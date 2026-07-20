@@ -198,7 +198,16 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .xpbar{height:6px;background:#3a3728;border-radius:4px;margin-top:5px;overflow:hidden;border:1px solid var(--ink)}
 .xpfill{height:100%;background:linear-gradient(90deg,#5ad0ff,#2a6dd4);width:0;transition:width .8s}
 .stchip{display:inline-block;font-size:10px;font-weight:900;color:#fff;padding:1px 6px;border-radius:6px;margin-left:5px;vertical-align:2px}
-
+.stgrow{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.stg{font-size:10px;font-weight:900;padding:1px 7px;border-radius:6px;border:2px solid var(--ink);line-height:1.5}
+.stg.up{background:#ffd9d2;color:#c22e28}
+.stg.dn{background:#cfe3ff;color:#2a6dd4}
+.stg.anim{animation:stgpop .4s cubic-bezier(.2,1.8,.4,1)}
+@keyframes stgpop{from{transform:scale(.2) rotate(-8deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+#wxchip{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:7;font-size:12px;font-weight:900;
+  background:rgba(255,255,255,.92);border:2px solid var(--ink);border-radius:8px;padding:2px 12px;display:none;box-shadow:0 3px 0 rgba(20,16,40,.3)}
+  
+#wxchip.on{display:block;animation:stgpop .3s}
 .pips{display:flex;gap:4px;margin-top:5px}
 .pip{width:10px;height:10px;border-radius:50%;border:2px solid var(--ink);background:#ff4b3e}
 .pip.down{background:#5a5648}
@@ -395,6 +404,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
       <div class="bcloud bc1"></div><div class="bcloud bc2"></div>
       <div class="hill h1"></div><div class="hill h2"></div>
       <div id="dynastorm"></div>
+      <div id="wxchip"></div>
       <div class="plat e"></div><div class="plat p"></div>
       <img id="espr" class="psprite" alt="">
       <img id="pspr" class="psprite" alt="">
@@ -1064,12 +1074,17 @@ function miniSprite(id){const i=new Image();i.width=40;i.height=40;i.style.image
 const BUI={
   scene:$('#bscene'),espr:$('#espr'),pspr:$('#pspr'),
   card(side){return side==='e'?$('#ecard'):$('#pcard');},
-  async refresh(b){
+    async refresh(b){
     const E=b.E(),Pm=b.P();
     // enemy card
     if(E){ $('#ecard').innerHTML=this.cardHTML(E,'e',b); }
     if(Pm){ $('#pcard').innerHTML=this.cardHTML(Pm,'p',b); }
     this.sprites(b);
+    // 天气 / 戏法空间实时指示
+    const wx=$('#wxchip');
+    if(b.wx){wx.textContent={sun:'☀ 大晴天',rain:'🌧 下雨',sand:'🌪 沙暴',hail:'🌨 冰雹'}[b.wx]+` (${b.wxT}回合)`;wx.classList.add('on');}
+    else if(b.trickT>0){wx.textContent=`🌀 戏法空间 (${b.trickT}回合)`;wx.classList.add('on');}
+    else wx.classList.remove('on');
   },
   cardHTML(m,side,b){
     const pct=Math.round(m.hpPct()*100);
@@ -1081,11 +1096,19 @@ const BUI={
     if(side==='e'){const arr=b.ep;pips='<div class="pips">'+arr.map(x=>`<span class="pip ${x.alive()?'':'down'}"></span>`).join('')+'</div>';}
     const hpnum=side==='p'?`<div class="hpnum">${m.hp} / ${m.maxhp}</div>`:'';
     const xp=side==='p'?`<div class="xpbar"><div class="xpfill" style="width:${Math.round(100*(m.xp-Math.pow(m.lvl,3))/(Math.pow(m.lvl+1,3)-Math.pow(m.lvl,3)))}%"></div></div>`:'';
-    const it=m.item?`<div style="font-size:10px;color:#888;font-weight:700">持有：${IT[m.item]?.n||''}</div>`:'';
+        const it=m.item?`<div style="font-size:10px;color:#888;font-weight:700">持有：${IT[m.item]?.n||''}</div>`:'';
+    /* 能力等级实时显示（红升蓝降） */
+    const sig=STATKEYS.map(k=>m.stages[k]).join(',');
+    const cardEl=this.card(side);
+    const changed=cardEl._sig!==sig; cardEl._sig=sig;
+    const SN={atk:'攻',def:'防',spa:'特攻',spd:'特防',spe:'速'};
+    const stgs=STATKEYS.filter(k=>m.stages[k]!==0).map(k=>{const v=m.stages[k];
+      return `<span class="stg ${v>0?'up':'dn'}${changed?' anim':''}">${SN[k]}${v>0?'▲':'▼'}${Math.abs(v)}</span>`;}).join('');
+    const stgrow=stgs?`<div class="stgrow">${stgs}</div>`:'';
     return `<div class="row1"><span class="nm">${m.name}${m.shiny?' ✦':''}</span><span class="lv">${m.lvl}</span>${stch}${tags}</div>
       <div style="margin-top:2px">${types}</div>
       <div class="hpwrap"><span class="hplabel">HP</span><div class="hpbar"><div class="hpfill ${cls}" style="width:${pct}%"></div></div></div>
-      ${hpnum}${xp}${pips}${it}`;
+      ${hpnum}${xp}${pips}${it}${stgrow}`;
   },
   sprites(b){
     const E=b.E(),Pm=b.P();
@@ -1761,7 +1784,8 @@ class Battle{
       if(m.has('competitive')){await say(`${m.name} 的好胜发动了！`);m.stages.spa=clamp(m.stages.spa+2,-6,6);} }
     const word=Math.abs(n)>=2?(n>0?'大幅提升':'大幅下降'):(n>0?'提升了':'下降了');
     await say(`${m.name} 的${STN[k]}${word}！`);
-      if(n>0){AU.statUp();}else{AU.statDn();}
+         if(n>0){AU.statUp();}else{AU.statDn();}
+    BUI.dmgPop(this.sideOf(m), `${STN[k]}${n>0?'▲':'▼'}${Math.abs(n)}`, n>0?'#ff6b57':'#5aa0ff');
     BUI.refresh(this);
   }
   /* ---------- 击倒 ---------- */
