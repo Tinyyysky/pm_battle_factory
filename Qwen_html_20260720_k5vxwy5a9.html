@@ -152,8 +152,8 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .plat.e{width:230px;height:60px;top:238px;right:90px;background:radial-gradient(ellipse at 50% 40%,#cdeab2,#8cc084 70%,#6aa76b)}
 .plat.p{width:270px;height:72px;bottom:118px;left:60px;background:radial-gradient(ellipse at 50% 40%,#cdeab2,#8cc084 70%,#6aa76b)}
 .psprite{position:absolute;object-fit:contain;transition:transform .5s, opacity .5s, filter .3s}
-#espr{width:192px;height:192px;top:88px;right:118px;animation:bobE 2.6s ease-in-out infinite}
-#pspr{width:192px;height:192px;bottom:142px;left:96px;animation:bobP 2.6s ease-in-out infinite}
+#espr{width:150px;height:150px;top:96px;right:135px;animation:bobE 2.6s ease-in-out infinite}
+#pspr{width:180px;height:180px;bottom:150px;left:105px;animation:bobP 2.6s ease-in-out infinite}
 @keyframes bobE{50%{transform:translateY(-6px)}}
 @keyframes bobP{50%{transform:translateY(-7px)}}
 .psprite.dyn{filter:drop-shadow(0 0 18px rgba(255,40,40,.85))!important;animation:none}
@@ -329,6 +329,8 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .slot .sname{font-family:'ZCOOL KuaiLe';font-size:19px}
 .slot.active{outline:4px solid var(--gold)}
 .slot.fainted{opacity:.55}
+.ovBox.forced{border-color:#e3350d;animation:forcedPulse 1.2s ease-in-out infinite}
+@keyframes forcedPulse{0%,100%{box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 5px #f3b4a4,0 6px 0 rgba(20,16,40,.35),0 0 0 3px rgba(227,53,13,.3)}50%{box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 5px #f3b4a4,0 6px 0 rgba(20,16,40,.35),0 0 0 10px rgba(227,53,13,.55)}}
 .itemRow{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:8px 12px;margin-bottom:6px;cursor:pointer}
 .itemRow:hover{background:#fff3c4}
 .itemRow .cnt{margin-left:auto;font-family:'Press Start 2P';font-size:10px}
@@ -1101,7 +1103,28 @@ const MEGA={
 };
 const GMAXLIST=new Set([3,6,9,25,131,143,809,812,815,818,823,849,858,861,892]);
 const MAXMV={normal:'极巨攻击',fire:'极巨火焰',water:'极巨水流',electric:'极巨闪电',grass:'极巨草原',ice:'极巨冰霜',fighting:'极巨拳斗',poison:'极巨酸毒',ground:'极巨大地',flying:'极巨飞冲',psychic:'极巨超能',bug:'极巨虫蛊',rock:'极巨岩石',ghost:'极巨幽魂',dragon:'极巨龙骑',dark:'极巨恶霸',steel:'极巨钢铁',fairy:'极巨妖精'};
-const MAXFX={normal:{drop:'spe'},fighting:{up:'atk'},poison:{up:'spa'},ground:{up:'spd'},flying:{up:'spe'},bug:{drop:'spa'},ghost:{drop:'def'},dragon:{drop:'atk'},dark:{drop:'spd'},steel:{up:'def'},fairy:{up:'spd'},electric:{st:'par',ch:30},ice:{st:'frz',ch:10}};
+/* ★ 极巨招式固有效果（对齐正作：能力变化 + 天气 + 场地） */
+const MAXFX={
+  normal:{drop:'spe'},           // 极巨攻击：降对方速度
+  fire:{weather:'sun'},          // 极巨火焰：大晴天
+  water:{weather:'rain'},        // 极巨水流：下雨
+  electric:{terrain:'electric'}, // 极巨闪电：电流场地
+  grass:{terrain:'grassy'},      // 极巨草原：青草场地
+  ice:{weather:'hail'},          // 极巨冰霜：冰雹
+  fighting:{up:'atk'},           // 极巨拳斗：己方物攻↑
+  poison:{up:'spa'},             // 极巨酸毒：己方特攻↑
+  ground:{up:'spd'},             // 极巨大地：己方特防↑
+  flying:{up:'spe'},             // 极巨飞冲：己方速度↑
+  psychic:{terrain:'psychic'},   // 极巨超能：精神场地
+  bug:{drop:'spa'},              // 极巨虫蛊：降对方特攻
+  rock:{weather:'sand'},         // 极巨岩石：沙暴
+  ghost:{drop:'def'},            // 极巨幽魂：降对方物防
+  dragon:{drop:'atk'},           // 极巨龙骑：降对方物攻
+  dark:{drop:'spd'},             // 极巨恶霸：降对方特防
+  steel:{up:'def'},              // 极巨钢铁：己方物防↑
+  fairy:{terrain:'misty'}        // 极巨妖精：薄雾场地
+};
+const TERRNAME={electric:'电流场地',grassy:'青草场地',psychic:'精神场地',misty:'薄雾场地'};
 function maxPower(mv){ if(!mv.p)return 0; const p=mv.p;
   if(mv.t==='fighting'||mv.t==='poison'){return p<=40?70:p<=50?75:p<=60?80:p<=70?85:p<=100?90:95;}
   return p<=40?90:p<=50?100:p<=60?110:p<=70?120:p<=100?130:140;}
@@ -1191,10 +1214,13 @@ const BUI={
     if(E){ $('#ecard').innerHTML=this.cardHTML(E,'e',b); }
     if(Pm){ $('#pcard').innerHTML=this.cardHTML(Pm,'p',b); }
     this.sprites(b);
-    // 天气 / 戏法空间实时指示
+    // 天气 / 场地 / 戏法空间实时指示
     const wx=$('#wxchip');
-    if(b.wx){wx.textContent={sun:'☀ 大晴天',rain:'🌧 下雨',sand:'🌪 沙暴',hail:'🌨 冰雹'}[b.wx]+` (${b.wxT}回合)`;wx.classList.add('on');}
-    else if(b.trickT>0){wx.textContent=`🌀 戏法空间 (${b.trickT}回合)`;wx.classList.add('on');}
+    const chips=[];
+    if(b.wx)chips.push({sun:'☀ 大晴天',rain:'🌧 下雨',sand:'🌪 沙暴',hail:'🌨 冰雹'}[b.wx]+`(${b.wxT})`);
+    if(b.terrain)chips.push({electric:'⚡ 电流场地',grassy:'🌿 青草场地',psychic:'🔮 精神场地',misty:'🌫 薄雾场地'}[b.terrain]+`(${b.terrainT})`);
+    if(b.trickT>0)chips.push(`🌀 戏法空间(${b.trickT})`);
+    if(chips.length){wx.textContent=chips.join('  ');wx.classList.add('on');}
     else wx.classList.remove('on');
   },
   cardHTML(m,side,b){
@@ -1281,7 +1307,7 @@ function logClassify(text){
   if(/提升|下降|提高|降低/.test(text))return ['📊','lg-stat'];
   if(/灼伤|麻痹|中毒|剧毒|睡着|冻住|混乱|解冻|醒来|解除了|蜕皮/.test(text))return ['☠️','lg-status'];
   if(/派出了|去吧|就决定|退场|出现了/.test(text))return ['🔄','lg-switch'];
-  if(/天气|大晴天|下雨|沙暴|冰雹|戏法空间/.test(text))return ['🌤️','lg-weather'];
+  if(/天气|大晴天|下雨|沙暴|冰雹|戏法空间|场地/.test(text))return ['🌤️','lg-weather'];
   if(/保护/.test(text))return ['🛡️','lg-protect'];
   if(/经验值|升到|学会了/.test(text))return ['⭐','lg-xp'];
   if(/超级进化|极巨化|太晶化|夸克充能/.test(text))return ['🔥','lg-mega'];
@@ -1349,7 +1375,7 @@ class Battle{
     this.rules=Object.assign({mega:true,dyna:true,tera:true,switch:true,items:true,run:true,capture:false},o.rules);
     this.aiLevel=o.ai||1; this.onEnd=o.onEnd; this.onWildFlee=o.onWildFlee;
     this.pi=0;this.ei=0;this.turn=0;this.over=false;this.result=null;
-    this.wx=null;this.wxT=0;this.trickT=0;
+    this.wx=null;this.wxT=0;this.trickT=0;this.terrain=null;this.terrainT=0;
     this.haz={p:{sr:0,spikes:0},e:{sr:0,spikes:0}};
     this.usedForm={p:false,e:false}; // ★ 三种形态互斥：每场战斗每方只能用一次，下场重置
     this.aiSwitches=o.aiSwitches??1;
@@ -1414,9 +1440,9 @@ class Battle{
     const foe=this.foeOf(m); const ab=m.ability; const side=this.sideOf(m);
     const msg=t=>say(`${m.name} 的特性发动了！${t}`);
     if(ab==='intimidate'&&foe&&foe.alive()){ await msg(''); await this.changeStat(foe,'atk',-1,m); }
-    if(ab==='drought'){this.setWeather('sun',m);} if(ab==='drizzle'){this.setWeather('rain',m);}
-    if(ab==='sandstream'){this.setWeather('sand',m);} if(ab==='snowwarning'){this.setWeather('hail',m);}
-    if(ab==='orichalcumpulse'){this.setWeather('sun',m);}
+    if(ab==='drought'){await this.setWeather('sun',m);} if(ab==='drizzle'){await this.setWeather('rain',m);}
+    if(ab==='sandstream'){await this.setWeather('sand',m);} if(ab==='snowwarning'){await this.setWeather('hail',m);}
+    if(ab==='orichalcumpulse'){await this.setWeather('sun',m);}
     if(ab==='intrepidsword'){await this.changeStat(m,'atk',1,m);}
     if(ab==='dauntlessshield'){await this.changeStat(m,'def',1,m);}
     if(ab==='download'&&foe){ const boost=foe.st.def>=foe.st.spd?'spa':'atk'; await this.changeStat(m,boost,1,m); }
@@ -1424,25 +1450,25 @@ class Battle{
     if(ab==='swordofruin'){ await say(`${m.name} 的灾祸之剑发动了！对手的防御下降了！`); AU.statDn(); }
     if(ab==='fairyaura'){await say('妖精光环笼罩了全场！');} if(ab==='darkaura'){await say('暗黑光环笼罩了全场！');}
   }
-  setWeather(w,m){ this.wx=w;this.wxT=5;
+  async setWeather(w,m){ this.wx=w;this.wxT=5;
     const nm={sun:'大晴天',rain:'下雨了',sand:'刮起了沙暴',hail:'下起了冰雹'}[w];
-    say(`${nm}！`); }
+    await say(`${nm}！`); }
+  async setTerrain(t,m){ this.terrain=t;this.terrainT=5;
+    await say(`场地变成了${TERRNAME[t]}！`); }
+  grounded(m){ return !m.types.includes('flying')&&!m.has('levitate'); } /* 是否站在地面上 */
   /* ---------- 回合 ---------- */
   async doTurn(){
     const Pm=this.P(),E=this.E();
     if(!Pm||!E)return this.finish();
-    // AI 换人判断
-    if(this.aiSwitches>0&&this.ep.filter(x=>x.alive()).length>1&&this.aiWantsSwitch()){
-      const to=this.aiBestSwitch(); if(to>-1){ this.aiSwitches--; await this.doSwitch('e',to); } }
     let pa=null,ea=null;
     pa=await this.getPlayerAction(); if(this.over)return;
     if(pa.type==='run'){ await say('成功逃走了！');AU.run(); this.result='run';this.over=true;return; }
     if(pa.type==='ball'){ await this.tryCapture(pa.item); if(this.over)return;
       ea={type:'move',move:this.pickAIMove()}; await this.execActions({type:'skip'},ea); await this.endTurn(); return; }
-    if(pa.type==='switch'){ await this.doSwitch('p',pa.idx); pa={type:'move',move:this.pickPlayerForcedMove()}; }
-    if(pa.type==='item'){ await this.useItem(pa.item,pa.idx); pa={type:'move',move:this.pickPlayerForcedMove()}; }
+    if(pa.type==='switch'){ await this.doSwitch('p',pa.idx); pa={type:'skip'}; } /* ★ 换人消耗本回合行动 */
+    if(pa.type==='item'){ await this.useItem(pa.item,pa.idx); pa={type:'skip'}; } /* ★ 用道具消耗本回合行动 */
     ea=await this.aiAction();
-    if(ea.type==='switch'){ await this.doSwitch('e',ea.idx); ea={type:'move',move:this.pickAIMove()}; }
+    if(ea.type==='switch'){ await this.doSwitch('e',ea.idx); ea={type:'skip'}; }
     await this.execActions(pa,ea);
     if(!this.over)await this.endTurn();
   }
@@ -1501,13 +1527,25 @@ class Battle{
           hint.textContent=wantMega?'本场已选Mega\n形态变化优先出手':wantDyn?'本场已选极巨\n招式变为极巨招式':wantTera?'本场已选太晶\n属性变为晶属性':'三形态互斥\n本场仅可用一次';
           formCol.appendChild(hint);
         }
+        if(m.dyn){
+          const tag=el('div','');tag.id='formHint';tag.style.color='#ff8a9a';
+          tag.textContent=`● 极巨化中\n剩余 ${m.dynT} 回合`;
+          formCol.appendChild(tag);
+        }
         m.moves.forEach(mv=>{
           const d=MV[mv.k];
           const dis=(locked&&locked!==mv.k)||(choiceLock&&choiceLock!==mv.k)||mv.pp<=0||(m.item==='assaultvest'&&d.c==='X');
           let nm=d.n,tcol=TCOL[d.t];
           let info=`${TNAME[d.t]} · ${d.c==='P'?'物理':d.c==='S'?'特殊':'变化'}${d.p?' · 威力'+d.p:''}`;
-          if(wantDyn){ if(d.c==='X'){nm='极巨防壁';info='极巨招式 · 守住自己';}
-            else{nm=MAXMV[d.t]||'极巨攻击';info=`极巨招式 · 威力 ${maxPower(d)} `;} }
+                    if(wantDyn||m.dyn){ if(d.c==='X'){nm='极巨防壁';info='极巨招式 · 守住自己';}
+            else{nm=MAXMV[d.t]||'极巨攻击';
+              const fx=MAXFX[d.t];
+              const fxTxt=fx?(fx.weather?(this.wx===fx.weather?' · ⚠天气已生效'
+                  :` · 开启${{sun:'大晴天',rain:'下雨',sand:'沙暴',hail:'冰雹'}[fx.weather]}`)
+                :fx.terrain?(this.terrain===fx.terrain?' · ⚠场地已生效'
+                  :` · 开启${TERRNAME[fx.terrain]}`)
+                :fx.up?` · 己方${STN[fx.up]}↑`:fx.drop?` · 对方${STN[fx.drop]}↓`:''):'';
+              info=`极巨招式 · 威力 ${maxPower(d)}${fxTxt}`;} }
           else if(wantTera){ if(d.terablast){nm=`太晶爆发 (${TNAME[m.teraType]})`;tcol=TCOL[m.teraType];info=`${TNAME[m.teraType]} · 特殊 · 威力 80`;}
             else if(d.c!=='X')info+=' · 晶化一致×2'; }
           else if(wantMega){ info+=' · Mega优先生效'; }
@@ -1526,36 +1564,48 @@ class Battle{
       render();
     });
   }
-  chooseParty(forced,escOk=true){
+    chooseParty(forced,escOk=true){
     return new Promise(res=>{
       const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
-      const box=el('div','ovBox panel');ov.appendChild(box);
-      box.appendChild(el('h3','disp','选择宝可梦'));
+      const box=el('div','ovBox panel'+(escOk?'':' forced'));ov.appendChild(box);
+      box.appendChild(el('h3','disp',escOk?'选择宝可梦':'⚠ 必须选择一只宝可梦出战！'));
       const foe=this.E();
+      let offEsc=null;
+      /* ★ 统一出口：任何路径关闭面板时都同步注销ESC监听，杜绝残留监听器关掉后续面板 */
+      const close=val=>{ if(offEsc){offEsc();offEsc=null;} ov.classList.add('hidden'); res(val); };
       this.pp.forEach((m,i)=>{
         const s=el('div','slot'+(i===this.pi?' active':'')+(m.alive()?'':' fainted'));
         s.appendChild(miniSprite(m.id));
         s.insertAdjacentHTML('beforeend',`<div style="flex:1"><div class="sname">${m.name} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${m.status?' ['+m.status+']':''}</div>
           <div class="hpbar" style="max-width:200px"><div class="hpfill ${m.hpPct()>.5?'':m.hpPct()>.2?'mid':'low'}" style="width:${Math.round(m.hpPct()*100)}%"></div></div>
           <div style="font-size:11px;color:#666;font-weight:700">${m.hp}/${m.maxhp} <span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div></div>`);
-                  const det=el('button','btn tiny','详情');
+        const det=el('button','btn tiny','详情');
         det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,this);};
         s.appendChild(det);
-        if(m.alive()&&i!==this.pi){ s.onclick=()=>{AU.ok();ov.classList.add('hidden');res(i);}; }
-        else if(i===this.pi){ s.insertAdjacentHTML('beforeend','<span style="font-size:11px;font-weight:900;color:#999">战斗中</span>'); }
+        if(m.alive()&&(i!==this.pi||forced)){ s.onclick=()=>{AU.ok();close(i);}; }
+        else if(i===this.pi){ s.insertAdjacentHTML('beforeend',`<span style="font-size:11px;font-weight:900;color:#999">${m.alive()?'战斗中':'濒死'}</span>`); }
         box.appendChild(s);
       });
-      const back=el('button','btn small','返回');back.style.marginTop='8px';
-      back.onclick=()=>{AU.no();ov.classList.add('hidden');res(null);};
-      box.appendChild(back);
-      if(escOk)onEsc(()=>{AU.no();ov.classList.add('hidden');res(null);});
+      if(escOk){
+        const back=el('button','btn small','返回');back.style.marginTop='8px';
+        back.onclick=()=>{AU.no();close(null);};
+        box.appendChild(back);
+        offEsc=onEsc(()=>{AU.no();close(null);});
+      } else {
+        /* ★ 强制换人：常驻ESC监听，每次按都提示、绝不关闭；选中宝可梦时由close()注销 */
+        const h=e=>{if(e.key==='Escape'){e.preventDefault();AU.no();toast('必须选择一只宝可梦！');}};
+        window.addEventListener('keydown',h);
+        offEsc=()=>window.removeEventListener('keydown',h);
+      }
     });
   }
-  chooseBag(){
+    chooseBag(){
     return new Promise(res=>{
       const ov=$('#bagOv');ov.classList.remove('hidden');ov.innerHTML='';
       const box=el('div','ovBox panel');ov.appendChild(box);
       box.appendChild(el('h3','disp','背包'));
+      let offEsc=null;
+      const close=val=>{ if(offEsc){offEsc();offEsc=null;} ov.classList.add('hidden'); res(val); };
       const bag=GM.bag; const keys=Object.keys(bag).filter(k=>bag[k]>0);
       if(!keys.length)box.appendChild(el('div','','背包空空如也…'));
       keys.forEach(k=>{
@@ -1563,19 +1613,19 @@ class Battle{
         r.innerHTML=`<div><b>${it.n}</b><div style="font-size:11px;color:#777">${it.d}</div></div><span class="cnt">×${bag[k]}</span>`;
         r.onclick=async()=>{
           if(['pokeball','greatball','ultraball'].includes(k)){ if(!this.rules.capture||!this.wild){toast('只能对野生宝可梦使用！');AU.no();return;}
-            AU.ok();ov.classList.add('hidden');res({type:'ball',item:k});return; }
+            AU.ok();close({type:'ball',item:k});return; }
           if(k==='revive'){ const idx=this.pp.findIndex(m=>m.fainted); if(idx<0){toast('没有濒死的宝可梦');AU.no();return;}
-            AU.ok();ov.classList.add('hidden');res({type:'item',item:k,idx});return; }
+            AU.ok();close({type:'item',item:k,idx});return; }
           // 治疗类：选择目标
-          const idx=await this.chooseParty(true); if(idx==null){ov.classList.add('hidden');res(null);return;}
-          AU.ok();ov.classList.add('hidden');res({type:'item',item:k,idx});
+          const idx=await this.chooseParty(true); if(idx==null){close(null);return;}
+          AU.ok();close({type:'item',item:k,idx});
         };
         box.appendChild(r);
       });
       const back=el('button','btn small','返回');back.style.marginTop='8px';
-      back.onclick=()=>{AU.no();ov.classList.add('hidden');res(null);};
+      back.onclick=()=>{AU.no();close(null);};
       box.appendChild(back);
-            onEsc(()=>{AU.no();ov.classList.add('hidden');res(null);});
+      offEsc=onEsc(()=>{AU.no();close(null);});
     });
   }
   async useItem(k,idx){
@@ -1695,6 +1745,8 @@ class Battle{
     // 变化招式执行
     if(useMv.c==='X'){ await this.statusMove(side,mon,foe,useMv,act); return; }
     // ---- 攻击招式 ----
+    // ★ 精神场地：地面上的宝可梦不受先制招式影响
+    if(this.terrain==='psychic'&&(useMv.pri||0)>0&&this.grounded(foe)){await say('精神场地挡住了先制招式！');return;}
     // 女王的威严
     if((useMv.pri||0)>0&&foe.has('queenmajesty')){await say(`${foe.name} 的女王的威严发动了！${useMv.n} 失败了！`);return;}
     // 突袭判定
@@ -1766,6 +1818,8 @@ class Battle{
     // 画皮/气势腰带/结实
     if(foe.vol.disguise){foe.vol.disguise=false;await say(`${foe.name} 的画皮抵挡了攻击！`);BUI.dmgPop(side==='p'?'e':'p','抵挡','#ffd93b');return {dmg:0};}
     let dmg=r.dmg;
+    // ★ 属性免疫：不造成伤害，极巨招式的天气/场地/能力效果均不触发
+    if(r.eff===0){ await say(`对 ${foe.name} 没有效果…`); return {dmg:0,immune:true}; }
     if(dmg>=foe.hp){ if(foe.item==='focussash'&&foe.hp===foe.maxhp){dmg=foe.hp-1;await say(`${foe.name} 靠气势腰带撑住了！`);}
       else if(foe.has('sturdy')&&foe.hp===foe.maxhp&&!mv.ignAb){dmg=foe.hp-1;await say(`${foe.name} 靠结实撑住了！`);} }
     // 动画
@@ -1815,11 +1869,19 @@ class Battle{
     // 愤怒之拳计数已在 vol.rage
     // 文柚果
     if(foe.item==='sitrus'&&foe.hp>0&&foe.hpPct()<=.5){foe.item=null;foe.hp=Math.min(foe.maxhp,foe.hp+Math.floor(foe.maxhp/4));AU.heal();await say(`${foe.name} 吃了文柚果，回复了HP！`);}
-    // 极巨附加效果
-    if(mv.maxfx&&foe.hp>0){ const f=mv.maxfx;
+    // ★ 极巨招式固有效果：仅在真正造成伤害时触发（天气/场地不受击倒影响）
+    if(mv.maxfx&&dmg>0){ const f=mv.maxfx;
       if(f.up)await this.changeStat(mon,f.up,1,mon);
-      if(f.drop)await this.changeStat(foe,f.drop,-1,mon);
-      if(f.st&&Math.random()*100<(f.ch||30))await this.inflictStatus(foe,f.st,mon); }
+      if(f.drop&&foe.hp>0)await this.changeStat(foe,f.drop,-1,mon);
+      /* ★ 同种天气/场地已存在时不触发：不重置持续时间，仅提示 */
+      if(f.weather){
+        if(this.wx===f.weather)await say(`天气已经是${{sun:'大晴天',rain:'下雨',sand:'沙暴',hail:'冰雹'}[f.weather]}，没有发生变化！`);
+        else await this.setWeather(f.weather,mon);
+      }
+      if(f.terrain){
+        if(this.terrain===f.terrain)await say(`场地已经是${TERRNAME[f.terrain]}，没有发生变化！`);
+        else await this.setTerrain(f.terrain,mon);
+      } }
     // 解冻（火属性伤害）
     if(mv.t==='fire'&&foe.status==='frz'){foe.status=null;await say(`${foe.name} 解冻了！`);}
     BUI.refresh(this);
@@ -1871,6 +1933,13 @@ class Battle{
     // 天气
     if(this.wx==='sun'){if(mv.t==='fire')dmg=Math.floor(dmg*1.5);if(mv.t==='water')dmg=Math.floor(dmg*.5);}
     if(this.wx==='rain'){if(mv.t==='water')dmg=Math.floor(dmg*1.5);if(mv.t==='fire')dmg=Math.floor(dmg*.5);}
+    // ★ 场地加成/削减（仅对地面上的宝可梦生效）
+    if(this.terrain){
+      if(this.terrain==='electric'&&mv.t==='electric'&&this.grounded(mon))dmg=Math.floor(dmg*1.3);
+      if(this.terrain==='grassy'&&mv.t==='grass'&&this.grounded(mon))dmg=Math.floor(dmg*1.3);
+      if(this.terrain==='psychic'&&mv.t==='psychic'&&this.grounded(mon))dmg=Math.floor(dmg*1.3);
+      if(this.terrain==='misty'&&mv.t==='dragon'&&this.grounded(foe))dmg=Math.floor(dmg*.5);
+    }
     // 光环
     if(mv.t==='fairy'&&(mon.has('fairyaura')||foe.has('fairyaura')))dmg=Math.floor(dmg*1.33);
     if(mv.t==='dark'&&(mon.has('darkaura')||foe.has('darkaura')))dmg=Math.floor(dmg*1.33);
@@ -1927,7 +1996,7 @@ class Battle{
     // 命中
     if(mv.a!=null&&Math.random()*100>mv.a*(mon.has('compoundeyes')?1.3:1)){await say(`${mv.n} 没有命中！`);return;}
     const k=mv.k;
-    if(mv.weather){this.setWeather({sun:'sun',rain:'rain'}[mv.weather]||mv.weather,mon);return;}
+    if(mv.weather){await this.setWeather({sun:'sun',rain:'rain'}[mv.weather]||mv.weather,mon);return;}
     if(mv.trickroom){this.trickT=this.trickT>0?0:5;await say(this.trickT?`${mon.name} 扭转了时空！`:'戏法空间解除了！');return;}
     if(mv.hazard){const ts=this.foeSide(side);
       if(mv.hazard==='sr'){ if(this.haz[ts].sr){await say('场上已经撒过隐形岩了！');return;} this.haz[ts].sr=1;await say(`${mon.name} 撒下了隐形岩！`);}
@@ -1960,6 +2029,9 @@ class Battle{
     BUI.refresh(this);
   }
   async tryInflict(foe,st,src){
+    // ★ 场地防护：薄雾场地免疫异常状态，电流场地免疫睡眠
+    if(this.terrain==='misty'&&this.grounded(foe)){await say('薄雾场地守护着宝可梦，无法附加异常状态！');return;}
+    if(this.terrain==='electric'&&this.grounded(foe)&&st==='sleep'){await say('电流场地守护着宝可梦，无法入睡！');return;}
     if(st==='sleep'){ if(foe.status){await say(`${foe.name} 已经有异常状态了！`);return;}
       if(foe.has('insomnia')||foe.has('vitalspirit')){await say(`${foe.name} 的特性让它无法入睡！`);return;} }
     if(st==='par'){ if(foe.status||foe.types.includes('electric')){await say(`但是没有效果！`);return;} if(foe.has('limber')){await say(`${foe.name} 的柔软特性发动了！`);return;} }
@@ -2056,15 +2128,17 @@ class Battle{
     }
     BUI.refresh(this);
   }
-  askForget(m,nk){
+   askForget(m,nk){
     return new Promise(res=>{
       const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
       const box=el('div','ovBox panel');ov.appendChild(box);
       box.appendChild(el('h3','disp',`${m.name} 想学习 ${MV[nk].n}，要忘记哪个招式？`));
+      let offEsc=null;
+      const close=val=>{ if(offEsc){offEsc();offEsc=null;} ov.classList.add('hidden'); res(val); };
       m.moves.forEach((mv,i)=>{const s=el('div','slot');s.innerHTML=`<b>${MV[mv.k].n}</b> <span style="font-size:11px;color:#777">${TNAME[MV[mv.k].t]} PP${mv.maxpp}</span>`;
-        s.onclick=()=>{AU.ok();ov.classList.add('hidden');res(i);};box.appendChild(s);});
-      const back=el('button','btn small','不学了');back.onclick=()=>{AU.no();ov.classList.add('hidden');res(null);};box.appendChild(back);
-            onEsc(()=>{AU.no();ov.classList.add('hidden');res(null);});
+        s.onclick=()=>{AU.ok();close(i);};box.appendChild(s);});
+      const back=el('button','btn small','不学了');back.onclick=()=>{AU.no();close(null);};box.appendChild(back);
+      offEsc=onEsc(()=>{AU.no();close(null);});
     });
   }
   /* ---------- 换人 ---------- */
@@ -2075,6 +2149,14 @@ class Battle{
       if(old.has('regenerator'))old.hp=Math.min(old.maxhp,old.hp+Math.floor(old.maxhp/3));
       if(old.has('naturalcure')){old.status=null;old.sleepT=0;old.toxicN=0;}
       old.vol.choiceLock=null;old.vol.lock=null;old.vol.charge=null;old.vol.recharge=false;old.vol.protect=false;old.vol.flinch=false;old.vol.confuse=0;old.vol.proteanUsed=false;
+      /* ★ 极巨化离场即解除（HP按比例折算）；Mega进化与太晶化本场战斗内永久保留 */
+      if(old.dyn){
+        const pct=old.hp/old.maxhp;
+        old.dyn=false;old.dynT=0;old.maxhp=Math.floor(old.maxhp/2);
+        old.hp=Math.max(1,Math.round(old.maxhp*pct));
+        await say(`${old.name} 的极巨化在交换中解除了！`);
+        BUI.refresh(this);
+      }
     }
     await this.sendOut(side,idx,false);
   }
@@ -2090,6 +2172,8 @@ class Battle{
         if(!m.has('snowcloak')&&!m.has('magicguard')&&!m.has('overcoatx')){m.hp=Math.max(0,m.hp-Math.floor(m.maxhp/16));await say(`冰雹袭击了 ${m.name}！`);} }
       if(m.has('solarpower')&&this.wx==='sun'&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(m.maxhp/8));}
       if(m.has('raindish')&&this.wx==='rain'){m.hp=Math.min(m.maxhp,m.hp+Math.floor(m.maxhp/16));}
+      // ★ 青草场地回复
+      if(this.terrain==='grassy'&&this.grounded(m)&&m.hp>0){m.hp=Math.min(m.maxhp,m.hp+Math.floor(m.maxhp/16));await say(`${m.name} 在青草场地上回复了HP！`);}
       // 寄生种子
       if(m.vol.seed&&m.hp>0){const src=m.vol.seed;
         if(src.alive()&&this.foeOf(src)===m){const d=Math.max(1,Math.floor(m.maxhp/8));
@@ -2114,12 +2198,19 @@ class Battle{
       if(m.has('shedskin')&&m.status&&Math.random()<1/3){m.status=null;m.sleepT=0;m.toxicN=0;await say(`${m.name} 的蜕皮发动了，状态恢复了！`);}
       // 加速
       if(m.has('speedboost'))await this.changeStat(m,'spe',1,m);
-      // 极巨化倒计时
-      if(m.dyn){m.dynT--;if(m.dynT<=0){m.dyn=false;m.maxhp=Math.floor(m.maxhp/2);m.hp=Math.min(m.hp,m.maxhp);await say(`${m.name} 的极巨化解除了！`);}}
+      // 极巨化倒计时（★解除时HP按比例折算，而非截断回满）
+      if(m.dyn){m.dynT--;if(m.dynT<=0){
+        const pct=m.hp/m.maxhp;
+        m.dyn=false;m.maxhp=Math.floor(m.maxhp/2);
+        m.hp=Math.max(1,Math.round(m.maxhp*pct));
+        await say(`${m.name} 的极巨化解除了！HP按比例还原。`);
+        BUI.refresh(this);
+      }}
       if(m.hp<=0&&!m.fainted){await this.handleKO(this.foeSide(side),this.foeOf(m),m);if(this.over)return;}
     }
-    // 天气/空间倒计时
+    // 天气/场地/空间倒计时
     if(this.wx){this.wxT--;if(this.wxT<=0){this.wx=null;await say('天气恢复了正常。');}}
+    if(this.terrain){this.terrainT--;if(this.terrainT<=0){this.terrain=null;await say('场地恢复了原状。');}}
     if(this.trickT>0){this.trickT--;if(this.trickT===0)await say('戏法空间解除了。');}
     // 混乱倒计时
     for(const m of [this.P(),this.E()]){ if(m&&m.vol.confuse>0){m.vol.confuse--;if(m.vol.confuse===0)await say(`${m.name} 的混乱解除了。`);}
@@ -2173,6 +2264,11 @@ class Battle{
     const m=this.E();
     if(m.vol.lock)return {type:'move',move:{k:m.vol.lock.k}};
     if(m.vol.charge)return {type:'move',move:{k:m.vol.charge}};
+    /* ★ AI换人作为本回合行动（同样消耗回合） */
+    if(this.aiSwitches>0&&this.ep.filter(x=>x.alive()).length>1&&this.aiWantsSwitch()){
+      const to=this.aiBestSwitch();
+      if(to>-1){ this.aiSwitches--; return {type:'switch',idx:to}; }
+    }
     const mv=this.aiScore().best;
     const act={type:'move',move:{k:mv}};
     /* ★ 形态决策只打标，统一由 resolveForms 在出招前结算；三种互斥，一场一次 */
@@ -2391,13 +2487,15 @@ const FAC={
       });
       box.appendChild(pg);
       const row=el('div','');row.style.display='flex';row.style.gap='10px';row.style.marginTop='12px';
+            let offEsc=null;
+      const close=()=>{ if(offEsc){offEsc();offEsc=null;} ov.classList.add('hidden'); res(); };
       const ok=el('button','btn red','确认交换');
       ok.onclick=()=>{ if(pickE==null||pickP==null){toast('请分别点选双方宝可梦');AU.no();return;}
-        AU.ok();GM.fac.party[pickP]=enemyTeam[pickE];ov.classList.add('hidden');res(); };
+        AU.ok();GM.fac.party[pickP]=enemyTeam[pickE];close(); };
       const skip=el('button','btn','不交换，继续');
-      skip.onclick=()=>{AU.no();ov.classList.add('hidden');res();};
+      skip.onclick=()=>{AU.no();close();};
       row.appendChild(ok);row.appendChild(skip);box.appendChild(row);
-      onEsc(()=>{AU.no();ov.classList.add('hidden');res();}); // ESC = 不交换
+      offEsc=onEsc(()=>{AU.no();close();}); // ESC = 不交换
     });
   }
 };
