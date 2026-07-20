@@ -183,7 +183,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .icard{position:absolute;z-index:6;background:linear-gradient(180deg,#fffef6,#efe9d2);border:3px solid var(--ink);
   border-radius:12px;padding:8px 12px;box-shadow:inset 0 0 0 2px #fff, 0 5px 0 rgba(20,16,40,.3);min-width:250px}
 #ecard{top:26px;left:26px}
-#pcard{bottom:190px;right:26px}
+#pcard{bottom:19px;right:26px}
 .icard .row1{display:flex;align-items:baseline;gap:8px}
 .icard .nm{font-family:'ZCOOL KuaiLe';font-size:20px}
 .icard .lv{font-family:'Press Start 2P';font-size:10px;color:#555}
@@ -206,8 +206,43 @@ button:disabled{opacity:.4;cursor:not-allowed}
 @keyframes stgpop{from{transform:scale(.2) rotate(-8deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
 #wxchip{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:7;font-size:12px;font-weight:900;
   background:rgba(255,255,255,.92);border:2px solid var(--ink);border-radius:8px;padding:2px 12px;display:none;box-shadow:0 3px 0 rgba(20,16,40,.3)}
-  
+#logBtn{position:absolute;top:10px;right:12px;z-index:30;font-size:12px;font-weight:900;padding:5px 12px;border-radius:9px;
+  background:rgba(38,35,58,.88);color:#ffd93b;border:2px solid #ffd93b;box-shadow:0 3px 0 rgba(0,0,0,.4);cursor:pointer;transition:.15s}
+#logBtn:hover{background:#ffd93b;color:#26233a;transform:translateY(-1px)}
+#logOv{position:absolute;top:0;right:0;bottom:0;width:330px;z-index:55;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#241f47,#171330);border-left:4px solid #0c0920;
+  transform:translateX(105%);transition:transform .28s cubic-bezier(.2,.9,.3,1);box-shadow:-10px 0 30px rgba(0,0,0,.5)}
+#logOv.on{transform:translateX(0)}
+#logHead{padding:12px 14px;border-bottom:3px solid #0c0920;background:rgba(255,255,255,.04)}
+#logHead .lt{font-family:'ZCOOL KuaiLe';font-size:20px;color:#ffd93b;letter-spacing:2px;display:flex;align-items:center;gap:8px}
+#logClose{margin-left:auto;background:none;border:2px solid #888;color:#ccc;border-radius:7px;padding:2px 9px;font-size:13px;cursor:pointer}
+#logClose:hover{border-color:#ffd93b;color:#ffd93b}
+#logSit{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.lsRow{display:flex;align-items:center;gap:6px}
+.lsRow .lsNm{font-size:10px;font-weight:900;color:#aab;width:28px;flex:none}
+.lmini{flex:1;height:9px;background:#3a3728;border-radius:5px;border:1px solid #0c0920;overflow:hidden}
+.lmini i{display:block;height:100%;border-radius:4px;transition:width .4s}
+.lsRow .lsHp{font-family:'Press Start 2P';font-size:7px;color:#888;width:58px;text-align:right;flex:none}
+#logList{flex:1;overflow-y:auto;padding:10px 12px 24px}
+.logTurnH{position:sticky;top:0;background:#171330;color:#ffd93b;font-family:'ZCOOL KuaiLe';font-size:14px;
+  text-align:center;padding:4px 0 3px;margin:12px 0 4px;letter-spacing:2px;border-bottom:2px dashed rgba(255,217,59,.3);z-index:2}
+.logTurnH:first-child{margin-top:0}
+.logE{display:flex;gap:7px;align-items:flex-start;font-size:12px;line-height:1.5;color:#cfcbe8;padding:3px 4px;border-radius:6px;animation:logIn .25s ease-out}
+@keyframes logIn{from{transform:translateX(14px);opacity:0}to{transform:translateX(0);opacity:1}}
+.logE .li{flex:none;width:16px;text-align:center}
+.lg-super{color:#ff9d6b;font-weight:900}.lg-weak{color:#8fb6e8}.lg-immune{color:#9a94b8}
+.lg-crit{color:#ffd93b;font-weight:900}.lg-ko{color:#ff6b6b;font-weight:900}.lg-stat{color:#7fe3c0}
+.lg-status{color:#d9a6ff}.lg-switch{color:#7fc4ff}.lg-weather{color:#ffe08a}.lg-protect{color:#a8e6a3}
+.lg-xp{color:#ffd93b}.lg-mega{color:#ff8ac2;font-weight:900}.lg-move{color:#e8e4ff}.lg-plain{color:#a9a4c8}
+.lg-dmg{color:#ff9d8a;font-weight:700}
+#logList::-webkit-scrollbar{width:8px}
+#logList::-webkit-scrollbar-thumb{background:#3a3168;border-radius:4px}  
 #wxchip.on{display:block;animation:stgpop .3s}
+.abchip{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:900;color:#7c5cb8;
+  background:linear-gradient(180deg,#f3ecff,#e4d8f7);border:2px solid #b89fe0;border-radius:7px;padding:1px 8px;
+  cursor:help;transition:transform .12s,box-shadow .12s;line-height:1.5}
+.abchip:hover{transform:translateY(-2px);box-shadow:0 3px 0 #b89fe0}
+.abchip::before{content:"◈";color:#9b6fd8}
 .pips{display:flex;gap:4px;margin-top:5px}
 .pip{width:10px;height:10px;border-radius:50%;border:2px solid var(--ink);background:#ff4b3e}
 .pip.down{background:#5a5648}
@@ -404,7 +439,15 @@ button:disabled{opacity:.4;cursor:not-allowed}
       <div class="bcloud bc1"></div><div class="bcloud bc2"></div>
       <div class="hill h1"></div><div class="hill h2"></div>
       <div id="dynastorm"></div>
-      <div id="wxchip"></div>
+            <div id="wxchip"></div>
+      <button id="logBtn">📋 记录 <span class="px" style="font-size:7px;color:#9fe8ff" id="logTurnN">回合1</span></button>
+      <div id="logOv">
+        <div id="logHead">
+          <div class="lt">📋 对战记录 <span class="px" style="font-size:8px;color:#9fe8ff" id="logTurnBig">回合 1</span><button id="logClose">✕</button></div>
+          <div id="logSit"></div>
+        </div>
+        <div id="logList"></div>
+      </div>
       <div class="plat e"></div><div class="plat p"></div>
       <img id="espr" class="psprite" alt="">
       <img id="pspr" class="psprite" alt="">
@@ -737,6 +780,13 @@ A('multitype','多属性','阿尔宙斯专属');A('victorystar2','胜利之星',
 A('keeneye','锐利目光','命中率不会降低');A('runaway','逃跑','一定能从野生宝可梦逃走');A('tangledfeet','蹒跚','混乱时回避率提升');
 A('illuminate','发光','照亮周围');A('earlybird','早起','更快从睡眠中醒来');A('snowcloak','雪隐','冰雹时回避率提升');A('sandveil','沙隐','沙暴时回避率提升');
 A('raindish','雨盘','雨天时回复HP');A('pickpocket','顺手牵羊','偷走接触自己的道具');A('analytic','分析','最后行动时威力提升');
+A('noguard','无防守','双方的招式必定命中');A('moldbreaker','破格','无视对手特性的影响进行攻击');
+A('skilllink','连续攻击','连续招式必定使出最大次数');A('cursedbodyx','诅咒之躯','被攻击时可能封印对手招式');
+A('swarmx','虫之预感','HP低时虫属性招式威力提高');A('hyperCutterx','怪力钳','攻击不会被对手降低');
+A('steadfastx','不屈之心','畏缩时速度提升');A('shadowtagx','踩影','对手无法逃走或交换');
+A('obliviousx','迟钝','不会陷入着迷或被挑衅');A('shellarmor','硬壳盔甲','不会受到会心一击');
+A('bulletproof','防弹','免疫弹类和球类招式');A('infiltrator','穿透','无视对手的屏障和替身');
+A('overcoatx','防尘','免疫天气和粉末类伤害');
 
 /* ---- 道具 ---- */
 const IT={};
@@ -1013,7 +1063,7 @@ class P{
     this.types=sp.t.split('/'); this.baseTypes=this.types.slice();
     this.ability=o.ability||pick(sp.ab); this.item=o.item||null;
     this.teraType=o.tera||pick(TYP);
-    const b=sp.s, iv=o.iv??25;
+    const b=sp.s, iv=o.iv??25; this.iv=iv;
     this.maxhp=Math.floor((2*b[0]+iv)*lvl/100)+lvl+10; if(this.id===292)this.maxhp=1;
     this.st={atk:Math.floor((2*b[1]+iv)*lvl/100)+5,def:Math.floor((2*b[2]+iv)*lvl/100)+5,
       spa:Math.floor((2*b[3]+iv)*lvl/100)+5,spd:Math.floor((2*b[4]+iv)*lvl/100)+5,spe:Math.floor((2*b[5]+iv)*lvl/100)+5};
@@ -1097,6 +1147,8 @@ const BUI={
     const hpnum=side==='p'?`<div class="hpnum">${m.hp} / ${m.maxhp}</div>`:'';
     const xp=side==='p'?`<div class="xpbar"><div class="xpfill" style="width:${Math.round(100*(m.xp-Math.pow(m.lvl,3))/(Math.pow(m.lvl+1,3)-Math.pow(m.lvl,3)))}%"></div></div>`:'';
         const it=m.item?`<div style="font-size:10px;color:#888;font-weight:700">持有：${IT[m.item]?.n||''}</div>`:'';
+    const ab=AB[m.ability];
+    const abRow=ab?`<div style="margin-top:3px"><span class="abchip" title="${ab.d}">${ab.n}</span></div>`:'';
     /* 能力等级实时显示（红升蓝降） */
     const sig=STATKEYS.map(k=>m.stages[k]).join(',');
     const cardEl=this.card(side);
@@ -1108,7 +1160,7 @@ const BUI={
     return `<div class="row1"><span class="nm">${m.name}${m.shiny?' ✦':''}</span><span class="lv">${m.lvl}</span>${stch}${tags}</div>
       <div style="margin-top:2px">${types}</div>
       <div class="hpwrap"><span class="hplabel">HP</span><div class="hpbar"><div class="hpfill ${cls}" style="width:${pct}%"></div></div></div>
-      ${hpnum}${xp}${pips}${it}${stgrow}`;
+      ${hpnum}${xp}${pips}${it}${abRow}${stgrow}`;
   },
   sprites(b){
     const E=b.E(),Pm=b.P();
@@ -1131,8 +1183,10 @@ const BUI={
       $('#fxlayer').appendChild(s);setTimeout(()=>s.remove(),1400);}},
 };
 /* 对话框打字机 */
+let LOGFN=null;
 function say(text,opts={}){
   return new Promise(res=>{
+    if(LOGFN)LOGFN(text);
     const box=$('#msg'); box.textContent='';
     const boxEl=$('#msgpanel');
     let i=0,done=false;
@@ -1155,6 +1209,45 @@ function say(text,opts={}){
       }
     },40);
   });
+}
+function logClassify(text){
+  if(/↳/.test(text))return ['💢','lg-dmg'];
+  if(/效果绝佳/.test(text))return ['💥','lg-super'];
+  if(/收效甚微/.test(text))return ['🛡️','lg-weak'];
+  if(/没有效果/.test(text))return ['⭕','lg-immune'];
+  if(/会心/.test(text))return ['✨','lg-crit'];
+  if(/倒下了/.test(text))return ['💀','lg-ko'];
+  if(/提升|下降|提高|降低/.test(text))return ['📊','lg-stat'];
+  if(/灼伤|麻痹|中毒|剧毒|睡着|冻住|混乱|解冻|醒来|解除了|蜕皮/.test(text))return ['☠️','lg-status'];
+  if(/派出了|去吧|就决定|退场|出现了/.test(text))return ['🔄','lg-switch'];
+  if(/天气|大晴天|下雨|沙暴|冰雹|戏法空间/.test(text))return ['🌤️','lg-weather'];
+  if(/保护/.test(text))return ['🛡️','lg-protect'];
+  if(/经验值|升到|学会了/.test(text))return ['⭐','lg-xp'];
+  if(/超级进化|极巨化|太晶化|夸克充能/.test(text))return ['🔥','lg-mega'];
+  if(/使用了|扔出|吃了|回复/.test(text))return ['⚔️','lg-move'];
+  return ['·','lg-plain'];
+}
+function renderBattleLog(b){
+  $('#logTurnN').textContent='回合'+b.turn;
+  $('#logTurnBig').textContent='回合 '+b.turn;
+  const sit=$('#logSit');
+  const mkRow=(label,arr)=>{
+    let hp=0,max=0,cnt=0;
+    arr.forEach(m=>{hp+=m.hp;max+=m.maxhp;if(m.alive())cnt++;});
+    const pct=max?Math.round(hp/max*100):0;
+    const col=pct>50?'#3ecf6c':pct>20?'#f2c230':'#ef4444';
+    return `<div class="lsRow"><span class="lsNm">${label}</span><div class="lmini"><i style="width:${pct}%;background:${col}"></i></div><span class="lsHp">${cnt}/${arr.length}只 ${pct}%</span></div>`;
+  };
+  sit.innerHTML=mkRow('我方',b.pp)+mkRow('敌方',b.ep);
+  const list=$('#logList');
+  let html='',lastT=-1;
+  b.log.forEach(e=>{
+    if(e.t!==lastT){html+=`<div class="logTurnH">— 第 ${e.t} 回合 —</div>`;lastT=e.t;}
+    const [ic,cls]=logClassify(e.text);
+    html+=`<div class="logE ${cls}"><span class="li">${ic}</span><span>${e.text}</span></div>`;
+  });
+  list.innerHTML=html;
+  if($('#logOv').classList.contains('on'))list.scrollTop=list.scrollHeight;
 }
 /* 剧情对话框 */
 function dlg(speaker,text,spriteId){
@@ -1197,9 +1290,9 @@ class Battle{
     this.pi=0;this.ei=0;this.turn=0;this.over=false;this.result=null;
     this.wx=null;this.wxT=0;this.trickT=0;
     this.haz={p:{sr:0,spikes:0},e:{sr:0,spikes:0}};
-    this.usedMega=false;this.usedDyn=false;this.usedTera=false;
+    this.usedForm={p:false,e:false}; // ★ 三种形态互斥：每场战斗每方只能用一次，下场重置
     this.aiSwitches=o.aiSwitches??1;
-    this.caught=null; this.participants=new Set();
+    this.caught=null; this.participants=new Set(); this.log=[];
   }
   P(){return this.pp[this.pi];} E(){return this.ep[this.ei];}
   sideOf(m){return this.pp.includes(m)?'p':'e';}
@@ -1207,6 +1300,20 @@ class Battle{
   /* ---------- 主流程 ---------- */
   async start(){
     AU.playMusic('battle');
+    this.log=[];
+    LOGFN=t=>this.addLog(t);
+    $('#logOv').classList.remove('on');
+    $('#logList').innerHTML='';
+    /* ★ 跨战斗重置：Mega/极巨/太晶状态清零，属性与能力还原（极巨翻倍的血量也还原） */
+    [...this.pp,...this.ep].forEach(m=>{
+      m.mega=null;m.dyn=false;m.dynT=0;m.tera=false;m.types=m.baseTypes.slice();
+      const b=m.sp.s,iv=m.iv??25;
+      m.maxhp=Math.floor((2*b[0]+iv)*m.lvl/100)+m.lvl+10;if(m.id===292)m.maxhp=1;
+      m.st.atk=Math.floor((2*b[1]+iv)*m.lvl/100)+5;m.st.def=Math.floor((2*b[2]+iv)*m.lvl/100)+5;
+      m.st.spa=Math.floor((2*b[3]+iv)*m.lvl/100)+5;m.st.spd=Math.floor((2*b[4]+iv)*m.lvl/100)+5;
+      m.st.spe=Math.floor((2*b[5]+iv)*m.lvl/100)+5;
+      m.hp=Math.min(m.hp,m.maxhp);m.xpGot=false;
+    });
     await this.sendOut('e',0,true);
     await this.sendOut('p',0,true);
     BUI.refresh(this);
@@ -1215,6 +1322,7 @@ class Battle{
       await this.doTurn();
     }
     AU.stopMusic();
+    LOGFN=null;
     if(this.onEnd)this.onEnd(this.result,this);
   }
   async sendOut(side,idx,first){
@@ -1272,7 +1380,7 @@ class Battle{
       ea={type:'move',move:this.pickAIMove()}; await this.execActions({type:'skip'},ea); await this.endTurn(); return; }
     if(pa.type==='switch'){ await this.doSwitch('p',pa.idx); pa={type:'move',move:this.pickPlayerForcedMove()}; }
     if(pa.type==='item'){ await this.useItem(pa.item,pa.idx); pa={type:'move',move:this.pickPlayerForcedMove()}; }
-    ea=this.aiAction();
+    ea=await this.aiAction();
     if(ea.type==='switch'){ await this.doSwitch('e',ea.idx); ea={type:'move',move:this.pickAIMove()}; }
     await this.execActions(pa,ea);
     if(!this.over)await this.endTurn();
@@ -1301,36 +1409,63 @@ class Battle{
     keys.forEach(k=>{const b=$(map[k]);const h=()=>{AU.cursor();cleanup();res(k);};hs[k]=h;b.addEventListener('click',h);});
     function cleanup(){keys.forEach(k=>$(map[k]).removeEventListener('click',hs[k]));}
   });}
-  async chooseMove(m){
+    async chooseMove(m){
     $('#menuMain').classList.add('hidden');
-    const mm=$('#menuMoves');mm.innerHTML='';mm.classList.remove('hidden');
+    const mm=$('#menuMoves');mm.classList.remove('hidden');
     const locked=m.vol.lock?m.vol.lock.k:null;
     const choiceLock=['choiceband','choicespecs','choicescarf'].includes(m.item)?m.vol.choiceLock:null;
-    // mega/dyna/tera 开关
-    const row=el('div','');row.id='dynRow';
     let wantMega=false,wantDyn=false,wantTera=false;
-    if(this.rules.mega&&MEGA[m.id]&&!this.usedMega&&!m.mega){const b=el('button','dynToggle mega','◆ 超级进化');b.onclick=()=>{wantMega=!wantMega;b.classList.toggle('on',wantMega);AU.cursor();};row.appendChild(b);}
-    if(this.rules.dyna&&!this.usedDyn&&!m.dyn&&!m.mega){const b=el('button','dynToggle','● 极巨化');b.onclick=()=>{wantDyn=!wantDyn;b.classList.toggle('on',wantDyn);AU.cursor();};row.appendChild(b);}
-    if(this.rules.tera&&!this.usedTera&&!m.tera){const b=el('button','dynToggle tera','✦ 太晶化('+TNAME[m.teraType]+')');b.onclick=()=>{wantTera=!wantTera;b.classList.toggle('on',wantTera);AU.cursor();};row.appendChild(b);}
-    mm.appendChild(row);
+    const canMega=this.rules.mega&&!!MEGA[m.id]&&!this.usedForm.p&&!m.mega&&!m.dyn;
+    const canDyn=this.rules.dyna&&!this.usedForm.p&&!m.dyn&&!m.mega;
+    const canTera=this.rules.tera&&!this.usedForm.p&&!m.tera;
     return new Promise(res=>{
-      const backs=[];
-      m.moves.forEach(mv=>{
-        const d=MV[mv.k];
-        const dis=(locked&&locked!==mv.k)||(choiceLock&&choiceLock!==mv.k)||mv.pp<=0||(m.item==='assaultvest'&&d.c==='X');
-        const b=el('button','btn moveBtn');b.style.background=`linear-gradient(180deg,${TCOL[d.t]},${TCOL[d.t]}cc)`;
-        if(dis)b.disabled=true;
-        b.innerHTML=`<span class="mn">${d.n}</span><span class="mi">${TNAME[d.t]} · ${d.c==='P'?'物理':d.c==='S'?'特殊':'变化'}${d.p?' · 威力'+d.p:''}</span><span class="pp">PP ${mv.pp}/${mv.maxpp}</span>`;
-        const h=()=>{AU.ok();cleanup();res({type:'move',move:mv,mega:wantMega,dyn:wantDyn,tera:wantTera});};
-        b.addEventListener('click',h);backs.push([b,h]);mm.appendChild(b);
-      });
-      const back=el('button','btn small','返回');
-      const bh=()=>{AU.no();cleanup();res(null);};
-      back.addEventListener('click',bh);backs.push([back,bh]);mm.appendChild(back);
-      function cleanup(){backs.forEach(([b,h])=>b.removeEventListener('click',h));}
+      let backs=[],offEsc=null;
+      const cleanup=()=>{backs.forEach(([b,h])=>b.removeEventListener('click',h));if(offEsc)offEsc();};
+      const render=()=>{
+        mm.innerHTML='';backs.forEach(([b,h])=>b.removeEventListener('click',h));backs=[];
+        const row=el('div','');row.id='dynRow';
+        if(canMega){const b=el('button','dynToggle mega'+(wantMega?' on':''),'◆ 超级进化');
+          b.onclick=()=>{AU.cursor();wantMega=!wantMega;if(wantMega){wantDyn=false;wantTera=false;}render();};
+          row.appendChild(b);}
+        if(canDyn){const b=el('button','dynToggle'+(wantDyn?' on':''),'● 极巨化');
+          b.onclick=()=>{AU.cursor();wantDyn=!wantDyn;if(wantDyn){wantMega=false;wantTera=false;}render();};
+          row.appendChild(b);}
+        if(canTera){const b=el('button','dynToggle tera'+(wantTera?' on':''),'✦ 太晶化('+TNAME[m.teraType]+')');
+          b.onclick=()=>{AU.cursor();wantTera=!wantTera;if(wantTera){wantMega=false;wantDyn=false;}render();};
+          row.appendChild(b);}
+        if(canMega||canDyn||canTera){
+          const hint=el('span','',wantMega?'本场已选Mega · 优先出手':wantDyn?'本场已选极巨 · 招式变为极巨招式':wantTera?'本场已选太晶 · 属性变为晶属性':'三形态互斥 · 本场战斗仅可用一次');
+          hint.style.cssText='font-size:10px;color:#c8b8e8;font-weight:700;align-self:center';
+          row.appendChild(hint);
+        }
+        mm.appendChild(row);
+        m.moves.forEach(mv=>{
+          const d=MV[mv.k];
+          const dis=(locked&&locked!==mv.k)||(choiceLock&&choiceLock!==mv.k)||mv.pp<=0||(m.item==='assaultvest'&&d.c==='X');
+          let nm=d.n,tcol=TCOL[d.t];
+          let info=`${TNAME[d.t]} · ${d.c==='P'?'物理':d.c==='S'?'特殊':'变化'}${d.p?' · 威力'+d.p:''}`;
+          /* ★ 极巨化预览：招式名/威力全部按极巨招式显示，并标注不继承追加效果 */
+          if(wantDyn){ if(d.c==='X'){nm='极巨防壁';info='极巨招式 · 守住自己';}
+            else{nm=MAXMV[d.t]||'极巨攻击';info=`极巨招式 · 威力 ${maxPower(d)} · 不继承原招式追加效果`;} }
+          else if(wantTera){ if(d.terablast){nm=`太晶爆发 (${TNAME[m.teraType]})`;tcol=TCOL[m.teraType];info=`${TNAME[m.teraType]} · 特殊 · 威力 80`;}
+            else if(d.c!=='X')info+=' · 晶化后一致×2'; }
+          else if(wantMega){ info+=' · Mega进化优先生效'; }
+          const b=el('button','btn moveBtn');
+          b.style.background=`linear-gradient(180deg,${tcol},${tcol}cc)`;
+          if(dis)b.disabled=true;
+          b.innerHTML=`<span class="mn">${nm}</span><span class="mi">${info}</span><span class="pp">PP ${mv.pp}/${mv.maxpp}</span>`;
+          const h=()=>{AU.ok();cleanup();res({type:'move',move:mv,mega:wantMega,dyn:wantDyn,tera:wantTera});};
+          b.addEventListener('click',h);backs.push([b,h]);mm.appendChild(b);
+        });
+        const back=el('button','btn small','返回 (ESC)');
+        const bh=()=>{AU.no();cleanup();res(null);};
+        back.addEventListener('click',bh);backs.push([back,bh]);mm.appendChild(back);
+      };
+      offEsc=onEsc(()=>{AU.no();cleanup();res(null);});
+      render();
     });
   }
-  chooseParty(forced){
+  chooseParty(forced,escOk=true){
     return new Promise(res=>{
       const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
       const box=el('div','ovBox panel');ov.appendChild(box);
@@ -1341,7 +1476,7 @@ class Battle{
         s.appendChild(miniSprite(m.id));
         s.insertAdjacentHTML('beforeend',`<div style="flex:1"><div class="sname">${m.name} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${m.status?' ['+m.status+']':''}</div>
           <div class="hpbar" style="max-width:200px"><div class="hpfill ${m.hpPct()>.5?'':m.hpPct()>.2?'mid':'low'}" style="width:${Math.round(m.hpPct()*100)}%"></div></div>
-          <div style="font-size:11px;color:#666;font-weight:700">${m.hp}/${m.maxhp}</div></div>`);
+          <div style="font-size:11px;color:#666;font-weight:700">${m.hp}/${m.maxhp} <span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div></div>`);
         if(m.alive()&&i!==this.pi){ s.onclick=()=>{AU.ok();ov.classList.add('hidden');res(i);}; }
         else if(i===this.pi){ s.insertAdjacentHTML('beforeend','<span style="font-size:11px;font-weight:900;color:#999">战斗中</span>'); }
         box.appendChild(s);
@@ -1349,6 +1484,7 @@ class Battle{
       const back=el('button','btn small','返回');back.style.marginTop='8px';
       back.onclick=()=>{AU.no();ov.classList.add('hidden');res(null);};
       box.appendChild(back);
+      if(escOk)onEsc(()=>{AU.no();ov.classList.add('hidden');res(null);});
     });
   }
   chooseBag(){
@@ -1375,6 +1511,7 @@ class Battle{
       const back=el('button','btn small','返回');back.style.marginTop='8px';
       back.onclick=()=>{AU.no();ov.classList.add('hidden');res(null);};
       box.appendChild(back);
+            onEsc(()=>{AU.no();ov.classList.add('hidden');res(null);});
     });
   }
   async useItem(k,idx){
@@ -1459,12 +1596,17 @@ class Battle{
     if(!foe||foe.fainted){return;}
     // 极巨化转换
     let useMv=mv;
-    if(mon.dyn&&mv){ if(mv.c==='X')useMv={...mv,k:'maxguard',n:'极巨防壁',c:'X',pri:4,protect:1,maxguard:1};
-      else useMv={...mv,k:'maxmv',n:MAXMV[mv.t]||'极巨攻击',p:maxPower(mv),a:null,c:mv.c,t:mv.t,maxfx:MAXFX[mv.t]}; }
+    if(mon.dyn&&mv){
+      /* ★ 全新对象：不继承原招式的 sec/recoil/drain/multi/crit/接触等，伤害走极巨威力表；maxfx 是极巨招式自身的固有效果 */
+      if(mv.c==='X')useMv={k:'maxguard',n:'极巨防壁',c:'X',pri:4,protect:1,maxguard:1};
+      else useMv={k:'maxmv',n:MAXMV[mv.t]||'极巨攻击',p:maxPower(mv),a:null,c:mv.c,t:mv.t,maxfx:MAXFX[mv.t]};
+    }
     // 太晶爆发
     if(useMv.terablast&&mon.tera){useMv={...useMv,t:mon.teraType};}
     // 气象球
     if(useMv.weatherball&&this.wx){useMv={...useMv,t:{sun:'fire',rain:'water',sand:'rock',hail:'ice'}[this.wx],p:100};}
+    // ★ 播报使用的招式（对话框 + 对战记录同步显示）
+    await say(`${mon.name} 使用了 ${useMv.n}！`);
     // 消耗PP
     if(mvObj&&mvk!=='struggle'){ let cost=foe.has('pressure')?2:1; mvObj.pp=Math.max(0,mvObj.pp-cost); }
     // 挑衅
@@ -1565,10 +1707,18 @@ class Battle{
     // 动画
     const tgtSpr=side==='p'?BUI.espr:BUI.pspr;
     await BUI.anim(tgtSpr,'hit',400);
-    if(r.crit)BUI.dmgPop(side==='p'?'e':'p','会心!','#ffd93b');
     AU.hit(); if(r.eff>1){AU.superEff();await say('效果绝佳！');} else if(r.eff>0&&r.eff<1){AU.notEff();await say('收效甚微…');}
     foe.hp=Math.max(0,foe.hp-dmg);
     foe.vol.rage=(foe.vol.rage||0)+1;
+    /* ★ 伤害占比：写入对战记录 + 场景浮动数字 */
+    if(dmg>0){
+      const pct=Math.max(1,Math.round(dmg/foe.maxhp*100));
+      const leftPct=Math.round(foe.hp/foe.maxhp*100);
+      this.addLog(`↳ 造成 ${dmg} 点伤害（${pct}% HP）· 对手剩余 ${leftPct}%${r.crit?' · 会心一击':''}${r.eff>1?' · 效果绝佳':(r.eff>0&&r.eff<1)?' · 收效甚微':''}`);
+      const popSide=side==='p'?'e':'p';
+      BUI.dmgPop(popSide,`-${dmg} (${pct}%)`,r.crit?'#ffd93b':r.eff>1?'#ff9d6b':(r.eff>0&&r.eff<1)?'#8fb6e8':'#ffffff');
+      if(r.crit)setTimeout(()=>BUI.dmgPop(popSide,'会心一击!','#ffd93b'),170);
+    }
     // 接触副作用
     if(mv.ct&&!mon.has('magicguard')){
       if(foe.has('ironbarbs')||foe.has('roughskin')){await this.directDmg(mon,Math.max(1,Math.floor(mon.maxhp/8)),side,`${foe.name} 的${AB[foe.ability].n}伤害了 ${mon.name}！`);}
@@ -1694,6 +1844,7 @@ class Battle{
   async directDmg(m,d,side,msg){
     if(m.has('magicguard'))return;
     m.hp=Math.max(0,m.hp-d); if(msg)await say(msg);
+    this.addLog(`↳ ${m.name} 损失 ${d} HP（${Math.max(1,Math.round(d/m.maxhp*100))}%）· 剩余 ${Math.round(m.hp/m.maxhp*100)}%`);
     BUI.refresh(this);
     if(m.hp<=0){ const foe=this.foeOf(m); await this.handleKO(this.sideOf(m)==='p'?'e':'p',foe,m); }
   }
@@ -1808,7 +1959,7 @@ class Battle{
     if(this.ep.every(m=>!m.alive())){ this.result='win';this.over=true;return; }
     if(this.pp.every(m=>!m.alive())){ this.result='lose';this.over=true;return; }
     // 换人
-    if(loserSide==='p'){ const idx=await this.chooseParty(false); if(idx!=null)await this.doSwitch('p',idx); }
+    if(loserSide==='p'){ const idx=await this.chooseParty(false,false); if(idx!=null)await this.doSwitch('p',idx); }
     else{ const to=this.aiBestSwitch(); if(to>-1)await this.doSwitch('e',to); }
     BUI.refresh(this);
   }
@@ -1849,6 +2000,7 @@ class Battle{
       m.moves.forEach((mv,i)=>{const s=el('div','slot');s.innerHTML=`<b>${MV[mv.k].n}</b> <span style="font-size:11px;color:#777">${TNAME[MV[mv.k].t]} PP${mv.maxpp}</span>`;
         s.onclick=()=>{AU.ok();ov.classList.add('hidden');res(i);};box.appendChild(s);});
       const back=el('button','btn small','不学了');back.onclick=()=>{AU.no();ov.classList.add('hidden');res(null);};box.appendChild(back);
+            onEsc(()=>{AU.no();ov.classList.add('hidden');res(null);});
     });
   }
   /* ---------- 换人 ---------- */
@@ -1912,6 +2064,7 @@ class Battle{
     // 低HP提示音
     const Pm=this.P();if(Pm&&Pm.alive()&&Pm.hpPct()<=.2)AU.lowhp();
   }
+  addLog(text){ this.log.push({t:this.turn,text}); renderBattleLog(this); }
   finish(){this.over=true;}
   /* ---------- AI ---------- */
   aiScore(){
@@ -1952,23 +2105,22 @@ class Battle{
     if(!best)best='struggle';
     return {best,score:bestS};
   }
-  aiAction(){
+    async aiAction(){
     const m=this.E();
     if(m.vol.lock)return {type:'move',move:{k:m.vol.lock.k}};
     if(m.vol.charge)return {type:'move',move:{k:m.vol.charge}};
-    // 极巨化/太晶化决策
     const mv=this.aiScore().best;
-    if(this.rules.dyna&&!this.usedDyn&&!m.dyn&&!m.mega&&m.hpPct()>.5&&Math.random()<.3){
-      this.usedDyn=true;m.dyn=true;m.dynT=3;const old=m.maxhp;m.maxhp*=2;m.hp*=2;
-      say(`极巨化！${m.name} 的体型变得巨大了！`);AU.dyna();BUI.refresh(this); }
-    else if(this.rules.tera&&!this.usedTera&&!m.tera&&Math.random()<.25){
-      this.usedTera=true;m.tera=true;m.types=[m.teraType];
-      say(`太晶化！${m.name} 变成了${TNAME[m.teraType]}属性！`);AU.tera();BUI.sparkle('e');BUI.refresh(this); }
-    else if(this.rules.mega&&MEGA[m.id]&&!this.usedMega&&!m.mega&&Math.random()<.5){
-      this.doMega('e',m,Array.isArray(MEGA[m.id])?0:0); }
-    return {type:'move',move:{k:mv}};
+    const act={type:'move',move:{k:mv}};
+    /* ★ 形态决策只打标，统一由 resolveForms 在出招前结算；三种互斥，一场一次 */
+    if(!this.wild&&!this.usedForm.e){
+      const d=MV[mv];
+      if(this.rules.dyna&&!m.dyn&&!m.mega&&d.c!=='X'&&m.hpPct()>.5&&Math.random()<.3){act.dyn=true;}
+      else if(this.rules.tera&&!m.tera&&Math.random()<.25){act.tera=true;}
+      else if(this.rules.mega&&MEGA[m.id]&&!m.mega&&!m.dyn&&Math.random()<.5){act.mega=true;act.megaIdx=0;}
+    }
+    return act;
   }
-  doMega(side,m,idx){
+  async doMega(side,m,idx){
     const cfg=Array.isArray(MEGA[m.id])?MEGA[m.id][idx]:MEGA[m.id];
     m.mega=cfg;m.types=cfg.t.split('/');
     const b=cfg.s;
@@ -1976,7 +2128,7 @@ class Battle{
       spa:Math.floor((2*b[3]+25)*m.lvl/100)+5,spd:Math.floor((2*b[4]+25)*m.lvl/100)+5,spe:Math.floor((2*b[5]+25)*m.lvl/100)+5};
     m.ability=cfg.a;
     AU.mega();BUI.burst(side);
-    say(`超级进化！${m.name} 进化成了 Mega${m.name.replace(/\(.+\)/,'')}！`);
+    await say(`超级进化！${m.name} 进化成了 Mega${m.name.replace(/\(.+\)/,'')}！`);
     BUI.refresh(this);
   }
   aiWantsSwitch(){
@@ -2080,7 +2232,7 @@ const FAC={
     const party=$('#facParty');party.innerHTML='';
     if(GM.fac.party){ GM.fac.party.forEach(m=>{
       const c=el('div','slot');c.appendChild(miniSprite(m.id));
-      c.insertAdjacentHTML('beforeend',`<div><b>${m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x=>MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:'无道具'} · 晶${TNAME[m.teraType]}</div></div>`);
+      c.insertAdjacentHTML('beforeend',`<div><b>${m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x=>MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:'无道具'} · 晶${TNAME[m.teraType]}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span></div></div>`);
       party.appendChild(c); }); }
     else party.innerHTML='<div style="color:#888;font-size:13px;padding:10px">尚未选择租借队伍</div>';
   },
@@ -2100,7 +2252,7 @@ const FAC={
           c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
             <div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${m.st.atk}</span></div><div class="statMini"><span>防 ${m.st.def}</span><span>速 ${m.st.spe}</span></div>
             <div style="font-size:10px;color:#555;font-weight:700;margin-top:3px">${m.moves.map(x=>MV[x.k].n).join('·')}</div>
-            <div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''} · 特性${AB[m.ability]?.n||''}</div>`);
+            <div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span></div>`);
           row.appendChild(c);
         });
         const btn=el('button','btn blue','租借队伍 '+L);btn.style.width='100%';
@@ -2157,7 +2309,7 @@ const FAC={
       const eg=el('div','');eg.style.display='flex';eg.style.gap='10px';eg.style.flexWrap='wrap';
       enemyTeam.forEach((m,i)=>{
         const c=el('div','rentCard');c.appendChild(miniSprite(m.id));c.children[0].style.width='70px';c.children[0].style.height='70px';
-        c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x=>MV[x.k].n).join('·')}</div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div>`);
+        c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x=>MV[x.k].n).join('·')}</div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div>`);
         c.onclick=()=>{AU.cursor();eg.querySelectorAll('.rentCard').forEach(x=>x.classList.remove('swapPick'));c.classList.add('swapPick');pickE=i;};
         eg.appendChild(c);
       });
@@ -2166,7 +2318,7 @@ const FAC={
       const pg=el('div','');pg.style.display='flex';pg.style.gap='10px';pg.style.flexWrap='wrap';
       GM.fac.party.forEach((m,i)=>{
         const c=el('div','rentCard');c.appendChild(miniSprite(m.id));c.children[0].style.width='70px';c.children[0].style.height='70px';
-        c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x=>MV[x.k].n).join('·')}</div>`);
+        c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x=>MV[x.k].n).join('·')}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div>`);
         c.onclick=()=>{AU.cursor();pg.querySelectorAll('.rentCard').forEach(x=>x.classList.remove('swapPick'));c.classList.add('swapPick');pickP=i;};
         pg.appendChild(c);
       });
@@ -2178,6 +2330,7 @@ const FAC={
       const skip=el('button','btn','不交换，继续');
       skip.onclick=()=>{AU.no();ov.classList.add('hidden');res();};
       row.appendChild(ok);row.appendChild(skip);box.appendChild(row);
+      onEsc(()=>{AU.no();ov.classList.add('hidden');res();}); // ESC = 不交换
     });
   }
 };
@@ -2418,7 +2571,7 @@ $('#storyPartyBtn').onclick=()=>{
   box.appendChild(el('h3','disp','队伍 ('+GM.story.party.length+'/6)'));
   GM.story.party.forEach(m=>{
     const s=el('div','slot');s.appendChild(miniSprite(m.id));
-    s.insertAdjacentHTML('beforeend',`<div style="flex:1"><b>${m.name}</b> Lv${m.lvl} ${m.item?'['+IT[m.item].n+']':''}<div class="hpbar" style="max-width:220px"><div class="hpfill" style="width:${Math.round(m.hpPct()*100)}%"></div></div><div style="font-size:11px;color:#666">${m.hp}/${m.maxhp} · ${m.moves.map(x=>MV[x.k].n).join('/')}</div></div>`);
+    s.insertAdjacentHTML('beforeend',`<div style="flex:1"><b>${m.name}</b> Lv${m.lvl} ${m.item?'['+IT[m.item].n+']':''}<div class="hpbar" style="max-width:220px"><div class="hpfill" style="width:${Math.round(m.hpPct()*100)}%"></div></div><div style="font-size:11px;color:#666">${m.hp}/${m.maxhp} · ${m.moves.map(x=>MV[x.k].n).join('/')} · <span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div></div>`);
     box.appendChild(s);
   });
   if(GM.story.box.length){box.appendChild(el('h3','disp','电脑盒子'));
@@ -2444,21 +2597,58 @@ Battle.prototype.doTurn=async function(){
 };
 const _origExec=Battle.prototype.execActions;
 Battle.prototype.execActions=async function(pa,ea){
-  // 玩家形态变化
-  if(pa.type==='move'){
-    const m=this.P();
-    if(pa.tera&&this.rules.tera&&!this.usedTera&&!m.tera){this.usedTera=true;m.tera=true;m.types=[m.teraType];
-      AU.tera();BUI.sparkle('p');await say(`太晶化！${m.name} 变成了${TNAME[m.teraType]}属性！`);BUI.refresh(this);}
-    if(pa.dyn&&this.rules.dyna&&!this.usedDyn&&!m.dyn&&!m.mega){this.usedDyn=true;m.dyn=true;m.dynT=3;m.maxhp*=2;m.hp*=2;
-      AU.dyna();await say(`极巨化！${m.name} 的体型变得巨大了！HP翻倍！`);BUI.refresh(this);}
-    if(pa.mega&&this.rules.mega&&MEGA[m.id]&&!this.usedMega&&!m.mega&&!m.dyn){
-      let idx=0;
-      if(Array.isArray(MEGA[m.id])){ idx=await dlgChoices('超级进化',m.name+' 可以进化成两种形态，选择哪一种？',MEGA[m.id].map(c=>c.stone)); }
-      this.usedMega=true;this.doMega('p',m,idx);await sleep(700);}
-  }
+  /* ★ Mega/极巨/太晶：优先级仅次于换人，在双方出招之前先行结算 */
+  await this.resolveForms(pa,ea);
   return _origExec.call(this,pa,ea);
 };
-
+Battle.prototype.resolveForms=async function(pa,ea){
+  const Pm=this.P();
+  if(pa.type==='move'&&Pm&&!Pm.fainted){
+    if(pa.mega&&this.rules.mega&&MEGA[Pm.id]&&!this.usedForm.p&&!Pm.mega&&!Pm.dyn){
+      let idx=0;
+      if(Array.isArray(MEGA[Pm.id])){idx=await dlgChoices('超级进化',Pm.name+' 可以进化成两种形态，选择哪一种？',MEGA[Pm.id].map(c=>c.stone));}
+      this.usedForm.p=true;this.doMega('p',Pm,idx);await sleep(700);
+    } else if(pa.dyn&&this.rules.dyna&&!this.usedForm.p&&!Pm.dyn&&!Pm.mega){
+      this.usedForm.p=true;Pm.dyn=true;Pm.dynT=3;Pm.maxhp*=2;Pm.hp*=2;
+      AU.dyna();await say(`极巨化！${Pm.name} 的体型变得巨大了！HP翻倍！`);BUI.refresh(this);
+    } else if(pa.tera&&this.rules.tera&&!this.usedForm.p&&!Pm.tera){
+      this.usedForm.p=true;Pm.tera=true;Pm.types=[Pm.teraType];
+      AU.tera();BUI.sparkle('p');await say(`太晶化！${Pm.name} 变成了${TNAME[Pm.teraType]}属性！`);BUI.refresh(this);
+    }
+  }
+  const E=this.E();
+  if(ea.type==='move'&&E&&!E.fainted){
+    if(ea.mega&&this.rules.mega&&MEGA[E.id]&&!this.usedForm.e&&!E.mega&&!E.dyn){
+      this.usedForm.e=true;this.doMega('e',E,ea.megaIdx||0);await sleep(700);
+    } else if(ea.dyn&&this.rules.dyna&&!this.usedForm.e&&!E.dyn&&!E.mega){
+      this.usedForm.e=true;E.dyn=true;E.dynT=3;E.maxhp*=2;E.hp*=2;
+      AU.dyna();await say(`极巨化！${E.name} 的体型变得巨大了！`);BUI.refresh(this);
+    } else if(ea.tera&&this.rules.tera&&!this.usedForm.e&&!E.tera){
+      this.usedForm.e=true;E.tera=true;E.types=[E.teraType];
+      AU.tera();BUI.sparkle('e');await say(`太晶化！${E.name} 变成了${TNAME[E.teraType]}属性！`);BUI.refresh(this);
+    }
+  }
+};
+$('#logBtn').onclick=()=>{AU.cursor();const ov=$('#logOv');ov.classList.toggle('on');
+  if(ov.classList.contains('on')){const l=$('#logList');l.scrollTop=l.scrollHeight;}};
+$('#logClose').onclick=()=>{AU.no();$('#logOv').classList.remove('on');};
+/* ★ ESC = 返回上一步 */
+function onEsc(fn){
+  const h=e=>{if(e.key==='Escape'){e.preventDefault();window.removeEventListener('keydown',h);fn();}};
+  window.addEventListener('keydown',h);
+  return ()=>window.removeEventListener('keydown',h);
+}
+window.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if($('#battle').classList.contains('on')){
+    if($('#logOv').classList.contains('on'))$('#logOv').classList.remove('on');
+    return; // 战斗内的选招/选人/背包浮层由各自的 onEsc 处理
+  }
+  if($('#title').classList.contains('on'))return;
+  if($('#story').classList.contains('on'))return; // 剧情流程不打断
+  if(!$('#partyOv').classList.contains('hidden'))return; // 工厂交换等浮层内部处理
+  AU.no();fadeTo('#title').then(()=>AU.playMusic('title'));
+});
 /* 启动 */
 AU.init?.();
 show('#title');
