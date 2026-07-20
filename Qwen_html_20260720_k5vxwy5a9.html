@@ -297,6 +297,9 @@ button:disabled{opacity:.4;cursor:not-allowed}
 #logBtn{position:absolute;top:10px;right:12px;z-index:30;font-size:12px;font-weight:900;padding:5px 12px;border-radius:9px;
   background:rgba(38,35,58,.88);color:#ffd93b;border:2px solid #ffd93b;box-shadow:0 3px 0 rgba(0,0,0,.4);cursor:pointer;transition:.15s}
 #logBtn:hover{background:#ffd93b;color:#26233a;transform:translateY(-1px)}
+#bSetBtn{position:absolute;top:52px;right:12px;z-index:30;width:36px;height:36px;border-radius:9px;font-size:17px;line-height:1;
+  background:rgba(38,35,58,.88);color:#cfe3ff;border:2px solid #6fa8ff;box-shadow:0 3px 0 rgba(0,0,0,.4);cursor:pointer;transition:transform .25s,background .2s}
+#bSetBtn:hover{transform:rotate(90deg);background:#2a6dd4;color:#fff}
 #logOv{position:absolute;top:0;right:0;bottom:0;width:330px;z-index:55;display:flex;flex-direction:column;
   background:linear-gradient(180deg,#241f47,#171330);border-left:4px solid #0c0920;
   transform:translateX(105%);transition:transform .28s cubic-bezier(.2,.9,.3,1);box-shadow:-10px 0 30px rgba(0,0,0,.5)}
@@ -486,7 +489,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
         <button class="menuItem" id="mFactory"><span class="ball"></span>对战工厂<small>绿宝石规则</small></button>
         <button class="menuItem" id="mFree"><span class="ball"></span>自由对战<small>自选队伍</small></button>
         <button class="menuItem" id="mDex"><span class="ball"></span>宝可梦图鉴<small id="dexCount"></small></button>
-        <button class="menuItem" id="mSound"><span class="ball"></span>声音设置<small>音效/音乐</small></button>
+        <button class="menuItem" id="mSound"><span class="ball"></span>游戏设置<small>音效/画面</small></button>
       </div>
     </div>
     <div id="titleFoot">同人演示作品 · 图像素材来自 PokéAPI 公开素材库 · 全部音效由 Web Audio 实时合成 · 点击任意处开启声音</div>
@@ -588,6 +591,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
       <div id="koFlash"></div>
       <div id="wxchip"></div>
       <button id="logBtn">📋 记录 <span class="px" style="font-size:7px;color:#9fe8ff" id="logTurnN">回合1</span></button>
+      <button id="bSetBtn" title="游戏设置">⚙</button>
       <div id="logOv">
         <div id="logHead">
           <div class="lt">📋 对战记录 <span class="px" style="font-size:8px;color:#9fe8ff" id="logTurnBig">回合 1</span><button id="logClose">✕</button></div>
@@ -706,7 +710,7 @@ const AU={
   },
   /* --- 简易音序器 BGM --- */
   seq:null,
-  playMusic(name){ if(!this.ctx||this.muted)return; this.stopMusic();
+  playMusic(name){ if(!this.ctx||this.muted||!this.musOn)return; this.stopMusic();
     const P=MUSIC[name]; if(!P)return; this.cur=name; let step=0;
     const tick=()=>{ if(this.cur!==name)return;
       const spb=60/P.bpm/2;
@@ -718,6 +722,9 @@ const AU={
   stopMusic(){this.cur=null;this.timers.forEach(clearTimeout);this.timers=[];}
 };
 const N={C3:131,D3:147,E3:165,F3:175,G3:196,A3:220,B3:247,C4:262,D4:294,E4:330,F4:349,G4:392,A4:440,B4:494,C5:523,D5:587,E5:659,F5:698,G5:784,A5:880,B5:988,C6:1046};
+/* ★ 全局画面/声音设置（localStorage 持久化） */
+const CFG=Object.assign({muted:false,music:true,weatherFx:true,fxShake:true},JSON.parse(localStorage.getItem('pif_cfg')||'{}'));
+function saveCfg(){localStorage.setItem('pif_cfg',JSON.stringify(CFG));}
 const MUSIC={
   title:{bpm:132,trks:[
     {w:'square',v:.12,notes:[[N.E5,1],[N.G5,1],[N.A5,1],[N.G5,1],[N.E5,1],[N.D5,1],[N.C5,2],[N.D5,1],[N.E5,1],[N.G5,1],[N.E5,1],[N.D5,2],[0,1],[N.C5,1],[N.D5,1],[N.E5,1],[N.A5,2],[N.G5,1],[N.E5,1],[N.D5,1],[N.C5,3]]},
@@ -1305,10 +1312,12 @@ const BUI={
     if(E){ $('#ecard').innerHTML=this.cardHTML(E,'e',b); }
     if(Pm){ $('#pcard').innerHTML=this.cardHTML(Pm,'p',b); }
     this.sprites(b);
-    /* ★ 场景氛围随天气/场地实时切换（0.8s 渐隐渐显） */
+    /* ★ 场景氛围随天气/场地实时切换（受设置开关控制） */
     this.scene.classList.remove('wx-sun','wx-rain','wx-sand','wx-hail','tr-electric','tr-grassy','tr-psychic','tr-misty');
-    if(b.wx)this.scene.classList.add('wx-'+b.wx);
-    if(b.terrain)this.scene.classList.add('tr-'+b.terrain);
+    if(CFG.weatherFx){
+      if(b.wx)this.scene.classList.add('wx-'+b.wx);
+      if(b.terrain)this.scene.classList.add('tr-'+b.terrain);
+    }
     // 天气 / 场地 / 戏法空间实时指示
     const wx=$('#wxchip');
     const chips=[];
@@ -1360,6 +1369,7 @@ const BUI={
     $('#fxlayer').appendChild(d);setTimeout(()=>d.remove(),950);},
       koFx(side,spr){
     AU.faint();
+    if(CFG.fxShake){
     /* 白红闪屏 */
     const fl=$('#koFlash');fl.classList.remove('on');void fl.offsetWidth;fl.classList.add('on');
     /* 场景震动 */
@@ -1374,6 +1384,7 @@ const BUI={
       s.style.setProperty('--dx',rnd(-46,46)+'px');
       s.style.animationDelay=(i*0.055)+'s';
       $('#fxlayer').appendChild(s);setTimeout(()=>s.remove(),1300);
+    }
     }
     /* 旋转坠落（极巨化体型先还原，太晶装饰收起） */
     spr.classList.remove('dyn');
@@ -2841,18 +2852,7 @@ $('#mStory').onclick=async()=>{AU.ok();await fadeTo('#story');STORY.run();};
 $('#mFactory').onclick=async()=>{AU.ok();await fadeTo('#factory');FAC.lobby();};
 $('#mFree').onclick=async()=>{AU.ok();buildFree();await fadeTo('#free');};
 $('#mDex').onclick=async()=>{AU.ok();buildDex();await fadeTo('#dex');};
-$('#mSound').onclick=()=>{AU.ok();
-  const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
-  const box=el('div','ovBox panel');ov.appendChild(box);
-  box.appendChild(el('h3','disp','声音设置'));
-  const r1=el('div','setRow');r1.innerHTML='音效';const b1=el('button','btn small',AU.muted?'已关闭':'已开启');
-  b1.onclick=()=>{AU.muted=!AU.muted;b1.textContent=AU.muted?'已关闭':'已开启';if(AU.muted)AU.stopMusic();else AU.playMusic('title');};
-  r1.appendChild(b1);box.appendChild(r1);
-  const r2=el('div','setRow');r2.innerHTML='背景音乐（芯片风格循环）';const b2=el('button','btn small','试听战斗曲');
-  b2.onclick=()=>{AU.init();AU.playMusic('battle');};r2.appendChild(b2);box.appendChild(r2);
-  box.insertAdjacentHTML('beforeend','<div style="font-size:11px;color:#888;padding:8px 4px">全部音效由 Web Audio API 实时合成，无外部音频文件。</div>');
-  const back=el('button','btn small','关闭');back.onclick=()=>{ov.classList.add('hidden');};box.appendChild(back);
-};
+$('#mSound').onclick=()=>{AU.ok();openSettings();};
 $$('[data-back]').forEach(b=>b.onclick=async()=>{AU.no();await fadeTo('#title');AU.playMusic('title');});
 $('#storyPartyBtn').onclick=()=>{
   const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
@@ -2922,6 +2922,7 @@ Battle.prototype.resolveForms=async function(pa,ea){
 $('#logBtn').onclick=()=>{AU.cursor();const ov=$('#logOv');ov.classList.toggle('on');
   if(ov.classList.contains('on')){const l=$('#logList');l.scrollTop=l.scrollHeight;}};
 $('#logClose').onclick=()=>{AU.no();$('#logOv').classList.remove('on');};
+$('#bSetBtn').onclick=()=>{AU.cursor();openSettings();};
 /* ============ 宝可梦详情页 ============ */
 const STNAME={burn:'灼伤',par:'麻痹',psn:'中毒',tox:'剧毒',sleep:'睡眠',frz:'冰冻',confuse:'混乱'};
 function moveDesc(k){
@@ -3055,6 +3056,37 @@ function showDetail(m,battle){
   const off=onEsc(shut);
   function shut(){ov.classList.add('hidden');off();AU.no();}
 }
+/* ============ 游戏设置面板 ============ */
+function settingsRow(label,desc,get,set){
+  const r=el('div','setRow');
+  r.innerHTML=`<div><b>${label}</b><div style="font-size:11px;color:#888;font-weight:400">${desc}</div></div>`;
+  const b=el('button','btn small',get()?'已开启':'已关闭');
+  if(get())b.classList.add('blue');
+  b.onclick=()=>{ set(!get()); b.textContent=get()?'已开启':'已关闭'; b.classList.toggle('blue',get()); AU.cursor(); };
+  r.appendChild(b);
+  return r;
+}
+function openSettings(){
+  const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
+  const box=el('div','ovBox panel');box.style.maxWidth='480px';ov.appendChild(box);
+  box.appendChild(el('h3','disp','⚙ 游戏设置'));
+  let offEsc=null;
+  const close=()=>{ if(offEsc){offEsc();offEsc=null;} ov.classList.add('hidden'); saveCfg(); };
+  box.appendChild(settingsRow('音效','攻击、命中、状态、菜单等提示音',
+    ()=>!CFG.muted, v=>{CFG.muted=!v;AU.muted=CFG.muted;if(CFG.muted)AU.stopMusic();}));
+  box.appendChild(settingsRow('背景音乐','芯片风格循环 BGM',
+    ()=>CFG.music, v=>{CFG.music=v;AU.musOn=v; if(v){AU.init();AU.playMusic(AU.cur||'title');} else AU.stopMusic();}));
+  box.appendChild(settingsRow('天气/场地特效','场景中的雨幕、飞雪、沙暴、光轮、场地光晕与电火花等氛围层',
+    ()=>CFG.weatherFx, v=>{CFG.weatherFx=v;
+      if(!v)$('#bscene').classList.remove('wx-sun','wx-rain','wx-sand','wx-hail','tr-electric','tr-grassy','tr-psychic','tr-misty');}));
+  box.appendChild(settingsRow('战斗演出','濒死白红闪屏、场景震动、金星迸溅',
+    ()=>CFG.fxShake, v=>{CFG.fxShake=v;}));
+  box.insertAdjacentHTML('beforeend','<div style="font-size:11px;color:#888;padding:10px 4px 2px">设置自动保存。关闭天气/场地特效后，场景顶部的天气/场地文字指示仍会保留，仅移除画面氛围层。</div>');
+  const back=el('button','btn small','关闭 (ESC)');back.style.marginTop='10px';
+  back.onclick=()=>{AU.no();close();};
+  box.appendChild(back);
+  offEsc=onEsc(()=>{AU.no();close();});
+}
 /* ★ ESC = 返回上一步 */
 function onEsc(fn){
   const h=e=>{if(e.key==='Escape'){e.preventDefault();window.removeEventListener('keydown',h);fn();}};
@@ -3075,6 +3107,7 @@ window.addEventListener('keydown',e=>{
 });
 /* 启动 */
 AU.init?.();
+AU.muted=CFG.muted;AU.musOn=CFG.music;
 show('#title');
 setTimeout(()=>{try{AU.init();AU.playMusic('title');}catch(e){}},800);
 </script>
