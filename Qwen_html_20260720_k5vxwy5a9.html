@@ -16,6 +16,7 @@
 html,body{height:100%}
 body{
   font-family:'Noto Sans SC',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;
   background:
     radial-gradient(1200px 600px at 50% -10%, #3b3566 0%, transparent 60%),
     repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 2px, transparent 2px 4px),
@@ -27,9 +28,13 @@ body{
   border-radius:14px;overflow:hidden;background:#0e0b20;
   box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 6px #0a0818, 0 0 0 8px #3a3168;
 }
-#stage::after{ /* GBA scanlines */
-  content:"";position:absolute;inset:0;pointer-events:none;z-index:90;opacity:.16;
-  background:repeating-linear-gradient(0deg, rgba(0,0,0,.5) 0 1px, transparent 1px 3px);
+/* 精灵图锐化：整数倍缩放 + 像素渲染（Firefox回退crisp-edges） */
+.psprite,.dexCell img,.slot img,.pickCell img,.rentCard img,.starterCard img,.teamSlot img,#dSprite,#dlgSprite{
+  image-rendering:-moz-crisp-edges;image-rendering:crisp-edges;image-rendering:pixelated;
+}
+#stage::after{ /* 边缘暗角，保留画面纵深但不遮挡文字 */
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:90;
+  background:radial-gradient(130% 95% at 50% 42%, transparent 60%, rgba(8,6,20,.30) 100%);
 }
 .screen{position:absolute;inset:0;display:none;flex-direction:column}
 .screen.on{display:flex}
@@ -65,7 +70,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
   border:2px solid rgba(0,0,0,.35);text-shadow:0 1px 1px rgba(0,0,0,.4);letter-spacing:2px;line-height:1.5}
 
 /* ---------- title / menu ---------- */
-#title{background:linear-gradient(180deg,#7ec8ff 0%, #b8e6ff 45%, #79c98e 46%, #3f9e5f 100%);position:relative}
+#title{background:linear-gradient(180deg,#7ec8ff 0%, #b8e6ff 45%, #79c98e 46%, #3f9e5f 100%)}
 #title .sun{position:absolute;top:36px;right:70px;width:90px;height:90px;border-radius:50%;
   background:radial-gradient(circle at 35% 35%, #fff8d0, #ffd93b 60%, #f2a900);box-shadow:0 0 60px 20px rgba(255,220,90,.55);animation:sunpulse 5s ease-in-out infinite}
 @keyframes sunpulse{50%{box-shadow:0 0 90px 34px rgba(255,220,90,.7)}}
@@ -113,7 +118,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .dexCell{background:#fff;border:2px solid var(--ink);border-radius:10px;padding:6px 4px;text-align:center;cursor:pointer;
   transition:transform .1s, box-shadow .1s;position:relative}
 .dexCell:hover{transform:translateY(-4px);box-shadow:0 6px 0 rgba(20,16,40,.3)}
-.dexCell img{width:64px;height:64px;image-rendering:pixelated;object-fit:contain}
+.dexCell img{width:48px;height:48px;object-fit:contain}
 .dexCell .nm{font-size:11px;font-weight:900;line-height:1.2}
 .dexCell .no{font-family:'Press Start 2P';font-size:7px;color:#999}
 #dexDetail{position:sticky;top:0}
@@ -146,17 +151,19 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .plat{position:absolute;border-radius:50%;border:4px solid rgba(30,60,35,.35)}
 .plat.e{width:230px;height:60px;top:238px;right:90px;background:radial-gradient(ellipse at 50% 40%,#cdeab2,#8cc084 70%,#6aa76b)}
 .plat.p{width:270px;height:72px;bottom:118px;left:60px;background:radial-gradient(ellipse at 50% 40%,#cdeab2,#8cc084 70%,#6aa76b)}
-.psprite{position:absolute;image-rendering:pixelated;object-fit:contain;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25));transition:transform .5s, opacity .5s, filter .3s}
-#espr{width:150px;height:150px;top:96px;right:135px;animation:bobE 2.6s ease-in-out infinite}
-#pspr{width:180px;height:180px;bottom:150px;left:105px;animation:bobP 2.6s ease-in-out infinite}
+.psprite{position:absolute;object-fit:contain;transition:transform .5s, opacity .5s, filter .3s}
+#espr{width:192px;height:192px;top:88px;right:118px;animation:bobE 2.6s ease-in-out infinite}
+#pspr{width:192px;height:192px;bottom:142px;left:96px;animation:bobP 2.6s ease-in-out infinite}
 @keyframes bobE{50%{transform:translateY(-6px)}}
 @keyframes bobP{50%{transform:translateY(-7px)}}
-.psprite.dyn{transform:scale(1.55)!important;filter:drop-shadow(0 0 18px rgba(255,40,40,.9)) drop-shadow(0 8px 6px rgba(0,0,0,.3))!important;animation:none}
+.psprite.dyn{filter:drop-shadow(0 0 18px rgba(255,40,40,.85))!important;animation:none}
+#espr.dyn{width:288px!important;height:288px!important;top:-6px!important;right:70px!important}
+#pspr.dyn{width:288px!important;height:288px!important;bottom:118px!important;left:48px!important}
 .psprite.tera::after{content:""}
 .teragem{position:absolute;width:34px;height:34px;background:linear-gradient(135deg,#fff,#8fe3ff 40%,#37b6ff);
   clip-path:polygon(50% 0,100% 38%,80% 100%,20% 100%,0 38%);filter:drop-shadow(0 0 8px #6fd8ff);animation:gemSpin 3s linear infinite;z-index:5}
 @keyframes gemSpin{50%{transform:rotate(18deg) scale(1.15)}}
-.psprite.shiny{filter:hue-rotate(130deg) saturate(1.5) drop-shadow(0 0 10px gold)}
+.psprite.shiny{filter:hue-rotate(130deg) saturate(1.5)}
 .psprite.hit{animation:hitShake .4s}
 @keyframes hitShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px);filter:brightness(3)}40%{transform:translateX(9px)}60%{transform:translateX(-7px);filter:brightness(2.4)}80%{transform:translateX(5px)}}
 .psprite.lungeP{animation:lungeP .45s ease-in}
@@ -204,7 +211,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .stg.dn{background:#cfe3ff;color:#2a6dd4}
 .stg.anim{animation:stgpop .4s cubic-bezier(.2,1.8,.4,1)}
 @keyframes stgpop{from{transform:scale(.2) rotate(-8deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
-#wxchip{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:7;font-size:12px;font-weight:900;
+#wxchip{position:absolute;top:10px;left:0;right:0;margin:0 auto;width:max-content;z-index:7;font-size:12px;font-weight:900;
   background:rgba(255,255,255,.92);border:2px solid var(--ink);border-radius:8px;padding:2px 12px;display:none;box-shadow:0 3px 0 rgba(20,16,40,.3)}
 #logBtn{position:absolute;top:10px;right:12px;z-index:30;font-size:12px;font-weight:900;padding:5px 12px;border-radius:9px;
   background:rgba(38,35,58,.88);color:#ffd93b;border:2px solid #ffd93b;box-shadow:0 3px 0 rgba(0,0,0,.4);cursor:pointer;transition:.15s}
@@ -238,6 +245,49 @@ button:disabled{opacity:.4;cursor:not-allowed}
 #logList::-webkit-scrollbar{width:8px}
 #logList::-webkit-scrollbar-thumb{background:#3a3168;border-radius:4px}  
 #wxchip.on{display:block;animation:stgpop .3s}
+#detailOv{position:absolute;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(800px 460px at 18% -5%,#3b3566 0%,transparent 60%),
+  radial-gradient(600px 400px at 90% 105%,rgba(227,53,13,.18),transparent 55%),
+  linear-gradient(180deg,#1e1a3d,#120e26)}
+#detailOv::before{content:"";position:absolute;width:440px;height:440px;border-radius:50%;
+  right:-140px;top:-160px;opacity:.06;pointer-events:none;
+  background:linear-gradient(180deg,#fff 46%,transparent 46% 54%,#fff 54%);
+  border:16px solid #fff;animation:slowSpin 60s linear infinite}
+#detailOv::after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;
+  right:25px;top:5px;opacity:.06;pointer-events:none;border:16px solid #fff;
+  animation:slowSpin 60s linear infinite}
+@keyframes slowSpin{to{transform:rotate(360deg)}}
+#detailCard{position:relative;width:min(880px,94%);max-height:92%;display:grid;grid-template-columns:330px 1fr;gap:20px;
+  background:linear-gradient(180deg,#fffdf4,var(--panel) 45%,var(--panel2));border:4px solid var(--ink);border-radius:16px;
+  box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 7px #d8cfb4,0 24px 60px rgba(0,0,0,.6);padding:20px 22px;overflow:auto;
+  animation:cardPop .3s cubic-bezier(.2,1.4,.4,1)}
+@keyframes cardPop{from{transform:scale(.85) translateY(24px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+#detailClose{position:absolute;top:10px;right:12px;z-index:2}
+.dLeft{text-align:center}
+#dSprite{width:192px;height:192px;object-fit:contain;
+  animation:bobP 2.6s ease-in-out infinite;filter:drop-shadow(0 8px 6px rgba(0,0,0,.3))}
+#dSprite.faint{filter:grayscale(1) drop-shadow(0 8px 6px rgba(0,0,0,.3))}
+#dName{font-family:'ZCOOL KuaiLe';font-size:30px;line-height:1.1}
+#dLv{font-family:'Press Start 2P';font-size:9px;color:#666;margin-top:2px}
+.dMetaRow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.dHpBig{margin:10px 0 6px}
+.dStatRow{display:grid;grid-template-columns:42px 50px 76px 1fr;align-items:center;gap:8px;font-size:12px;margin:4px 0}
+.dStatNm{font-weight:900}
+.dStatBase{color:#999;font-size:10px;font-weight:700}
+.dStatVal{font-family:'Press Start 2P';font-size:9px;text-align:right}
+.dStatBar{height:11px;background:#e5e0cc;border:2px solid var(--ink);border-radius:7px;overflow:hidden}
+.dStatBar i{display:block;height:100%;border-radius:4px;animation:dbar .7s cubic-bezier(.2,.8,.2,1)}
+@keyframes dbar{from{width:0}}
+.dRight h3{font-family:'ZCOOL KuaiLe';font-size:22px;margin-bottom:8px;letter-spacing:2px}
+.dMove{background:#fff;border:3px solid #cfc8ad;border-left-width:8px;border-radius:10px;padding:8px 12px;margin-bottom:8px;
+  transition:transform .12s,box-shadow .12s}
+.dMove:hover{transform:translateX(6px);box-shadow:0 4px 0 rgba(20,16,40,.25)}
+.dmTop{display:flex;align-items:center;gap:8px}
+.dmTop b{font-size:16px}
+.dmCat{margin-left:auto;font-size:10px;font-weight:900;color:#777;border:2px solid #ddd;border-radius:6px;padding:1px 7px}
+.dmNums{font-size:11px;color:#666;font-weight:700;margin:3px 0 2px}
+.dmDesc{font-size:12px;color:#444;line-height:1.55}
+.dFlavor{font-size:11px;color:#888;font-weight:700;margin-top:8px;line-height:1.7}
 .abchip{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:900;color:#7c5cb8;
   background:linear-gradient(180deg,#f3ecff,#e4d8f7);border:2px solid #b89fe0;border-radius:7px;padding:1px 8px;
   cursor:help;transition:transform .12s,box-shadow .12s;line-height:1.5}
@@ -255,13 +305,17 @@ button:disabled{opacity:.4;cursor:not-allowed}
 @keyframes blink{50%{opacity:0}}
 .bmenu{width:330px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .bmenu .btn{font-family:'ZCOOL KuaiLe';font-size:20px;letter-spacing:4px}
-#menuMoves{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr auto}
+#menuMoves{display:flex;gap:8px;width:432px}
+#moveGrid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px}
 .moveBtn{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:6px 12px;gap:2px;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.5)}
 .moveBtn .mn{font-family:'ZCOOL KuaiLe';font-size:17px;letter-spacing:1px}
 .moveBtn .mi{font-size:10px;font-weight:700;opacity:.95}
 .moveBtn .pp{position:absolute;right:8px;bottom:4px;font-family:'Press Start 2P';font-size:7px}
 .moveBtn{position:relative}
-#dynRow{grid-column:1/3;display:flex;gap:6px;justify-content:center}
+#formCol{display:flex;flex-direction:column;gap:6px;min-width:124px}
+#formCol .dynToggle{width:100%;padding:7px 6px;font-size:12px}
+#formCol .backBtn{margin-top:auto;justify-content:center}
+#formHint{font-size:9px;color:#c8b8e8;font-weight:700;text-align:center;line-height:1.5;white-space:pre-line;padding:0 2px}
 .dynToggle{font-size:12px;font-weight:900;padding:5px 10px;border-radius:8px;border:2px solid var(--ink);background:#efe7cf;box-shadow:0 3px 0 var(--ink)}
 .dynToggle.on{background:linear-gradient(90deg,#ff5f6d,#ffc371);color:#fff}
 .dynToggle.mega.on{background:linear-gradient(90deg,#e040fb,#7c4dff)}
@@ -271,7 +325,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .ovBox{width:88%;max-width:760px;max-height:92%;overflow:auto;padding:16px}
 .slot{display:flex;align-items:center;gap:12px;background:#fff;border:3px solid var(--ink);border-radius:12px;padding:8px 12px;margin-bottom:8px;cursor:pointer;transition:transform .1s,background .15s}
 .slot:hover{background:#fff3c4;transform:translateX(6px)}
-.slot img{width:56px;height:56px;object-fit:contain;image-rendering:pixelated}
+.slot img{width:48px;height:48px;object-fit:contain}
 .slot .sname{font-family:'ZCOOL KuaiLe';font-size:19px}
 .slot.active{outline:4px solid var(--gold)}
 .slot.fainted{opacity:.55}
@@ -290,7 +344,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .bpip.cur{box-shadow:0 0 0 3px #fff, 0 0 14px #ffd93b;animation:blink 1.2s steps(2) infinite}
 .rentCard{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:10px;width:190px;cursor:pointer;position:relative;transition:transform .12s, box-shadow .12s}
 .rentCard:hover{transform:translateY(-6px) rotate(-1deg);box-shadow:0 10px 0 rgba(0,0,0,.3)}
-.rentCard img{width:84px;height:84px;object-fit:contain;image-rendering:pixelated;display:block;margin:0 auto}
+.rentCard img{width:96px;height:96px;object-fit:contain;display:block;margin:0 auto}
 .rentCard .rn{font-family:'ZCOOL KuaiLe';font-size:18px;text-align:center}
 .rentSet{display:flex;gap:12px;justify-content:center;padding:10px;background:rgba(255,255,255,.06);border:2px dashed rgba(255,255,255,.25);border-radius:14px;margin-bottom:12px}
 .setLabel{font-family:'ZCOOL KuaiLe';color:#ffd93b;font-size:20px;margin:8px 0 2px}
@@ -313,9 +367,9 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .starterCard img{width:96px;height:96px;object-fit:contain;image-rendering:pixelated}
 .starterCard:hover{background:#fff3c4;transform:translateY(-6px)}
 /* toast */
-#toast{position:absolute;top:14px;left:50%;transform:translateX(-50%) translateY(-60px);z-index:99;background:#26233a;color:#fff;
+#toast{position:absolute;top:14px;left:0;right:0;margin:0 auto;width:max-content;transform:translateY(-60px);z-index:99;background:#26233a;color:#fff;
   padding:8px 20px;border-radius:10px;font-weight:900;transition:transform .35s cubic-bezier(.2,.9,.3,1.3);border:2px solid #fff;pointer-events:none}
-#toast.on{transform:translateX(-50%) translateY(0)}
+#toast.on{transform:translateY(0)}
 /* fade */
 #fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .35s;z-index:80}
 #fade.on{opacity:1;pointer-events:auto}
@@ -326,9 +380,9 @@ button:disabled{opacity:.4;cursor:not-allowed}
 #freeWrap{display:grid;grid-template-columns:1fr 300px;gap:14px;height:100%}
 .pickCell{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--ink);border-radius:9px;padding:4px 8px;cursor:pointer;font-size:12px;font-weight:700}
 .pickCell:hover{background:#dff3ff}
-.pickCell img{width:38px;height:38px;object-fit:contain;image-rendering:pixelated}
+.pickCell img{width:48px;height:48px;object-fit:contain}
 .teamSlot{background:#fff;border:2px dashed #999;border-radius:10px;padding:8px;margin-bottom:8px;min-height:52px;display:flex;align-items:center;gap:8px}
-.teamSlot img{width:44px;height:44px;object-fit:contain;image-rendering:pixelated}
+.teamSlot img{width:48px;height:48px;object-fit:contain}
 @media (max-width:900px){ #facLobby{grid-template-columns:1fr} #freeWrap{grid-template-columns:1fr} .logo{font-size:52px} }
 </style>
 </head>
@@ -467,8 +521,9 @@ button:disabled{opacity:.4;cursor:not-allowed}
       <div id="menuMoves" class="bmenu hidden"></div>
     </div>
     </div>
-    <div id="partyOv" class="overlay hidden"></div>
-    <div id="bagOv" class="overlay hidden"></div>
+  <div id="partyOv" class="overlay hidden"></div>
+  <div id="bagOv" class="overlay hidden"></div>
+  <div id="detailOv" class="hidden"></div>
   
 
   <!-- dialog -->
@@ -824,7 +879,7 @@ S(6,'喷火龙','fire/flying','78/84/78/109/85/100','blaze/blaze',['flamethrower
 S(7,'杰尼龟','water','44/48/65/50/64/43','torrent/torrent',['tackle','aquajet','scald','icebeam','rapidspin'].filter(m=>MV[m]),{evo:1});
 S(8,'卡咪龟','water','59/63/80/65/80/58','torrent/torrent',['aquajet','scald','icebeam','surf'],{evo:1});
 S(9,'水箭龟','water','79/83/100/85/105/78','torrent/torrent',['hydropump','surf','icebeam','aurasphere','darkpulse','dragonpulse','scald','raindance']);
-S(10,'绿毛虫','bug','45/30/35/20/20/45','shielddust/shielddust',['tackle','stringshot'],{evo:1});
+S(10,'绿毛虫','bug','45/30/35/20/20/45','shielddust/shielddust',['tackle','stringshot','swift','terablast'],{evo:1});
 S(12,'巴大蝶','bug/flying','60/45/50/90/80/70','compoundeyes/compoundeyes',['bugbuzz','psychic','sleeppowder','energyball','hurricane']);
 S(16,'波波','normal/flying','40/45/40/35/35/56','keeneye/tangledfeet',['tackle','gust','quickattack'],{evo:1});
 S(18,'比雕','normal/flying','83/80/75/70/70/101','keeneye/tangledfeet',['hurricane','heatwave','uturn','roost','quickattack','aerialace']);
@@ -849,7 +904,7 @@ S(112,'钻角犀兽','ground/rock','105/130/120/45/45/40','lightningrod/rockhead
 S(120,'海星星','water','30/45/55/70/55/85','naturalcure/illuminate',['scald','icebeam','thunderbolt','recover','psychic'],{evo:1});
 S(121,'宝石海星','water/psychic','60/75/85/100/85/115','naturalcure/regenerator',['surf','icebeam','thunderbolt','psychic','recover','scald']);
 S(127,'大甲','bug','65/125/100/55/70/85','hyperCutterx/moxie',['xscissor','earthquake','stoneedge','swordsdance','quickattack','closecombat'].filter(m=>MV[m]));
-S(129,'鲤鱼王','water','20/10/55/15/20/80','swiftswim/swiftswim',['splash'],{evo:1});
+S(129,'鲤鱼王','water','20/10/55/15/20/80','swiftswim/swiftswim',['splash','tackle','facade','terablast'],{evo:1});
 S(130,'暴鲤龙','water/flying','95/125/79/60/100/81','intimidate/intimidate',['waterfall','crunch','earthquake','dragondance','icepunch','powerwhip','taunt']);
 S(131,'拉普拉斯','water/ice','130/85/80/85/95/60','waterabsorb/shellarmor',['surf','icebeam','thunderbolt','freezedry','bodyslam','icepunch']);
 S(133,'伊布','normal','55/55/50/45/65/55','adaptability/runaway',['quickattack','facade','irontail','shadowball'],{evo:1});
@@ -958,7 +1013,7 @@ S(738,'锹农炮虫','bug/electric','77/70/90/145/75/43','levitate/levitate',['t
 S(745,'鬃岩狼人(黑夜)','rock','85/115/75/55/75/82','noguard/noguard',['stoneedge','closecombat','suckerpunch','stealthrock','firepunch']);
 S(748,'超坏星','poison/water','50/63/152/53/142/35','regenerator/regenerator',['scald','toxic','recover','banefulbunker','knockoff']);
 S(758,'焰后蜥','poison/fire','68/64/60/111/60/117','corrosion/corrosion',['flamethrower','sludgewave','nastyplot','dragonpulse']);
-S(763,'甜冷美后','grass','72/120/98/50/98/72','queenmajesty/queenmajesty',['powerwhip','highjumpkick','knockoff','tropkick'].filter(m=>MV[m]||m==='powerwhip'));
+S(763,'甜冷美后','grass','72/120/98/50/98/72','queenmajesty/queenmajesty',['powerwhip','highjumpkick','knockoff','uturn','taunt']);
 S(778,'谜拟丘','ghost/fairy','55/90/80/50/105/96','disguise/disguise',['playrough','shadowclaw','swordsdance','spiritbreak','drainpunch','shadowsneak']);
 S(784,'杖尾鳞甲龙','dragon/fighting','75/110/125/100/105/85','bulletproof/bulletproof',['closecombat','clangingscales','flamethrower','flashcannon','bulkup']);
 S(791,'索尔迦雷欧','psychic/steel','137/137/107/113/89/97','fullmetalbody/fullmetalbody',['sunsteelstrike','zenheadbutt','flareblitz','earthquake','stoneedge'],{leg:1});
@@ -1068,7 +1123,13 @@ class P{
     this.st={atk:Math.floor((2*b[1]+iv)*lvl/100)+5,def:Math.floor((2*b[2]+iv)*lvl/100)+5,
       spa:Math.floor((2*b[3]+iv)*lvl/100)+5,spd:Math.floor((2*b[4]+iv)*lvl/100)+5,spe:Math.floor((2*b[5]+iv)*lvl/100)+5};
     this.hp=this.maxhp; this.xp=o.xp??lvl*lvl*lvl;
-    this.moves=(o.moves||sp.mv.slice(0,4)).map(k=>({k,pp:MV[k].pp,maxpp:MV[k].pp}));
+    /* ★ 保证满4招：招式池不足4个时用通用招式补齐（覆盖绿毛虫/鲤鱼王/甜冷美后等稀有招式池） */
+    let mk=o.moves?o.moves.slice():sp.mv.slice(0,4);
+    for(const p of ['tackle','quickattack','facade','swift','terablast','hyperbeam']){
+      if(mk.length>=4)break;
+      if(!mk.includes(p)&&MV[p])mk.push(p);
+    }
+    this.moves=mk.slice(0,4).map(k=>({k,pp:MV[k].pp,maxpp:MV[k].pp}));
     this.stages={atk:0,def:0,spa:0,spd:0,spe:0};
     this.status=null; this.sleepT=0; this.toxicN=0;
     this.vol={}; if(id===778)this.vol.disguise=true;
@@ -1116,7 +1177,7 @@ function spriteURLs(id,back){
 }
 function setSprite(img,id,back){ img._urls=spriteURLs(id,back); img._ui=0; img.src=img._urls[0];
   img.onerror=()=>{ img._ui++; if(img._ui<img._urls.length)img.src=img._urls[img._ui]; else img.onerror=null; }; }
-function miniSprite(id){const i=new Image();i.width=40;i.height=40;i.style.imageRendering='pixelated';setSprite(i,id);return i;}
+function miniSprite(id){const i=new Image();i.width=48;i.height=48;setSprite(i,id);return i;}
 
 /* ============================================================
    6. 对战 UI
@@ -1421,45 +1482,45 @@ class Battle{
     return new Promise(res=>{
       let backs=[],offEsc=null;
       const cleanup=()=>{backs.forEach(([b,h])=>b.removeEventListener('click',h));if(offEsc)offEsc();};
-      const render=()=>{
+            const render=()=>{
         mm.innerHTML='';backs.forEach(([b,h])=>b.removeEventListener('click',h));backs=[];
-        const row=el('div','');row.id='dynRow';
+        const formCol=el('div','');formCol.id='formCol';
+        const moveGrid=el('div','');moveGrid.id='moveGrid';
+        mm.appendChild(formCol);mm.appendChild(moveGrid);
         if(canMega){const b=el('button','dynToggle mega'+(wantMega?' on':''),'◆ 超级进化');
           b.onclick=()=>{AU.cursor();wantMega=!wantMega;if(wantMega){wantDyn=false;wantTera=false;}render();};
-          row.appendChild(b);}
+          formCol.appendChild(b);}
         if(canDyn){const b=el('button','dynToggle'+(wantDyn?' on':''),'● 极巨化');
           b.onclick=()=>{AU.cursor();wantDyn=!wantDyn;if(wantDyn){wantMega=false;wantTera=false;}render();};
-          row.appendChild(b);}
+          formCol.appendChild(b);}
         if(canTera){const b=el('button','dynToggle tera'+(wantTera?' on':''),'✦ 太晶化('+TNAME[m.teraType]+')');
           b.onclick=()=>{AU.cursor();wantTera=!wantTera;if(wantTera){wantMega=false;wantDyn=false;}render();};
-          row.appendChild(b);}
+          formCol.appendChild(b);}
         if(canMega||canDyn||canTera){
-          const hint=el('span','',wantMega?'本场已选Mega · 优先出手':wantDyn?'本场已选极巨 · 招式变为极巨招式':wantTera?'本场已选太晶 · 属性变为晶属性':'三形态互斥 · 本场战斗仅可用一次');
-          hint.style.cssText='font-size:10px;color:#c8b8e8;font-weight:700;align-self:center';
-          row.appendChild(hint);
+          const hint=el('div','');hint.id='formHint';
+          hint.textContent=wantMega?'本场已选Mega\n形态变化优先出手':wantDyn?'本场已选极巨\n招式变为极巨招式':wantTera?'本场已选太晶\n属性变为晶属性':'三形态互斥\n本场仅可用一次';
+          formCol.appendChild(hint);
         }
-        mm.appendChild(row);
         m.moves.forEach(mv=>{
           const d=MV[mv.k];
           const dis=(locked&&locked!==mv.k)||(choiceLock&&choiceLock!==mv.k)||mv.pp<=0||(m.item==='assaultvest'&&d.c==='X');
           let nm=d.n,tcol=TCOL[d.t];
           let info=`${TNAME[d.t]} · ${d.c==='P'?'物理':d.c==='S'?'特殊':'变化'}${d.p?' · 威力'+d.p:''}`;
-          /* ★ 极巨化预览：招式名/威力全部按极巨招式显示，并标注不继承追加效果 */
           if(wantDyn){ if(d.c==='X'){nm='极巨防壁';info='极巨招式 · 守住自己';}
-            else{nm=MAXMV[d.t]||'极巨攻击';info=`极巨招式 · 威力 ${maxPower(d)} · 不继承原招式追加效果`;} }
+            else{nm=MAXMV[d.t]||'极巨攻击';info=`极巨招式 · 威力 ${maxPower(d)} `;} }
           else if(wantTera){ if(d.terablast){nm=`太晶爆发 (${TNAME[m.teraType]})`;tcol=TCOL[m.teraType];info=`${TNAME[m.teraType]} · 特殊 · 威力 80`;}
-            else if(d.c!=='X')info+=' · 晶化后一致×2'; }
-          else if(wantMega){ info+=' · Mega进化优先生效'; }
+            else if(d.c!=='X')info+=' · 晶化一致×2'; }
+          else if(wantMega){ info+=' · Mega优先生效'; }
           const b=el('button','btn moveBtn');
           b.style.background=`linear-gradient(180deg,${tcol},${tcol}cc)`;
           if(dis)b.disabled=true;
           b.innerHTML=`<span class="mn">${nm}</span><span class="mi">${info}</span><span class="pp">PP ${mv.pp}/${mv.maxpp}</span>`;
           const h=()=>{AU.ok();cleanup();res({type:'move',move:mv,mega:wantMega,dyn:wantDyn,tera:wantTera});};
-          b.addEventListener('click',h);backs.push([b,h]);mm.appendChild(b);
+          b.addEventListener('click',h);backs.push([b,h]);moveGrid.appendChild(b);
         });
-        const back=el('button','btn small','返回 (ESC)');
+        const back=el('button','btn small backBtn','返回 (ESC)');
         const bh=()=>{AU.no();cleanup();res(null);};
-        back.addEventListener('click',bh);backs.push([back,bh]);mm.appendChild(back);
+        back.addEventListener('click',bh);backs.push([back,bh]);formCol.appendChild(back);
       };
       offEsc=onEsc(()=>{AU.no();cleanup();res(null);});
       render();
@@ -1477,6 +1538,9 @@ class Battle{
         s.insertAdjacentHTML('beforeend',`<div style="flex:1"><div class="sname">${m.name} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${m.status?' ['+m.status+']':''}</div>
           <div class="hpbar" style="max-width:200px"><div class="hpfill ${m.hpPct()>.5?'':m.hpPct()>.2?'mid':'low'}" style="width:${Math.round(m.hpPct()*100)}%"></div></div>
           <div style="font-size:11px;color:#666;font-weight:700">${m.hp}/${m.maxhp} <span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div></div>`);
+                  const det=el('button','btn tiny','详情');
+        det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,this);};
+        s.appendChild(det);
         if(m.alive()&&i!==this.pi){ s.onclick=()=>{AU.ok();ov.classList.add('hidden');res(i);}; }
         else if(i===this.pi){ s.insertAdjacentHTML('beforeend','<span style="font-size:11px;font-weight:900;color:#999">战斗中</span>'); }
         box.appendChild(s);
@@ -2233,6 +2297,7 @@ const FAC={
     if(GM.fac.party){ GM.fac.party.forEach(m=>{
       const c=el('div','slot');c.appendChild(miniSprite(m.id));
       c.insertAdjacentHTML('beforeend',`<div><b>${m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x=>MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:'无道具'} · 晶${TNAME[m.teraType]}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span></div></div>`);
+            const det=el('button','btn tiny','详情');det.style.marginLeft='auto';det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};c.appendChild(det);
       party.appendChild(c); }); }
     else party.innerHTML='<div style="color:#888;font-size:13px;padding:10px">尚未选择租借队伍</div>';
   },
@@ -2308,8 +2373,9 @@ const FAC={
       let pickE=null,pickP=null;
       const eg=el('div','');eg.style.display='flex';eg.style.gap='10px';eg.style.flexWrap='wrap';
       enemyTeam.forEach((m,i)=>{
-        const c=el('div','rentCard');c.appendChild(miniSprite(m.id));c.children[0].style.width='70px';c.children[0].style.height='70px';
+        const c=el('div','rentCard');c.appendChild(miniSprite(m.id));c.children[0].style.width='48px';c.children[0].style.height='48px';
         c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x=>MV[x.k].n).join('·')}</div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div>`);
+                const det=el('button','btn tiny','详情');det.style.marginTop='4px';det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};c.appendChild(det);
         c.onclick=()=>{AU.cursor();eg.querySelectorAll('.rentCard').forEach(x=>x.classList.remove('swapPick'));c.classList.add('swapPick');pickE=i;};
         eg.appendChild(c);
       });
@@ -2319,6 +2385,7 @@ const FAC={
       GM.fac.party.forEach((m,i)=>{
         const c=el('div','rentCard');c.appendChild(miniSprite(m.id));c.children[0].style.width='70px';c.children[0].style.height='70px';
         c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x=>MV[x.k].n).join('·')}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div>`);
+                const det=el('button','btn tiny','详情');det.style.marginTop='4px';det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};c.appendChild(det);
         c.onclick=()=>{AU.cursor();pg.querySelectorAll('.rentCard').forEach(x=>x.classList.remove('swapPick'));c.classList.add('swapPick');pickP=i;};
         pg.appendChild(c);
       });
@@ -2472,7 +2539,7 @@ const STORY={
 function statBar(v){return `<div class="statRow"><span style="width:34px;color:#888;font-weight:900">${''}</span></div>`;}
 function dexDetail(sp){
   const d=$('#dexDetail');
-  const img=new Image();setSprite(img,sp.id);img.style.width='110px';img.style.height='110px';img.style.objectFit='contain';img.style.display='block';img.style.margin='0 auto';
+  const img=new Image();setSprite(img,sp.id);img.style.width='96px';img.style.height='96px';img.style.objectFit='contain';img.style.display='block';img.style.margin='0 auto';
   d.innerHTML='';d.appendChild(img);
   const names=['HP','攻击','防御','特攻','特防','速度'];
   d.insertAdjacentHTML('beforeend',`
@@ -2572,6 +2639,7 @@ $('#storyPartyBtn').onclick=()=>{
   GM.story.party.forEach(m=>{
     const s=el('div','slot');s.appendChild(miniSprite(m.id));
     s.insertAdjacentHTML('beforeend',`<div style="flex:1"><b>${m.name}</b> Lv${m.lvl} ${m.item?'['+IT[m.item].n+']':''}<div class="hpbar" style="max-width:220px"><div class="hpfill" style="width:${Math.round(m.hpPct()*100)}%"></div></div><div style="font-size:11px;color:#666">${m.hp}/${m.maxhp} · ${m.moves.map(x=>MV[x.k].n).join('/')} · <span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div></div>`);
+          const det=el('button','btn tiny','详情');det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};s.appendChild(det);
     box.appendChild(s);
   });
   if(GM.story.box.length){box.appendChild(el('h3','disp','电脑盒子'));
@@ -2632,6 +2700,139 @@ Battle.prototype.resolveForms=async function(pa,ea){
 $('#logBtn').onclick=()=>{AU.cursor();const ov=$('#logOv');ov.classList.toggle('on');
   if(ov.classList.contains('on')){const l=$('#logList');l.scrollTop=l.scrollHeight;}};
 $('#logClose').onclick=()=>{AU.no();$('#logOv').classList.remove('on');};
+/* ============ 宝可梦详情页 ============ */
+const STNAME={burn:'灼伤',par:'麻痹',psn:'中毒',tox:'剧毒',sleep:'睡眠',frz:'冰冻',confuse:'混乱'};
+function moveDesc(k){
+  const d=MV[k];if(!d)return '';
+  const p=[];
+  if(d.k==='struggle')p.push('无其他招式可用时使用');
+  if(d.pri>0)p.push(`先制+${d.pri}，优先出手`);
+  if(d.pri<0)p.push(`优先度${d.pri}，最后出手`);
+  if(d.alwaysCrit)p.push('必定会心一击');
+  else if(d.crit)p.push('容易会心一击');
+  if(d.multi)p.push(`连续攻击 ${d.multi[0]}~${d.multi[1]} 次`);
+  if(d.multiPow)p.push(`连续攻击 ${d.multiPow.length} 次，威力逐次提升（${d.multiPow.join('/')}）`);
+  if(d.drain)p.push(`回复造成伤害 ${d.drain}% 的HP`);
+  if(d.recoil)p.push(`受到造成伤害 1/${d.recoil} 的反作用力伤害`);
+  if(d.recharge)p.push('使用后下一回合无法行动');
+  if(d.charge)p.push('第一回合蓄力，第二回合攻击');
+  if(d.rampage)p.push('狂暴攻击2~3回合，结束后陷入混乱');
+  if(d.seismic)p.push('伤害固定为使用者等级');
+  if(d.hex)p.push('对手处于异常状态时威力翻倍');
+  if(d.facade)p.push('自身处于异常状态时威力翻倍');
+  if(d.psyshock)p.push('以对手的防御计算伤害');
+  if(d.foulplay)p.push('以对手的攻击计算伤害');
+  if(d.gyro)p.push('比对手越慢威力越高（上限150）');
+  if(d.freezedry)p.push('对水属性效果绝佳');
+  if(d.weatherball)p.push('随天气改变属性，且威力提升至100');
+  if(d.terablast)p.push('太晶化后变为太晶属性');
+  if(d.knockoff)p.push('拍落对手的持有道具');
+  if(d.uturn)p.push('攻击后替换下场');
+  if(d.dyna2x)p.push('对极巨化宝可梦伤害×2');
+  if(d.se2)p.push('效果绝佳时伤害×2');
+  if(d.ragefist)p.push('每受到一次攻击威力+50');
+  if(d.steal)p.push('夺取对手全部能力提升');
+  if(d.parting)p.push('降低对手双攻后替换下场');
+  if(d.clearsmog)p.push('重置对手全部能力变化');
+  if(d.painsplit)p.push('双方HP取平均值');
+  if(d.trick)p.push('与对手交换持有道具');
+  if(d.destiny)p.push('本回合被击倒时拉对手同归');
+  if(d.protect)p.push('本回合完全防住攻击'+(d.ks?'，接触者攻击-2':'')+(d.bb?'，接触者中毒':'')+'，连续使用易失败');
+  if(d.taunt)p.push('使对手3回合内无法使用变化招式');
+  if(d.trickroom)p.push('5回合内速度慢的先出手');
+  if(d.hazard==='sr')p.push('在对手场地撒下隐形岩（按岩石属性克制结算）');
+  if(d.hazard==='spikes')p.push('在对手场地撒菱（最多3层）');
+  if(d.leechseed)p.push('种下种子，每回合吸取对手1/8 HP');
+  if(d.weather)p.push('改变天气5回合：'+({sun:'大晴天（火系增强）',rain:'下雨（水系增强）'}[d.weather]||''));
+  if(d.setSt)p.push(`使对手陷入${STNAME[d.setSt]||d.setSt}`);
+  if(d.setDrop)p.push(`降低对手${STN[d.setDrop.drop]}${Math.abs(d.setDrop.n)}级`);
+  if(d.heal)p.push('回复最大HP的一半');
+  if(d.rest)p.push('完全回复HP并睡眠2回合');
+  if(d.splash)p.push('什么也不会发生');
+  const ups=[];['selfUp','selfUp2','selfUp3'].forEach(key=>{if(d[key])ups.push(STN[d[key].drop]+(Math.abs(d[key].n)>=2?'2级':'1级'));});
+  if(ups.length)p.push('提升自身'+ups.join('、'));
+  if(d.self)p.push(`使用后自身${STN[d.self.drop]}降低${Math.abs(d.self.n)}级`);
+  if(d.selfDn)p.push(`代价：自身防御、特防降低1级`);
+  if(d.sec){
+    if(d.sec.st==='confuse')p.push(`${d.sec.ch}%几率使对手混乱`);
+    else if(d.sec.st==='tri')p.push(`${d.sec.ch}%几率灼伤/麻痹/冰冻`);
+    else if(d.sec.st)p.push(`${d.sec.ch}%几率使对手${STNAME[d.sec.st]||d.sec.st}`);
+    if(d.sec.flinch)p.push(`${d.sec.ch}%几率使对手畏缩`);
+    if(d.sec.drop)p.push(`${d.sec.ch}%几率降低对手${STN[d.sec.drop]}${Math.abs(d.sec.n)}级`);
+  }
+  if(d.selfDropT)p.push(`必定降低对手${STN[d.selfDropT.drop]}1级`);
+  if(d.salt)p.push('盐腌对手，每回合造成伤害（水/钢属性翻倍）');
+  if(d.thunder)p.push('雨天必中，晴天命中减半');
+  if(d.blizzard)p.push('冰雹天气必中');
+  if(d.crash)p.push('未命中时自身损失1/2最大HP');
+  if(d.powder)p.push('对草属性无效');
+  if(d.punch)p.push('拳类招式（铁拳×1.2）');
+  if(d.pulse)p.push('波动招式（超级发射器×1.5）');
+  if(!p.length)p.push(d.c==='X'?'变化招式。':'基础攻击招式。');
+  return p.join('；');
+}
+function showDetail(m,battle){
+  const ov=$('#detailOv');ov.innerHTML='';ov.classList.remove('hidden');
+  const sp=m.sp;
+  const card=el('div','');card.id='detailCard';
+  const close=el('button','btn small','✕ 关闭 (ESC)');close.id='detailClose';close.onclick=shut;
+  card.appendChild(close);
+  const left=el('div','dLeft');
+  const img=new Image();img.id='dSprite';setSprite(img,m.mega?m.mega.f:m.id);
+  if(m.fainted)img.classList.add('faint');
+  if(m.shiny)img.style.filter='hue-rotate(130deg) saturate(1.5)';
+  left.appendChild(img);
+  left.insertAdjacentHTML('beforeend',`
+    <div id="dName">${m.name}${m.shiny?' <span style="color:#e0a400">✦</span>':''}</div>
+    <div id="dLv">Lv.${m.lvl} · ${sp.leg?'传说宝可梦':'普通宝可梦'} · 种族值和 ${bst(sp)}</div>
+    <div class="dMetaRow">${m.types.map(tyBadge).join('')}</div>
+    <div class="dMetaRow">
+      <span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span>
+      ${m.item?`<span class="abchip" style="color:#a06a00;border-color:#e0c060;background:linear-gradient(180deg,#fff8e0,#ffe9a8)" title="${IT[m.item]?.d||''}">🎒 ${IT[m.item].n}</span>`:''}
+      <span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;background:linear-gradient(180deg,#e0fbff,#b8f0f8)">✦ 太晶·${TNAME[m.teraType]}</span>
+      ${m.status?`<span class="abchip" style="color:#c22e28;border-color:#e08a8a;background:#ffe8e8">${STNAME[m.status]||m.status}</span>`:''}
+      ${m.mega?'<span class="abchip" style="color:#b3188d;border-color:#e08ac2;background:#ffe0f5">Mega进化</span>':''}
+      ${m.dyn?'<span class="abchip" style="color:#d21f3c;border-color:#f08a9a;background:#ffe0e5">极巨化中</span>':''}
+    </div>
+    <div class="dHpBig">
+      <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:900;color:#777"><span>HP</span><span class="px" style="font-size:9px">${m.hp} / ${m.maxhp}</span></div>
+      <div class="hpbar" style="height:16px"><div class="hpfill ${m.hpPct()>.5?'':m.hpPct()>.2?'mid':'low'}" style="width:${Math.round(m.hpPct()*100)}%"></div></div>
+    </div>`);
+  const names=['HP','攻击','防御','特攻','特防','速度'];
+  const keys=[null,'atk','def','spa','spd','spe'];
+  const stCols=['#e07b00','#e2574c','#3f8fe0','#8a63d2','#4caf7d','#e0912b'];
+  let statHtml='';
+  for(let i=0;i<6;i++){
+    const k=keys[i];
+    const val=i===0?m.maxhp:m.st[k];
+    const stage=i>0&&battle?m.stages[k]:0;
+    const eff=i>0&&battle?m.effStat(k,battle):val;
+    const stCol=stage>0?'#ff6b57':'#5aa0ff';
+    statHtml+=`<div class="dStatRow">
+      <span class="dStatNm" style="color:${stCols[i]}">${names[i]}</span>
+      <span class="dStatBase">种族 ${sp.s[i]}</span>
+      <span class="dStatVal">${i===0?val:eff}${stage?` <em style="color:${stCol};font-style:normal">${stage>0?'▲':'▼'}${Math.abs(stage)}</em>`:''}</span>
+      <div class="dStatBar"><i style="width:${Math.min(100,val/1.9)}%;background:${val>=100?'#3ecf6c':val>=70?'#8bc34a':val>=45?'#f2c230':'#ef4444'}"></i></div>
+    </div>`;
+  }
+  left.insertAdjacentHTML('beforeend',statHtml);
+  card.appendChild(left);
+  const right=el('div','dRight');
+  right.insertAdjacentHTML('beforeend','<h3>持有招式</h3>');
+  m.moves.forEach(mv=>{
+    const d=MV[mv.k];
+    const c=el('div','dMove');c.style.borderLeftColor=TCOL[d.t];
+    c.innerHTML=`<div class="dmTop">${tyBadge(d.t)}<b>${d.n}</b><span class="dmCat">${d.c==='P'?'物理':d.c==='S'?'特殊':'变化'}</span></div>
+      <div class="dmNums">威力 ${d.p??'—'} · 命中 ${d.a??'—'} · PP ${mv.pp}/${mv.maxpp}${d.pri?` · 先制 ${d.pri>0?'+':''}${d.pri}`:''}</div>
+      <div class="dmDesc">${moveDesc(mv.k)}</div>`;
+    right.appendChild(c);
+  });
+  right.insertAdjacentHTML('beforeend',`<div class="dFlavor">特性效果：${AB[m.ability]?.d||'—'}${m.item?'<br>道具效果：'+(IT[m.item]?.d||''):''}</div>`);
+  card.appendChild(right);
+  ov.appendChild(card);
+  const off=onEsc(shut);
+  function shut(){ov.classList.add('hidden');off();AU.no();}
+}
 /* ★ ESC = 返回上一步 */
 function onEsc(fn){
   const h=e=>{if(e.key==='Escape'){e.preventDefault();window.removeEventListener('keydown',h);fn();}};
@@ -2640,6 +2841,7 @@ function onEsc(fn){
 }
 window.addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
+  if(!$('#detailOv').classList.contains('hidden'))return; // 详情页自行处理ESC
   if($('#battle').classList.contains('on')){
     if($('#logOv').classList.contains('on'))$('#logOv').classList.remove('on');
     return; // 战斗内的选招/选人/背包浮层由各自的 onEsc 处理
