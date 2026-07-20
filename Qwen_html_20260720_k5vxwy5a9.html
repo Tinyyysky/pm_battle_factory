@@ -146,6 +146,87 @@ button:disabled{opacity:.4;cursor:not-allowed}
   background:radial-gradient(ellipse at 50% 0%, rgba(255,60,60,.55), rgba(120,10,40,.35) 55%, transparent 80%),
   repeating-linear-gradient(75deg, rgba(255,120,120,.12) 0 14px, transparent 14px 34px);
   animation:stormShift 3s linear infinite}
+  /* ============ 天气 & 场地氛围 ============ */
+#atmo{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+#atmo>div{position:absolute;inset:0;opacity:0;transition:opacity .8s}
+/* --- 天空底色随天气切换 --- */
+#bscene.wx-sun{background:linear-gradient(180deg,#5ec0ff 0%,#cdefff 42%,#b8e0a0 43%,#7cc47f 68%,#57a866 100%)}
+#bscene.wx-rain{background:linear-gradient(180deg,#37466b 0%,#66799e 42%,#6f9a7c 43%,#4a7a5e 68%,#335c47 100%)}
+#bscene.wx-sand{background:linear-gradient(180deg,#c09552 0%,#e0c088 42%,#b8a070 43%,#8f7a50 68%,#6a5838 100%)}
+#bscene.wx-hail{background:linear-gradient(180deg,#93aecf 0%,#dceaf8 42%,#c4d6cd 43%,#96aca4 68%,#74908b 100%)}
+/* --- 太阳状态 --- */
+#bscene .bsun{transition:opacity .8s,filter .8s,box-shadow .8s}
+#bscene.wx-sun .bsun{box-shadow:0 0 90px 34px rgba(255,224,110,.9)}
+#bscene.wx-rain .bsun,#bscene.wx-sand .bsun{opacity:.12;filter:grayscale(.7)}
+#bscene.wx-hail .bsun{background:radial-gradient(circle at 35% 35%,#fff,#dceaff 60%,#a8c8e8);box-shadow:0 0 50px 14px rgba(220,235,255,.6)}
+#bscene.wx-rain .bcloud{background:rgba(84,94,116,.9)}
+#bscene.wx-rain .bcloud::before{background:rgba(84,94,116,.9)}
+/* --- 晴天光轮 --- */
+.atmo-sunray{transform-origin:12% 10%;
+  background:radial-gradient(circle at 12% 10%,rgba(255,242,170,.5),transparent 40%),
+  repeating-conic-gradient(from 0deg at 12% 10%,rgba(255,236,150,.14) 0deg 5deg,transparent 5deg 14deg)}
+#bscene.wx-sun .atmo-sunray{opacity:1;animation:raySpin 46s linear infinite}
+@keyframes raySpin{to{transform:rotate(360deg)}}
+/* --- 雨幕 --- */
+.atmo-rain{background:repeating-linear-gradient(78deg,transparent 0 9px,rgba(185,215,255,.32) 9px 11px,transparent 11px 22px)}
+#bscene.wx-rain .atmo-rain{opacity:1;animation:rainFall .45s linear infinite}
+@keyframes rainFall{from{background-position:0 0}to{background-position:-52px 170px}}
+/* --- 飞雪 --- */
+.atmo-snow{background-image:
+  radial-gradient(3px 3px at 20% 10%,#fff 50%,transparent 51%),
+  radial-gradient(2px 2px at 60% 30%,#eaf6ff 50%,transparent 51%),
+  radial-gradient(3px 3px at 82% 58%,#fff 50%,transparent 51%),
+  radial-gradient(2px 2px at 35% 76%,#eaf6ff 50%,transparent 51%),
+  radial-gradient(2px 2px at 92% 16%,#fff 50%,transparent 51%);
+  background-size:260px 260px}
+#bscene.wx-hail .atmo-snow{opacity:.9;animation:snowFall 3.2s linear infinite}
+@keyframes snowFall{from{background-position:0 0}to{background-position:-42px 260px}}
+/* --- 沙暴 --- */
+.atmo-sand{background:
+  linear-gradient(180deg,rgba(214,178,110,.25),rgba(178,138,78,.42)),
+  repeating-linear-gradient(84deg,transparent 0 26px,rgba(232,202,142,.42) 26px 30px,transparent 30px 58px)}
+#bscene.wx-sand .atmo-sand{opacity:1;animation:sandBlow .6s linear infinite}
+@keyframes sandBlow{from{background-position:0 0,0 0}to{background-position:0 0,-224px 10px}}
+/* --- 场地：地面能量光晕 --- */
+#bscene.tr-electric .atmo-terr{opacity:1;background:linear-gradient(0deg,rgba(255,220,60,.5),rgba(255,220,60,.12) 45%,transparent 72%)}
+#bscene.tr-grassy .atmo-terr{opacity:1;background:linear-gradient(0deg,rgba(90,225,120,.5),rgba(90,225,120,.12) 45%,transparent 72%)}
+#bscene.tr-psychic .atmo-terr{opacity:1;background:linear-gradient(0deg,rgba(232,110,222,.45),rgba(232,110,222,.12) 45%,transparent 72%);animation:psychPulse 2.4s ease-in-out infinite}
+@keyframes psychPulse{50%{opacity:.5}}
+#bscene.tr-misty .atmo-terr{opacity:1;background:linear-gradient(0deg,rgba(255,150,200,.5),rgba(255,150,200,.15) 50%,transparent 76%)}
+/* --- 场地：电火花 --- */
+.atmo-spark{background:repeating-linear-gradient(115deg,transparent 0 42px,rgba(255,242,130,.75) 42px 44px,transparent 44px 96px);mix-blend-mode:screen}
+#bscene.tr-electric .atmo-spark{animation:sparkFlick .8s steps(2) infinite}
+@keyframes sparkFlick{0%{opacity:.12}50%{opacity:.85}100%{opacity:.18}}
+/* --- 场地：青草光尘（上升） --- */
+#bscene.tr-grassy .atmo-snow{opacity:.85;filter:hue-rotate(72deg) saturate(2.2);animation:moteRise 4.6s linear infinite}
+@keyframes moteRise{from{background-position:0 0}to{background-position:34px -260px}}
+/* --- 场地：薄雾漂移 --- */
+.atmo-mist{filter:blur(7px);background:
+  radial-gradient(42% 30% at 20% 82%,rgba(255,190,225,.55),transparent 70%),
+  radial-gradient(36% 26% at 72% 88%,rgba(255,170,215,.5),transparent 70%),
+  radial-gradient(46% 30% at 45% 76%,rgba(255,205,232,.45),transparent 70%)}
+#bscene.tr-misty .atmo-mist{opacity:1;animation:mistDrift 6s ease-in-out infinite alternate}
+@keyframes mistDrift{from{transform:translateX(-20px)}to{transform:translateX(20px)}}
+/* ============ 濒死瞬间演出 ============ */
+#koFlash{position:absolute;inset:0;z-index:9;pointer-events:none;opacity:0;
+  background:radial-gradient(circle at 50% 45%,#fff 0%,rgba(255,90,90,.85) 45%,rgba(255,30,30,.35) 100%)}
+#koFlash.on{animation:koFlashA .5s ease-out}
+@keyframes koFlashA{0%{opacity:0}14%{opacity:.95}100%{opacity:0}}
+#bscene.shake{animation:sceneShake .45s}
+@keyframes sceneShake{0%,100%{transform:translate(0,0)}15%{transform:translate(-8px,4px)}30%{transform:translate(7px,-5px)}45%{transform:translate(-5px,3px)}60%{transform:translate(4px,-2px)}78%{transform:translate(-2px,1px)}}
+.psprite.ko{animation:koFall .72s cubic-bezier(.45,0,.85,.35) forwards!important}
+@keyframes koFall{
+  0%{transform:translateY(0) rotate(0);opacity:1;filter:brightness(1)}
+  10%{filter:brightness(3.6)}
+  22%{filter:brightness(.55)}
+  34%{filter:brightness(2.8)}
+  46%{filter:brightness(1)}
+  100%{transform:translateY(115px) rotate(560deg);opacity:0;filter:brightness(.75)}
+}
+.kostar{position:absolute;color:#ffd93b;font-size:20px;z-index:9;pointer-events:none;
+  text-shadow:0 0 8px #fff,0 0 3px #b8860b;animation:starBurst 1s ease-out forwards}
+@keyframes starBurst{0%{transform:translate(0,0) scale(.3) rotate(0);opacity:1}
+  100%{transform:translate(var(--dx,24px),-64px) scale(1.35) rotate(200deg);opacity:0}}
 #bscene.dyna #dynastorm{opacity:1}
 @keyframes stormShift{to{background-position:0 0, 200px 0}}
 .plat{position:absolute;border-radius:50%;border:4px solid rgba(30,60,35,.35)}
@@ -495,7 +576,17 @@ button:disabled{opacity:.4;cursor:not-allowed}
       <div class="bcloud bc1"></div><div class="bcloud bc2"></div>
       <div class="hill h1"></div><div class="hill h2"></div>
       <div id="dynastorm"></div>
-            <div id="wxchip"></div>
+      <div id="atmo">
+        <div class="atmo-sunray"></div>
+        <div class="atmo-rain"></div>
+        <div class="atmo-snow"></div>
+        <div class="atmo-sand"></div>
+        <div class="atmo-terr"></div>
+        <div class="atmo-mist"></div>
+        <div class="atmo-spark"></div>
+      </div>
+      <div id="koFlash"></div>
+      <div id="wxchip"></div>
       <button id="logBtn">📋 记录 <span class="px" style="font-size:7px;color:#9fe8ff" id="logTurnN">回合1</span></button>
       <div id="logOv">
         <div id="logHead">
@@ -1214,6 +1305,10 @@ const BUI={
     if(E){ $('#ecard').innerHTML=this.cardHTML(E,'e',b); }
     if(Pm){ $('#pcard').innerHTML=this.cardHTML(Pm,'p',b); }
     this.sprites(b);
+    /* ★ 场景氛围随天气/场地实时切换（0.8s 渐隐渐显） */
+    this.scene.classList.remove('wx-sun','wx-rain','wx-sand','wx-hail','tr-electric','tr-grassy','tr-psychic','tr-misty');
+    if(b.wx)this.scene.classList.add('wx-'+b.wx);
+    if(b.terrain)this.scene.classList.add('tr-'+b.terrain);
     // 天气 / 场地 / 戏法空间实时指示
     const wx=$('#wxchip');
     const chips=[];
@@ -1263,6 +1358,30 @@ const BUI={
   dmgPop(side,txt,color){const d=el('div','dmgpop',txt);d.style.color=color||'#fff';
     if(side==='e'){d.style.top='120px';d.style.right='180px';}else{d.style.bottom='230px';d.style.left='160px';}
     $('#fxlayer').appendChild(d);setTimeout(()=>d.remove(),950);},
+      koFx(side,spr){
+    AU.faint();
+    /* 白红闪屏 */
+    const fl=$('#koFlash');fl.classList.remove('on');void fl.offsetWidth;fl.classList.add('on');
+    /* 场景震动 */
+    const sc=$('#bscene');sc.classList.remove('shake');void sc.offsetWidth;sc.classList.add('shake');
+    setTimeout(()=>sc.classList.remove('shake'),500);
+    /* 金星迸溅 */
+    for(let i=0;i<7;i++){
+      const s=el('div','kostar','✦');
+      const x=side==='e'?rnd(150,310):rnd(100,270), y=side==='e'?rnd(90,210):rnd(250,390);
+      if(side==='e')s.style.right=x+'px';else s.style.left=x+'px';
+      s.style.top=y+'px';
+      s.style.setProperty('--dx',rnd(-46,46)+'px');
+      s.style.animationDelay=(i*0.055)+'s';
+      $('#fxlayer').appendChild(s);setTimeout(()=>s.remove(),1300);
+    }
+    /* 旋转坠落（极巨化体型先还原，太晶装饰收起） */
+    spr.classList.remove('dyn');
+    $('#'+(side==='e'?'etera':'ptera')).classList.add('hidden');
+    spr.classList.add('ko');
+    setTimeout(()=>{AU.noise(.14,.28,0,260);},600); /* 落地闷响 */
+    setTimeout(()=>{spr.classList.remove('ko');spr.classList.add('faint');},740);
+  },
   burst(side){const d=el('div','megaburst');if(side==='e'){d.style.top='60px';d.style.right='100px';}else{d.style.bottom='120px';d.style.left='60px';}$('#fxlayer').appendChild(d);setTimeout(()=>d.remove(),850);},
   sparkle(side){for(let i=0;i<8;i++){const s=el('div','sparkle','◆');
       const x=side==='e'?rnd(120,320):rnd(80,300), y=side==='e'?rnd(80,220):rnd(240,420);
@@ -2078,11 +2197,16 @@ class Battle{
   /* ---------- 击倒 ---------- */
   async handleKO(winSide,winner,loser){
     loser.fainted=true;loser.hp=0;
-    // 同命
+    const lSide=this.sideOf(loser);
+    // 同命（双倒各自播放演出）
     if(loser.vol.destiny&&winner&&winner.hp>0){winner.vol.destiny=false;winner.hp=0;winner.fainted=true;
-      await say(`${loser.name} 的同命发动了！${winner.name} 也跟着倒下了！`);}
-    const lspr=winSide==='p'?BUI.espr:BUI.pspr;
-    lspr.classList.add('faint');AU.faint();
+      await say(`${loser.name} 的同命发动了！${winner.name} 也跟着倒下了！`);
+      const wSide=this.sideOf(winner);
+      BUI.koFx(wSide,wSide==='p'?BUI.pspr:BUI.espr);
+    }
+    /* ★ 濒死演出：闪屏+震动+旋转坠落+金星 */
+    BUI.koFx(lSide,lSide==='p'?BUI.pspr:BUI.espr);
+    await sleep(760);
     await say(`${loser.name} 倒下了！`);
     // 自信过剩 / 异兽提升
     if(winner&&winner.alive()){
