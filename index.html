@@ -1572,22 +1572,26 @@ const BUI={
     spr.classList.toggle('shiny',m.shiny);
   },
   /* ★ 出场动画：投球→弹跳→爆开→实体化+星屑；野生宝可梦直接滑入 */
-  async entryAnim(side,m,isWild){
-    const layer=$('#fxlayer');
-    const spr=side==='p'?this.pspr:this.espr;
-    this.loadSprite(side,m);
-    spr.classList.remove('faint','dyn');
-    if(isWild){
-      spr.style.opacity=1;
-      spr.classList.add('wildIn');
-      AU.ball();
-      await sleep(720);
-      spr.classList.remove('wildIn');
-      return;
-    }
-    /* 先隐藏宝可梦，投球 */
-    spr.style.opacity=0;
-    const x=190, y=side==='p'?150:268;
+async entryAnim(side,m,isWild){
+const layer=$('#fxlayer');
+const spr=side==='p'?this.pspr:this.espr;
+/* ★ 先彻底隐藏立绘并禁用过渡，杜绝投球/滑入前的渐隐闪现 */
+spr.style.transition='none';
+spr.style.opacity=0;
+void spr.offsetWidth;            // 强制重排，让"隐藏"立即生效，不被过渡动画接管
+this.loadSprite(side,m);
+spr.classList.remove('faint','dyn');
+if(isWild){
+spr.style.transition='';
+spr.style.opacity=1;
+spr.classList.add('wildIn');
+AU.ball();
+await sleep(720);
+spr.classList.remove('wildIn');
+return;
+}
+spr.style.transition='';         // 恢复过渡（后续显隐由出场动画接管）
+const x=190, y=side==='p'?150:268;
     const ball=el('div','entryBall '+(side==='p'?'arcP':'arcE'));
     if(side==='p'){ball.style.left=x+'px';ball.style.bottom=y+'px';}
     else{ball.style.right=x+'px';ball.style.top=y+'px';}
