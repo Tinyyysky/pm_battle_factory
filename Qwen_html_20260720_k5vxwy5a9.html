@@ -115,6 +115,12 @@ button:disabled{opacity:.4;cursor:not-allowed}
 #dexFilters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
 #dexFilters input,#dexFilters select{border:2px solid var(--ink);border-radius:8px;padding:6px 10px;font-family:inherit;background:#fff;font-size:13px}
 #dexGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+#itemGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.itemCard{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:14px;position:relative;transition:transform .12s, box-shadow .12s}
+.itemCard:hover{transform:translateY(-4px);box-shadow:0 6px 0 rgba(20,16,40,.3)}
+.icName{font-family:'ZCOOL KuaiLe';font-size:19px;margin-bottom:8px;padding-right:76px;line-height:1.2}
+.icCat{position:absolute;top:12px;right:12px;color:#fff;font-size:10px;font-weight:900;padding:2px 9px;border-radius:12px;border:2px solid rgba(0,0,0,.3);letter-spacing:1px}
+.icDesc{font-size:12px;color:#555;line-height:1.7;font-weight:700}
 .dexCell{background:#fff;border:2px solid var(--ink);border-radius:10px;padding:6px 4px;text-align:center;cursor:pointer;
   transition:transform .1s, box-shadow .1s;position:relative}
 .dexCell:hover{transform:translateY(-4px);box-shadow:0 6px 0 rgba(20,16,40,.3)}
@@ -602,6 +608,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
         <button class="menuItem" id="mFactory"><span class="ball"></span>对战工厂<small>绿宝石规则</small></button>
         <button class="menuItem" id="mFree"><span class="ball"></span>自由对战<small>自选队伍</small></button>
         <button class="menuItem" id="mDex"><span class="ball"></span>宝可梦图鉴<small id="dexCount"></small></button>
+<button class="menuItem" id="mItemDex"><span class="ball"></span>道具图鉴<small id="itemCount"></small></button>
         <button class="menuItem" id="mSound"><span class="ball"></span>游戏设置<small>音效/画面</small></button>
       </div>
     </div>
@@ -624,7 +631,14 @@ button:disabled{opacity:.4;cursor:not-allowed}
     </div>
   </div>
 
-  <!-- ======= FREE ======= -->
+    <!-- ======= ITEMDEX ======= -->
+  <div id="itemdex" class="screen">
+    <div class="scrHead"><h2>道具图鉴</h2><span class="px" style="font-size:9px;color:#ffd93b" id="itemTotal"></span><div class="spacer"></div><button class="btn small" data-back>返回</button></div>
+    <div class="scrBody">
+      <div id="dexFilters"><input id="itemSearch" placeholder="搜索道具名称…"></div>
+      <div id="itemGrid"></div>
+    </div>
+  </div>
   <div id="free" class="screen">
     <div class="scrHead"><h2>自由对战</h2><div class="spacer"></div><button class="btn small" data-back>返回</button></div>
     <div class="scrBody"><div id="freeWrap">
@@ -669,11 +683,11 @@ button:disabled{opacity:.4;cursor:not-allowed}
         <div style="margin-top:10px;font-size:12px;color:#555;font-weight:700">历史最佳：<span id="facBest" class="px" style="font-size:9px">0 连胜</span></div>
       </div>
       <div class="facCol" id="facMid"></div>
-      <div class="facCol panel" style="height:fit-content">
-        <div style="font-weight:900;color:#777;text-align:center">我的租借队伍</div>
-        <div id="facParty" style="flex-direction:column;margin-top:10px"></div>
-        <button class="btn blue" id="facStart" style="width:100%;margin-top:12px">开始匹配</button>
-      </div>
+<div class="facCol panel" style="height:fit-content">
+<div style="font-weight:900;color:#777;text-align:center">我的租借队伍</div>
+<button class="btn blue" id="facStart" style="width:100%;margin-top:12px">开始匹配</button>
+<div id="facParty" style="flex-direction:column;margin-top:10px"></div>
+</div>
     </div></div>
   </div>
 
@@ -1446,6 +1460,7 @@ class P{
     this.st.spa=Math.floor((c(b[3])+(ev.spa||0))*nm('spa'));
     this.st.spd=Math.floor((c(b[4])+(ev.spd||0))*nm('spd'));
     this.st.spe=Math.floor((c(b[5])+(ev.spe||0))*nm('spe'));
+    this.baseMax=mhp;   // ★ 未翻倍的原始最大HP：极巨化时被动百分比扣血/回血按此计算
     this.maxhp=this.dyn?mhp*2:mhp;
   }
   hpPct(){return this.hp/this.maxhp;}
@@ -2336,7 +2351,7 @@ class Battle{
       BUI.dmgPop(side,`-${rec}`,'#ff9d8a');
     }
     if(mon.item==='lifeorb'&&totalDmg>0&&!mon.has('magicguard')&&!(mon.has('sheerforce')&&useMv.sec)&&!mon.fainted){
-      const lo=Math.max(1,Math.floor(mon.maxhp/10));
+      const lo=Math.max(1,Math.floor(mon.baseMax/10));   // ★ 按未翻倍HP计算
       mon.hp=Math.max(0,mon.hp-lo);
       await say('生命宝珠消耗了HP…');
       BUI.dmgPop(side,`-${lo}`,'#ff9d8a');
@@ -2386,7 +2401,7 @@ class Battle{
       await say(`${foe.name} 的画皮抵挡了攻击！`);
       BUI.dmgPop(side==='p'?'e':'p','抵挡','#ffd93b');
       if(!foe.has('magicguard')){
-        const rec=Math.max(1,Math.floor(foe.maxhp/8));
+        const rec=Math.max(1,Math.floor(foe.baseMax/8));   // ★ 按未翻倍HP计算
         foe.hp=Math.max(0,foe.hp-rec);
         await say(`${foe.name} 因画皮破损受到了伤害！`);
         BUI.dmgPop(side==='p'?'e':'p',`-${rec}`,'#ff9d8a');
@@ -2422,7 +2437,7 @@ class Battle{
     }
     // 接触副作用
     if(mv.ct&&!mon.has('magicguard')){
-      if(foe.has('ironbarbs')||foe.has('roughskin')){await this.directDmg(mon,Math.max(1,Math.floor(mon.maxhp/8)),side,`${foe.name} 的${AB[foe.ability].n}伤害了 ${mon.name}！`);}
+      if(foe.has('ironbarbs')||foe.has('roughskin')){await this.directDmg(mon,Math.max(1,Math.floor(mon.baseMax/8)),side,`${foe.name} 的${AB[foe.ability].n}伤害了 ${mon.name}！`);}
       if(foe.has('effectspore')&&Math.random()<.3&&!mon.status){await this.inflictStatus(mon,pick(['psn','par','sleep']),foe);} }
     // 弱点保险
     if(r.eff>1&&foe.item==='weaknesspolicy'&&!foe.fainted){foe.item=null;await this.changeStat(foe,'atk',2,foe);await this.changeStat(foe,'spa',2,foe);await say(`${foe.name} 的弱点保险发动了！`);}
@@ -2780,42 +2795,43 @@ class Battle{
   /* ---------- 回合结束 ---------- */
   async endTurn(){
     const order=[this.P(),this.E()].filter(m=>m&&m.alive());
-    for(const m of order){
+        for(const m of order){
       const side=this.sideOf(m);
+      const B=m.baseMax;   // ★ 百分比扣血/回血按未翻倍HP计算（回血上限仍用m.maxhp）
       // 天气伤害
       if(this.wx==='sand'&&!['rock','ground','steel'].includes(m.types[0])&&!['rock','ground','steel'].includes(m.types[1]||'')){
-        if(!m.has('sandveil')&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(m.maxhp/16));await say(`沙暴袭击了 ${m.name}！`);} }
+        if(!m.has('sandveil')&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(B/16));await say(`沙暴袭击了 ${m.name}！`);} }
       if(this.wx==='hail'&&!m.types.includes('ice')){
-        if(!m.has('snowcloak')&&!m.has('magicguard')&&!m.has('overcoatx')){m.hp=Math.max(0,m.hp-Math.floor(m.maxhp/16));await say(`冰雹袭击了 ${m.name}！`);} }
-      if(m.has('solarpower')&&this.wx==='sun'&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(m.maxhp/8));}
-      if(m.has('raindish')&&this.wx==='rain'){m.hp=Math.min(m.maxhp,m.hp+Math.floor(m.maxhp/16));}
-      // ★ 青草场地回复
-      if(this.terrain==='grassy'&&this.grounded(m)&&m.hp>0){m.hp=Math.min(m.maxhp,m.hp+Math.floor(m.maxhp/16));await say(`${m.name} 在青草场地上回复了HP！`);}
+        if(!m.has('snowcloak')&&!m.has('magicguard')&&!m.has('overcoatx')){m.hp=Math.max(0,m.hp-Math.floor(B/16));await say(`冰雹袭击了 ${m.name}！`);} }
+      if(m.has('solarpower')&&this.wx==='sun'&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(B/8));}
+      if(m.has('raindish')&&this.wx==='rain'){m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));}
+      // 青草场地回复
+      if(this.terrain==='grassy'&&this.grounded(m)&&m.hp>0){m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));await say(`${m.name} 在青草场地上回复了HP！`);}
       // 寄生种子
       if(m.vol.seed&&m.hp>0){const src=m.vol.seed;
-        if(src.alive()&&this.foeOf(src)===m){const d=Math.max(1,Math.floor(m.maxhp/8));
+        if(src.alive()&&this.foeOf(src)===m){const d=Math.max(1,Math.floor(B/8));
           m.hp=Math.max(0,m.hp-d);src.hp=Math.min(src.maxhp,src.hp+d);await say(`${m.name} 被寄生种子吸取了HP！`);} }
       // 盐腌
-      if(m.vol.salt&&m.hp>0){const d=Math.max(1,Math.floor(m.maxhp/(['water','steel'].includes(m.types[0])?4:8)));
+      if(m.vol.salt&&m.hp>0){const d=Math.max(1,Math.floor(B/(['water','steel'].includes(m.types[0])?4:8)));
         m.hp=Math.max(0,m.hp-d);await say(`盐腌正在侵蚀 ${m.name}！`);}
       // 异常状态
-      if(m.status==='burn'){m.hp=Math.max(0,m.hp-Math.floor(m.maxhp/16));await say(`${m.name} 被灼伤伤害了！`);}
-      if(m.status==='psn'){m.hp=Math.max(0,m.hp-Math.floor(m.maxhp/8));await say(`${m.name} 受到了毒素伤害！`);}
-      if(m.status==='tox'){m.toxicN++;m.hp=Math.max(0,m.hp-Math.floor(m.maxhp*m.toxicN/16));await say(`${m.name} 受到了剧毒伤害！`);}
-      if(m.has('poisonheal')&&(m.status==='psn'||m.status==='tox')){m.hp=Math.min(m.maxhp,m.hp+Math.floor(m.maxhp/8));}
+      if(m.status==='burn'){m.hp=Math.max(0,m.hp-Math.floor(B/16));await say(`${m.name} 被灼伤伤害了！`);}
+      if(m.status==='psn'){m.hp=Math.max(0,m.hp-Math.floor(B/8));await say(`${m.name} 受到了毒素伤害！`);}
+      if(m.status==='tox'){m.toxicN++;m.hp=Math.max(0,m.hp-Math.floor(B*m.toxicN/16));await say(`${m.name} 受到了剧毒伤害！`);}
+      if(m.has('poisonheal')&&(m.status==='psn'||m.status==='tox')){m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/8));}
       // 道具回复
-      if(m.item==='leftovers')m.hp=Math.min(m.maxhp,m.hp+Math.floor(m.maxhp/16));
-      if(m.item==='blacksludge'){ if(m.types.includes('poison'))m.hp=Math.min(m.maxhp,m.hp+Math.floor(m.maxhp/16));
-        else if(!m.has('magicguard'))m.hp=Math.max(0,m.hp-Math.floor(m.maxhp/8)); }
+      if(m.item==='leftovers')m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));
+      if(m.item==='blacksludge'){ if(m.types.includes('poison'))m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));
+        else if(!m.has('magicguard'))m.hp=Math.max(0,m.hp-Math.floor(B/8)); }
       // 梦魇
       const foe=this.foeOf(m);
       if(m.has('baddreams')&&foe&&foe.alive()&&foe.status==='sleep'&&!foe.has('magicguard')){
-        foe.hp=Math.max(0,foe.hp-Math.floor(foe.maxhp/8));await say(`${foe.name} 被梦魇折磨着！`);}
+        foe.hp=Math.max(0,foe.hp-Math.floor(foe.baseMax/8));await say(`${foe.name} 被梦魇折磨着！`);}
       // 蜕皮
       if(m.has('shedskin')&&m.status&&Math.random()<1/3){m.status=null;m.sleepT=0;m.toxicN=0;await say(`${m.name} 的蜕皮发动了，状态恢复了！`);}
       // 加速
       if(m.has('speedboost'))await this.changeStat(m,'spe',1,m);
-      // 极巨化倒计时（★解除时HP按比例折算，而非截断回满）
+      // 极巨化倒计时
       if(m.dyn){m.dynT--;if(m.dynT<=0){
         const pct=m.hp/m.maxhp;
         m.dyn=false;m.recalc();
@@ -3285,6 +3301,12 @@ const STORY={
    12. 图鉴 / 自由对战 / 标题
 ============================================================ */
 function statBar(v){return `<div class="statRow"><span style="width:34px;color:#888;font-weight:900">${''}</span></div>`;}
+/* 图鉴预览：50级、中性性格、无对战点数，用于展示完整详情 */
+function previewMon(sp){
+  const p=new P(sp.id,50,{iv:25,ev:{hp:0,atk:0,def:0,spa:0,spd:0,spe:0},nature:NATURES[0],moves:sp.mv.slice(0,4)});
+  p.fullPool=sp.mv;   // ★ 完整招式池，供图鉴详情分页展示
+  return p;
+}
 function dexDetail(sp){
   const d=$('#dexDetail');
   const img=new Image();setSprite(img,sp.id);img.style.width='96px';img.style.height='96px';img.style.objectFit='contain';img.style.display='block';img.style.margin='0 auto';
@@ -3297,7 +3319,12 @@ function dexDetail(sp){
     <div style="font-size:11px;color:#888;font-weight:700">第 ${genOf(sp.id)} 世代 · 总和 ${bst(sp)}${sp.leg?' · 传说':''}${MEGA[sp.id]?' · 可Mega':''}${GMAXLIST.has(sp.id)?' · 可极巨':''}</div></div>
     ${sp.s.map((v,i)=>`<div class="statRow"><span style="width:30px;font-weight:900;color:#777;font-size:11px">${names[i]}</span><span class="px" style="font-size:8px;width:26px;text-align:right">${v}</span><div class="bar"><div class="fill" style="width:${Math.min(100,v/1.8)}%;background:${v>=100?'#3ecf6c':v>=70?'#8bc34a':v>=45?'#f2c230':'#ef4444'}"></div></div></div>`).join('')}
     <div style="margin-top:8px;font-size:12px"><b>特性：</b>${sp.ab.map(a=>AB[a]?.n||a).join(' / ')}</div>
-    <div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k=>`<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p?' '+MV[k].p:''}</span>`).join('')}</div>`);
+        <div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k=>`<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p?' '+MV[k].p:''}</span>`).join('')}</div>`);
+  /* ★ 点开完整详情（全屏） */
+  const detBtn=el('button','btn blue','📋 完整详情');
+  detBtn.style.cssText='width:100%;margin-top:12px';
+  detBtn.onclick=()=>{AU.ok();showDetail(previewMon(sp),null);};
+  d.appendChild(detBtn);
 }
 function buildDex(){
   $('#dexTotal').textContent='收录 '+SP.length+' 种 · 覆盖第1~9世代';
@@ -3361,12 +3388,37 @@ function buildFree(){
   };
   render();renderTeam();
 }
+/* ============ 道具图鉴 ============ */
+function itemCat(k){
+  if(['pokeball','greatball','ultraball'].includes(k))return {n:'精灵球',c:'#e3350d'};
+  if(['potion','superpotion','hyperpotion','maxpotion','fullrestore','revive'].includes(k))return {n:'回复',c:'#3ecf6c'};
+  if(IT[k].t)return {n:'属性增强',c:'#e0912b'};
+  return {n:'对战道具',c:'#2a6dd4'};
+}
+function buildItemDex(){
+  $('#itemTotal').textContent='收录 '+Object.keys(IT).length+' 种';
+  const grid=$('#itemGrid'),search=$('#itemSearch');
+  const render=()=>{
+    const q=(search.value||'').trim();
+    grid.innerHTML='';
+    Object.values(IT).filter(it=>!q||it.n.includes(q)||it.k.includes(q)).forEach(it=>{
+      const cat=itemCat(it.k);
+      const c=el('div','itemCard');
+      c.innerHTML=`<div class="icName">${it.n}</div><span class="icCat" style="background:${cat.c}">${cat.n}</span><div class="icDesc">${it.d}</div>`;
+      grid.appendChild(c);
+    });
+  };
+  search.addEventListener('input',render);
+  render();
+}
 /* 标题与导航 */
 $('#dexCount').textContent=SP.length+' 种';
+$('#itemCount').textContent=Object.keys(IT).length+' 种';
 $('#mStory').onclick=async()=>{AU.ok();await fadeTo('#story');STORY.run();};
 $('#mFactory').onclick=async()=>{AU.ok();await fadeTo('#factory');FAC.lobby();};
 $('#mFree').onclick=async()=>{AU.ok();buildFree();await fadeTo('#free');};
 $('#mDex').onclick=async()=>{AU.ok();buildDex();await fadeTo('#dex');};
+$('#mItemDex').onclick=async()=>{AU.ok();buildItemDex();await fadeTo('#itemdex');};
 $('#mSound').onclick=()=>{AU.ok();openSettings();};
 $$('[data-back]').forEach(b=>b.onclick=async()=>{AU.no();await fadeTo('#title');AU.playMusic('title');});
 $('#storyPartyBtn').onclick=()=>{
@@ -3557,15 +3609,39 @@ function showDetail(m,battle){
   left.insertAdjacentHTML('beforeend',statHtml);
   card.appendChild(left);
   const right=el('div','dRight');
-  right.insertAdjacentHTML('beforeend','<h3>持有招式</h3>');
-  m.moves.forEach(mv=>{
-    const d=MV[mv.k];
-    const c=el('div','dMove');c.style.borderLeftColor=TCOL[d.t];
-    c.innerHTML=`<div class="dmTop">${tyBadge(d.t)}<b>${d.n}</b><span class="dmCat">${d.c==='P'?'物理':d.c==='S'?'特殊':'变化'}</span></div>
-      <div class="dmNums">威力 ${d.p??'—'} · 命中 ${d.a??'—'} · PP ${mv.pp}/${mv.maxpp}${d.pri?` · 先制 ${d.pri>0?'+':''}${d.pri}`:''}</div>
-      <div class="dmDesc">${moveDesc(mv.k)}</div>`;
-    right.appendChild(c);
-  });
+  /* ★ 招式列表：图鉴预览展示完整招式池（分页），战斗中展示4个持有招式 */
+  const moveList=m.fullPool?m.fullPool.map(k=>({k,pp:MV[k].pp,maxpp:MV[k].pp})):m.moves;
+  const PER=4;
+  let page=0;
+  const totalPages=Math.max(1,Math.ceil(moveList.length/PER));
+  right.insertAdjacentHTML('beforeend',`<h3>${m.fullPool?`招式池（全部 ${moveList.length} 个）`:'持有招式'}</h3>`);
+  const moveWrap=el('div','');right.appendChild(moveWrap);
+  const pager=el('div','');pager.style.cssText='display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px';
+  right.appendChild(pager);
+  function renderMoves(){
+    moveWrap.innerHTML='';
+    moveList.slice(page*PER,page*PER+PER).forEach(mv=>{
+      const d=MV[mv.k];
+      const c=el('div','dMove');c.style.borderLeftColor=TCOL[d.t];
+      c.innerHTML=`<div class="dmTop">${tyBadge(d.t)}<b>${d.n}</b><span class="dmCat">${d.c==='P'?'物理':d.c==='S'?'特殊':'变化'}</span></div>
+        <div class="dmNums">威力 ${d.p??'—'} · 命中 ${d.a??'—'} · PP ${mv.pp}/${mv.maxpp}${d.pri?` · 先制 ${d.pri>0?'+':''}${d.pri}`:''}</div>
+        <div class="dmDesc">${moveDesc(mv.k)}</div>`;
+      moveWrap.appendChild(c);
+    });
+    pager.innerHTML='';
+    if(totalPages>1){
+      const prev=el('button','btn tiny','← 上一页');
+      prev.disabled=page<=0;
+      prev.onclick=()=>{if(page>0){page--;AU.cursor();renderMoves();}};
+      const ind=el('span','px',`${page+1} / ${totalPages}`);
+      ind.style.cssText='font-size:9px;color:#888';
+      const next=el('button','btn tiny','下一页 →');
+      next.disabled=page>=totalPages-1;
+      next.onclick=()=>{if(page<totalPages-1){page++;AU.cursor();renderMoves();}};
+      pager.appendChild(prev);pager.appendChild(ind);pager.appendChild(next);
+    }
+  }
+  renderMoves();
   right.insertAdjacentHTML('beforeend',`<div class="dFlavor">特性效果：${AB[m.ability]?.d||'—'}${m.item?'<br>道具效果：'+(IT[m.item]?.d||''):''}</div>`);
   card.appendChild(right);
   ov.appendChild(card);
