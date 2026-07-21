@@ -226,6 +226,21 @@ button:disabled{opacity:.4;cursor:not-allowed}
   100%{transform:translate(var(--dx,24px),-64px) scale(1.35) rotate(200deg);opacity:0}}
 #bscene.dyna #dynastorm{opacity:1}
 @keyframes stormShift{to{background-position:0 0, 200px 0}}
+/* ============ 属性攻击特效 ============ */
+.tfx{position:absolute;z-index:8;pointer-events:none;line-height:1;
+  text-shadow:0 0 8px currentColor,0 0 2px #fff;animation-fill-mode:forwards}
+.tfxring{position:absolute;z-index:8;width:70px;height:70px;border:4px solid #fff;border-radius:50%;
+  pointer-events:none;box-shadow:0 0 16px currentColor,inset 0 0 10px currentColor;animation:fxRing .55s ease-out forwards}
+@keyframes fxBurst{0%{transform:translate(0,0) scale(.4);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.25);opacity:0}}
+@keyframes fxRise{0%{transform:translateY(0) scale(.5);opacity:0}18%{opacity:1}100%{transform:translate(var(--dx),-74px) scale(1.15);opacity:0}}
+@keyframes fxFall{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),64px) rotate(200deg);opacity:0}}
+@keyframes fxBolt{0%,100%{opacity:0}12%,32%,52%{opacity:1;transform:translate(var(--dx),var(--dy)) scale(1.1)}22%,42%{opacity:.15}}
+@keyframes fxSplash{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.4);opacity:0}}
+@keyframes fxBubble{0%{transform:translate(0,0) scale(.5);opacity:.95}100%{transform:translate(var(--dx),-54px) scale(1.25);opacity:0}}
+@keyframes fxGust{0%{transform:translateX(0) scaleX(.6);opacity:0}30%{opacity:.9}100%{transform:translateX(var(--dx)) scaleX(1.4);opacity:0}}
+@keyframes fxRing{0%{transform:scale(.2);opacity:1}100%{transform:scale(2.3);opacity:0}}
+@keyframes fxRock{0%{transform:translate(0,0) rotate(0);opacity:1}50%{transform:translate(calc(var(--dx)*.6),-44px) rotate(120deg)}100%{transform:translate(var(--dx),34px) rotate(260deg);opacity:0}}
+@keyframes fxGhost{0%{transform:translate(0,0) scale(.5);opacity:0;filter:blur(0)}30%{opacity:.9}100%{transform:translate(var(--dx),-50px) scale(1.35);opacity:0;filter:blur(3px)}}
 /* ============ 对战平台（草皮盘+土层环+草簇纹理） ============ */
 .plat{position:absolute;border-radius:50%;z-index:2;
   background:
@@ -326,9 +341,10 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .hpwrap{display:flex;align-items:center;gap:6px;margin-top:5px}
 .hplabel{font-family:'Press Start 2P';font-size:8px;color:#e07b00}
 .hpbar{flex:1;height:12px;border:2px solid var(--ink);border-radius:8px;background:#4a4633;overflow:hidden;position:relative}
-.hpfill{height:100%;background:linear-gradient(180deg,#8df0ae,var(--hp));border-radius:5px;transition:width .7s cubic-bezier(.3,.9,.3,1)}
+.hpfill{height:100%;background:linear-gradient(180deg,#8df0ae,var(--hp));border-radius:5px}
 .hpfill.mid{background:linear-gradient(180deg,#ffe08a,var(--hpmid))}
-.hpfill.low{background:linear-gradient(180deg,#ff9d9d,var(--hplow))}
+.hpfill.low{background:linear-gradient(180deg,#ff9d9d,var(--hplow));animation:hpPulse 1s ease-in-out infinite}
+@keyframes hpPulse{50%{filter:brightness(1.4)}}
 .hpnum{font-family:'Press Start 2P';font-size:10px;text-align:right;margin-top:4px}
 .xpbar{height:6px;background:#3a3728;border-radius:4px;margin-top:5px;overflow:hidden;border:1px solid var(--ink)}
 .xpfill{height:100%;background:linear-gradient(90deg,#5ad0ff,#2a6dd4);width:0;transition:width .8s}
@@ -500,7 +516,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .starterCard img{width:96px;height:96px;object-fit:contain;image-rendering:pixelated}
 .starterCard:hover{background:#fff3c4;transform:translateY(-6px)}
 /* toast */
-#toast{position:absolute;top:14px;left:0;right:0;margin:0 auto;width:max-content;transform:translateY(-60px);z-index:99;background:#26233a;color:#fff;
+#toast{position:absolute;top:1px;left:0;right:0;margin:0 auto;width:max-content;transform:translateY(-60px);z-index:99;background:#26233a;color:#fff;
   padding:8px 20px;border-radius:10px;font-weight:900;transition:transform .35s cubic-bezier(.2,.9,.3,1.3);border:2px solid #fff;pointer-events:none}
 #toast.on{transform:translateY(0)}
 /* fade */
@@ -1427,8 +1443,8 @@ const BUI={
     async refresh(b){
     const E=b.E(),Pm=b.P();
     // enemy card
-    if(E){ $('#ecard').innerHTML=this.cardHTML(E,'e',b); }
-    if(Pm){ $('#pcard').innerHTML=this.cardHTML(Pm,'p',b); }
+    if(E){ $('#ecard').innerHTML=this.cardHTML(E,'e',b); this.animHp('e',E); }
+    if(Pm){ $('#pcard').innerHTML=this.cardHTML(Pm,'p',b); this.animHp('p',Pm); }
     this.sprites(b);
     /* ★ 场景氛围随天气/场地实时切换（受设置开关控制） */
     this.scene.classList.remove('wx-sun','wx-rain','wx-sand','wx-hail','tr-electric','tr-grassy','tr-psychic','tr-misty');
@@ -1470,6 +1486,39 @@ const BUI={
       <div style="margin-top:2px">${types}</div>
       <div class="hpwrap"><span class="hplabel">HP</span><div class="hpbar"><div class="hpfill ${cls}" style="width:${pct}%"></div></div></div>
       ${hpnum}${xp}${pips}${it}${abRow}${stgrow}`;
+  },
+    /* ★ 血条变化动画：rAF驱动，平滑升降 + 实时变色 + 数字滚动 */
+  animHp(side,m){
+    const card=this.card(side);
+    const fill=card.querySelector('.hpfill');
+    if(!fill)return;
+    const numEl=side==='p'?card.querySelector('.hpnum'):null;
+    const target=m.hpPct();
+    if(!this._hp)this._hp={};
+    if(!this._hpRaf)this._hpRaf={};
+    const prev=this._hp[side];
+    /* 新上场的宝可梦从0开始填充（登场动画），同一只则从上次比例平滑过渡 */
+    const from=(prev&&prev.mon===m)?prev.ratio:0;
+    this._hp[side]={mon:m,ratio:target};
+    if(this._hpRaf[side])cancelAnimationFrame(this._hpRaf[side]);
+    const setCls=r=>{fill.classList.remove('mid','low');if(r<=0.2)fill.classList.add('low');else if(r<=0.5)fill.classList.add('mid');};
+    if(Math.abs(from-target)<0.002){fill.style.width=(target*100)+'%';setCls(target);if(numEl)numEl.textContent=`${m.hp} / ${m.maxhp}`;return;}
+    /* 先同步置为起点，避免重建瞬间闪现终点宽度 */
+    fill.style.width=(from*100)+'%';setCls(from);
+    if(numEl)numEl.textContent=`${Math.round(m.maxhp*from)} / ${m.maxhp}`;
+    const dur=Math.min(1200,400+Math.abs(target-from)*900);
+    const t0=performance.now();
+    const step=now=>{
+      const t=Math.min(1,(now-t0)/dur);
+      const ease=1-Math.pow(1-t,3); /* easeOutCubic：快起缓收 */
+      const r=from+(target-from)*ease;
+      fill.style.width=(r*100)+'%';
+      setCls(r);
+      if(numEl)numEl.textContent=`${Math.round(m.maxhp*r)} / ${m.maxhp}`;
+      if(t<1)this._hpRaf[side]=requestAnimationFrame(step);
+      else{fill.style.width=(target*100)+'%';setCls(target);if(numEl)numEl.textContent=`${m.hp} / ${m.maxhp}`;}
+    };
+    this._hpRaf[side]=requestAnimationFrame(step);
   },
   sprites(b){
     const E=b.E(),Pm=b.P();
@@ -1591,6 +1640,74 @@ function renderBattleLog(b){
   });
   list.innerHTML=html;
   if($('#logOv').classList.contains('on'))list.scrollTop=list.scrollHeight;
+}
+/* ============ 属性攻击特效 & 变化招式共用特效 ============ */
+const TYPEVFX={
+  normal:{c:'#d8d8c0',ch:'●',n:7,an:'fxBurst'},
+  fire:{c:'#ff7a2f',ch:'▲',n:9,an:'fxRise'},
+  water:{c:'#4f9df7',ch:'●',n:8,an:'fxSplash'},
+  electric:{c:'#ffe14a',ch:'⚡',n:6,an:'fxBolt'},
+  grass:{c:'#7ac74c',ch:'❧',n:8,an:'fxFall'},
+  ice:{c:'#9fe8f5',ch:'❄',n:8,an:'fxFall'},
+  fighting:{c:'#e05545',ch:'✦',n:7,an:'fxBurst'},
+  poison:{c:'#b56fd8',ch:'●',n:8,an:'fxBubble'},
+  ground:{c:'#c9a94e',ch:'▲',n:7,an:'fxRock'},
+  flying:{c:'#c8b8f0',ch:'〜',n:7,an:'fxGust'},
+  psychic:{c:'#ff7ab8',ch:'◎',n:7,an:'fxBurst'},
+  bug:{c:'#b8d84a',ch:'✦',n:7,an:'fxBurst'},
+  rock:{c:'#b0a060',ch:'■',n:7,an:'fxRock'},
+  ghost:{c:'#9070c8',ch:'◉',n:7,an:'fxGhost'},
+  dragon:{c:'#8060f0',ch:'◆',n:8,an:'fxBurst'},
+  dark:{c:'#8a6058',ch:'●',n:7,an:'fxGhost'},
+  steel:{c:'#c8d0e0',ch:'✦',n:8,an:'fxBurst'},
+  fairy:{c:'#ff9ac8',ch:'✿',n:8,an:'fxFall'},
+};
+function typeVFX(type,side){
+  const cfg=TYPEVFX[type]||TYPEVFX.normal;
+  const layer=$('#fxlayer');
+  /* 属性色冲击环 */
+  const ring=el('div','tfxring');
+  ring.style.color=cfg.c;ring.style.borderColor=cfg.c;
+  if(side==='e'){ring.style.right='180px';ring.style.top='148px';}
+  else{ring.style.left='152px';ring.style.top='252px';}
+  layer.appendChild(ring);setTimeout(()=>ring.remove(),700);
+  /* 粒子 */
+  for(let i=0;i<cfg.n;i++){
+    const p=el('div','tfx',cfg.ch);
+    p.style.color=cfg.c;
+    const bx=side==='e'?rnd(140,300):rnd(90,260);
+    const by=side==='e'?rnd(100,230):rnd(220,370);
+    if(side==='e')p.style.right=bx+'px';else p.style.left=bx+'px';
+    p.style.top=by+'px';
+    p.style.fontSize=rnd(14,26)+'px';
+    p.style.setProperty('--dx',rnd(-56,56)+'px');
+    p.style.setProperty('--dy',rnd(-46,46)+'px');
+    p.style.animation=`${cfg.an} ${rnd(5,9)/10}s ease-out ${i*0.03}s forwards`;
+    layer.appendChild(p);
+    setTimeout(()=>p.remove(),1400);
+  }
+}
+/* 变化招式共用：金色光环 + 上升星屑 */
+function statusVFX(side){
+  const layer=$('#fxlayer');
+  const ring=el('div','tfxring');
+  ring.style.color='#ffe9a8';ring.style.borderColor='#ffe9a8';
+  if(side==='e'){ring.style.right='180px';ring.style.top='148px';}
+  else{ring.style.left='152px';ring.style.top='252px';}
+  layer.appendChild(ring);setTimeout(()=>ring.remove(),700);
+  for(let i=0;i<10;i++){
+    const p=el('div','tfx','✧');
+    p.style.color=i%2?'#ffe9a8':'#ffffff';
+    const bx=side==='e'?rnd(150,290):rnd(100,250);
+    const by=side==='e'?rnd(110,220):rnd(230,360);
+    if(side==='e')p.style.right=bx+'px';else p.style.left=bx+'px';
+    p.style.top=by+'px';
+    p.style.fontSize=rnd(12,22)+'px';
+    p.style.setProperty('--dx',rnd(-30,30)+'px');
+    p.style.animation=`fxBubble ${rnd(6,10)/10}s ease-out ${i*0.05}s forwards`;
+    layer.appendChild(p);
+    setTimeout(()=>p.remove(),1500);
+  }
 }
 /* 剧情对话框 */
 function dlg(speaker,text,spriteId){
@@ -2022,7 +2139,7 @@ class Battle{
     // 保护类
     if(useMv.protect){ const chain=(mon.vol.pchain||0)+1;mon.vol.pchain=chain;
       if(Math.random()>1/chain){mon.vol.protect=false;await say(`${mon.name} 的保护失败了！`);}
-      else{mon.vol.protect=true;mon.vol.ks=useMv.ks;mon.vol.bb=useMv.bb;AU.protect();await say(`${mon.name} 保护了自己！`);}
+      else{mon.vol.protect=true;mon.vol.ks=useMv.ks;mon.vol.bb=useMv.bb;AU.protect();statusVFX(side);await say(`${mon.name} 保护了自己！`);}
       if(useMv.ks&&mon.has('stancechange'))mon.vol.shield=true;
       return; }
     mon.vol.protect=false;mon.vol.pchain=0;
@@ -2142,8 +2259,9 @@ class Battle{
     }
     if(dmg>=foe.hp){ if(foe.item==='focussash'&&foe.hp===foe.maxhp){dmg=foe.hp-1;await say(`${foe.name} 靠气势腰带撑住了！`);}
       else if(foe.has('sturdy')&&foe.hp===foe.maxhp&&!mv.ignAb){dmg=foe.hp-1;await say(`${foe.name} 靠结实撑住了！`);} }
-    // 动画
+    // 动画 + ★属性攻击特效（与受击动画同步）
     const tgtSpr=side==='p'?BUI.espr:BUI.pspr;
+    typeVFX(mv.t, side==='p'?'e':'p');
     await BUI.anim(tgtSpr,'hit',400);
     AU.hit(); if(r.eff>1){AU.superEff();await say('效果绝佳！');} else if(r.eff>0&&r.eff<1){AU.notEff();await say('收效甚微…');}
     foe.hp=Math.max(0,foe.hp-dmg);
@@ -2316,6 +2434,10 @@ class Battle{
     if(e===0&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather&&!corrosionBypass){await say(`对 ${foe.name} 没有效果…`);return;}
     // 命中
     if(mv.a!=null&&Math.random()*100>mv.a*(mon.has('compoundeyes')?1.3:1)){await say(`${mv.n} 没有命中！`);return;}
+    /* ★ 变化招式共用特效：作用于招式目标（减益/异常/场地技→对手，强化/回复→自身） */
+    const mySide=this.sideOf(mon);
+    const onFoe=!!(mv.setSt||mv.setDrop||mv.taunt||mv.leechseed||mv.trick||mv.parting||mv.clearsmog||mv.hazard);
+    statusVFX(onFoe?(mySide==='p'?'e':'p'):mySide);
     const k=mv.k;
     if(mv.weather){await this.setWeather({sun:'sun',rain:'rain'}[mv.weather]||mv.weather,mon);return;}
     if(mv.trickroom){this.trickT=this.trickT>0?0:5;await say(this.trickT?`${mon.name} 扭转了时空！`:'戏法空间解除了！');return;}
