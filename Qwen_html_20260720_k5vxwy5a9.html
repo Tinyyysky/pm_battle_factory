@@ -1317,14 +1317,14 @@ class P{
       if(this.has('guts')&&this.status)v*=1.5;
       if(this.has('solarpower')&&b&&b.wx==='sun')v*=1.5;
       if(this.has('orichalcumpulse')&&b&&b.wx==='sun')v*=1.33;
-      if(this.item==='choiceband')v*=1.5;
+      if(this.item==='choiceband'&&!this.dyn)v*=1.5;
       if(this.vol.qd==='atk')v*=1.3;
       if(b&&b.foeOf(this)&&b.foeOf(this).has('swordofruin')&&!b.foeOf(this).fainted)v*=.75; }
     if(k==='spa'){ if(this.has('solarpower')&&b&&b.wx==='sun')v*=1.5;
       if(this.has('hadronengine'))v*=1.33;
-      if(this.item==='choicespecs')v*=1.5; if(this.vol.qd==='spa')v*=1.3; }
+      if(this.item==='choicespecs'&&!this.dyn)v*=1.5; if(this.vol.qd==='spa')v*=1.3; }
     if(k==='spe'){ if(this.status==='par')v*=.5;
-      if(this.item==='choicescarf')v*=1.5;
+      if(this.item==='choicescarf'&&!this.dyn)v*=1.5;
       if(b){ const w=b.wx;
         if(w==='sun'&&(ab==='chlorophyll'))v*=2;
         if(w==='rain'&&ab==='swiftswim')v*=2;
@@ -1661,7 +1661,7 @@ class Battle{
   }
   pickPlayerForcedMove(){ const m=this.P();
     /* ★ 用道具后仍需行动：尊重讲究锁 */
-    if(m.vol.choiceLock&&m.moves.find(x=>x.k===m.vol.choiceLock&&x.pp>0))return {k:m.vol.choiceLock};
+    if(m.vol.choiceLock&&!m.dyn&&m.moves.find(x=>x.k===m.vol.choiceLock&&x.pp>0))return {k:m.vol.choiceLock};
     return {k:m.moves.find(x=>x.pp>0)?.k||'struggle'}; }
   pickAIMove(){ return {k:this.aiScore().best}; }
   /* ---------- 玩家输入 ---------- */
@@ -1690,7 +1690,7 @@ class Battle{
     $('#menuMain').classList.add('hidden');
     const mm=$('#menuMoves');mm.classList.remove('hidden');
     const locked=m.vol.lock?m.vol.lock.k:null;
-    const choiceLock=['choiceband','choicespecs','choicescarf'].includes(m.item)?m.vol.choiceLock:null;
+    const choiceLock=(['choiceband','choicespecs','choicescarf'].includes(m.item)&&!m.dyn)?m.vol.choiceLock:null;
     let wantMega=false,wantDyn=false,wantTera=false;
     const canMega=this.rules.mega&&!!MEGA[m.id]&&!this.usedForm.p&&!m.mega&&!m.dyn;
     const canDyn=this.rules.dyna&&!this.usedForm.p&&!m.dyn&&!m.mega;
@@ -1722,8 +1722,8 @@ class Battle{
           tag.textContent=`● 极巨化中\n剩余 ${m.dynT} 回合`;
           formCol.appendChild(tag);
         }
-        /* ★ 讲究锁：被锁招式PP耗尽时自动解锁，避免所有按钮禁用导致死锁 */
-        let effChoiceLock=choiceLock;
+        /* ★ 讲究锁：极巨化（已生效或预览中）时解锁；被锁招式PP耗尽时自动解锁防死锁 */
+        let effChoiceLock=wantDyn?null:choiceLock;
         if(effChoiceLock){const lm=m.moves.find(x=>x.k===effChoiceLock);if(!lm||lm.pp<=0){effChoiceLock=null;m.vol.choiceLock=null;}}
         if(effChoiceLock){
           const lk=el('div','');lk.id='formHint';lk.style.color='#ffb35c';
@@ -1936,7 +1936,7 @@ class Battle{
     // 突击背心
     if(mon.item==='assaultvest'&&useMv.c==='X'){await say('突击背心挡住了变化招式！');return;}
     // ★ 讲究系列锁招：锁定第一个成功进入执行的招式（挣扎不锁；换下/拍落/戏法时解锁）
-    if(['choiceband','choicespecs','choicescarf'].includes(mon.item)&&!mon.vol.choiceLock&&mvk!=='struggle'){
+    if(['choiceband','choicespecs','choicescarf'].includes(mon.item)&&!mon.vol.choiceLock&&!mon.dyn&&mvk!=='struggle'){
       mon.vol.choiceLock=mvk;
     }
     // 变换自如
@@ -2037,15 +2037,35 @@ class Battle{
     // 保护
     if(foe.vol.protect&&!(mon.has('unseenfist')&&mv.ct)){await say(`${foe.name} 保护住了自己！`);
       if(foe.vol.ks&&mv.ct){await this.changeStat(mon,'atk',-2,foe);}
-      if(foe.vol.bb&&mv.ct){await this.inflictStatus(mon,'psn',foe);}
+      if(foe.vol.bb&&mv.ct){await this.inflictStatus(mon,'psn',foe,'poison');}
       return {dmg:0,immune:true};}
     // 伤害计算
     const r=this.calcDmg(mon,foe,mv);
-    // 画皮/气势腰带/结实
-    if(foe.vol.disguise){foe.vol.disguise=false;await say(`${foe.name} 的画皮抵挡了攻击！`);BUI.dmgPop(side==='p'?'e':'p','抵挡','#ffd93b');return {dmg:0};}
     let dmg=r.dmg;
-    // ★ 属性免疫：不造成伤害，极巨招式的天气/场地/能力效果均不触发
+    // ★ 属性免疫：不造成伤害，也不破坏画皮
     if(r.eff===0){ await say(`对 ${foe.name} 没有效果…`); return {dmg:0,immune:true}; }
+    // ★ 画皮：完全抵挡一次伤害，破损时反噬自身1/8 HP；极巨招式打在画皮上仍触发天气/场地/能力效果
+    if(foe.vol.disguise){
+      foe.vol.disguise=false;
+      await say(`${foe.name} 的画皮抵挡了攻击！`);
+      BUI.dmgPop(side==='p'?'e':'p','抵挡','#ffd93b');
+      if(!foe.has('magicguard')){
+        const rec=Math.max(1,Math.floor(foe.maxhp/8));
+        foe.hp=Math.max(0,foe.hp-rec);
+        await say(`${foe.name} 因画皮破损受到了伤害！`);
+        BUI.dmgPop(side==='p'?'e':'p',`-${rec}`,'#ff9d8a');
+      }
+      if(mv.maxfx){
+        const f=mv.maxfx;
+        if(f.up)await this.changeStat(mon,f.up,1,mon);
+        if(f.drop&&foe.hp>0)await this.changeStat(foe,f.drop,-1,mon);
+        if(f.weather)await this.setWeather(f.weather,mon);
+        if(f.terrain)await this.setTerrain(f.terrain,mon);
+      }
+      BUI.refresh(this);
+      if(foe.hp<=0)return {dmg:0,ko:true};
+      return {dmg:0};
+    }
     if(dmg>=foe.hp){ if(foe.item==='focussash'&&foe.hp===foe.maxhp){dmg=foe.hp-1;await say(`${foe.name} 靠气势腰带撑住了！`);}
       else if(foe.has('sturdy')&&foe.hp===foe.maxhp&&!mv.ignAb){dmg=foe.hp-1;await say(`${foe.name} 靠结实撑住了！`);} }
     // 动画
@@ -2076,8 +2096,8 @@ class Battle{
       let ch=mv.sec.ch*(mon.has('serenegrace')?2:1);
       if(Math.random()*100<ch){
         if(mv.sec.st){ if(mv.sec.st==='confuse'){if(!foe.vol.confuse){foe.vol.confuse=rnd(2,4);await say(`${foe.name} 混乱了！`);}}
-          else if(mv.sec.st==='tri'){await this.inflictStatus(foe,pick(['burn','par','frz']),mon);}
-          else await this.inflictStatus(foe,mv.sec.st,mon);
+          else if(mv.sec.st==='tri'){await this.inflictStatus(foe,pick(['burn','par','frz']),mon,mv.t);}
+          else await this.inflictStatus(foe,mv.sec.st,mon,mv.t);
           if(mv.sec.st==='burn'&&foe.status==='frz'){foe.status='burn';await say(`${foe.name} 解冻了！`);} }
         if(mv.sec.flinch){ if(!foe.has('innerfocus')){foe.vol.flinch=true;await say(`${foe.name} 畏缩了！`);} }
         if(mv.sec.drop){await this.changeStat(foe,mv.sec.drop,mv.sec.n,mon);} } }
@@ -2216,9 +2236,10 @@ class Battle{
       await say(`${foe.name} 的魔法镜反弹了招式！`); [mon,foe]=[foe,mon]; }
     // 恶作剧之心 vs 恶
     if(mon.has('prankster')&&foe.types.includes('dark')){await say(`${foe.name} 无视了恶作剧！`);return;}
-    // 属性免疫（变化招式也受属性影响）
+    // 属性免疫（变化招式也受属性影响；腐蚀特性可绕过毒属性免疫）
     const e=effMult(mv.t,foe.types);
-    if(e===0&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather){await say(`对 ${foe.name} 没有效果…`);return;}
+    const corrosionBypass=mon.has('corrosion')&&(mv.setSt==='psn'||mv.setSt==='tox');
+    if(e===0&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather&&!corrosionBypass){await say(`对 ${foe.name} 没有效果…`);return;}
     // 命中
     if(mv.a!=null&&Math.random()*100>mv.a*(mon.has('compoundeyes')?1.3:1)){await say(`${mv.n} 没有命中！`);return;}
     const k=mv.k;
@@ -2227,7 +2248,7 @@ class Battle{
     if(mv.hazard){const ts=this.foeSide(side);
       if(mv.hazard==='sr'){ if(this.haz[ts].sr){await say('场上已经撒过隐形岩了！');return;} this.haz[ts].sr=1;await say(`${mon.name} 撒下了隐形岩！`);}
       if(mv.hazard==='spikes'){ if(this.haz[ts].spikes>=3){await say('场上已经布满撒菱了！');return;} this.haz[ts].spikes++;await say(`${mon.name} 撒下了撒菱！`);} return;}
-    if(mv.setSt){ await this.tryInflict(foe,mv.setSt,mon); return; }
+    if(mv.setSt){ await this.tryInflict(foe,mv.setSt,mon,mv.t); return; }
     if(mv.setDrop){ await this.changeStat(foe,mv.setDrop.drop,mv.setDrop.n,mon); return; }
     if(mv.heal){ const h=Math.floor(mon.maxhp/2); mon.hp=Math.min(mon.maxhp,mon.hp+h);AU.heal();await say(`${mon.name} 回复了HP！`);BUI.refresh(this);return; }
     if(mv.rest){ mon.hp=mon.maxhp;mon.status='sleep';mon.sleepT=3;AU.heal();await say(`${mon.name} 睡着了，HP完全回复了！`);BUI.refresh(this);return; }
@@ -2254,31 +2275,40 @@ class Battle{
     if(mv.selfDn2){await this.changeStat(mon,mv.selfDn2.drop,mv.selfDn2.n,mon);}
     BUI.refresh(this);
   }
-  async tryInflict(foe,st,src){
-    // ★ 场地防护：薄雾场地免疫异常状态，电流场地免疫睡眠
+  async tryInflict(foe,st,src,mvType){
+    /* ★ 场地防护：薄雾场地免疫异常状态，电流场地免疫睡眠 */
     if(this.terrain==='misty'&&this.grounded(foe)){await say('薄雾场地守护着宝可梦，无法附加异常状态！');return;}
     if(this.terrain==='electric'&&this.grounded(foe)&&st==='sleep'){await say('电流场地守护着宝可梦，无法入睡！');return;}
-    if(st==='sleep'){ if(foe.status){await say(`${foe.name} 已经有异常状态了！`);return;}
-      if(foe.has('insomnia')||foe.has('vitalspirit')){await say(`${foe.name} 的特性让它无法入睡！`);return;} }
-    if(st==='par'){ if(foe.status||foe.types.includes('electric')){await say(`但是没有效果！`);return;} if(foe.has('limber')){await say(`${foe.name} 的柔软特性发动了！`);return;} }
-    if(st==='burn'){ if(foe.status||foe.types.includes('fire')){await say(`但是没有效果！`);return;} if(foe.has('waterveil')){await say(`${foe.name} 的水幕特性发动了！`);return;} }
-    if(st==='psn'||st==='tox'){ if(foe.status||foe.types.includes('poison')||foe.types.includes('steel')){
-        if(!(src&&src.has('corrosion'))){await say(`但是没有效果！`);return;} }
-      if(foe.has('immunity')||foe.has('purifyingsalt')){await say(`${foe.name} 的特性让它无法中毒！`);return;} }
-    await this.inflictStatus(foe,st,src);
+    if(st!=='confuse'&&foe.status){await say(`${foe.name} 已经有异常状态了！`);return;}
+    await this.inflictStatus(foe,st,src,mvType);
   }
-  async inflictStatus(m,st,src){
-    if(m.status&&st!=='confuse')return;
-    if(st==='confuse'){m.vol.confuse=rnd(2,4);await say(`${m.name} 混乱了！`);AU.status();return;}
-    if(m.has('purifyingsalt')&&(st==='psn'||st==='tox'))return;
+   async inflictStatus(m,st,src,mvType,noSync){
+    if(m.status&&st!=='confuse')return false;
+    if(st==='confuse'){m.vol.confuse=rnd(2,4);await say(`${m.name} 混乱了！`);AU.status();return true;}
+    /* ★ 属性免疫（绝对，与来源招式属性无关） */
+    if(st==='burn'&&m.types.includes('fire')){await say(`${m.name} 是火属性，不会灼伤！`);return false;}
+    if(st==='frz'&&m.types.includes('ice')){await say(`${m.name} 是冰属性，不会冰冻！`);return false;}
+    if((st==='psn'||st==='tox')&&(m.types.includes('poison')||m.types.includes('steel'))&&!(src&&src.has('corrosion'))){
+      await say(`${m.name} 不会中毒！`);return false;}
+    /* ★ 电属性仅免疫电属性招式的麻痹（电磁波/打雷），大蛇瞪眼等一般属性仍可麻痹 */
+    if(st==='par'&&m.types.includes('electric')&&mvType==='electric'){await say(`${m.name} 是电属性，不会被电属性招式麻痹！`);return false;}
+    /* ★ 特性免疫 */
+    if(st==='burn'&&m.has('waterveil')){await say(`${m.name} 的水幕特性发动了！`);return false;}
+    if(st==='par'&&m.has('limber')){await say(`${m.name} 的柔软特性发动了！`);return false;}
+    if((st==='psn'||st==='tox')&&(m.has('immunity')||m.has('purifyingsalt'))){await say(`${m.name} 的特性让它无法中毒！`);return false;}
+    if(st==='sleep'&&(m.has('insomnia')||m.has('vitalspirit'))){await say(`${m.name} 的特性让它无法入睡！`);return false;}
     m.status=st;AU.status();
     const nm={burn:'被灼伤了',par:'麻痹了',psn:'中毒了',tox:'中了剧毒',sleep:'睡着了',frz:'被冻住了'}[st];
     await say(`${m.name} ${nm}！`);
     if(st==='sleep')m.sleepT=m.has('earlybird')?1:rnd(1,3);
     if(st==='tox')m.toxicN=0;
-    // 同步
-    if(m.has('synchronize')&&src&&src!==m&&!src.status&&src.hp>0){ src.status=st;src.sleepT=rnd(1,3);await say(`${src.name} 的同步特性发动了！${src.name} 也${nm}！`); }
+    /* 同步：反射同样经过免疫判定，noSync 防止连锁 */
+    if(!noSync&&m.has('synchronize')&&src&&src!==m&&!src.status&&src.hp>0){
+      await say(`${m.name} 的同步特性发动了！`);
+      await this.inflictStatus(src,st,m,mvType,true);
+    }
     BUI.refresh(this);
+    return true;
   }
   /* ---------- 能力变化 ---------- */
   async changeStat(m,k,n,src){
@@ -2458,7 +2488,7 @@ class Battle{
   aiScore(){
     const m=this.E(),foe=this.P();
     let best=null,bestS=-1e9;
-    const choiceLock=['choiceband','choicespecs','choicescarf'].includes(m.item)?m.vol.choiceLock:null;
+    const choiceLock=(['choiceband','choicespecs','choicescarf'].includes(m.item)&&!m.dyn)?m.vol.choiceLock:null;
     for(const mv of m.moves){
       if(mv.pp<=0)continue;
       const d=MV[mv.k];
