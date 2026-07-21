@@ -588,7 +588,8 @@ button:disabled{opacity:.4;cursor:not-allowed}
   <div id="factory" class="screen">
     <div class="scrHead"><h2>对战工厂</h2><span class="px" style="font-size:9px;color:#9fe8ff">BATTLE FACTORY</span><div class="spacer"></div>
       <span class="px" style="font-size:10px;color:var(--gold)" id="facBP">BP 0</span>
-      <button class="btn small" data-back id="facBack" style="margin-left:12px">返回</button></div>
+      <button class="btn small" data-back id="facBack" style="margin-left:12px">返回</button>
+      <button class="btn small red" id="facReset" style="margin-left:8px">重新游戏</button></div>
     <div class="scrBody"><div id="facLobby">
       <div class="facCol panel" style="height:fit-content">
         <div style="text-align:center;font-weight:900;color:#777">当前轮次</div>
@@ -2671,6 +2672,11 @@ const GM={
 };
 function newMon(id,lvl,o){return new P(id,lvl,o||{});}
 function healAll(arr){arr.forEach(m=>{m.hp=m.maxhp;m.status=null;m.sleepT=0;m.toxicN=0;m.fainted=false;m.vol={};if(m.id===778)m.vol.disguise=true;m.moves.forEach(x=>x.pp=x.maxpp);});}
+/* ============ 对战工厂存档（持久化） ============ */
+function serializeMon(m){return {id:m.id,lvl:m.lvl,xp:m.xp,iv:m.iv,ev:m.ev,nature:m.nature,item:m.item,tera:m.teraType,ability:m.ability,moves:m.moves.map(x=>x.k),shiny:m.shiny,battles:m.battles};}
+function deserializeMon(d){return new P(d.id,d.lvl,{iv:d.iv,ev:d.ev,nature:d.nature,item:d.item,tera:d.tera,ability:d.ability,moves:d.moves,shiny:d.shiny,battles:d.battles,xp:d.xp});}
+function saveFac(){localStorage.setItem('pif_fac',JSON.stringify({round:GM.fac.round,win:GM.fac.win,bp:GM.fac.bp,best:GM.fac.best,party:GM.fac.party?GM.fac.party.map(serializeMon):null}));}
+function loadFac(){try{const d=JSON.parse(localStorage.getItem('pif_fac')||'null');if(d){GM.fac.round=d.round||1;GM.fac.win=d.win||0;GM.fac.bp=d.bp||0;if(d.best!=null)GM.fac.best=d.best;GM.fac.party=d.party?d.party.map(deserializeMon):null;}}catch(e){}}
 
 /* ============================================================
    9. 对战入口（通用）
@@ -2768,7 +2774,7 @@ const FAC={
           row.appendChild(c);
         });
         const btn=el('button','btn blue','租借队伍 '+L);btn.style.width='100%';
-        btn.onclick=()=>{AU.ok();GM.fac.party=sets[si];this.ui();this.lobby();};
+        btn.onclick=()=>{AU.ok();GM.fac.party=sets[si];saveFac();this.ui();this.lobby();};
         mid.appendChild(row);mid.appendChild(btn);
       });
     } else {
@@ -2811,11 +2817,13 @@ const FAC={
         AU.jingle('badge');
         await dlg('广播','🎉 本轮 7 连胜达成！额外获得 10 BP！进入第 '+GM.fac.round+' 轮，请重新选择租借队伍。',132);
       }
+      saveFac();
       this.ui();this.lobby();
     } else if(r.result==='lose'||r.result==='run'){
       AU.jingle('lose');
       await dlg('广播','挑战失败……连胜 '+((GM.fac.round-1)*7+GM.fac.win)+' 场。获得 BP：'+GM.fac.bp+'。重新挑战吧！',132);
       GM.fac.round=1;GM.fac.win=0;GM.fac.party=null;
+      saveFac();
       this.ui();this.lobby();
     }
   },
@@ -3400,6 +3408,16 @@ function openSettings(){
   box.appendChild(back);
   offEsc=onEsc(()=>{AU.no();close();});
 }
+/* ★ 重新游戏：清空工厂进度（保留历史最佳记录） */
+$('#facReset').onclick=async()=>{
+  const idx=await dlgChoices('重新游戏','确定要清空当前轮次、连胜、BP 与租借队伍，重新开始挑战吗？（历史最佳记录将保留）',['确定，重新开始','取消']);
+  if(idx===0){
+    GM.fac.round=1;GM.fac.win=0;GM.fac.bp=0;GM.fac.party=null;
+    saveFac();
+    FAC.ui();FAC.lobby();
+    toast('已重新开始！');
+  }
+};
 /* ★ ESC = 返回上一步 */
 function onEsc(fn){
   const h=e=>{if(e.key==='Escape'){e.preventDefault();window.removeEventListener('keydown',h);fn();}};
@@ -3421,6 +3439,7 @@ window.addEventListener('keydown',e=>{
 /* 启动 */
 AU.init?.();
 AU.muted=CFG.muted;AU.musOn=CFG.music;
+loadFac();
 show('#title');
 setTimeout(()=>{try{AU.init();AU.playMusic('title');}catch(e){}},800);
 </script>
