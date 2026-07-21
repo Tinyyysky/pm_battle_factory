@@ -1043,8 +1043,9 @@ A('compoundeyes','复眼','命中率×1.3');A('victorystar','胜利之星','命�
 A('baddreams','梦魇','睡眠中的对手每回合损失HP');A('corrosion','腐蚀','可以使任何宝可梦中毒');
 A('stancechange','战斗切换','随招式切换刀剑/盾牌形态');A('scrappy','胆量','一般/格斗招式可命中幽灵');
 A('unaware','纯朴','无视对手的能力变化');A('toxicdebris','毒满地','受物理攻击时撒出毒菱');
-A('quarkdrive','夸克充能','最高能力×1.3');A('orichalcumpulse','绯红脉动','出场开启晴天，晴天时攻击提升');
-A('hadronengine','强子引擎','特攻×1.3');A('swordofruin','灾祸之剑','对手的防御×0.75');
+A('quarkdrive','夸克充能','电场下最高能力×1.3（速度×1.5，HP除外）');
+A('protosynthesis','古代活性','晴天下最高能力×1.3（速度×1.5，HP除外）');
+A('hadronengine','强子引擎','出场开启电场，电场下特攻×1.3');
 A('fairyaura','妖精光环','全场妖精招式×1.33');A('darkaura','暗黑光环','全场恶属性招式×1.33');
 A('intrepidsword','不挠之剑','出场时攻击提升');A('dauntlessshield','不屈之盾','出场时防御提升');
 A('multitype','多属性','阿尔宙斯专属');A('victorystar2','胜利之星','命中率提升');
@@ -1058,6 +1059,7 @@ A('steadfastx','不屈之心','畏缩时速度提升');A('shadowtagx','踩影','
 A('obliviousx','迟钝','不会陷入着迷或被挑衅');A('shellarmor','硬壳盔甲','不会受到会心一击');
 A('bulletproof','防弹','免疫弹类和球类招式');A('infiltrator','穿透','无视对手的屏障和替身');
 A('overcoatx','防尘','免疫天气和粉末类伤害');
+A('swordofruin','灾厄之剑','降低全体1/3防御')
 
 /* ---- 道具 ---- */
 const IT={};
@@ -1263,8 +1265,8 @@ S(977,'吃吼霸','water','150/100/115/65/65/35','unaware/unaware',['liquidation
 S(979,'弃世猴','fighting/ghost','110/115/80/50/90/90','vitalspirit/innerfocus',['ragefist','closecombat','drainpunch','bulkup','taunt']);
 S(980,'土王','poison/ground','130/75/60/45/100/20','unaware/waterabsorb',['earthquake','poisonjab','toxic','recover','stealthrock']);
 S(983,'仆刀将军','dark/steel','100/135/120/60/85/50','defiant/defiant',['kowtowcleave','suckerpunch','ironhead','swordsdance','knockoff']);
-S(984,'雄伟牙','ground/fighting','115/131/131/53/53/87','quarkdrive/quarkdrive',['earthquake','closecombat','stealthrock','knockoff','icepunch']);
-S(987,'振翼发','ghost/fairy','55/55/55/135/135/135','quarkdrive/quarkdrive',['shadowball','moonblast','thunderbolt','calmmind','dazzlinggleam']);
+S(984,'雄伟牙','ground/fighting','115/131/131/53/53/87','protosynthesis',['earthquake','closecombat','stealthrock','knockoff','icepunch']);
+S(987,'振翼发','ghost/fairy','55/55/55/135/135/135','protosynthesis',['shadowball','moonblast','thunderbolt','calmmind','dazzlinggleam']);
 S(991,'铁包袱','ice/water','56/80/114/124/60/136','quarkdrive/quarkdrive',['freezedry','hydropump','taunt','uturn','icebeam']);
 S(994,'铁毒蛾','fire/poison','80/70/60/140/110/110','quarkdrive/quarkdrive',['fireblast','sludgewave','energyball','thunderbolt']);
 S(1000,'赛富豪','steel/ghost','87/60/95/133/91/84','goodasgold/goodasgold',['makeitrain','shadowball','focusblast','recover','thunderbolt']);
@@ -1275,6 +1277,7 @@ S(1008,'密勒顿','electric/dragon','100/85/100/135/115/135','hadronengine/hadr
 /* 修正：过滤掉不存在的招式键 */
 SP.forEach(s=>s.mv=s.mv.filter(k=>MV[k]));
 SP.forEach(s=>{ if(!s.mv.length) s.mv=['tackle']; });
+SP.forEach(s=>{ if(!s.mv.includes('terablast'))s.mv.push('terablast'); });   // ★ 所有宝可梦可学会太晶爆发
 const SPDB=Object.fromEntries(SP.map(s=>[s.id,s]));
 const bst=sp=>sp.s.reduce((a,b)=>a+b,0);
 const genOf=id=>id<=151?1:id<=251?2:id<=386?3:id<=493?4:id<=649?5:id<=721?6:id<=809?7:id<=898?8:9;
@@ -1417,6 +1420,10 @@ class P{
       if(mk.length>=4)break;
       if(!mk.includes(p)&&MV[p])mk.push(p);
     }
+    // ★ 所有宝可梦20%概率携带太晶爆发（显式传入moves时不重掷，避免存档漂移）
+    if(!o.moves&&Math.random()<0.2&&!mk.includes('terablast')){
+      if(mk.length>=4)mk[3]='terablast';else mk.push('terablast');
+    }
     this.moves=mk.slice(0,4).map(k=>({k,pp:MV[k].pp,maxpp:MV[k].pp}));
     this.stages={atk:0,def:0,spa:0,spd:0,spe:0};
     this.status=null; this.sleepT=0; this.toxicN=0;
@@ -1442,6 +1449,8 @@ class P{
     this.maxhp=this.dyn?mhp*2:mhp;
   }
   hpPct(){return this.hp/this.maxhp;}
+  /* ★ 古代活性/夸克充能：返回最高能力键（HP除外） */
+  bestStat(){let best='atk';for(const k of ['atk','def','spa','spd','spe'])if(this.st[k]>this.st[best])best=k;return best;}
   alive(){return !this.fainted&&this.hp>0;}
   has(k){return this.ability===k;}
   effStat(k,b){ // b: battle
@@ -1453,21 +1462,23 @@ class P{
       if(this.has('solarpower')&&b&&b.wx==='sun')v*=1.5;
       if(this.has('orichalcumpulse')&&b&&b.wx==='sun')v*=1.33;
       if(this.item==='choiceband'&&!this.dyn)v*=1.5;
-      if(this.vol.qd==='atk')v*=1.3;
       if(b&&b.foeOf(this)&&b.foeOf(this).has('swordofruin')&&!b.foeOf(this).fainted)v*=.75; }
     if(k==='spa'){ if(this.has('solarpower')&&b&&b.wx==='sun')v*=1.5;
-      if(this.has('hadronengine'))v*=1.33;
-      if(this.item==='choicespecs'&&!this.dyn)v*=1.5; if(this.vol.qd==='spa')v*=1.3; }
+      if(this.has('hadronengine')&&b&&b.terrain==='electric')v*=1.3;   // ★ 强子引擎：电场下特攻×1.3
+      if(this.item==='choicespecs'&&!this.dyn)v*=1.5; }
     if(k==='spe'){ if(this.status==='par')v*=.5;
       if(this.item==='choicescarf'&&!this.dyn)v*=1.5;
       if(b){ const w=b.wx;
         if(w==='sun'&&(ab==='chlorophyll'))v*=2;
         if(w==='rain'&&ab==='swiftswim')v*=2;
         if(w==='sand'&&ab==='sandrush')v*=2; }
-      if(this.vol.qd==='spe')v*=1.3; }
+      }
     if(k==='def'||k==='spd'){ if(this.item==='eviolite'&&this.sp.evo)v*=1.5;
-      if(k==='spd'&&this.item==='assaultvest')v*=1.5;
-      if(this.vol.qd===k)v*=1.3; }
+      if(k==='spd'&&this.item==='assaultvest')v*=1.5; }
+    // ★ 古代活性（晴天）/夸克充能（电场）：最高项×1.3，速度×1.5（HP除外）
+    if(b&&((ab==='protosynthesis'&&b.wx==='sun')||(ab==='quarkdrive'&&b.terrain==='electric'))){
+      if(k===this.bestStat())v*=(k==='spe'?1.5:1.3);
+    }
     return Math.max(1,Math.floor(v));
   }
 }
@@ -1920,8 +1931,8 @@ class Battle{
   async entryEffects(m,side){
     await this.hazardHit(m,side);
     await this.switchInAbility(m);
-    if(m.has('quarkdrive')&&!m.vol.qd){ const best=STATKEYS.reduce((a,b)=>m.st[a]>=m.st[b]?a:b); m.vol.qd=best;
-      await say(`${m.name} 的夸克充能发动了！${STN[best]}提升了！`); AU.statUp(); }
+    // if(m.has('quarkdrive')&&!m.vol.qd){ const best=STATKEYS.reduce((a,b)=>m.st[a]>=m.st[b]?a:b); m.vol.qd=best;
+    //   await say(`${m.name} 的夸克充能发动了！${STN[best]}提升了！`); AU.statUp(); }
   }
   async hazardHit(m,side){
     const h=this.haz[side];
@@ -1936,18 +1947,31 @@ class Battle{
     if(ab==='drought'){await this.setWeather('sun',m);} if(ab==='drizzle'){await this.setWeather('rain',m);}
     if(ab==='sandstream'){await this.setWeather('sand',m);} if(ab==='snowwarning'){await this.setWeather('hail',m);}
     if(ab==='orichalcumpulse'){await this.setWeather('sun',m);}
+    if(ab==='hadronengine'){await this.setTerrain('electric',m);await say(`${m.name} 的强子引擎发动了，特攻提升了！`);}
     if(ab==='intrepidsword'){await this.changeStat(m,'atk',1,m);}
     if(ab==='dauntlessshield'){await this.changeStat(m,'def',1,m);}
     if(ab==='download'&&foe){ const boost=foe.st.def>=foe.st.spd?'spa':'atk'; await this.changeStat(m,boost,1,m); }
     if(ab==='trace'&&foe){ m.ability=foe.ability; await say(`${m.name} 复制了 ${foe.name} 的${AB[foe.ability]?.n||'特性'}！`); }
     if(ab==='swordofruin'){ await say(`${m.name} 的灾祸之剑发动了！对手的防御下降了！`); AU.statDn(); }
     if(ab==='fairyaura'){await say('妖精光环笼罩了全场！');} if(ab==='darkaura'){await say('暗黑光环笼罩了全场！');}
+        if(ab==='quarkdrive'&&this.terrain==='electric'){await say(`${m.name} 的夸克充能发动了！${STN[m.bestStat()]}提升了！`);}
+    if(ab==='protosynthesis'&&this.wx==='sun'){await say(`${m.name} 的古代活性发动了！${STN[m.bestStat()]}提升了！`);}
   }
-  async setWeather(w,m){ this.wx=w;this.wxT=5;
+  async setWeather(w,m){
+    // ★ 同种天气已存在：不刷新持续时间，仅提示
+    if(this.wx===w){ await say(`天气已经是${{sun:'大晴天',rain:'下雨',sand:'沙暴',hail:'冰雹'}[w]}，没有发生变化！`); return; }
+    this.wx=w;this.wxT=5;
     const nm={sun:'大晴天',rain:'下雨了',sand:'刮起了沙暴',hail:'下起了冰雹'}[w];
-    await say(`${nm}！`); }
-  async setTerrain(t,m){ this.terrain=t;this.terrainT=5;
-    await say(`场地变成了${TERRNAME[t]}！`); }
+    await say(`${nm}！`);
+    if(w==='sun'){for(const mon of [this.P(),this.E()]){if(mon&&mon.alive()&&mon.has('protosynthesis')&&mon!==m)await say(`${mon.name} 的古代活性发动了！${STN[mon.bestStat()]}提升了！`);}}
+  }
+  async setTerrain(t,m){
+    // ★ 同种场地已存在：不刷新持续时间，仅提示
+    if(this.terrain===t){ await say(`场地已经是${TERRNAME[t]}，没有发生变化！`); return; }
+    this.terrain=t;this.terrainT=5;
+    await say(`场地变成了${TERRNAME[t]}！`);
+    if(t==='electric'){for(const mon of [this.P(),this.E()]){if(mon&&mon.alive()&&mon.has('quarkdrive')&&mon!==m)await say(`${mon.name} 的夸克充能发动了！${STN[mon.bestStat()]}提升了！`);}}
+  }
   grounded(m){ return !m.types.includes('flying')&&!m.has('levitate'); } /* 是否站在地面上 */
   /* ---------- 回合 ---------- */
   async doTurn(){
@@ -2228,8 +2252,13 @@ class Battle{
       if(mv.c==='X')useMv={k:'maxguard',n:'极巨防壁',c:'X',pri:4,protect:1,maxguard:1};
       else useMv={k:'maxmv',n:MAXMV[mv.t]||'极巨攻击',p:maxPower(mv),a:null,c:mv.c,t:mv.t,maxfx:MAXFX[mv.t]};
     }
-    // 太晶爆发
-    if(useMv.terablast&&mon.tera){useMv={...useMv,t:mon.teraType};}
+        // ★ 太晶化招式修正：太晶爆发变异晶属性、按较高攻击项决定物特；威力<60的招式提升至60
+    if(mon.tera){
+      let tt=useMv.t,tc=useMv.c,tp=useMv.p;
+      if(useMv.terablast||useMv.k==='terablast'){ tt=mon.teraType; tc=mon.st.atk>=mon.st.spa?'P':'S'; }
+      if(tp>0&&tp<60)tp=60;
+      useMv={...useMv,t:tt,c:tc,p:tp};
+    }
     // 气象球
     if(useMv.weatherball&&this.wx){useMv={...useMv,t:{sun:'fire',rain:'water',sand:'rock',hail:'ice'}[this.wx],p:100};}
     // ★ 播报使用的招式（对话框 + 对战记录同步显示）
@@ -2285,9 +2314,10 @@ class Battle{
     let hits=1,powers=[useMv.p];
     if(useMv.multi){hits=mon.has('skilllink')?useMv.multi[1]:rnd(useMv.multi[0],useMv.multi[1]);powers=Array(hits).fill(useMv.p);}
     if(useMv.multiPow){powers=useMv.multiPow;hits=powers.length;}
-    let totalDmg=0,koed=false;
+    let totalDmg=0,koed=false,connected=false;
     for(let h=0;h<hits;h++){
       const r=await this.hitOnce(side,mon,foe,{...useMv,p:powers[h]},act);
+      if(!r.immune)connected=true;   // ★ 命中（含打在画皮上）才算"打中"；属性免疫/保护/神奇守护不算
       if(r.ko){koed=true;totalDmg+=r.dmg;break;}
       totalDmg+=r.dmg;
       if(r.immune)break;
@@ -2315,12 +2345,13 @@ class Battle{
     // ★ 击倒结算：先对手（被招式击倒），后自己（被反伤/命玉击倒）
     if(koed){ await this.handleKO(side,mon,foe); }
     if(!this.over&&mon.hp<=0&&!mon.fainted){ await this.handleKO(this.foeSide(side),foe,mon); return; }
-    if(koed)return;
     // 逆鳞锁定
     if(useMv.rampage&&!mon.vol.lock){const t=rnd(2,3);mon.vol.lock={k:mvk,t};}
     if(mon.vol.lock){mon.vol.lock.t--;if(mon.vol.lock.t<=0){mon.vol.lock=null;mon.vol.confuse=rnd(2,4);await say(`${mon.name} 因狂暴而混乱了！`);}}
     if(useMv.recharge)mon.vol.recharge=true;
-    if(useMv.uturn&&this.sideAliveCount(side)>1){ await this.uturnSwitch(side,mon); }
+    // ★ 折返：只有招式真正命中才能折返（画皮算命中可折返；属性免疫/保护未命中不折返）
+    if(useMv.uturn&&connected&&!this.over&&mon.alive()&&this.sideAliveCount(side)>1){ await this.uturnSwitch(side,mon); }
+    if(koed)return;
     BUI.refresh(this);
   }
   foeSide(s){return s==='p'?'e':'p';}
@@ -2426,14 +2457,8 @@ class Battle{
       if(f.up)await this.changeStat(mon,f.up,1,mon);
       if(f.drop&&foe.hp>0)await this.changeStat(foe,f.drop,-1,mon);
       /* ★ 同种天气/场地已存在时不触发：不重置持续时间，仅提示 */
-      if(f.weather){
-        if(this.wx===f.weather)await say(`天气已经是${{sun:'大晴天',rain:'下雨',sand:'沙暴',hail:'冰雹'}[f.weather]}，没有发生变化！`);
-        else await this.setWeather(f.weather,mon);
-      }
-      if(f.terrain){
-        if(this.terrain===f.terrain)await say(`场地已经是${TERRNAME[f.terrain]}，没有发生变化！`);
-        else await this.setTerrain(f.terrain,mon);
-      } }
+      if(f.weather)await this.setWeather(f.weather,mon);
+      if(f.terrain)await this.setTerrain(f.terrain,mon); }
     // 解冻（火属性伤害）
     if(mv.t==='fire'&&foe.status==='frz'){foe.status=null;await say(`${foe.name} 解冻了！`);}
     BUI.refresh(this);
@@ -2470,9 +2495,17 @@ class Battle{
     if(mv.foulplay)A=foe.effStat('atk',this);
     let dmg=Math.floor(Math.floor((2*mon.lvl/5+2)*mv.p*A/D/50)+2);
     // 属性一致
-    let stab=1; const matchType=mon.types.includes(mv.t);
-    if(matchType)stab=mon.has('adaptability')?2:1.5;
-    if(mon.tera&&mv.t===mon.teraType)stab=Math.max(stab,2);
+    // ★ STAB（含太晶化规则）：太晶属性即本系→2倍；太晶属性或本系→1.5倍（适应力2倍）
+    let stab=1;
+    const adapt=mon.has('adaptability');
+    if(mon.tera){
+      const orig=mon.baseTypes||mon.types;
+      const isTera=(mv.t===mon.teraType),isOrig=orig.includes(mv.t);
+      if(isTera&&isOrig)stab=2;
+      else if(isTera||isOrig)stab=adapt?2:1.5;
+    } else if(mon.types.includes(mv.t)){
+      stab=adapt?2:1.5;
+    }
     dmg=Math.floor(dmg*stab);
     // 属性相克
     let eff=effMult(mv.t,foe.types);
@@ -2873,6 +2906,7 @@ class Battle{
     m.ability=cfg.a;
     AU.mega();BUI.burst(side);
     await say(`超级进化！${m.name} 进化成了 Mega${m.name.replace(/\(.+\)/,'')}！`);
+    await this.switchInAbility(m);  // ★ 变更后的特性立即发动（雷电兽→威吓立刻降攻、喷火龙Y→日照立刻开晴天、胡地→复制等）
     BUI.refresh(this);
   }
   aiWantsSwitch(){
@@ -2931,9 +2965,10 @@ const FAC={
   tier(sp){const b=bst(sp);if(sp.leg||b>=570)return 4;if(b>=510)return 3;if(b>=430)return 2;return 1;},
   lvl(round,i){return Math.min(100,48+(round-1)*7+Math.floor(i/2));},
   pickMoves(sp){
-    const dmg=shuffle(sp.mv.filter(k=>MV[k].c!=='X')), st=shuffle(sp.mv.filter(k=>MV[k].c==='X'));
+    const dmg=shuffle(sp.mv.filter(k=>MV[k].c!=='X'&&k!=='terablast')), st=shuffle(sp.mv.filter(k=>MV[k].c==='X'));
     const out=dmg.slice(0,st.length?3:4);
     if(st.length)out.push(st[0]);
+    if(Math.random()<0.2){ if(out.length>=4)out[3]='terablast';else out.push('terablast'); }   // ★ 20%携带太晶爆发
     return out.slice(0,4);
   },
   pickItem(sp,moves){
