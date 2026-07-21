@@ -139,9 +139,6 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .bcloud::before{content:"";position:absolute;background:inherit;border-radius:50%;width:55%;height:150%;left:15%;top:-60%}
 .bc1{width:120px;height:30px;top:48px;animation:drift 50s linear infinite}
 .bc2{width:80px;height:22px;top:100px;animation:drift 70s linear infinite;animation-delay:-30s}
-.hill{position:absolute;border-radius:50% 50% 0 0}
-.h1{width:520px;height:150px;left:-120px;bottom:34%;background:#7fc487;opacity:.8}
-.h2{width:620px;height:120px;right:-160px;bottom:36%;background:#8fd196;opacity:.7}
 #dynastorm{position:absolute;inset:0;opacity:0;transition:opacity .8s;pointer-events:none;
   background:radial-gradient(ellipse at 50% 0%, rgba(255,60,60,.55), rgba(120,10,40,.35) 55%, transparent 80%),
   repeating-linear-gradient(75deg, rgba(255,120,120,.12) 0 14px, transparent 14px 34px);
@@ -169,7 +166,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 @keyframes raySpin{to{transform:rotate(360deg)}}
 /* --- 雨幕 --- */
 .atmo-rain{background:repeating-linear-gradient(78deg,transparent 0 9px,rgba(185,215,255,.32) 9px 11px,transparent 11px 22px)}
-#bscene.wx-rain .atmo-rain{opacity:1;animation:rainFall .45s linear infinite}
+#bscene.wx-rain .atmo-rain{opacity:.8;animation:rainFall 1.5s linear infinite}
 @keyframes rainFall{from{background-position:0 0}to{background-position:-52px 170px}}
 /* --- 飞雪 --- */
 .atmo-snow{background-image:
@@ -179,13 +176,13 @@ button:disabled{opacity:.4;cursor:not-allowed}
   radial-gradient(2px 2px at 35% 76%,#eaf6ff 50%,transparent 51%),
   radial-gradient(2px 2px at 92% 16%,#fff 50%,transparent 51%);
   background-size:260px 260px}
-#bscene.wx-hail .atmo-snow{opacity:.9;animation:snowFall 3.2s linear infinite}
+#bscene.wx-hail .atmo-snow{opacity:.85;animation:snowFall 5.5s linear infinite}
 @keyframes snowFall{from{background-position:0 0}to{background-position:-42px 260px}}
 /* --- 沙暴 --- */
 .atmo-sand{background:
   linear-gradient(180deg,rgba(214,178,110,.25),rgba(178,138,78,.42)),
   repeating-linear-gradient(84deg,transparent 0 26px,rgba(232,202,142,.42) 26px 30px,transparent 30px 58px)}
-#bscene.wx-sand .atmo-sand{opacity:1;animation:sandBlow .6s linear infinite}
+#bscene.wx-sand .atmo-sand{opacity:.85;animation:sandBlow 2.2s linear infinite}
 @keyframes sandBlow{from{background-position:0 0,0 0}to{background-position:0 0,-224px 10px}}
 /* --- 场地：地面能量光晕 --- */
 #bscene.tr-electric .atmo-terr{opacity:1;background:linear-gradient(0deg,rgba(255,220,60,.5),rgba(255,220,60,.12) 45%,transparent 72%)}
@@ -195,7 +192,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 #bscene.tr-misty .atmo-terr{opacity:1;background:linear-gradient(0deg,rgba(255,150,200,.5),rgba(255,150,200,.15) 50%,transparent 76%)}
 /* --- 场地：电火花 --- */
 .atmo-spark{background:repeating-linear-gradient(115deg,transparent 0 42px,rgba(255,242,130,.75) 42px 44px,transparent 44px 96px);mix-blend-mode:screen}
-#bscene.tr-electric .atmo-spark{animation:sparkFlick .8s steps(2) infinite}
+#bscene.tr-electric .atmo-spark{animation:sparkFlick 1.1s steps(2) infinite}
 @keyframes sparkFlick{0%{opacity:.12}50%{opacity:.85}100%{opacity:.18}}
 /* --- 场地：青草光尘（上升） --- */
 #bscene.tr-grassy .atmo-snow{opacity:.85;filter:hue-rotate(72deg) saturate(2.2);animation:moteRise 4.6s linear infinite}
@@ -229,17 +226,67 @@ button:disabled{opacity:.4;cursor:not-allowed}
   100%{transform:translate(var(--dx,24px),-64px) scale(1.35) rotate(200deg);opacity:0}}
 #bscene.dyna #dynastorm{opacity:1}
 @keyframes stormShift{to{background-position:0 0, 200px 0}}
-.plat{position:absolute;border-radius:50%;border:4px solid rgba(30,60,35,.35)}
-.plat.e{width:230px;height:60px;top:238px;right:90px;background:radial-gradient(ellipse at 50% 40%,#cdeab2,#8cc084 70%,#6aa76b)}
-.plat.p{width:270px;height:72px;bottom:118px;left:60px;background:radial-gradient(ellipse at 50% 40%,#cdeab2,#8cc084 70%,#6aa76b)}
-.psprite{position:absolute;object-fit:contain;transition:transform .5s, opacity .5s, filter .3s}
+/* ============ 对战平台（草皮盘+土层环+草簇纹理） ============ */
+.plat{position:absolute;border-radius:50%;z-index:2;
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(255,255,255,.55), transparent 44%),
+    radial-gradient(ellipse at 50% 42%, #d3ecb4 0%, #a2d189 46%, #78b76c 74%, #5a9a5b 100%);
+  box-shadow:
+    inset 0 -12px 20px rgba(28,62,34,.5),
+    inset 0 5px 9px rgba(255,255,255,.4),
+    0 0 0 6px rgba(66,100,60,.55),
+    0 0 0 9px rgba(40,70,44,.32),
+    0 16px 24px rgba(10,24,12,.42);
+  transition:filter .8s, box-shadow .5s;
+}
+.plat::before{content:"";position:absolute;inset:8px 12px;border-radius:50%;
+  background-image:
+    radial-gradient(7px 4px at 20% 58%, rgba(52,104,54,.5) 49%, transparent 50%),
+    radial-gradient(5px 3px at 66% 36%, rgba(52,104,54,.45) 49%, transparent 50%),
+    radial-gradient(4px 3px at 44% 76%, rgba(255,255,255,.4) 49%, transparent 50%),
+    radial-gradient(6px 4px at 84% 64%, rgba(52,104,54,.4) 49%, transparent 50%),
+    radial-gradient(3px 2px at 32% 30%, rgba(255,255,255,.35) 49%, transparent 50%);
+}
+.plat.e{width:236px;height:62px;top:240px;right:88px}
+.plat.p{width:278px;height:74px;bottom:116px;left:58px}
+/* 平台随天气调色 */
+#bscene.wx-sun .plat{filter:brightness(1.08) saturate(1.15)}
+#bscene.wx-rain .plat{filter:brightness(.76) saturate(.72)}
+#bscene.wx-sand .plat{filter:sepia(.5) brightness(.96)}
+#bscene.wx-hail .plat{filter:brightness(.92) saturate(.55) hue-rotate(150deg)}
+/* 极巨化：平台红光脉冲 */
+.plat.dynRing{animation:dynPulse 1.1s ease-in-out infinite}
+@keyframes dynPulse{
+  0%,100%{box-shadow:inset 0 -12px 20px rgba(28,62,34,.5),0 0 0 6px rgba(255,64,74,.55),0 0 26px 8px rgba(255,40,60,.5),0 16px 24px rgba(10,24,12,.42)}
+  50%{box-shadow:inset 0 -12px 20px rgba(28,62,34,.5),0 0 0 9px rgba(255,64,74,.75),0 0 46px 16px rgba(255,40,60,.7),0 16px 24px rgba(10,24,12,.42)}}
+/* 太晶化：平台边缘旋转晶环 */
+.teraring{position:absolute;inset:-13px;border-radius:50%;opacity:0;transition:opacity .5s;
+  background:conic-gradient(from 0deg, transparent 0 30deg, rgba(120,225,255,.65) 55deg, transparent 85deg 170deg, rgba(160,255,220,.55) 200deg, transparent 230deg 360deg);
+  -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
+  mask:radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 8px));
+  animation:ringSpin 4s linear infinite}
+.plat.teraOn .teraring{opacity:1}
+@keyframes ringSpin{to{transform:rotate(360deg)}}
+/* ============ 宝可梦投影（与站立呼吸同步压扁） ============ */
+.pshadow{position:absolute;z-index:3;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse, rgba(16,36,20,.5), transparent 68%);
+  animation:shBob 2.6s ease-in-out infinite;
+  transition:width .5s,height .5s,opacity .5s,right .5s,left .5s}
+#eshadow{width:124px;height:26px;top:264px;right:152px}
+#pshadow{width:140px;height:30px;bottom:132px;left:122px}
+@keyframes shBob{50%{transform:scale(.9);opacity:.78}}
+.pshadow.dyn{width:196px!important}
+#eshadow.dyn{right:116px}
+#pshadow.dyn{left:94px}
+.pshadow.gone{opacity:0!important}
+.psprite{position:absolute;z-index:4;object-fit:contain;transition:transform .5s, opacity .5s, filter .3s}
 #espr{width:150px;height:150px;top:96px;right:135px;animation:bobE 2.6s ease-in-out infinite}
 #pspr{width:180px;height:180px;bottom:150px;left:105px;animation:bobP 2.6s ease-in-out infinite}
 @keyframes bobE{50%{transform:translateY(-6px)}}
 @keyframes bobP{50%{transform:translateY(-7px)}}
 .psprite.dyn{filter:drop-shadow(0 0 18px rgba(255,40,40,.85))!important;animation:none}
 #espr.dyn{width:288px!important;height:288px!important;top:-6px!important;right:70px!important}
-#pspr.dyn{width:288px!important;height:288px!important;bottom:118px!important;left:48px!important}
+#pspr.dyn{width:288px!important;height:288px!important;bottom:126px!important;left:48px!important}
 .psprite.tera::after{content:""}
 .teragem{position:absolute;width:34px;height:34px;background:linear-gradient(135deg,#fff,#8fe3ff 40%,#37b6ff);
   clip-path:polygon(50% 0,100% 38%,80% 100%,20% 100%,0 38%);filter:drop-shadow(0 0 8px #6fd8ff);animation:gemSpin 3s linear infinite;z-index:5}
@@ -577,7 +624,6 @@ button:disabled{opacity:.4;cursor:not-allowed}
     <div id="bscene">
       <div class="bsun"></div>
       <div class="bcloud bc1"></div><div class="bcloud bc2"></div>
-      <div class="hill h1"></div><div class="hill h2"></div>
       <div id="dynastorm"></div>
       <div id="atmo">
         <div class="atmo-sunray"></div>
@@ -599,7 +645,10 @@ button:disabled{opacity:.4;cursor:not-allowed}
         </div>
         <div id="logList"></div>
       </div>
-      <div class="plat e"></div><div class="plat p"></div>
+      <div class="plat e"><i class="teraring"></i></div>
+      <div class="plat p"><i class="teraring"></i></div>
+      <div class="pshadow" id="eshadow"></div>
+      <div class="pshadow" id="pshadow"></div>
       <img id="espr" class="psprite" alt="">
       <img id="pspr" class="psprite" alt="">
       <div id="etera" class="teragem hidden"></div><div id="ptera" class="teragem hidden"></div>
@@ -1362,6 +1411,13 @@ const BUI={
       $('#ptera').classList.toggle('hidden',!Pm.tera); if(Pm.tera){$('#ptera').style.bottom='300px';$('#ptera').style.left='185px';} }
     else if(Pm&&Pm.fainted){this.pspr.classList.add('faint');}
     this.scene.classList.toggle('dyna',!!(E&&E.dyn)||(Pm&&Pm.dyn));
+    /* ★ 平台与投影响应形态/存活状态 */
+    const pe=document.querySelector('.plat.e'),pp=document.querySelector('.plat.p');
+    pe.classList.toggle('dynRing',!!(E&&E.dyn));pp.classList.toggle('dynRing',!!(Pm&&Pm.dyn));
+    pe.classList.toggle('teraOn',!!(E&&E.tera));pp.classList.toggle('teraOn',!!(Pm&&Pm.tera));
+    const es=$('#eshadow'),ps=$('#pshadow');
+    es.classList.toggle('gone',!(E&&!E.fainted));ps.classList.toggle('gone',!(Pm&&!Pm.fainted));
+    es.classList.toggle('dyn',!!(E&&E.dyn));ps.classList.toggle('dyn',!!(Pm&&Pm.dyn));
   },
   async anim(elm,cls,ms){elm.classList.add(cls);await sleep(ms);elm.classList.remove(cls);},
   dmgPop(side,txt,color){const d=el('div','dmgpop',txt);d.style.color=color||'#fff';
@@ -1386,7 +1442,8 @@ const BUI={
       $('#fxlayer').appendChild(s);setTimeout(()=>s.remove(),1300);
     }
     }
-    /* 旋转坠落（极巨化体型先还原，太晶装饰收起） */
+    /* 旋转坠落（极巨化体型先还原，太晶装饰收起，投影淡出） */
+    $('#'+(side==='e'?'eshadow':'pshadow')).classList.add('gone');
     spr.classList.remove('dyn');
     $('#'+(side==='e'?'etera':'ptera')).classList.add('hidden');
     spr.classList.add('ko');
@@ -1602,7 +1659,10 @@ class Battle{
     await this.execActions(pa,ea);
     if(!this.over)await this.endTurn();
   }
-  pickPlayerForcedMove(){ const m=this.P(); return {k:m.moves.find(x=>x.pp>0)?.k||'struggle'}; }
+  pickPlayerForcedMove(){ const m=this.P();
+    /* ★ 用道具后仍需行动：尊重讲究锁 */
+    if(m.vol.choiceLock&&m.moves.find(x=>x.k===m.vol.choiceLock&&x.pp>0))return {k:m.vol.choiceLock};
+    return {k:m.moves.find(x=>x.pp>0)?.k||'struggle'}; }
   pickAIMove(){ return {k:this.aiScore().best}; }
   /* ---------- 玩家输入 ---------- */
   async getPlayerAction(){
@@ -1662,9 +1722,17 @@ class Battle{
           tag.textContent=`● 极巨化中\n剩余 ${m.dynT} 回合`;
           formCol.appendChild(tag);
         }
+        /* ★ 讲究锁：被锁招式PP耗尽时自动解锁，避免所有按钮禁用导致死锁 */
+        let effChoiceLock=choiceLock;
+        if(effChoiceLock){const lm=m.moves.find(x=>x.k===effChoiceLock);if(!lm||lm.pp<=0){effChoiceLock=null;m.vol.choiceLock=null;}}
+        if(effChoiceLock){
+          const lk=el('div','');lk.id='formHint';lk.style.color='#ffb35c';
+          lk.textContent=`🔒 讲究道具锁定\n仅可用「${MV[effChoiceLock].n}」`;
+          formCol.appendChild(lk);
+        }
         m.moves.forEach(mv=>{
           const d=MV[mv.k];
-          const dis=(locked&&locked!==mv.k)||(choiceLock&&choiceLock!==mv.k)||mv.pp<=0||(m.item==='assaultvest'&&d.c==='X');
+          const dis=(locked&&locked!==mv.k)||(effChoiceLock&&effChoiceLock!==mv.k)||mv.pp<=0||(m.item==='assaultvest'&&d.c==='X');
           let nm=d.n,tcol=TCOL[d.t];
           let info=`${TNAME[d.t]} · ${d.c==='P'?'物理':d.c==='S'?'特殊':'变化'}${d.p?' · 威力'+d.p:''}`;
                     if(wantDyn||m.dyn){ if(d.c==='X'){nm='极巨防壁';info='极巨招式 · 守住自己';}
@@ -1832,10 +1900,20 @@ class Battle{
       else{await say(`${mon.name} 被冻住无法行动！`);return;} }
     if(mon.status==='par'&&Math.random()<.25){await say(`${mon.name} 全身麻痹无法行动！`);AU.status();return;}
     if(mon.vol.confuse&&mon.vol.confuse>0){
-      if(Math.random()<1/3){await say(`${mon.name} 在混乱中攻击了自己！`);AU.hit();
-        const d=Math.max(1,Math.floor((2*mon.lvl/5+2)*40*mon.effStat('atk',this)/mon.effStat('def',this)/50)+2);
-        await this.applyDmg(mon,foe===this.E()?mon:mon,d,'p',null,false); return;}
-      await say(`${mon.name} 陷入了混乱！`); }
+      if(Math.random()<1/3){
+        await say(`${mon.name} 在混乱中攻击了自己！`);AU.hit();
+        /* ★ 混乱自伤：无属性40威力，魔法防守免疫；自杀式倒下走正常濒死流程 */
+        if(!mon.has('magicguard')){
+          const d=Math.max(1,Math.floor((2*mon.lvl/5+2)*40*mon.effStat('atk',this)/mon.effStat('def',this)/50)+2);
+          mon.hp=Math.max(0,mon.hp-d);
+          BUI.dmgPop(side,`-${d}`,'#ff9d8a');
+          BUI.refresh(this);
+          if(mon.hp<=0){ await this.handleKO(this.foeSide(side),this.foeOf(mon),mon); return; }
+        }
+        return;
+      }
+      await say(`${mon.name} 陷入了混乱！`);
+    }
     if(mon.vol.flinch){mon.vol.flinch=false;await say(`${mon.name} 因害怕而无法行动！`);return;}
     if(!foe||foe.fainted){return;}
     // 极巨化转换
@@ -1857,6 +1935,10 @@ class Battle{
     if(mon.vol.taunt&&mon.vol.taunt>0&&useMv.c==='X'){await say(`${mon.name} 受到挑衅，无法使用变化招式！`);return;}
     // 突击背心
     if(mon.item==='assaultvest'&&useMv.c==='X'){await say('突击背心挡住了变化招式！');return;}
+    // ★ 讲究系列锁招：锁定第一个成功进入执行的招式（挣扎不锁；换下/拍落/戏法时解锁）
+    if(['choiceband','choicespecs','choicescarf'].includes(mon.item)&&!mon.vol.choiceLock&&mvk!=='struggle'){
+      mon.vol.choiceLock=mvk;
+    }
     // 变换自如
     if((mon.has('protean')||mon.has('libero'))&&!mon.vol.proteanUsed&&useMv.c!=='X'&&useMv.t!=='normal'){
       mon.vol.proteanUsed=true;mon.types=[useMv.t];await say(`${mon.name} 的${AB[mon.ability].n}发动了！变成了${TNAME[useMv.t]}属性！`);}
@@ -1906,15 +1988,29 @@ class Battle{
       if(r.immune)break;
     }
     if(hits>1&&!koed)await say(`击中了 ${hits} 次！`);
-    if(koed){ await this.handleKO(side,mon,foe); return; }
-    // 吸取/反伤
-    if(useMv.drain&&totalDmg>0&&!mon.has('magicguard')){const h=Math.max(1,Math.floor(totalDmg*useMv.drain/100));mon.hp=Math.min(mon.maxhp,mon.hp+h);AU.heal();await say(`${mon.name} 吸取了对手的HP！`);}
-    if(useMv.recoil&&totalDmg>0&&!mon.has('rockhead')&&!mon.has('magicguard')){
-      let rec=Math.max(1,Math.floor(totalDmg/useMv.recoil));await this.directDmg(mon,rec,side,`${mon.name} 受到了反作用力伤害！`);
-      if(mon.hp<=0){await this.handleKO(this.foeSide(side),foe,mon);return;} }
-    if(mon.item==='lifeorb'&&!mon.has('magicguard')&&!(mon.has('sheerforce')&&useMv.sec)){
-      await this.directDmg(mon,Math.max(1,Math.floor(mon.maxhp/10)),side,'生命宝珠消耗了HP…');
-      if(mon.hp<=0){await this.handleKO(this.foeSide(side),foe,mon);return;} }
+    // ★ 吸取/反伤/命玉：只要造成伤害就结算（击倒对手也要付反伤）
+    //   坚硬脑袋/魔法防守免疫反伤；强行+命玉不扣血
+    if(useMv.drain&&totalDmg>0&&!mon.has('magicguard')&&!mon.fainted){
+      const h=Math.max(1,Math.floor(totalDmg*useMv.drain/100));
+      mon.hp=Math.min(mon.maxhp,mon.hp+h);AU.heal();await say(`${mon.name} 吸取了对手的HP！`);
+    }
+    if(useMv.recoil&&totalDmg>0&&!mon.has('rockhead')&&!mon.has('magicguard')&&!mon.fainted){
+      const rec=Math.max(1,Math.floor(totalDmg/useMv.recoil));
+      mon.hp=Math.max(0,mon.hp-rec);
+      await say(`${mon.name} 受到了反作用力伤害！`);
+      BUI.dmgPop(side,`-${rec}`,'#ff9d8a');
+    }
+    if(mon.item==='lifeorb'&&totalDmg>0&&!mon.has('magicguard')&&!(mon.has('sheerforce')&&useMv.sec)&&!mon.fainted){
+      const lo=Math.max(1,Math.floor(mon.maxhp/10));
+      mon.hp=Math.max(0,mon.hp-lo);
+      await say('生命宝珠消耗了HP…');
+      BUI.dmgPop(side,`-${lo}`,'#ff9d8a');
+    }
+    BUI.refresh(this);
+    // ★ 击倒结算：先对手（被招式击倒），后自己（被反伤/命玉击倒）
+    if(koed){ await this.handleKO(side,mon,foe); }
+    if(!this.over&&mon.hp<=0&&!mon.fainted){ await this.handleKO(this.foeSide(side),foe,mon); return; }
+    if(koed)return;
     // 逆鳞锁定
     if(useMv.rampage&&!mon.vol.lock){const t=rnd(2,3);mon.vol.lock={k:mvk,t};}
     if(mon.vol.lock){mon.vol.lock.t--;if(mon.vol.lock.t<=0){mon.vol.lock=null;mon.vol.confuse=rnd(2,4);await say(`${mon.name} 因狂暴而混乱了！`);}}
@@ -1992,8 +2088,8 @@ class Battle{
     if(mv.selfUp2){await this.changeStat(mon,mv.selfUp2.drop,mv.selfUp2.n,mon);}
     if(mv.selfUp3){await this.changeStat(mon,mv.selfUp3.drop,mv.selfUp3.n,mon);}
     if(mv.selfCh&&Math.random()*100<mv.selfCh&&mv.selfUp){/* 彗星拳已处理 */}
-    // 拍落
-    if(mv.knockoff&&foe.item){await say(`${foe.name} 的${IT[foe.item].n}被拍落了！`);foe.item=null;}
+    // 拍落（同时解除讲究锁招）
+    if(mv.knockoff&&foe.item){await say(`${foe.name} 的${IT[foe.item].n}被拍落了！`);foe.item=null;foe.vol.choiceLock=null;}
     // 盐腌
     if(mv.salt&&foe.hp>0){foe.vol.salt=true;await say(`${foe.name} 被盐腌住了！`);}
     // 愤怒之拳计数已在 vol.rage
@@ -2347,9 +2443,11 @@ class Battle{
     if(this.wx){this.wxT--;if(this.wxT<=0){this.wx=null;await say('天气恢复了正常。');}}
     if(this.terrain){this.terrainT--;if(this.terrainT<=0){this.terrain=null;await say('场地恢复了原状。');}}
     if(this.trickT>0){this.trickT--;if(this.trickT===0)await say('戏法空间解除了。');}
-    // 混乱倒计时
-    for(const m of [this.P(),this.E()]){ if(m&&m.vol.confuse>0){m.vol.confuse--;if(m.vol.confuse===0)await say(`${m.name} 的混乱解除了。`);}
-      if(m&&m.vol.taunt>0)m.vol.taunt--; }
+    // 混乱/挑衅倒计时 + ★畏缩只在当回合生效，回合结束统一清除
+    for(const m of [this.P(),this.E()]){ if(!m)continue;
+      m.vol.flinch=false;
+      if(m.vol.confuse>0){m.vol.confuse--;if(m.vol.confuse===0)await say(`${m.name} 的混乱解除了。`);}
+      if(m.vol.taunt>0)m.vol.taunt--; }
     BUI.refresh(this);
     // 低HP提示音
     const Pm=this.P();if(Pm&&Pm.alive()&&Pm.hpPct()<=.2)AU.lowhp();
