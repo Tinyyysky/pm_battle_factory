@@ -1501,7 +1501,8 @@ class P{
 /* ============================================================
    5. 素材（PokéAPI 精灵图，多级回退）
 ============================================================ */
-const SPRBASE='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+// const SPRBASE='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+const SPRBASE='https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/';
 function spriteURLs(id,back){
   if(back)return [SPRBASE+'other/showdown/back/'+id+'.gif',SPRBASE+'versions/generation-v/black-white/animated/back/'+id+'.gif',SPRBASE+'versions/generation-v/black-white/back/'+id+'.png',SPRBASE+'back/'+id+'.png'];
   return [SPRBASE+'other/showdown/'+id+'.gif',SPRBASE+'versions/generation-v/black-white/animated/'+id+'.gif',SPRBASE+id+'.png',SPRBASE+'other/official-artwork/'+id+'.png'];
