@@ -2355,9 +2355,9 @@ class Battle{
     // 检查战斗结束
     if(this.ep.every(m=>!m.alive())){ this.result='win';this.over=true;return; }
     if(this.pp.every(m=>!m.alive())){ this.result='lose';this.over=true;return; }
-    // 换人
-    if(loserSide==='p'){ const idx=await this.chooseParty(false,false); if(idx!=null)await this.doSwitch('p',idx); }
-    else{ const to=this.aiBestSwitch(); if(to>-1)await this.doSwitch('e',to); }
+    // 换人（★濒死替换上场者标记freshEntry：本回合末不结算天气伤害，视为从下一回合开始）
+    if(loserSide==='p'){ const idx=await this.chooseParty(false,false); if(idx!=null){await this.doSwitch('p',idx);this.P().vol.freshEntry=true;} }
+    else{ const to=this.aiBestSwitch(); if(to>-1){await this.doSwitch('e',to);this.E().vol.freshEntry=true;} }
     BUI.refresh(this);
   }
   async gainXP(silent){
@@ -2426,6 +2426,8 @@ class Battle{
     const order=[this.P(),this.E()].filter(m=>m&&m.alive());
     for(const m of order){
       const side=this.sideOf(m);
+      // ★ 本回合因濒死刚替换上场的宝可梦：跳过全部回合末结算（天气/场地/状态/道具/极巨倒计时），视为从下一回合开始
+      if(m.vol.freshEntry){ m.vol.freshEntry=false; continue; }
       // 天气伤害
       if(this.wx==='sand'&&!['rock','ground','steel'].includes(m.types[0])&&!['rock','ground','steel'].includes(m.types[1]||'')){
         if(!m.has('sandveil')&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(m.maxhp/16));await say(`沙暴袭击了 ${m.name}！`);} }
