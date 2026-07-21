@@ -1281,6 +1281,54 @@ function maxPower(mv){ if(!mv.p)return 0; const p=mv.p;
 ============================================================ */
 const STN={atk:'攻击',def:'防御',spa:'特攻',spd:'特防',spe:'速度'};
 const STC={atk:'#e2574c',def:'#3f8fe0',spa:'#8a63d2',spd:'#4caf7d',spe:'#e0912b'};
+/* ============ 对战点数(EV)系统 ============ */
+const EV_RATE=6, EV_MAX=66, EV_STAT=32;
+function evTotal(m){const e=m.ev||{};return (e.hp||0)+(e.atk||0)+(e.def||0)+(e.spa||0)+(e.spd||0)+(e.spe||0);}
+function evCap(m){return Math.min(EV_MAX,(m.battles||0)*EV_RATE);}   // 可分配上限随出场数增长，封顶66
+/* 工厂按轮次生成EV：前期随机且总量低，后期总量趋近66且分配更贴合定位（速攻→主攻+速度，坦克→HP+主攻） */
+function genEV(sp,round){
+  const ev={hp:0,atk:0,def:0,spa:0,spd:0,spe:0};
+  const progress=Math.min(1,(round-1)/6);                       // 第1轮0 → 第7轮起1
+  let total=Math.round(6+progress*54+(Math.random()*2-1)*8);
+  total=Math.max(0,Math.min(EV_MAX,total));
+  const b=sp.s, keys=['hp','atk','def','spa','spd','spe'];
+  const mainAtk=b[1]>=b[3]?'atk':'spa';
+  const isFast=b[5]>=80, isTank=(b[0]>=90||b[2]>=100||b[4]>=100)&&b[5]<70;
+  const w={hp:1,atk:.4,def:.5,spa:.4,spd:.5,spe:.6};
+  w[mainAtk]=3;
+  if(isFast){w.spe=3;w.hp=.8;}
+  if(isTank){w.hp=2.8;w.spe=.2;w[mainAtk]=2.5;}
+  const opt=progress*0.85;                                       // 优化倾向概率，最高85%（保留随机）
+  let remaining=total;
+  while(remaining>0){
+    const cand=keys.filter(k=>ev[k]<EV_STAT);
+    if(!cand.length)break;
+    const chosen=Math.random()<opt?cand.reduce((a,c)=>w[c]>w[a]?c:a,cand[0]):pick(cand);
+    ev[chosen]++;remaining--;
+  }
+  return ev;
+}
+/* ============ 性格系统 ============ */
+const STATNM={atk:'攻击',def:'防御',spa:'特攻',spd:'特防',spe:'速度'};
+const NATURES=[
+  {n:'实干',up:null,down:null},{n:'害羞',up:null,down:null},{n:'认真',up:null,down:null},{n:'浮躁',up:null,down:null},{n:'腼腆',up:null,down:null},
+  {n:'孤僻',up:'atk',down:'def'},{n:'勇敢',up:'atk',down:'spe'},{n:'固执',up:'atk',down:'spa'},{n:'调皮',up:'atk',down:'spd'},
+  {n:'大胆',up:'def',down:'atk'},{n:'淘气',up:'def',down:'spa'},{n:'悠闲',up:'def',down:'spe'},{n:'乐天',up:'def',down:'spd'},
+  {n:'保守',up:'spa',down:'atk'},{n:'慢吞吞',up:'spa',down:'def'},{n:'冷静',up:'spa',down:'spe'},{n:'马虎',up:'spa',down:'spd'},
+  {n:'沉着',up:'spd',down:'atk'},{n:'温顺',up:'spd',down:'def'},{n:'慎重',up:'spd',down:'spa'},{n:'自大',up:'spd',down:'spe'},
+  {n:'胆小',up:'spe',down:'atk'},{n:'急躁',up:'spe',down:'def'},{n:'爽朗',up:'spe',down:'spa'},{n:'天真',up:'spe',down:'spd'},
+];
+function natureDesc(nat){return !nat||!nat.up?'无修正':`↑${STATNM[nat.up]} ↓${STATNM[nat.down]}`;}
+/* 单项能力试算：与recalc同公式（种族+个体+对战点数+性格），供分配面板实时预览 */
+function statPreview(m,k,evVal,nat){
+  const b=m.mega?m.mega.s:m.sp.s;
+  const idx={hp:0,atk:1,def:2,spa:3,spd:4,spe:5}[k];
+  const iv=m.iv??25;
+  let v=Math.floor((2*b[idx]+iv)*m.lvl/100)+(k==='hp'?m.lvl+10:5)+(evVal||0);
+  if(m.id===292&&k==='hp')v=1;
+  if(k!=='hp'){const mult=nat&&nat.up===k?1.1:nat&&nat.down===k?0.9:1;v=Math.floor(v*mult);}
+  return v;
+}
 class P{
   constructor(id,lvl,o={}){
     const sp=SPDB[id]; this.sp=sp; this.id=id; this.name=sp.n; this.lvl=lvl;
@@ -1288,10 +1336,13 @@ class P{
     this.types=sp.t.split('/'); this.baseTypes=this.types.slice();
     this.ability=o.ability||pick(sp.ab); this.item=o.item||null;
     this.teraType=o.tera||pick(TYP);
-    const b=sp.s, iv=o.iv??25; this.iv=iv;
-    this.maxhp=Math.floor((2*b[0]+iv)*lvl/100)+lvl+10; if(this.id===292)this.maxhp=1;
-    this.st={atk:Math.floor((2*b[1]+iv)*lvl/100)+5,def:Math.floor((2*b[2]+iv)*lvl/100)+5,
-      spa:Math.floor((2*b[3]+iv)*lvl/100)+5,spd:Math.floor((2*b[4]+iv)*lvl/100)+5,spe:Math.floor((2*b[5]+iv)*lvl/100)+5};
+    this.iv=o.iv??25;
+    this.ev=o.ev||{hp:0,atk:0,def:0,spa:0,spd:0,spe:0};
+    this.battles=o.battles||0;
+    this.nature=o.nature||pick(NATURES);
+    this.mega=null; this.dyn=false; this.dynT=0; this.tera=false;
+    this.st={atk:0,def:0,spa:0,spd:0,spe:0};
+    this.recalc();
     this.hp=this.maxhp; this.xp=o.xp??lvl*lvl*lvl;
     /* ★ 保证满4招：招式池不足4个时用通用招式补齐（覆盖绿毛虫/鲤鱼王/甜冷美后等稀有招式池） */
     let mk=o.moves?o.moves.slice():sp.mv.slice(0,4);
@@ -1303,8 +1354,25 @@ class P{
     this.stages={atk:0,def:0,spa:0,spd:0,spe:0};
     this.status=null; this.sleepT=0; this.toxicN=0;
     this.vol={}; if(id===778)this.vol.disguise=true;
-    this.mega=null; this.dyn=false; this.dynT=0; this.tera=false;
     this.fainted=false; this.xpGot=false;
+  }
+  /* ★ 重算能力：当前形态(普通/Mega)种族值 + 个体值 + 对战点数(EV)；极巨化时HP翻倍 */
+  recalc(){
+    const b=this.mega?this.mega.s:this.sp.s;
+    const iv=this.iv??25, ev=this.ev||{hp:0,atk:0,def:0,spa:0,spd:0,spe:0};
+    const c=bs=>Math.floor((2*bs+iv)*this.lvl/100)+5;
+    let mhp=Math.floor((2*b[0]+iv)*this.lvl/100)+this.lvl+10+(ev.hp||0);
+    if(this.id===292)mhp=1;
+    if(!this.st)this.st={};
+    /* ★ 性格加成作用于"对战点数加成之后"（HP除外）：有利×1.1 / 不利×0.9 */
+    const nat=this.nature||{up:null,down:null};
+    const nm=k=>nat.up===k?1.1:nat.down===k?0.9:1;
+    this.st.atk=Math.floor((c(b[1])+(ev.atk||0))*nm('atk'));
+    this.st.def=Math.floor((c(b[2])+(ev.def||0))*nm('def'));
+    this.st.spa=Math.floor((c(b[3])+(ev.spa||0))*nm('spa'));
+    this.st.spd=Math.floor((c(b[4])+(ev.spd||0))*nm('spd'));
+    this.st.spe=Math.floor((c(b[5])+(ev.spe||0))*nm('spe'));
+    this.maxhp=this.dyn?mhp*2:mhp;
   }
   hpPct(){return this.hp/this.maxhp;}
   alive(){return !this.fainted&&this.hp>0;}
@@ -1581,11 +1649,7 @@ class Battle{
     /* ★ 跨战斗重置：Mega/极巨/太晶状态清零，属性与能力还原（极巨翻倍的血量也还原） */
     [...this.pp,...this.ep].forEach(m=>{
       m.mega=null;m.dyn=false;m.dynT=0;m.tera=false;m.types=m.baseTypes.slice();
-      const b=m.sp.s,iv=m.iv??25;
-      m.maxhp=Math.floor((2*b[0]+iv)*m.lvl/100)+m.lvl+10;if(m.id===292)m.maxhp=1;
-      m.st.atk=Math.floor((2*b[1]+iv)*m.lvl/100)+5;m.st.def=Math.floor((2*b[2]+iv)*m.lvl/100)+5;
-      m.st.spa=Math.floor((2*b[3]+iv)*m.lvl/100)+5;m.st.spd=Math.floor((2*b[4]+iv)*m.lvl/100)+5;
-      m.st.spe=Math.floor((2*b[5]+iv)*m.lvl/100)+5;
+      m.recalc();
       m.hp=Math.min(m.hp,m.maxhp);m.xpGot=false;
     });
     this.turn=1;
@@ -2398,9 +2462,7 @@ class Battle{
       while(m.xp>=Math.pow(m.lvl+1,3)&&m.lvl<100){
         m.lvl++;AU.level();
         const oldMax=m.maxhp;
-        const b=m.sp.s;
-        m.maxhp=Math.floor((2*b[0]+25)*m.lvl/100)+m.lvl+10;if(m.id===292)m.maxhp=1;
-        for(const k of STATKEYS)m.st[k]=Math.floor((2*b[STATKEYS.indexOf(k)+1]+25)*m.lvl/100)+5;
+        m.recalc();
         m.hp+=m.maxhp-oldMax;
         await say(`🎉 ${m.name} 升到了 Lv.${m.lvl}！`);
         // 学新招式
@@ -2437,7 +2499,7 @@ class Battle{
       /* ★ 极巨化离场即解除（HP按比例折算）；Mega进化与太晶化本场战斗内永久保留 */
       if(old.dyn){
         const pct=old.hp/old.maxhp;
-        old.dyn=false;old.dynT=0;old.maxhp=Math.floor(old.maxhp/2);
+        old.dyn=false;old.dynT=0;old.recalc();
         old.hp=Math.max(1,Math.round(old.maxhp*pct));
         await say(`${old.name} 的极巨化在交换中解除了！`);
         BUI.refresh(this);
@@ -2486,7 +2548,7 @@ class Battle{
       // 极巨化倒计时（★解除时HP按比例折算，而非截断回满）
       if(m.dyn){m.dynT--;if(m.dynT<=0){
         const pct=m.hp/m.maxhp;
-        m.dyn=false;m.maxhp=Math.floor(m.maxhp/2);
+        m.dyn=false;m.recalc();
         m.hp=Math.max(1,Math.round(m.maxhp*pct));
         await say(`${m.name} 的极巨化解除了！HP按比例还原。`);
         BUI.refresh(this);
@@ -2570,9 +2632,7 @@ class Battle{
   async doMega(side,m,idx){
     const cfg=Array.isArray(MEGA[m.id])?MEGA[m.id][idx]:MEGA[m.id];
     m.mega=cfg;m.types=cfg.t.split('/');
-    const b=cfg.s;
-    m.st={atk:Math.floor((2*b[1]+25)*m.lvl/100)+5,def:Math.floor((2*b[2]+25)*m.lvl/100)+5,
-      spa:Math.floor((2*b[3]+25)*m.lvl/100)+5,spd:Math.floor((2*b[4]+25)*m.lvl/100)+5,spe:Math.floor((2*b[5]+25)*m.lvl/100)+5};
+    m.recalc();
     m.ability=cfg.a;
     AU.mega();BUI.burst(side);
     await say(`超级进化！${m.name} 进化成了 Mega${m.name.replace(/\(.+\)/,'')}！`);
@@ -2644,9 +2704,9 @@ const FAC={
     if(it==='eviolite'&&!sp.evo)it='sitrus';
     return it;
   },
-  build(sp,lvl){
+  build(sp,lvl,round){
     const moves=this.pickMoves(sp);
-    return new P(sp.id,lvl,{moves,item:this.pickItem(sp,moves),iv:28,tera:pick(TYP)});
+    return new P(sp.id,lvl,{moves,item:this.pickItem(sp,moves),iv:28,tera:pick(TYP),ev:genEV(sp,round||1)});
   },
   rentalSets(round){
     const minT=round<=1?1:round<=3?2:3, maxT=round<=1?2:round<=2?3:4;
@@ -2654,7 +2714,7 @@ const FAC={
     const sets=[];
     for(let s=0;s<3;s++){
       const set=[];
-      for(let i=0;i<3;i++){ const sp=cands.pop()||pick(SP); set.push(this.build(sp,50)); }
+      for(let i=0;i<3;i++){ const sp=cands.pop()||pick(SP); set.push(this.build(sp,50,round)); }
       sets.push(set);
     }
     return sets;
@@ -2663,11 +2723,11 @@ const FAC={
     const lvl=this.lvl(round,i);
     const isHead=round%3===0&&i===6;
     if(isHead){ return {head:true,team:[
-      this.build(SPDB[275],lvl+4), this.build(SPDB[303],lvl+4), this.build(SPDB[214],lvl+4)]}; }
+      this.build(SPDB[275],lvl+4,round), this.build(SPDB[303],lvl+4,round), this.build(SPDB[214],lvl+4,round)]}; }
     const minT=round<=1?1:round<=3?2:3, maxT=round<=1?2:round<=2?3:4;
     let cands=shuffle(SP.filter(s=>{const t=this.tier(s);return t>=minT&&t<=maxT;}));
     const team=[];
-    for(let k=0;k<3;k++){const sp=cands.pop()||pick(SP);team.push(this.build(sp,lvl));}
+    for(let k=0;k<3;k++){const sp=cands.pop()||pick(SP);team.push(this.build(sp,lvl,round));}
     return {head:false,team};
   },
   ui(){
@@ -2698,9 +2758,13 @@ const FAC={
           const c=el('div','rentCard');
           c.appendChild(miniSprite(m.id));c.children[0].style.width='84px';c.children[0].style.height='84px';
           c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
-            <div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${m.st.atk}</span></div><div class="statMini"><span>防 ${m.st.def}</span><span>速 ${m.st.spe}</span></div>
+            <div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${Math.max(m.st.atk,m.st.spa)}</span></div><div class="statMini"><span>防 ${Math.max(m.st.def,m.st.spd)}</span><span>速 ${m.st.spe}</span></div>
             <div style="font-size:10px;color:#555;font-weight:700;margin-top:3px">${m.moves.map(x=>MV[x.k].n).join('·')}</div>
             <div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span></div>`);
+          const det=el('button','btn tiny','详情');
+          det.style.marginTop='6px';
+          det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};
+          c.appendChild(det);
           row.appendChild(c);
         });
         const btn=el('button','btn blue','租借队伍 '+L);btn.style.width='100%';
@@ -2729,12 +2793,19 @@ const FAC={
     });
     if(r.result==='win'){
       GM.fac.win++;GM.fac.bp+=GM.fac.round;
+      [...r.battle.participants].forEach(m=>{ if(GM.fac.party.includes(m)) m.battles=(m.battles||0)+1; });
       const streak=(GM.fac.round-1)*7+GM.fac.win;
       if(streak>GM.fac.best){GM.fac.best=streak;localStorage.setItem('pif_best',streak);}
       AU.jingle('win');
       await fadeTo('#factory');
       await dlg('广播','胜利！获得 '+GM.fac.round+' BP！可以选择交换对手的宝可梦。',132);
       await this.swapScreen(et.team);
+      /* ★ 每3场（交换宝可梦之后）可为当前队伍一只宝可梦自由分配对战点数 */
+      if(GM.fac.win%3===0 && GM.fac.party.some(m=>evCap(m)-evTotal(m)>0)){
+        await dlg('广播','你的宝可梦通过实战成长了！可以为其中一只分配对战点数。',132);
+        await openEVAllocation(GM.fac.party);
+        this.ui();
+      }
       if(GM.fac.win>=7){
         GM.fac.bp+=10;GM.fac.round++;GM.fac.win=0;GM.fac.party=null;
         AU.jingle('badge');
@@ -2831,14 +2902,25 @@ const STORY={
     const rs=GM.story.rivalStarter;
     const team=lvl<=10?[newMon(rs,lvl)]:lvl<=20?[newMon(16,lvl-2),newMon(rs,lvl)]:[newMon(18,lvl-4),newMon(130,lvl-3),newMon(rs,lvl)];
     const r=await startBattle({player:GM.story.party,enemy:team,trainer:'劲敌·小茂',rules:{capture:false,run:false},ai:1.2});
-    if(r.result==='lose'){await dlg('小茂','哈哈哈！就凭你还想当冠军？再练一百年吧！',6);await this.heal();await this.rivalBattle(lvl);}
+    if(r.result==='lose'){await dlg('小茂','哈哈哈！就凭你还想当冠军？再练一百年吧！',6);await this.heal();await this.rivalBattle(lvl);return;}
+    await this.postBattle(r);
   },
   async heal(){ healAll(GM.story.party); AU.heal(); await dlg('宝可梦中心','欢迎来到宝可梦中心！您的宝可梦已经完全恢复了！',113); },
+    async postBattle(r){
+    if(!r||!r.battle)return;
+    [...r.battle.participants].forEach(m=>{ if(GM.story.party.includes(m)) m.battles=(m.battles||0)+1; });
+    GM.story.battleCount=(GM.story.battleCount||0)+1;
+    if(GM.story.battleCount%3===0 && GM.story.party.some(m=>evCap(m)-evTotal(m)>0)){
+      await dlg('大木博士','你的宝可梦通过实战成长了！现在可以为其中一只分配对战点数（提升能力）。',151);
+      await openEVAllocation(GM.story.party);
+    }
+  },
   async wild(ids,lo,hi){
     const id=pick(ids);const m=newMon(id,rnd(lo,hi));
     const r=await startBattle({player:GM.story.party,enemy:[m],wild:true,rules:{capture:true,run:true,items:true},ai:.7});
     if(r.result==='capture'){ await this.addToParty(r.battle.caught); }
     if(r.result==='lose'){await this.heal();}
+    await this.postBattle(r);
     return r;
   },
   async addToParty(m){
@@ -2847,13 +2929,15 @@ const STORY={
   },
   async trainer(name,team,sprite,after){
     await dlg(name,'训练家对战，开始！',sprite);
+    let r;
     while(true){
-      const r=await startBattle({player:GM.story.party,enemy:team.map(t=>newMon(t[0],t[1])),trainer:name,rules:{capture:false,run:false},ai:1.3});
+      r=await startBattle({player:GM.story.party,enemy:team.map(t=>newMon(t[0],t[1])),trainer:name,rules:{capture:false,run:false},ai:1.3});
       if(r.result==='win'){break;}
       await dlg(name,'哈哈，你还差得远呢！再来！',sprite);
       await this.heal();
     }
     AU.jingle('win');
+    await this.postBattle(r);
     if(after)await after();
   },
   async chapterLoop(){
@@ -3051,7 +3135,7 @@ Battle.prototype.resolveForms=async function(pa,ea){
       if(Array.isArray(MEGA[Pm.id])){idx=await dlgChoices('超级进化',Pm.name+' 可以进化成两种形态，选择哪一种？',MEGA[Pm.id].map(c=>c.stone));}
       this.usedForm.p=true;this.doMega('p',Pm,idx);await sleep(700);
     } else if(pa.dyn&&this.rules.dyna&&!this.usedForm.p&&!Pm.dyn&&!Pm.mega){
-      this.usedForm.p=true;Pm.dyn=true;Pm.dynT=3;Pm.maxhp*=2;Pm.hp*=2;
+      this.usedForm.p=true;Pm.dyn=true;Pm.dynT=3;Pm.recalc();Pm.hp*=2;
       AU.dyna();await say(`极巨化！${Pm.name} 的体型变得巨大了！HP翻倍！`);BUI.refresh(this);
     } else if(pa.tera&&this.rules.tera&&!this.usedForm.p&&!Pm.tera){
       this.usedForm.p=true;Pm.tera=true;Pm.types=[Pm.teraType];
@@ -3063,7 +3147,7 @@ Battle.prototype.resolveForms=async function(pa,ea){
     if(ea.mega&&this.rules.mega&&MEGA[E.id]&&!this.usedForm.e&&!E.mega&&!E.dyn){
       this.usedForm.e=true;this.doMega('e',E,ea.megaIdx||0);await sleep(700);
     } else if(ea.dyn&&this.rules.dyna&&!this.usedForm.e&&!E.dyn&&!E.mega){
-      this.usedForm.e=true;E.dyn=true;E.dynT=3;E.maxhp*=2;E.hp*=2;
+      this.usedForm.e=true;E.dyn=true;E.dynT=3;E.recalc();E.hp*=2;
       AU.dyna();await say(`极巨化！${E.name} 的体型变得巨大了！`);BUI.refresh(this);
     } else if(ea.tera&&this.rules.tera&&!this.usedForm.e&&!E.tera){
       this.usedForm.e=true;E.tera=true;E.types=[E.teraType];
@@ -3163,6 +3247,7 @@ function showDetail(m,battle){
     <div class="dMetaRow">${m.types.map(tyBadge).join('')}</div>
     <div class="dMetaRow">
       <span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span>
+      <span class="abchip" style="color:#c07a2a;border-color:#e0b080;background:linear-gradient(180deg,#fff2e0,#ffe0b8)" title="${natureDesc(m.nature)}">性格·${m.nature?.n||'—'}${m.nature?.up?` ${natureDesc(m.nature)}`:''}</span>
       ${m.item?`<span class="abchip" style="color:#a06a00;border-color:#e0c060;background:linear-gradient(180deg,#fff8e0,#ffe9a8)" title="${IT[m.item]?.d||''}">🎒 ${IT[m.item].n}</span>`:''}
       <span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;background:linear-gradient(180deg,#e0fbff,#b8f0f8)">✦ 太晶·${TNAME[m.teraType]}</span>
       ${m.status?`<span class="abchip" style="color:#c22e28;border-color:#e08a8a;background:#ffe8e8">${STNAME[m.status]||m.status}</span>`:''}
@@ -3184,8 +3269,8 @@ function showDetail(m,battle){
     const eff=i>0&&battle?m.effStat(k,battle):val;
     const stCol=stage>0?'#ff6b57':'#5aa0ff';
     statHtml+=`<div class="dStatRow">
-      <span class="dStatNm" style="color:${stCols[i]}">${names[i]}</span>
-      <span class="dStatBase">种族 ${sp.s[i]}</span>
+      <span class="dStatNm" style="color:${stCols[i]}">${names[i]}${m.nature?.up===['hp','atk','def','spa','spd','spe'][i]?' <b style="color:#e2574c">↑</b>':m.nature?.down===['hp','atk','def','spa','spd','spe'][i]?' <b style="color:#3f8fe0">↓</b>':''}</span>
+      <span class="dStatBase">种族${sp.s[i]}${(m.ev[['hp','atk','def','spa','spd','spe'][i]]||0)?` <b style="color:#e07b00">+${m.ev[['hp','atk','def','spa','spd','spe'][i]]}</b>`:''}</span>
       <span class="dStatVal">${i===0?val:eff}${stage?` <em style="color:${stCol};font-style:normal">${stage>0?'▲':'▼'}${Math.abs(stage)}</em>`:''}</span>
       <div class="dStatBar"><i style="width:${Math.min(100,val/1.9)}%;background:${val>=100?'#3ecf6c':val>=70?'#8bc34a':val>=45?'#f2c230':'#ef4444'}"></i></div>
     </div>`;
@@ -3217,6 +3302,82 @@ function settingsRow(label,desc,get,set){
   b.onclick=()=>{ set(!get()); b.textContent=get()?'已开启':'已关闭'; b.classList.toggle('blue',get()); AU.cursor(); };
   r.appendChild(b);
   return r;
+}
+/* ============ 对战点数自由分配面板 ============ */
+function openEVAllocation(team){
+  return new Promise(res=>{
+    const ov=$('#partyOv');ov.classList.remove('hidden');
+    let offEsc=null;
+    const finish=v=>{ if(offEsc){offEsc();offEsc=null;} ov.classList.add('hidden'); res(v); };
+    offEsc=onEsc(()=>{AU.no();finish(false);});
+    const keys=['hp','atk','def','spa','spd','spe'],names=['HP','攻击','防御','特攻','特防','速度'];
+    const stCols=['#e07b00','#e2574c','#3f8fe0','#8a63d2','#4caf7d','#e0912b'];
+    function picker(){
+      ov.innerHTML='';
+      const box=el('div','ovBox panel');box.style.maxWidth='560px';ov.appendChild(box);
+      box.appendChild(el('h3','disp','★ 分配对战点数'));
+      box.insertAdjacentHTML('beforeend','<div style="font-size:12px;color:#888;margin-bottom:8px">选择一只宝可梦分配对战点数（单项≤32，总和上限随出场数提升，最高66）</div>');
+      team.forEach(m=>{
+        const cap=evCap(m),used=evTotal(m),avail=Math.max(0,cap-used);
+        const s=el('div','slot');s.appendChild(miniSprite(m.id));
+        s.insertAdjacentHTML('beforeend',`<div style="flex:1"><b>${m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span>
+          <div style="font-size:11px;color:#666">出场 ${m.battles||0} 场 · 已分配 ${used}/66 · <b style="color:${avail>0?'#3ecf6c':'#999'}">可再分配 +${avail}</b></div></div>`);
+        if(avail>0)s.onclick=()=>{AU.ok();panel(m);}; else s.style.opacity='.5';
+        box.appendChild(s);
+      });
+      const cancel=el('button','btn small','稍后再说');cancel.style.marginTop='10px';
+      cancel.onclick=()=>{AU.no();finish(false);};
+      box.appendChild(cancel);
+    }
+    function panel(m){
+      ov.innerHTML='';
+      const box=el('div','ovBox panel');box.style.maxWidth='560px';ov.appendChild(box);
+      const cap=evCap(m);
+      const draft={hp:m.ev.hp,atk:m.ev.atk,def:m.ev.def,spa:m.ev.spa,spd:m.ev.spd,spe:m.ev.spe};
+      let natIdx=NATURES.indexOf(m.nature); if(natIdx<0)natIdx=0;
+      box.appendChild(el('h3','disp',`分配对战点数 · ${m.name}`));
+      const info=el('div','');info.style.cssText='font-size:12px;color:#888;margin:6px 0';box.appendChild(info);
+      /* ★ 性格选择（与点数同时更改） */
+      const natRow=el('div','');natRow.style.cssText='display:flex;align-items:center;gap:8px;margin:6px 0';
+      natRow.innerHTML=`<span style="width:42px;font-weight:900;color:#c07a2a">性格</span>`;
+      const sel=el('select','');sel.style.cssText='flex:1;padding:5px;border:2px solid var(--ink);border-radius:6px;font-family:inherit;font-size:13px';
+      NATURES.forEach((nat,idx)=>{const opt=el('option','',nat.n+(nat.up?`（↑${STATNM[nat.up]} ↓${STATNM[nat.down]}）`:'（无修正）'));opt.value=idx;sel.appendChild(opt);});
+      sel.value=natIdx;
+      sel.onchange=()=>{natIdx=+sel.value;AU.cursor();refresh();};
+      natRow.appendChild(sel);box.appendChild(natRow);
+      const wrap=el('div','');box.appendChild(wrap);
+      const ctrls={};
+      function refresh(){
+        const used=keys.reduce((a,k)=>a+draft[k],0),remain=cap-used;
+        const nat=NATURES[natIdx];
+        info.innerHTML=`可分配上限 <b>${cap}</b>（出场 ${m.battles||0} 场）· 已用 <b>${used}</b> · 剩余 <b style="color:${remain>0?'#3ecf6c':'#e2574c'}">${remain}</b>`;
+        keys.forEach((k,i)=>{const c=ctrls[k];
+          const raw=statPreview(m,k,0,{up:null,down:null});
+          const fin=statPreview(m,k,draft[k],nat);
+          c.val.textContent=draft[k];
+          c.name.innerHTML=`${names[i]}${nat.up===k?' <b style="color:#e2574c">↑</b>':nat.down===k?' <b style="color:#3f8fe0">↓</b>':''}`;
+          c.stat.innerHTML=`基础${raw} → <b style="color:${fin>raw?'#3ecf6c':fin<raw?'#e2574c':'#666'}">${fin}</b>`;
+          c.minus.disabled=draft[k]<=0;c.plus.disabled=draft[k]>=EV_STAT||remain<=0;});
+      }
+      keys.forEach((k,i)=>{
+        const r=el('div','');r.style.cssText='display:flex;align-items:center;gap:8px;margin:5px 0';
+        const name=el('span','');name.style.cssText=`width:52px;font-weight:900;color:${stCols[i]}`;
+        const minus=el('button','btn tiny','－'),val=el('span','px','0'),plus=el('button','btn tiny','＋'),stat=el('span','');
+        val.style.cssText='font-size:9px;width:34px;text-align:center';stat.style.cssText='font-size:11px;color:#666;margin-left:6px';
+        r.appendChild(name);r.appendChild(minus);r.appendChild(val);r.appendChild(plus);r.appendChild(stat);
+        minus.onclick=()=>{if(draft[k]>0){draft[k]--;AU.cursor();refresh();}};
+        plus.onclick=()=>{const used=keys.reduce((a,kk)=>a+draft[kk],0);if(draft[k]<EV_STAT&&used<cap){draft[k]++;AU.cursor();refresh();}};
+        wrap.appendChild(r);ctrls[k]={name,minus,val,plus,stat};
+      });
+      refresh();
+      const btnRow=el('div','');btnRow.style.cssText='display:flex;gap:10px;margin-top:12px';
+      const ok=el('button','btn red','确认分配');
+      ok.onclick=()=>{m.ev={...draft};m.nature=NATURES[natIdx];m.recalc();if(m.hp>m.maxhp)m.hp=m.maxhp;AU.ok();finish(true);};
+      const back=el('button','btn','← 返回选择');back.onclick=()=>{AU.no();picker();};
+      btnRow.appendChild(ok);btnRow.appendChild(back);box.appendChild(btnRow);
+    }
+    picker();
+  });
 }
 function openSettings(){
   const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
