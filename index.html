@@ -351,7 +351,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 #pshadow.dyn{left:94px}
 .pshadow.gone{opacity:0!important}
 .psprite{position:absolute;z-index:4;object-fit:contain;transition:transform .5s, opacity .5s, filter .3s}
-#espr{width:150px;height:150px;top:96px;right:135px;animation:bobE 2.6s ease-in-out infinite}
+#espr{width:150px;height:150px;top:120px;right:135px;animation:bobE 2.6s ease-in-out infinite}
 #pspr{width:180px;height:180px;bottom:150px;left:105px;animation:bobP 2.6s ease-in-out infinite}
 @keyframes bobE{50%{transform:translateY(-6px)}}
 @keyframes bobP{50%{transform:translateY(-7px)}}
@@ -370,6 +370,18 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .psprite.lungeE{animation:lungeE .45s ease-in}
 @keyframes lungeE{40%{transform:translate(-70px,60px) scale(1.06)}}
 .psprite.faint{transform:translateY(60px)!important;opacity:0}
+/* ============ 特性触发横幅 ============ */
+#abilityBanner{position:absolute;z-index:16;display:flex;align-items:center;gap:8px;
+  background:linear-gradient(90deg,rgba(30,27,50,.96),rgba(30,27,50,.75));
+  border:2px solid #ffd93b;border-radius:10px;padding:6px 16px 6px 8px;
+  pointer-events:none;transition:opacity .35s,transform .35s}
+#abilityBanner.left{left:16px;top:175px;border-left:4px solid #ffd93b;animation:abSlideL .35s ease-out}
+#abilityBanner.right{right:16px;top:100px;border-right:4px solid #ffd93b;animation:abSlideR .35s ease-out}
+@keyframes abSlideL{from{transform:translateX(-40px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes abSlideR{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+#abilityBanner.hide{opacity:0;transform:translateX(24px)}
+#abilityBanner img{width:42px;height:42px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+#abilityBanner span{font-family:'ZCOOL KuaiLe';font-size:15px;color:#ffd93b;letter-spacing:2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 .megaburst{position:absolute;width:220px;height:220px;border-radius:50%;pointer-events:none;z-index:8;
   background:radial-gradient(circle,#fff 0%,rgba(255,220,120,.9) 30%,rgba(255,120,200,.5) 55%,transparent 70%);
   animation:burst .8s ease-out forwards}
@@ -742,6 +754,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
       <div class="icard" id="ecard"></div>
       <div class="icard" id="pcard"></div>
       <div id="fxlayer" style="position:absolute;inset:0;pointer-events:none;z-index:8"></div>
+<div id="abilityBanner" class="hidden"><img id="abBannerImg" src=""><span id="abBannerName"></span></div>
     </div>
     <div id="bui">
       <div id="msgpanel" class="panel"><div id="msg"></div></div>
@@ -1066,6 +1079,7 @@ A('unaware','纯朴','无视对手的能力变化');A('toxicdebris','毒满地',
 A('quarkdrive','夸克充能','电场下最高能力×1.3（速度×1.5，HP除外）');
 A('protosynthesis','古代活性','晴天下最高能力×1.3（速度×1.5，HP除外）');
 A('hadronengine','强子引擎','出场开启电场，电场下特攻×1.3');
+A('orichalcumpulse','绯红脉动','出场开启晴天，电场下物攻×1.3');
 A('fairyaura','妖精光环','全场妖精招式×1.33');A('darkaura','暗黑光环','全场恶属性招式×1.33');
 A('intrepidsword','不挠之剑','出场时攻击提升');A('dauntlessshield','不屈之盾','出场时防御提升');
 A('multitype','多属性','阿尔宙斯专属');A('victorystar2','胜利之星','命中率提升');
@@ -1566,7 +1580,10 @@ const BUI={
     const SN={atk:'攻',def:'防',spa:'特攻',spd:'特防',spe:'速'};
     const stgs=STATKEYS.filter(k=>m.stages[k]!==0).map(k=>{const v=m.stages[k];
       return `<span class="stg ${v>0?'up':'dn'}${changed?' anim':''}">${SN[k]}${v>0?'▲':'▼'}${Math.abs(v)}</span>`;}).join('');
-    const stgrow=stgs?`<div class="stgrow">${stgs}</div>`:'';
+    /* ★ 古代活性/夸克充能：独立芯片显示（不属于能力等级） */
+const protoActive=(m.has('protosynthesis')&&b&&b.wx==='sun')||(m.has('quarkdrive')&&b&&b.terrain==='electric');
+const protoChip=protoActive?`<span class="stg up" style="background:#fff3c4;color:#c07a2a;border-color:#f2c230">⚡${AB[m.ability]?.n||''} ${STN[m.bestStat()]}↑</span>`:'';
+const stgrow=(stgs||protoChip)?`<div class="stgrow">${protoChip}${stgs}</div>`:'';
     return `<div class="row1"><span class="nm">${m.name}${m.shiny?' ✦':''}</span><span class="lv">${m.lvl}</span>${stch}${tags}</div>
       <div style="margin-top:2px">${types}</div>
       <div class="hpwrap"><span class="hplabel">HP</span><div class="hpbar"><div class="hpfill ${cls}" style="width:${pct}%"></div></div></div>
@@ -1835,6 +1852,16 @@ function typeVFX(type,side){
     setTimeout(()=>p.remove(),1400);
   }
 }
+/* ============ 特性触发横幅 ============ */
+function showAbilityBanner(mon,side){
+  const banner=$('#abilityBanner');
+  setSprite($('#abBannerImg'),mon.mega?mon.mega.f:mon.id,side==='p');
+  $('#abBannerName').textContent=AB[mon.ability]?.n||mon.ability;
+  banner.className=side==='p'?'left':'right';
+  banner.classList.remove('hidden','hide');
+  clearTimeout(banner._t);
+  banner._t=setTimeout(()=>{banner.classList.add('hide');setTimeout(()=>banner.classList.add('hidden'),350);},1600);
+}
 /* 变化招式共用：金色光环 + 上升星屑 */
 function statusVFX(side){
   const layer=$('#fxlayer');
@@ -1968,9 +1995,12 @@ m.vol={};if(m.id===778)m.vol.disguise=true;m.vol.switchedInThisTurn=true;m.stage
     if(h.spikes){ const immune=m.types.includes('flying')||m.has('levitate');
       if(!immune){ const d=Math.max(1,Math.floor(m.maxhp/[8,6,4][Math.min(h.spikes,3)-1])); await this.directDmg(m,d,side,`撒菱扎伤了${m.name}！`);} }
   }
-  async switchInAbility(m){
-    const foe=this.foeOf(m); const ab=m.ability; const side=this.sideOf(m);
-    const msg=t=>say(`${m.name} 的特性发动了！${t}`);
+async switchInAbility(m){
+const foe=this.foeOf(m); const ab=m.ability; const side=this.sideOf(m);
+/* ★ 特性触发横幅：出场特性实际生效时弹出 */
+const willTrigger=(ab==='intimidate'&&foe&&foe.alive())||['drought','drizzle','sandstream','snowwarning','orichalcumpulse','hadronengine','grassysurge','intrepidsword','dauntlessshield','swordofruin','fairyaura','darkaura'].includes(ab)||(ab==='download'&&foe)||(ab==='trace'&&foe)||(ab==='quarkdrive'&&this.terrain==='electric')||(ab==='protosynthesis'&&this.wx==='sun');
+if(willTrigger)showAbilityBanner(m,side);
+const msg=async t=>{await say(`${m.name} 的特性发动了！${t}`);};
     if(ab==='intimidate'&&foe&&foe.alive()){ await msg(''); await this.changeStat(foe,'atk',-1,m); }
     if(ab==='drought'){await this.setWeather('sun',m);} if(ab==='drizzle'){await this.setWeather('rain',m);}
     if(ab==='sandstream'){await this.setWeather('sand',m);} if(ab==='snowwarning'){await this.setWeather('hail',m);}
@@ -2287,7 +2317,7 @@ if(this.over)return;
       }
       await say(`${mon.name} 陷入了混乱！`);
     }
-    if(mon.vol.flinch){mon.vol.flinch=false;if(mon.has('steadfastx')){await this.changeStat(mon,'spe',1,mon);await say(`${mon.name} 的不屈之心发动了！`);}await say(`${mon.name} 因害怕而无法行动！`);return;}
+    if(mon.vol.flinch){mon.vol.flinch=false;if(mon.has('steadfastx')){this.abBanner(mon);await this.changeStat(mon,'spe',1,mon);await say(`${mon.name} 的不屈之心发动了！`);}await say(`${mon.name} 因害怕而无法行动！`);return;}
     // ★ 诅咒之躯封印：被封印的招式无法使用
 if(mon.vol.disabled&&mon.vol.disabled.k===mvk){
   await say(`${mon.name} 的${mv.n}被封印了，无法使用！`);return;
@@ -2323,7 +2353,7 @@ if(mon.vol.disabled&&mon.vol.disabled.k===mvk){
     }
  // 变换自如/自由者：太晶化后属性锁定不触发；单属性使用本系招式（属性本就不变）也不触发
 if((mon.has('protean')||mon.has('libero'))&&!mon.vol.proteanUsed&&!mon.tera&&useMv.c!=='X'&&useMv.t!=='normal'&&!(mon.types.length===1&&mon.types[0]===useMv.t)){
-mon.vol.proteanUsed=true;mon.types=[useMv.t];await say(`${mon.name} 的${AB[mon.ability].n}发动了！变成了${TNAME[useMv.t]}属性！`);}
+mon.vol.proteanUsed=true;mon.types=[useMv.t];showAbilityBanner(mon,side);await say(`${mon.name} 的${AB[mon.ability].n}发动了！变成了${TNAME[useMv.t]}属性！`);}
     // 坚盾剑怪形态
     if(mon.has('stancechange')){ if(useMv.k==='kingshield'){mon.vol.shield=true;} else if(useMv.c!=='X'){mon.vol.shield=false;}
       mon.st.def=mon.vol.shield?Math.floor(mon.st.def*1):mon.st.def; }
@@ -2342,7 +2372,7 @@ mon.vol.proteanUsed=true;mon.types=[useMv.t];await say(`${mon.name} 的${AB[mon.
     // ★ 精神场地：地面上的宝可梦不受先制招式影响
     if(this.terrain==='psychic'&&(useMv.pri||0)>0&&this.grounded(foe)){await say('精神场地挡住了先制招式！');return;}
     // 女王的威严
-    if((useMv.pri||0)>0&&foe.has('queenmajesty')){await say(`${foe.name} 的女王的威严发动了！${useMv.n} 失败了！`);return;}
+    if((useMv.pri||0)>0&&foe.has('queenmajesty')){this.abBanner(foe);await say(`${foe.name} 的女王的威严发动了！${useMv.n} 失败了！`);return;}
     // ★ 突袭判定：目标必须正在使用攻击招式、且本回合尚未出手，否则失败
 if(useMv.sucker){
 const foePlan=foe.vol.plannedMove;
@@ -2416,6 +2446,7 @@ if(acc!=null&&!mon.has('keeneye')&&!mon.has('illuminate')){
     BUI.refresh(this);
   }
   foeSide(s){return s==='p'?'e':'p';}
+  abBanner(m){showAbilityBanner(m,this.sideOf(m));}
   sideAliveCount(s){return (s==='p'?this.pp:this.ep).filter(m=>m.alive()).length;}
   async uturnSwitch(side,mon){
     await say(`${mon.name} 使用急速折返退场了！`);
@@ -2430,9 +2461,9 @@ if(acc!=null&&!mon.has('keeneye')&&!mon.has('illuminate')){
     if(imm==='absorb'){return {dmg:0,immune:true};}
     // 神奇守护
     const e0=effMult(mv.t,foe.types);
-if(foe.has('wonderguard')&&e0<=1&&!mv.ignAb){await say(`${foe.name} 的神奇守护发动了！只有效果绝佳的招式才能击中！`);return {dmg:0,immune:true};}
+    if(foe.has('wonderguard')&&e0<=1&&!mv.ignAb){this.abBanner(foe);await say(`${foe.name} 的神奇守护发动了！只有效果绝佳的招式才能击中！`);return {dmg:0,immune:true};}
 // ★ 防弹：免疫弹类/球类招式
-if(foe.has('bulletproof')&&mv.bullet){await say(`${foe.name} 的防弹特性发动了！${mv.n}无效！`);return {dmg:0,immune:true};}
+    if(foe.has('bulletproof')&&mv.bullet){this.abBanner(foe);await say(`${foe.name} 的防弹特性发动了！${mv.n}无效！`);return {dmg:0,immune:true};}
 // 保护
 let protectPierce=false;
 if(foe.vol.protect&&!(mon.has('unseenfist')&&mv.ct)){
@@ -2456,7 +2487,7 @@ if(protectPierce)dmg=Math.max(1,Math.floor(dmg/4));   // ★ 穿透保护：1/4�
     // ★ 画皮：完全抵挡一次伤害，破损时反噬自身1/8 HP；极巨招式打在画皮上仍触发天气/场地/能力效果
 // ★ 破格/流星闪冲等无视对手特性的招式可穿透画皮
 if(foe.vol.disguise&&!mon.has('moldbreaker')&&!mv.ignAb){
-      foe.vol.disguise=false;
+      foe.vol.disguise=false;this.abBanner(foe);
       await say(`${foe.name} 的画皮抵挡了攻击！`);
       BUI.dmgPop(side==='p'?'e':'p','抵挡','#ffd93b');
       if(!foe.has('magicguard')){
@@ -2477,7 +2508,7 @@ if(foe.vol.disguise&&!mon.has('moldbreaker')&&!mv.ignAb){
       return {dmg:0};
     }
     if(dmg>=foe.hp){ if(foe.item==='focussash'&&foe.hp===foe.maxhp){dmg=foe.hp-1;await say(`${foe.name} 靠气势腰带撑住了！`);}
-      else if(foe.has('sturdy')&&foe.hp===foe.maxhp&&!mv.ignAb){dmg=foe.hp-1;await say(`${foe.name} 靠结实撑住了！`);} }
+      else if(foe.has('sturdy')&&foe.hp===foe.maxhp&&!mv.ignAb){dmg=foe.hp-1;this.abBanner(foe);await say(`${foe.name} 靠结实撑住了！`);} }
     // 动画 + ★属性攻击特效（与受击动画同步）
     const tgtSpr=side==='p'?BUI.espr:BUI.pspr;
     typeVFX(mv.t, side==='p'?'e':'p');
@@ -2496,22 +2527,22 @@ if(foe.vol.disguise&&!mon.has('moldbreaker')&&!mv.ignAb){
     }
     // 接触副作用
     if(mv.ct&&!mon.has('magicguard')){
-      if(foe.has('ironbarbs')||foe.has('roughskin')){await this.directDmg(mon,Math.max(1,Math.floor(mon.baseMax/8)),side,`${foe.name} 的${AB[foe.ability].n}伤害了 ${mon.name}！`);}
-if(foe.has('effectspore')&&Math.random()<.3&&!mon.status){await this.inflictStatus(mon,pick(['psn','par','sleep']),foe);} }
+      if(foe.has('ironbarbs')||foe.has('roughskin')){this.abBanner(foe);await this.directDmg(mon,Math.max(1,Math.floor(mon.baseMax/8)),side,`${foe.name} 的${AB[foe.ability].n}伤害了 ${mon.name}！`);}
+      if(foe.has('effectspore')&&Math.random()<.3&&!mon.status){this.abBanner(foe);await this.inflictStatus(mon,pick(['psn','par','sleep']),foe);} }
 // ★ 顺手牵羊：被接触招式击中时偷走对手道具（自身无道具时）
-if(mv.ct&&foe.has('pickpocket')&&!foe.item&&mon.item&&foe.hp>0){
-  const stolen=mon.item;mon.item=null;foe.item=stolen;
-  await say(`${foe.name} 的顺手牵羊发动了！偷走了${mon.name}的${IT[stolen].n}！`);
+    if(mv.ct&&foe.has('pickpocket')&&!foe.item&&mon.item&&foe.hp>0){
+      const stolen=mon.item;mon.item=null;foe.item=stolen;this.abBanner(foe);
+      await say(`${foe.name} 的顺手牵羊发动了！偷走了${mon.name}的${IT[stolen].n}！`);
 }
 // ★ 诅咒之躯：被击中时30%几率封印对手招式4回合
 if(foe.has('cursedbodyx')&&mv.k!=='struggle'&&!mon.vol.disabled&&foe.hp>0&&Math.random()<0.3){
-mon.vol.disabled={k:mv.k,turns:4};
+mon.vol.disabled={k:mv.k,turns:4};this.abBanner(foe);
 await say(`${mon.name} 的${mv.n}被${foe.name}的诅咒之躯封印了！`);
 }
 // 弱点保险
-if(foe.has('static')&&Math.random()<.3&&!mon.status){await this.inflictStatus(mon,'par',foe,'electric');}
-if(foe.has('flamebody')&&Math.random()<.3&&!mon.status){await this.inflictStatus(mon,'burn',foe,'fire');}
-if(foe.has('poisonpoint')&&Math.random()<.3&&!mon.status){await this.inflictStatus(mon,'psn',foe,'poison');} 
+    if(foe.has('static')&&Math.random()<.3&&!mon.status){this.abBanner(foe);await this.inflictStatus(mon,'par',foe,'electric');}
+    if(foe.has('flamebody')&&Math.random()<.3&&!mon.status){this.abBanner(foe);await this.inflictStatus(mon,'burn',foe,'fire');}
+    if(foe.has('poisonpoint')&&Math.random()<.3&&!mon.status){this.abBanner(foe);await this.inflictStatus(mon,'psn',foe,'poison');}
     // 弱点保险
     if(r.eff>1&&foe.item==='weaknesspolicy'&&!foe.fainted){foe.item=null;await this.changeStat(foe,'atk',2,foe);await this.changeStat(foe,'spa',2,foe);await say(`${foe.name} 的弱点保险发动了！`);}
     // 气球破裂
@@ -2555,14 +2586,14 @@ if(foe.has('poisonpoint')&&Math.random()<.3&&!mon.status){await this.inflictStat
    async checkImmunity(mon,foe,mv){
     if(mv.ignAb)return null;
     const t=mv.t;
-    if(t==='ground'){ if(foe.has('levitate')){await say(`${foe.name} 漂浮在空中！`);return 'immune';}
+    if(t==='ground'){ if(foe.has('levitate')){this.abBanner(foe);await say(`${foe.name} 漂浮在空中！`);return 'immune';}
       if(foe.item==='airballoon'){await say(`${foe.name} 靠气球浮在空中！`);return 'immune';} }
-    if(t==='electric'&&foe.has('voltabsorb')){foe.hp=Math.min(foe.maxhp,foe.hp+Math.floor(foe.maxhp/4));await say(`${foe.name} 的蓄电发动了，回复了HP！`);AU.heal();return 'absorb';}
-    if(t==='water'&&foe.has('waterabsorb')){foe.hp=Math.min(foe.maxhp,foe.hp+Math.floor(foe.maxhp/4));await say(`${foe.name} 的储水发动了，回复了HP！`);AU.heal();return 'absorb';}
-    if(t==='water'&&foe.has('stormdrain')){await this.changeStat(foe,'spa',1,foe);await say(`${foe.name} 的引水发动了！`);return 'absorb';}
-    if(t==='electric'&&foe.has('lightningrod')){await this.changeStat(foe,'spa',1,foe);await say(`${foe.name} 的避雷针发动了！`);return 'absorb';}
-    if(t==='fire'&&foe.has('flashfire')){foe.vol.ff=true;await say(`${foe.name} 的引火发动了！火属性招式威力提升了！`);return 'absorb';}
-    if(t==='grass'&&foe.has('sapsipper')){await this.changeStat(foe,'atk',1,foe);await say(`${foe.name} 的食草发动了！`);return 'absorb';}
+    if(t==='electric'&&foe.has('voltabsorb')){this.abBanner(foe);foe.hp=Math.min(foe.maxhp,foe.hp+Math.floor(foe.maxhp/4));await say(`${foe.name} 的蓄电发动了，回复了HP！`);AU.heal();return 'absorb';}
+    if(t==='water'&&foe.has('waterabsorb')){this.abBanner(foe);foe.hp=Math.min(foe.maxhp,foe.hp+Math.floor(foe.maxhp/4));await say(`${foe.name} 的储水发动了，回复了HP！`);AU.heal();return 'absorb';}
+    if(t==='water'&&foe.has('stormdrain')){this.abBanner(foe);await this.changeStat(foe,'spa',1,foe);await say(`${foe.name} 的引水发动了！`);return 'absorb';}
+    if(t==='electric'&&foe.has('lightningrod')){this.abBanner(foe);await this.changeStat(foe,'spa',1,foe);await say(`${foe.name} 的避雷针发动了！`);return 'absorb';}
+    if(t==='fire'&&foe.has('flashfire')){this.abBanner(foe);foe.vol.ff=true;await say(`${foe.name} 的引火发动了！火属性招式威力提升了！`);return 'absorb';}
+    if(t==='grass'&&foe.has('sapsipper')){this.abBanner(foe);await this.changeStat(foe,'atk',1,foe);await say(`${foe.name} 的食草发动了！`);return 'absorb';}
     return null;
   }
   calcDmg(mon,foe,mv){
@@ -2671,10 +2702,10 @@ async statusMove(side,mon,foe,mv,act){
 const isSelf=!!(mv.selfUp||mv.selfUp2||mv.selfUp3||mv.selfDn||mv.selfDn2||mv.protect||mv.heal||mv.rest||mv.splash||mv.destiny);
 if(!isSelf){
 // 黄金之躯（场地技/天气/戏法空间除外）
-if(foe.has('goodasgold')&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather){await say(`${foe.name} 的黄金之躯发动了！变化招式无效！`);return;}
+      if(foe.has('goodasgold')&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather){this.abBanner(foe);await say(`${foe.name} 的黄金之躯发动了！变化招式无效！`);return;}
 // 魔法镜（场地技/天气/戏法空间除外）
-if(foe.has('magicbounce')&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather&&!mon.has('moldbreaker')){
-await say(`${foe.name} 的魔法镜反弹了招式！`); [mon,foe]=[foe,mon]; }
+      if(foe.has('magicbounce')&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather&&!mon.has('moldbreaker')){
+        this.abBanner(foe);await say(`${foe.name} 的魔法镜反弹了招式！`); [mon,foe]=[foe,mon]; }
 // ★ 恶作剧之心：变化招式对恶系宝可梦无效（场地技/天气/戏法空间除外）
 if(mon.has('prankster')&&foe.types.includes('dark')&&!mv.hazard&&!mv.weather&&mv.k!=='trickroom'){await say(`${foe.name} 无视了恶作剧！变化招式失败了！`);return;}
 // ★ 变化招式不参与属性克制（电磁波除外：电属性变化招式对地面系无效）
@@ -2694,7 +2725,7 @@ if(mv.a!=null&&Math.random()*100>mv.a*(mon.has('compoundeyes')?1.3:1)){await say
       if(mv.hazard==='sr'){ if(this.haz[ts].sr){await say('场上已经撒过隐形岩了！');return;} this.haz[ts].sr=1;await say(`${mon.name} 撒下了隐形岩！`);}
       if(mv.hazard==='spikes'){ if(this.haz[ts].spikes>=3){await say('场上已经布满撒菱了！');return;} this.haz[ts].spikes++;await say(`${mon.name} 撒下了撒菱！`);} return;}
       // ★ 防尘：免疫粉末招式
-if(mv.powder&&foe.has('overcoatx')){await say(`${foe.name} 的防尘发动了！粉末招式无效！`);return;}
+    if(mv.powder&&foe.has('overcoatx')){this.abBanner(foe);await say(`${foe.name} 的防尘发动了！粉末招式无效！`);return;}
     if(mv.setSt){ await this.tryInflict(foe,mv.setSt,mon,mv.t); return; }
     if(mv.setDrop){ await this.changeStat(foe,mv.setDrop.drop,mv.setDrop.n,mon); return; }
     if(mv.heal){ const h=Math.floor(mon.maxhp/2); mon.hp=Math.min(mon.maxhp,mon.hp+h);AU.heal();await say(`${mon.name} 回复了HP！`);BUI.refresh(this);return; }
@@ -2702,7 +2733,7 @@ if(mv.powder&&foe.has('overcoatx')){await say(`${foe.name} 的防尘发动了！
     if(mv.leechseed){ if(foe.types.includes('grass')){await say(`对 ${foe.name} 没有效果…`);return;}
       if(foe.vol.seed){await say(`${foe.name} 已经被种下了种子！`);return;}
       foe.vol.seed=mon;await say(`${mon.name} 种下了寄生种子！`);return; }
-    if(mv.taunt){ if(foe.has('obliviousx')){await say(`${foe.name} 的迟钝发动了！挑衅无效！`);return;} foe.vol.taunt=3;await say(`${foe.name} 被挑衅了！`);return; }
+    if(mv.taunt){ if(foe.has('obliviousx')){this.abBanner(foe);await say(`${foe.name} 的迟钝发动了！挑衅无效！`);return;} foe.vol.taunt=3;await say(`${foe.name} 被挑衅了！`);return; }
     if(mv.trick){ const a=mon.item,b=foe.item; mon.item=b;foe.item=a;mon.vol.choiceLock=null;foe.vol.choiceLock=null;
       await say(`${mon.name} 用戏法交换了双方的道具！`);return; }
     if(mv.painsplit){ const avg=Math.floor((mon.hp+foe.hp)/2);mon.hp=Math.min(mon.maxhp,avg);foe.hp=Math.min(foe.maxhp,avg);
@@ -2763,16 +2794,16 @@ if(mv.powder&&foe.has('overcoatx')){await say(`${foe.name} 的防尘发动了！
     let orig=n;
     if(m.has('contrary'))n=-n;
     if(n<0&&src&&src!==m){
-      if(m.has('clearbody')||m.has('fullmetalbody')){await say(`${m.name} 的${AB[m.ability].n}发动了！能力不会下降！`);return;}
-if(n<0&&k==='atk'&&m.has('hyperCutterx')){await say(`${m.name} 的怪力钳发动了！攻击不会下降！`);return;}
-      if(m.has('mirrorarmor')&&src.hp>0){await say(`${m.name} 的镜甲反弹了能力下降！`);await this.changeStat(src,k,orig<0?orig:-orig,m);return;} }
+            if(m.has('clearbody')||m.has('fullmetalbody')){this.abBanner(m);await say(`${m.name} 的${AB[m.ability].n}发动了！能力不会下降！`);return;}
+      if(n<0&&k==='atk'&&m.has('hyperCutterx')){this.abBanner(m);await say(`${m.name} 的怪力钳发动了！攻击不会下降！`);return;}
+      if(m.has('mirrorarmor')&&src.hp>0){this.abBanner(m);await say(`${m.name} 的镜甲反弹了能力下降！`);await this.changeStat(src,k,orig<0?orig:-orig,m);return;} }
     const before=m.stages[k];
     m.stages[k]=clamp(before+n,-6,6);
     const real=m.stages[k]-before;
     if(real===0){await say(`${m.name} 的${STN[k]}不会再${n>0?'提高':'降低'}了！`);return;}
     if(n<0&&src&&src!==m&&!m.has('contrary')){
-      if(m.has('defiant')){await say(`${m.name} 的不服输发动了！`);m.stages.atk=clamp(m.stages.atk+2,-6,6);}
-      if(m.has('competitive')){await say(`${m.name} 的好胜发动了！`);m.stages.spa=clamp(m.stages.spa+2,-6,6);} }
+      if(m.has('defiant')){this.abBanner(m);await say(`${m.name} 的不服输发动了！`);m.stages.atk=clamp(m.stages.atk+2,-6,6);}
+      if(m.has('competitive')){this.abBanner(m);await say(`${m.name} 的好胜发动了！`);m.stages.spa=clamp(m.stages.spa+2,-6,6);} }
     const word=Math.abs(n)>=2?(n>0?'大幅提升':'大幅下降'):(n>0?'提升了':'下降了');
     await say(`${m.name} 的${STN[k]}${word}！`);
          if(n>0){AU.statUp();}else{AU.statDn();}
@@ -2795,8 +2826,8 @@ if(n<0&&k==='atk'&&m.has('hyperCutterx')){await say(`${m.name} 的怪力钳发�
     await say(`${loser.name} 倒下了！`);
     // 自信过剩 / 异兽提升
     if(winner&&winner.alive()){
-      if(winner.has('moxie'))await this.changeStat(winner,'atk',1,winner);
-      if(winner.has('beastboost')){const best=STATKEYS.reduce((a,b)=>winner.st[a]>=winner.st[b]?a:b);await this.changeStat(winner,best,1,winner);} }
+      if(winner.has('moxie')){this.abBanner(winner);await this.changeStat(winner,'atk',1,winner);}
+      if(winner.has('beastboost')){this.abBanner(winner);const best=STATKEYS.reduce((a,b)=>winner.st[a]>=winner.st[b]?a:b);await this.changeStat(winner,best,1,winner);} }
     const loserSide=this.sideOf(loser);
     // 经验
     if(loserSide==='e'&&winner&&this.sideOf(winner)==='p'&&!this.wild){ this.participants.add(winner); await this.gainXP(); }
@@ -2868,8 +2899,8 @@ if(n<0&&k==='atk'&&m.has('hyperCutterx')){await say(`${m.name} 的怪力钳发�
     const arr=side==='p'?this.pp:this.ep;
     const old=side==='p'?this.P():this.E();
     if(old&&old.alive()){
-      if(old.has('regenerator'))old.hp=Math.min(old.maxhp,old.hp+Math.floor(old.maxhp/3));
-      if(old.has('naturalcure')){old.status=null;old.sleepT=0;old.toxicN=0;}
+      if(old.has('regenerator')){this.abBanner(old);old.hp=Math.min(old.maxhp,old.hp+Math.floor(old.maxhp/3));}
+      if(old.has('naturalcure')){this.abBanner(old);old.status=null;old.sleepT=0;old.toxicN=0;}
       old.vol.choiceLock=null;old.vol.lock=null;old.vol.charge=null;old.vol.recharge=false;old.vol.protect=false;old.vol.flinch=false;old.vol.confuse=0;old.vol.proteanUsed=false;old.vol.disabled=null;
       /* ★ 极巨化离场即解除（HP按比例折算）；Mega进化与太晶化本场战斗内永久保留 */
       if(old.dyn){
@@ -2894,8 +2925,8 @@ if(wx==='sand'&&!m.has('overcoatx')&&!['rock','ground','steel'].includes(m.types
 if(!m.has('sandveil')&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(B/16));await say(`沙暴袭击了 ${m.name}！`);} }
 if(wx==='hail'&&!m.has('overcoatx')&&!m.types.includes('ice')){
 if(!m.has('snowcloak')&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(B/16));await say(`冰雹袭击了 ${m.name}！`);} }
-if(m.has('solarpower')&&wx==='sun'&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(B/8));}
-if(m.has('raindish')&&wx==='rain'){m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));await say(`${m.name} 的雨盘回复了HP！`);}
+      if(m.has('solarpower')&&wx==='sun'&&!m.has('magicguard')){this.abBanner(m);m.hp=Math.max(0,m.hp-Math.floor(B/8));await say(`${m.name} 的太阳之力发动了！`);}
+      if(m.has('raindish')&&wx==='rain'){this.abBanner(m);m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));await say(`${m.name} 的雨盘回复了HP！`);}
       // 青草场地回复
       if(this.terrain==='grassy'&&this.grounded(m)&&m.hp>0){m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));await say(`${m.name} 在青草场地上回复了HP！`);}
       // 寄生种子
@@ -2909,7 +2940,7 @@ if(m.has('raindish')&&wx==='rain'){m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));
       if(m.status==='burn'){m.hp=Math.max(0,m.hp-Math.floor(B/16));await say(`${m.name} 被灼伤伤害了！`);}
       if(m.status==='psn'){m.hp=Math.max(0,m.hp-Math.floor(B/8));await say(`${m.name} 受到了毒素伤害！`);}
       if(m.status==='tox'){m.toxicN++;m.hp=Math.max(0,m.hp-Math.floor(B*m.toxicN/16));await say(`${m.name} 受到了剧毒伤害！`);}
-      if(m.has('poisonheal')&&(m.status==='psn'||m.status==='tox')){m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/8));}
+      if(m.has('poisonheal')&&(m.status==='psn'||m.status==='tox')){this.abBanner(m);m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/8));await say(`${m.name} 的毒疗发动了，回复了HP！`);}
       // 道具回复
       if(m.item==='leftovers')m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));
       if(m.item==='blacksludge'){ if(m.types.includes('poison'))m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));
@@ -2917,11 +2948,11 @@ if(m.has('raindish')&&wx==='rain'){m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));
       // 梦魇
       const foe=this.foeOf(m);
       if(m.has('baddreams')&&foe&&foe.alive()&&foe.status==='sleep'&&!foe.has('magicguard')){
-        foe.hp=Math.max(0,foe.hp-Math.floor(foe.baseMax/8));await say(`${foe.name} 被梦魇折磨着！`);}
+        this.abBanner(m);foe.hp=Math.max(0,foe.hp-Math.floor(foe.baseMax/8));await say(`${foe.name} 被梦魇折磨着！`);}
       // 蜕皮
-      if(m.has('shedskin')&&m.status&&Math.random()<1/3){m.status=null;m.sleepT=0;m.toxicN=0;await say(`${m.name} 的蜕皮发动了，状态恢复了！`);}
+      if(m.has('shedskin')&&m.status&&Math.random()<1/3){this.abBanner(m);m.status=null;m.sleepT=0;m.toxicN=0;await say(`${m.name} 的蜕皮发动了，状态恢复了！`);}
 // 加速（替换上场的当回合不触发）
-if(m.has('speedboost')&&!m.vol.switchedInThisTurn)await this.changeStat(m,'spe',1,m);
+      if(m.has('speedboost')&&!m.vol.switchedInThisTurn){this.abBanner(m);await this.changeStat(m,'spe',1,m);}
       // 极巨化倒计时
       if(m.dyn){m.dynT--;if(m.dynT<=0){
         const pct=m.hp/m.maxhp;
