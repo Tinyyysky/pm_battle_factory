@@ -2205,9 +2205,12 @@ class Battle{
     } else { await say(`啊——！宝可梦从球里挣脱出来了！`); }
   }
   /* ---------- 行动执行 ---------- */
-  async execActions(pa,ea){
-    const Pm=this.P(),E=this.E();
-    let acts=[];
+async execActions(pa,ea){
+const Pm=this.P(),E=this.E();
+// ★ 清除上一回合残留的保护状态（保护只作用于使用当回合，不延续到下回合）
+if(Pm)Pm.vol.protect=false;
+if(E)E.vol.protect=false;
+let acts=[];
     if(pa.type==='move')acts.push({side:'p',mon:Pm,...pa});
     if(ea.type==='move')acts.push({side:'e',mon:E,...ea});
     // 排序：优先级 → 速度
