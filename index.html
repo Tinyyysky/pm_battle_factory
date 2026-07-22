@@ -601,7 +601,291 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .teamSlot{background:#fff;border:2px dashed #999;border-radius:10px;padding:8px;margin-bottom:8px;min-height:52px;display:flex;align-items:center;gap:8px}
 .teamSlot img{width:48px;height:48px;object-fit:contain}
 @media (max-width:900px){ #facLobby{grid-template-columns:1fr} #freeWrap{grid-template-columns:1fr} .logo{font-size:52px} }
+/* =========================================
+   📱 竖屏 / 移动端原生适配补丁
+   ========================================= */
+@media screen and (max-width: 768px), screen and (orientation: portrait) {
+    /* 1. 全局舞台：去除横屏的圆角和边框，强制全屏 */
+    html, body { overflow: auto; }
+    #stage {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
 
+    /* 2. 标题界面：缩小 Logo 和菜单宽度 */
+    .logo { font-size: 46px !important; letter-spacing: 2px !important; }
+    .logoSub { font-size: 9px !important; }
+    #menuList { width: 90% !important; max-width: 320px !important; }
+    .menuItem { font-size: 20px !important; padding: 10px 14px !important; }
+    #titleFoot { font-size: 9px !important; padding: 0 10px; }
+
+    /* 3. 通用头部与内容区 */
+    .scrHead { padding: 10px 14px !important; }
+    .scrHead h2 { font-size: 22px !important; }
+    .scrBody { padding: 12px !important; }
+
+    /* 4. 图鉴：改为上下布局，防止右侧详情面板挤出屏幕 */
+#dex .scrBody {
+    padding: 12px !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+#dex .scrBody > div:not(#dexFilters) {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+}
+#dexGrid {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    max-height: calc(100vh - 200px) !important;
+    min-height: 200px !important;
+}
+    #dexDetail {
+         position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    background: linear-gradient(180deg, #fffdf4, var(--panel) 40%, var(--panel2)) !important;
+    border: 3px solid var(--ink) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    padding: 14px !important;
+    order: 1 !important;  /* 强制显示在最上方 */
+    flex-shrink: 0 !important;
+}
+
+    /* 5. 自由对战：改为上下布局 */
+    #freeWrap {
+        grid-template-columns: 1fr !important;
+    }
+    #freeGrid {
+        max-height: 40vh !important;
+    }
+
+    /* 6. 对战工厂：三列布局改为单列流式布局 */
+    #facLobby {
+        display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    height: auto !important;          /* ★ 解除 100% 固定高度 */
+    min-height: 0 !important;
+    }
+    #factory .scrBody {
+    padding: 10px !important;
+    overflow-y: auto !important;      /* 内容超出时可滚动 */
+    height: auto !important;
+    flex: 1 !important;
+}
+    .facCol {  padding: 12px !important;
+    width: 100% !important;
+    height: auto !important;          /* ★ 解除 fit-content 挤压 */
+    overflow: visible !important; }
+    #facLobby > .facCol.panel {
+    height: auto !important;
+}
+    .rentSet {
+       flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    }
+    .rentCard {
+        width: calc(50% - 10px) !important;
+    min-width: 140px !important;
+    max-width: 200px !important;
+    flex: 1 1 140px !important;
+    }
+
+    /* 7. 战斗界面：UI 紧凑化，防止遮挡精灵 */
+    /* 缩小信息卡 */
+    .icard {
+        min-width: 130px !important;
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+    }
+    .icard .nm { font-size: 15px !important; }
+    #ecard { top: 10px !important; left: 10px !important; }
+    #pcard { bottom: 10px !important; right: 10px !important; }
+
+    /* 底部操作栏重构为更紧凑的布局 */
+    #bui {
+        height: auto !important;
+        min-height: 130px !important;
+        flex-direction: column !important;
+        padding: 8px !important;
+        gap: 6px !important;
+    }
+    #msgpanel {
+        height: 50px !important;
+        width: 100% !important;
+    }
+    #msg {
+        font-size: 14px !important;
+        padding: 8px 12px !important;
+    }
+    .bmenu {
+        width: 100% !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;
+    }
+    .bmenu .btn {
+        font-size: 16px !important;
+        padding: 8px 0 !important;
+    }
+    #menuMoves {
+        width: 100% !important;
+        flex-direction: column !important;
+    }
+    #moveGrid {
+        width: 100% !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;
+    }
+    .moveBtn { padding: 6px 8px !important; }
+    .moveBtn .mn { font-size: 14px !important; }
+    .moveBtn .mi { font-size: 9px !important; }
+    
+    /* 极巨化/太晶化/超级进化 按钮排列 */
+    #formCol {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        min-width: 100% !important;
+        gap: 6px !important;
+    }
+    #formCol .btn {
+        flex: 1 !important;
+        min-width: 80px !important;
+    }
+
+    /* 战斗记录面板自适应宽度 */
+    #logOv {
+        width: 85vw !important;
+        max-width: 300px !important;
+    }
+
+    /* 8. 弹窗与覆盖层：全屏自适应 */
+    .ovBox {
+        width: 95% !important;
+        max-width: 100% !important;
+        padding: 12px !important;
+    }
+    #detailCard {
+        grid-template-columns: 1fr !important;
+        width: 95% !important;
+        max-height: 90vh !important;
+        padding: 14px !important;
+    }
+    #detailCard .dLeft, #detailCard .dRight {
+        text-align: center !important;
+    }
+    #dlgBox {
+        padding: 12px !important;
+        min-height: 90px !important;
+    }
+    #dlgText { font-size: 15px !important; }
+    #dlgSprite {
+        width: 64px !important;
+        height: 64px !important;
+        top: -50px !important;
+    }
+
+    /* 9. 全局按钮与列表微调 */
+    .btn { padding: 8px 12px !important; font-size: 14px !important; }
+    .btn.small { padding: 5px 10px !important; font-size: 12px !important; }
+    .slot { padding: 6px 8px !important; }
+    .slot .sname { font-size: 16px !important; }
+    
+    /* 防止特效粒子超出屏幕产生横向滚动条 */
+    #fxlayer, #bscene { overflow: hidden !important; }
+    /* ====== 对话框 & 战斗消息框 宽度修复 ====== */
+
+/* 1. 剧情对话框：去除左右大 padding，让盒子撑满 */
+#dlg {
+    padding: 10px 6px 14px !important;
+}
+#dlgBox {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 14px 14px 12px !important;
+    min-height: 100px !important;
+    box-sizing: border-box !important;
+}
+#dlgSpeaker {
+    font-size: 14px !important;
+    padding: 2px 12px !important;
+    top: -14px !important;
+    left: 12px !important;
+}
+#dlgText {
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+}
+/* 对话框头像缩小，避免占太多横向空间 */
+#dlgSprite {
+    width: 56px !important;
+    height: 56px !important;
+    top: -42px !important;
+    right: 12px !important;
+}
+
+/* 2. 战斗中底部消息面板：改为独占一行并撑满 */
+#bui {
+    height: auto !important;
+    min-height: 120px !important;
+    flex-direction: column !important;
+    padding: 8px 6px !important;
+    gap: 6px !important;
+}
+#msgpanel {
+    width: 100% !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    flex: none !important;
+}
+#msg {
+    font-size: 14px !important;
+    padding: 10px 12px !important;
+    line-height: 1.6 !important;
+    /* 确保文字不会溢出 */
+    overflow-wrap: break-word !important;
+    word-break: break-all !important;
+}
+
+/* 3. 操作按钮区也跟着撑满 */
+.bmenu {
+    width: 100% !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+}
+#menuMoves {
+    width: 100% !important;
+}
+#moveGrid {
+    width: 100% !important;
+    grid-template-columns: 1fr 1fr !important;
+}
+/* 我的队伍列表：单列排布 */
+#facParty {
+    flex-direction: column !important;
+    align-items: stretch !important;
+}
+#facParty .slot {
+    width: 100% !important;
+}
+/* 轮次大字缩小一点，避免竖屏过宽 */
+.roundBig {
+    font-size: 28px !important;
+}
+}
 </style>
 </head>
 <body>
