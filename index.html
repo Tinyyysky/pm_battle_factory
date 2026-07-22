@@ -601,6 +601,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .teamSlot{background:#fff;border:2px dashed #999;border-radius:10px;padding:8px;margin-bottom:8px;min-height:52px;display:flex;align-items:center;gap:8px}
 .teamSlot img{width:48px;height:48px;object-fit:contain}
 @media (max-width:900px){ #facLobby{grid-template-columns:1fr} #freeWrap{grid-template-columns:1fr} .logo{font-size:52px} }
+
 </style>
 </head>
 <body>
@@ -2350,12 +2351,17 @@ if(mon.vol.disabled&&mon.vol.disabled.k===mvk){
 }
     if(!foe||foe.fainted){return;}
     // 极巨化转换
-    let useMv=mv;
-    if(mon.dyn&&mv){
-      /* ★ 全新对象：不继承原招式的 sec/recoil/drain/multi/crit/接触等，伤害走极巨威力表；maxfx 是极巨招式自身的固有效果 */
-      if(mv.c==='X')useMv={k:'maxguard',n:'极巨防壁',c:'X',pri:4,protect:1,maxguard:1};
-      else useMv={k:'maxmv',n:MAXMV[mv.t]||'极巨攻击',p:maxPower(mv),a:null,c:mv.c,t:mv.t,maxfx:MAXFX[mv.t]};
-    }
+    // 极巨化转换
+let useMv=mv;
+if(mon.dyn&&mv){
+if(mv.c==='X')useMv={k:'maxguard',n:'极巨防壁',c:'X',pri:4,protect:1,maxguard:1};
+else {
+  // ★ 先计算变威力招式的实际威力（陀螺球等），再传给 maxPower
+  let effectiveP=mv.p;
+  if(mv.gyro){effectiveP=Math.min(150,Math.floor(25*foe.effStat('spe',this)/Math.max(1,mon.effStat('spe',this))));}
+  useMv={k:'maxmv',n:MAXMV[mv.t]||'极巨攻击',p:maxPower({...mv,p:effectiveP}),a:null,c:mv.c,t:mv.t,maxfx:MAXFX[mv.t]};
+}
+}
         // ★ 太晶化招式修正：太晶爆发变异晶属性、按较高攻击项决定物特；威力<60的招式提升至60
     if(mon.tera){
       let tt=useMv.t,tc=useMv.c,tp=useMv.p;
@@ -2565,10 +2571,10 @@ if(foe.has('cursedbodyx')&&mv.k!=='struggle'&&!mon.vol.disabled&&foe.hp>0&&Math.
 mon.vol.disabled={k:mv.k,turns:4};this.abBanner(foe);
 await say(`${mon.name} 的${mv.n}被${foe.name}的诅咒之躯封印了！`);
 }
-// 弱点保险
-    if(foe.has('static')&&Math.random()<.3&&!mon.status){this.abBanner(foe);await this.inflictStatus(mon,'par',foe,'electric');}
-    if(foe.has('flamebody')&&Math.random()<.3&&!mon.status){this.abBanner(foe);await this.inflictStatus(mon,'burn',foe,'fire');}
-    if(foe.has('poisonpoint')&&Math.random()<.3&&!mon.status){this.abBanner(foe);await this.inflictStatus(mon,'psn',foe,'poison');}
+// ★ 接触类特性触发（静电/火焰之躯/毒刺）：仅接触招式(ct)触发
+if(mv.ct&&foe.has('static')&&Math.random()<.3&&!mon.status){this.abBanner(foe);await this.inflictStatus(mon,'par',foe,'electric');}
+if(mv.ct&&foe.has('flamebody')&&Math.random()<.3&&!mon.status){this.abBanner(foe);await this.inflictStatus(mon,'burn',foe,'fire');}
+if(mv.ct&&foe.has('poisonpoint')&&Math.random()<.3&&!mon.status){this.abBanner(foe);await this.inflictStatus(mon,'psn',foe,'poison');}
     // 弱点保险
     if(r.eff>1&&foe.item==='weaknesspolicy'&&!foe.fainted){foe.item=null;await this.changeStat(foe,'atk',2,foe);await this.changeStat(foe,'spa',2,foe);await say(`${foe.name} 的弱点保险发动了！`);}
     // 气球破裂
@@ -2629,7 +2635,7 @@ await say(`${mon.name} 的${mv.n}被${foe.name}的诅咒之躯封印了！`);
     if(mv.foulplay)atkK='atk';
     if(mv.seismic){return {dmg:mon.lvl,eff:effMult(mv.t,foe.types),crit:false};}
     if(mv.ragefist){mv={...mv,p:50+50*(mon.vol.rage||0)};}
-    if(mv.gyro){const p=Math.min(150,Math.floor(25*foe.effStat('spe',this)/mon.effStat('spe',this)));mv={...mv,p};}
+    if(mv.gyro){const p=Math.min(150,Math.floor(25*foe.effStat('spe',this)/Math.max(1,mon.effStat('spe',this))));mv={...mv,p};}
     // 会心
     let cs=(mv.crit?1:0)+(mv.alwaysCrit?2:0)+(mon.has('superluck')?1:0)+(mon.item==='scopelens'?1:0);
     const crit=mv.alwaysCrit||(mon.has('merciless')&&(foe.status==='psn'||foe.status==='tox'))||(!foe.has('shellarmor')&&Math.random()<[1/24,1/8,1/2,1][Math.min(cs,3)]);
