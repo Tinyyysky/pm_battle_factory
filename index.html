@@ -1933,15 +1933,15 @@ class Battle{
   }
   async sendOut(side,idx,first){
     if(side==='p'){
-      this.pi=idx;const m=this.P();
-      m.vol={};if(m.id===778)m.vol.disguise=true;m.stages={atk:0,def:0,spa:0,spd:0,spe:0};m.fainted=false;
+this.pi=idx;const m=this.P();
+m.vol={};if(m.id===778)m.vol.disguise=true;m.vol.switchedInThisTurn=true;m.stages={atk:0,def:0,spa:0,spd:0,spe:0};m.fainted=false;
       await BUI.entryAnim('p',m,false);
       await say(first?`去吧！${m.name}！`:`${m.name}，就决定是你了！`);
       this.participants.add(m);
       await this.entryEffects(m,'p');
     } else {
-      this.ei=idx;const m=this.E();
-      m.vol={};if(m.id===778)m.vol.disguise=true;m.stages={atk:0,def:0,spa:0,spd:0,spe:0};m.fainted=false;
+this.ei=idx;const m=this.E();
+m.vol={};if(m.id===778)m.vol.disguise=true;m.vol.switchedInThisTurn=true;m.stages={atk:0,def:0,spa:0,spd:0,spe:0};m.fainted=false;
       await BUI.entryAnim('e',m,this.wild);
       await say(this.wild?`野生的 ${m.name} 出现了！`:`${this.trainerName||'对手'} 派出了 ${m.name}！`);
       await this.entryEffects(m,'e');
@@ -2210,6 +2210,9 @@ const Pm=this.P(),E=this.E();
 // ★ 清除上一回合残留的保护状态（保护只作用于使用当回合，不延续到下回合）
 if(Pm)Pm.vol.protect=false;
 if(E)E.vol.protect=false;
+// ★ 突袭判定准备：记录双方本回合计划招式 + 重置出手标记
+if(Pm){Pm.vol.actedThisTurn=false;Pm.vol.plannedMove=(pa.type==='move'&&pa.move)?pa.move.k:null;}
+if(E){E.vol.actedThisTurn=false;E.vol.plannedMove=(ea.type==='move'&&ea.move)?ea.move.k:null;}
 let acts=[];
     if(pa.type==='move')acts.push({side:'p',mon:Pm,...pa});
     if(ea.type==='move')acts.push({side:'e',mon:E,...ea});
@@ -2230,12 +2233,13 @@ return p; };
       const sx=x.mon.effStat('spe',this),sy=y.mon.effStat('spe',this);
       if(sx!==sy)return this.trickT>0?sx-sy:sy-sx;
       return Math.random()<.5?-1:1; });
-    for(const a of acts){
-      if(this.over)return;
-      if(a.mon.fainted)continue;
-      await this.doMove(a.side,a.mon,a.move,a);
-      if(this.over)return;
-    }
+for(const a of acts){
+if(this.over)return;
+if(a.mon.fainted)continue;
+a.mon.vol.actedThisTurn=true;   // ★ 标记本回合已出手（供突袭判定）
+await this.doMove(a.side,a.mon,a.move,a);
+if(this.over)return;
+}
   }
   /* ---------- 出招 ---------- */
   async doMove(side,mon,moveSel,act){
@@ -2302,9 +2306,9 @@ return p; };
     if(['choiceband','choicespecs','choicescarf'].includes(mon.item)&&!mon.vol.choiceLock&&!mon.dyn&&mvk!=='struggle'){
       mon.vol.choiceLock=mvk;
     }
-    // 变换自如
-    if((mon.has('protean')||mon.has('libero'))&&!mon.vol.proteanUsed&&useMv.c!=='X'&&useMv.t!=='normal'){
-      mon.vol.proteanUsed=true;mon.types=[useMv.t];await say(`${mon.name} 的${AB[mon.ability].n}发动了！变成了${TNAME[useMv.t]}属性！`);}
+ // 变换自如/自由者：太晶化后属性锁定不触发；单属性使用本系招式（属性本就不变）也不触发
+if((mon.has('protean')||mon.has('libero'))&&!mon.vol.proteanUsed&&!mon.tera&&useMv.c!=='X'&&useMv.t!=='normal'&&!(mon.types.length===1&&mon.types[0]===useMv.t)){
+mon.vol.proteanUsed=true;mon.types=[useMv.t];await say(`${mon.name} 的${AB[mon.ability].n}发动了！变成了${TNAME[useMv.t]}属性！`);}
     // 坚盾剑怪形态
     if(mon.has('stancechange')){ if(useMv.k==='kingshield'){mon.vol.shield=true;} else if(useMv.c!=='X'){mon.vol.shield=false;}
       mon.st.def=mon.vol.shield?Math.floor(mon.st.def*1):mon.st.def; }
@@ -2324,8 +2328,15 @@ return p; };
     if(this.terrain==='psychic'&&(useMv.pri||0)>0&&this.grounded(foe)){await say('精神场地挡住了先制招式！');return;}
     // 女王的威严
     if((useMv.pri||0)>0&&foe.has('queenmajesty')){await say(`${foe.name} 的女王的威严发动了！${useMv.n} 失败了！`);return;}
-    // 突袭判定
-    if(useMv.sucker){ /* 简化：对方上回合选了攻击则成功 */ }
+    // ★ 突袭判定：目标必须正在使用攻击招式、且本回合尚未出手，否则失败
+if(useMv.sucker){
+const foePlan=foe.vol.plannedMove;
+const foeUsingAttack=foePlan&&MV[foePlan]&&MV[foePlan].c!=='X';
+if(!foeUsingAttack||foe.vol.actedThisTurn){
+await say(`${mon.name} 的突袭失败了！`);
+return;
+}
+}
     // 命中判定
     let acc=useMv.a;
     if(useMv.thunder&&this.wx==='rain')acc=100;
@@ -2606,20 +2617,23 @@ if(protectPierce)dmg=Math.max(1,Math.floor(dmg/4));   // ★ 穿透保护：1/4�
     if(m.hp<=0){ const foe=this.foeOf(m); await this.handleKO(this.sideOf(m)==='p'?'e':'p',foe,m); }
   }
   /* ---------- 变化招式 ---------- */
-  async statusMove(side,mon,foe,mv,act){
-    // 黄金之躯
-    if(foe.has('goodasgold')&&!mv.hazard&&mv.k!=='trickroom'){await say(`${foe.name} 的黄金之躯发动了！变化招式无效！`);return;}
-    // 魔法镜
-    if(foe.has('magicbounce')&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather&&!mv.trickroom&&!mon.has('moldbreaker')){
-      await say(`${foe.name} 的魔法镜反弹了招式！`); [mon,foe]=[foe,mon]; }
-    // 恶作剧之心 vs 恶
-    if(mon.has('prankster')&&foe.types.includes('dark')){await say(`${foe.name} 无视了恶作剧！`);return;}
-    // 属性免疫（变化招式也受属性影响；腐蚀特性可绕过毒属性免疫）
-    const e=effMult(mv.t,foe.types);
-    const corrosionBypass=mon.has('corrosion')&&(mv.setSt==='psn'||mv.setSt==='tox');
-    if(e===0&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather&&!corrosionBypass){await say(`对 ${foe.name} 没有效果…`);return;}
-    // 命中
-    if(mv.a!=null&&Math.random()*100>mv.a*(mon.has('compoundeyes')?1.3:1)){await say(`${mv.n} 没有命中！`);return;}
+async statusMove(side,mon,foe,mv,act){
+// ★ 自身招式（强化/保护/回复/同命等）不受对手属性/特性影响，一定能使出
+const isSelf=!!(mv.selfUp||mv.selfUp2||mv.selfUp3||mv.selfDn||mv.selfDn2||mv.protect||mv.heal||mv.rest||mv.splash||mv.destiny);
+if(!isSelf){
+// 黄金之躯（场地技/天气/戏法空间除外）
+if(foe.has('goodasgold')&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather){await say(`${foe.name} 的黄金之躯发动了！变化招式无效！`);return;}
+// 魔法镜（场地技/天气/戏法空间除外）
+if(foe.has('magicbounce')&&!mv.hazard&&mv.k!=='trickroom'&&!mv.weather&&!mon.has('moldbreaker')){
+await say(`${foe.name} 的魔法镜反弹了招式！`); [mon,foe]=[foe,mon]; }
+// ★ 恶作剧之心：变化招式对恶系宝可梦无效（场地技/天气/戏法空间除外）
+if(mon.has('prankster')&&foe.types.includes('dark')&&!mv.hazard&&!mv.weather&&mv.k!=='trickroom'){await say(`${foe.name} 无视了恶作剧！变化招式失败了！`);return;}
+// ★ 变化招式不参与属性克制（电磁波除外：电属性变化招式对地面系无效）
+// 状态免疫（钢免疫中毒、火免疫灼伤等）由 inflictStatus 处理，不在此判定
+if(mv.t==='electric'&&foe.types.includes('ground')){await say(`对 ${foe.name} 没有效果…`);return;}
+}
+// 命中
+if(mv.a!=null&&Math.random()*100>mv.a*(mon.has('compoundeyes')?1.3:1)){await say(`${mv.n} 没有命中！`);return;}
     /* ★ 变化招式共用特效：作用于招式目标（减益/异常/场地技→对手，强化/回复→自身） */
     const mySide=this.sideOf(mon);
     const onFoe=!!(mv.setSt||mv.setDrop||mv.taunt||mv.leechseed||mv.trick||mv.parting||mv.clearsmog||mv.hazard);
@@ -2853,8 +2867,8 @@ if(protectPierce)dmg=Math.max(1,Math.floor(dmg/4));   // ★ 穿透保护：1/4�
         foe.hp=Math.max(0,foe.hp-Math.floor(foe.baseMax/8));await say(`${foe.name} 被梦魇折磨着！`);}
       // 蜕皮
       if(m.has('shedskin')&&m.status&&Math.random()<1/3){m.status=null;m.sleepT=0;m.toxicN=0;await say(`${m.name} 的蜕皮发动了，状态恢复了！`);}
-      // 加速
-      if(m.has('speedboost'))await this.changeStat(m,'spe',1,m);
+// 加速（替换上场的当回合不触发）
+if(m.has('speedboost')&&!m.vol.switchedInThisTurn)await this.changeStat(m,'spe',1,m);
       // 极巨化倒计时
       if(m.dyn){m.dynT--;if(m.dynT<=0){
         const pct=m.hp/m.maxhp;
@@ -2870,8 +2884,8 @@ if(protectPierce)dmg=Math.max(1,Math.floor(dmg/4));   // ★ 穿透保护：1/4�
     if(this.terrain){this.terrainT--;if(this.terrainT<=0){this.terrain=null;await say('场地恢复了原状。');}}
     if(this.trickT>0){this.trickT--;if(this.trickT===0)await say('戏法空间解除了。');}
     // 混乱/挑衅倒计时 + ★畏缩只在当回合生效，回合结束统一清除
-    for(const m of [this.P(),this.E()]){ if(!m)continue;
-      m.vol.flinch=false;
+for(const m of [this.P(),this.E()]){ if(!m)continue;
+m.vol.flinch=false;m.vol.switchedInThisTurn=false;
       if(m.vol.confuse>0){m.vol.confuse--;if(m.vol.confuse===0)await say(`${m.name} 的混乱解除了。`);}
       if(m.vol.taunt>0)m.vol.taunt--; }
     BUI.refresh(this);
