@@ -1932,6 +1932,14 @@ class Battle{
   P(){return this.pp[this.pi];} E(){return this.ep[this.ei];}
   sideOf(m){return this.pp.includes(m)?'p':'e';}
   foeOf(m){return this.sideOf(m)==='p'?this.E():this.P();}
+/* ★ 速度比较：返回先手方（'p'或'e'），受戏法空间影响，同速50%随机 */
+speedOrder(pMon,eMon){
+  if(!pMon)return 'e';
+  if(!eMon)return 'p';
+  const ps=pMon.effStat('spe',this),es=eMon.effStat('spe',this);
+  if(ps!==es)return (this.trickT>0?ps<es:ps>es)?'p':'e';
+  return Math.random()<0.5?'p':'e';
+}
   /* ---------- 主流程 ---------- */
   async start(){
     AU.playMusic('battle');
@@ -1946,12 +1954,18 @@ class Battle{
       m.hp=Math.min(m.hp,m.maxhp);m.xpGot=false;
     });
     this.turn=1;
-    await this.sendOut('e',0,true,true);   // 先出场，跳过特性
-await this.sendOut('p',0,true,true);   // 先出场，跳过特性
+const first = this.speedOrder(this.pp[0], this.ep[0]);
+if (first === 'p') {
+    await this.sendOut('p', 0, true, true);  // ← 第4参数 skipEffects=true
+    await this.sendOut('e', 0, true, true);
+} else {
+    await this.sendOut('e', 0, true, true);
+    await this.sendOut('p', 0, true, true);
+}
 BUI.refresh(this);
 // ★ 双方宝可梦都出场后，再依次发动入场特性
-await this.entryEffects(this.E(),'e');
-if(!this.over)await this.entryEffects(this.P(),'p');
+await this.entryEffects(this.E(), 'e');
+if (!this.over) await this.entryEffects(this.P(), 'p');
     while(!this.over){
       await this.doTurn();                    // ① 本回合行动阶段
       if(this.over)break;
@@ -2038,20 +2052,28 @@ const msg=async t=>{await say(`${m.name} 的特性发动了！${t}`);};
   grounded(m){ return !m.types.includes('flying')&&!m.has('levitate'); } /* 是否站在地面上 */
   wxActive(){ const P=this.P(),E=this.E(); if((P&&P.has('airlock'))||(E&&E.has('airlock')))return null; return this.wx; } /* 气闸：天气无效 */
   /* ---------- 回合 ---------- */
-  async doTurn(){
+async doTurn(){
     const Pm=this.P(),E=this.E();
     if(!Pm||!E)return this.finish();
     let pa=null,ea=null;
     pa=await this.getPlayerAction(); if(this.over)return;
     if(pa.type==='run'){ await say('成功逃走了！');AU.run(); this.result='run';this.over=true;return; }
     if(pa.type==='ball'){ await this.tryCapture(pa.item); if(this.over)return;
-      ea={type:'move',move:this.pickAIMove()}; await this.execActions({type:'skip'},ea); return; }
-    if(pa.type==='switch'){ await this.doSwitch('p',pa.idx); pa={type:'skip'}; } /* ★ 换人消耗本回合行动 */
-    if(pa.type==='item'){ await this.useItem(pa.item,pa.idx); pa={type:'skip'}; } /* ★ 用道具消耗本回合行动 */
+        ea={type:'move',move:this.pickAIMove()}; await this.execActions({type:'skip'},ea); return; }
     ea=await this.aiAction();
-    if(ea.type==='switch'){ await this.doSwitch('e',ea.idx); ea={type:'skip'}; }
-    await this.execActions(pa,ea);
-  }
+    /* ★ 双方同时换人 */
+    if(pa.type==='switch'&&ea.type==='switch'){
+        const first=this.speedOrder(Pm,E);
+        if(first==='p'){await this.doSwitch('p',pa.idx);await this.doSwitch('e',ea.idx);}
+        else{await this.doSwitch('e',ea.idx);await this.doSwitch('p',pa.idx);}
+        pa={type:'skip'};ea={type:'skip'};
+    } else {
+        if(pa.type==='switch'){ await this.doSwitch('p',pa.idx); pa={type:'skip'}; }
+        if(pa.type==='item'){ await this.useItem(pa.item,pa.idx); pa={type:'skip'}; }
+        if(ea.type==='switch'){ await this.doSwitch('e',ea.idx); ea={type:'skip'}; }
+    }
+    await this.execActions(pa,ea);   // ★ 只调用一次
+}
   pickPlayerForcedMove(){ const m=this.P();
     /* ★ 用道具后仍需行动：尊重讲究锁 */
     if(m.vol.choiceLock&&!m.dyn&&m.moves.find(x=>x.k===m.vol.choiceLock&&x.pp>0))return {k:m.vol.choiceLock};
@@ -2847,29 +2869,31 @@ if(mv.a!=null&&Math.random()*100>mv.a*(mon.has('compoundeyes')?1.3:1)){await say
     BUI.refresh(this);
   }
 async resolvePendingSwitches(){
-while(this.pendingSwitches.length&&!this.over){
-const switchedSides=[];
-const batch=[...this.pendingSwitches];
-this.pendingSwitches=[];
-// ★ 先让所有需要替换的宝可梦都出场（跳过特性）
-for(const ps of batch){
-if(this.over)break;
-if(ps.side==='p'){
-const idx=await this.chooseParty(false,false);
-if(idx!=null){await this.sendOut('p',idx,false,true);switchedSides.push('p');}
-} else {
-const to=this.aiBestSwitch();
-if(to>-1){await this.sendOut('e',to,false,true);switchedSides.push('e');}
-}
-}
-// ★ 双方都出场后，再依次发动入场特性（含隐形岩等入场伤害）
-for(const side of switchedSides){
-if(this.over)break;
-const m=side==='p'?this.P():this.E();
-if(m&&m.alive())await this.entryEffects(m,side);
-}
-// 若入场伤害导致新的濒死，循环继续处理
-}
+  while(this.pendingSwitches.length&&!this.over){
+    const batch=[...this.pendingSwitches];
+    this.pendingSwitches=[];
+    const pNeeds=batch.some(ps=>ps.side==='p');
+    const eNeeds=batch.some(ps=>ps.side==='e');
+    if(pNeeds&&eNeeds){
+      /* ★ 双方同时濒死：按上场宝可梦速度决定出场顺序（受戏法空间影响） */
+      const pIdx=await this.chooseParty(false,false);
+      const eIdx=this.aiBestSwitch();
+      const pMon=pIdx!=null?this.pp[pIdx]:null;
+      const eMon=eIdx>=0?this.ep[eIdx]:null;
+      if(pMon&&eMon){
+        const first=this.speedOrder(pMon,eMon);
+        if(first==='p'){await this.doSwitch('p',pIdx);await this.doSwitch('e',eIdx);}
+        else{await this.doSwitch('e',eIdx);await this.doSwitch('p',pIdx);}
+      } else if(pMon){await this.doSwitch('p',pIdx);}
+      else if(eMon){await this.doSwitch('e',eIdx);}
+    } else {
+      for(const ps of batch){
+        if(this.over)break;
+        if(ps.side==='p'){const idx=await this.chooseParty(false,false);if(idx!=null)await this.doSwitch('p',idx);}
+        else{const to=this.aiBestSwitch();if(to>-1)await this.doSwitch('e',to);}
+      }
+    }
+  }
 }
   async gainXP(silent){
     for(const m of this.participants){
@@ -3815,8 +3839,9 @@ Battle.prototype.execActions=async function(pa,ea){
   return _origExec.call(this,pa,ea);
 };
 Battle.prototype.resolveForms=async function(pa,ea){
-  const Pm=this.P();
-  if(pa.type==='move'&&Pm&&!Pm.fainted){
+  const Pm=this.P(),E=this.E();
+  const doP=async()=>{
+    if(pa.type!=='move'||!Pm||Pm.fainted)return;
     if(pa.mega&&this.rules.mega&&MEGA[Pm.id]&&!this.usedForm.p&&!Pm.mega&&!Pm.dyn){
       let idx=0;
       if(Array.isArray(MEGA[Pm.id])){idx=await dlgChoices('超级进化',Pm.name+' 可以进化成两种形态，选择哪一种？',MEGA[Pm.id].map(c=>c.stone));}
@@ -3828,9 +3853,9 @@ Battle.prototype.resolveForms=async function(pa,ea){
       this.usedForm.p=true;Pm.tera=true;Pm.types=[Pm.teraType];
       AU.tera();BUI.sparkle('p');await say(`太晶化！${Pm.name} 变成了${TNAME[Pm.teraType]}属性！`);BUI.refresh(this);
     }
-  }
-  const E=this.E();
-  if(ea.type==='move'&&E&&!E.fainted){
+  };
+  const doE=async()=>{
+    if(ea.type!=='move'||!E||E.fainted)return;
     if(ea.mega&&this.rules.mega&&MEGA[E.id]&&!this.usedForm.e&&!E.mega&&!E.dyn){
       this.usedForm.e=true;this.doMega('e',E,ea.megaIdx||0);await sleep(700);
     } else if(ea.dyn&&this.rules.dyna&&!this.usedForm.e&&!E.dyn&&!E.mega){
@@ -3840,6 +3865,15 @@ Battle.prototype.resolveForms=async function(pa,ea){
       this.usedForm.e=true;E.tera=true;E.types=[E.teraType];
       AU.tera();BUI.sparkle('e');await say(`太晶化！${E.name} 变成了${TNAME[E.teraType]}属性！`);BUI.refresh(this);
     }
+  };
+  const pHas=pa.type==='move'&&Pm&&!Pm.fainted&&(pa.mega||pa.dyn||pa.tera);
+  const eHas=ea.type==='move'&&E&&!E.fainted&&(ea.mega||ea.dyn||ea.tera);
+  if(pHas&&eHas){
+    const first=this.speedOrder(Pm,E);
+    if(first==='p'){await doP();await doE();}else{await doE();await doP();}
+  } else {
+    if(pHas)await doP();
+    if(eHas)await doE();
   }
 };
 $('#logBtn').onclick=()=>{AU.cursor();const ov=$('#logOv');ov.classList.toggle('on');
