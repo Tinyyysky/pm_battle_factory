@@ -358,10 +358,39 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .psprite.dyn{filter:drop-shadow(0 0 18px rgba(255,40,40,.85))!important;animation:none}
 #espr.dyn{width:288px!important;height:288px!important;top:-6px!important;right:70px!important}
 #pspr.dyn{width:288px!important;height:288px!important;bottom:126px!important;left:48px!important}
-.psprite.tera::after{content:""}
+/* ★ 太晶化水晶质感：高亮+高饱和+冰蓝辉光+棱镜色散 */
+.psprite.tera{
+  filter:brightness(1.18) saturate(1.45) contrast(1.05)
+    drop-shadow(0 0 14px rgba(120,225,255,.65))
+    drop-shadow(0 0 5px rgba(255,255,255,.85))
+    drop-shadow(3px 0 6px rgba(255,120,200,.3))
+    drop-shadow(-3px 0 6px rgba(120,200,255,.3));
+}
 .teragem{position:absolute;width:34px;height:34px;background:linear-gradient(135deg,#fff,#8fe3ff 40%,#37b6ff);
-  clip-path:polygon(50% 0,100% 38%,80% 100%,20% 100%,0 38%);filter:drop-shadow(0 0 8px #6fd8ff);animation:gemSpin 3s linear infinite;z-index:5}
+clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);filter:drop-shadow(0 0 8px #6fd8ff);animation:gemSpin 3s linear infinite;z-index:5}
 @keyframes gemSpin{50%{transform:rotate(18deg) scale(1.15)}}
+/* ★ Mega进化：身边微流动的彩虹纹理光环 */
+.megaAura{
+  position:absolute;z-index:3;pointer-events:none;border-radius:50%;
+  width:200px;height:200px;
+  background:conic-gradient(from 0deg,
+    rgba(255,60,60,.18),rgba(255,180,40,.18),rgba(255,255,80,.18),
+    rgba(80,255,80,.18),rgba(60,180,255,.18),rgba(140,80,255,.18),
+    rgba(255,80,220,.18),rgba(255,60,60,.18));
+  -webkit-mask:radial-gradient(farthest-side,transparent 52%,#000 54%,#000 72%,transparent 74%);
+  mask:radial-gradient(farthest-side,transparent 52%,#000 54%,#000 72%,transparent 74%);
+  animation:rainbowSpin 5s linear infinite;
+  mix-blend-mode:screen;
+  opacity:0;transition:opacity .6s;
+}
+.megaAura.on{opacity:1}
+@keyframes rainbowSpin{to{transform:rotate(360deg)}}
+/* Mega精灵图本体：轻微增亮+暖色辉光 */
+.psprite.mega{
+  filter:brightness(1.1) saturate(1.15)
+    drop-shadow(0 0 10px rgba(255,200,120,.5))
+    drop-shadow(0 0 4px rgba(255,255,255,.6));
+}
 .psprite.shiny{filter:hue-rotate(130deg) saturate(1.5)}
 .psprite.hit{animation:hitShake .4s}
 @keyframes hitShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px);filter:brightness(3)}40%{transform:translateX(9px)}60%{transform:translateX(-7px);filter:brightness(2.4)}80%{transform:translateX(5px)}}
@@ -472,6 +501,10 @@ button:disabled{opacity:.4;cursor:not-allowed}
   right:25px;top:5px;opacity:.06;pointer-events:none;border:16px solid #fff;
   animation:slowSpin 60s linear infinite}
 @keyframes slowSpin{to{transform:rotate(360deg)}}
+@keyframes rainbowChip{
+  0%{background-position:0% 50%}
+  100%{background-position:200% 50%}
+}
 #detailCard{position:relative;width:min(880px,94%);max-height:92%;display:grid;grid-template-columns:330px 1fr;gap:20px;
   background:linear-gradient(180deg,#fffdf4,var(--panel) 45%,var(--panel2));border:4px solid var(--ink);border-radius:16px;
   box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 7px #d8cfb4,0 24px 60px rgba(0,0,0,.6);padding:20px 22px;overflow:auto;
@@ -1036,6 +1069,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
       <img id="espr" class="psprite" alt="">
       <img id="pspr" class="psprite" alt="">
       <div id="etera" class="teragem hidden"></div><div id="ptera" class="teragem hidden"></div>
+<div id="emegaAura" class="megaAura"></div><div id="pmegaAura" class="megaAura"></div>
       <div class="icard" id="ecard"></div>
       <div class="icard" id="pcard"></div>
       <div id="fxlayer" style="position:absolute;inset:0;pointer-events:none;z-index:8"></div>
@@ -1851,7 +1885,7 @@ const BUI={
     const cls=pct>50?'':pct>20?'mid':'low';
     const stch=m.status?`<span class="stchip" style="background:${{burn:'#e2574c',par:'#e0912b',psn:'#a33ea1',tox:'#a33ea1',sleep:'#666',frz:'#63c5c2'}[m.status]}">${{burn:'灼',par:'麻',psn:'毒',tox:'剧',sleep:'眠',frz:'冰'}[m.status]}</span>`:'';
     const confCh=m.vol.confuse>0?`<span class="stchip" style="background:#e0912b">乱${m.vol.confuse}</span>`:'';
-    const tags=(m.mega?'<span class="formtag">Mega</span>':'')+(m.dyn?'<span class="formtag" style="color:#d21f3c">极巨</span>':'')+(m.tera?`<span class="formtag" style="color:#0aa">晶(${TNAME[m.teraType]})</span>`:'')+(m.id===778&&m.disguiseUsed?'<span class="formtag" style="color:#999;text-decoration:line-through">画皮</span>':'')+(m.id===778&&!m.disguiseUsed?'<span class="formtag" style="color:#c8a0e8">画皮</span>':'');
+   const tags=(m.mega?'<span class="formtag" style="color:#e040fb">◆Mega</span>':'')+(m.dyn?'<span class="formtag" style="color:#d21f3c">极巨</span>':'')+(m.tera?`<span class="formtag" style="color:#0aa">⬡晶(${TNAME[m.teraType]})</span>`:'');+(m.id===778&&m.disguiseUsed?'<span class="formtag" style="color:#999;text-decoration:line-through">画皮</span>':'')+(m.id===778&&!m.disguiseUsed?'<span class="formtag" style="color:#c8a0e8">画皮</span>':'');
     const types=m.types.map(tyBadge).join(' ');
     let pips='';
     if(side==='e'){const arr=b.ep;pips='<div class="pips">'+arr.map(x=>`<span class="pip ${x.alive()?'':'down'}"></span>`).join('')+'</div>';}
@@ -1980,6 +2014,17 @@ const x=190, y=side==='p'?150:268;
     if(Pm&&!Pm.fainted){ const fid=Pm.mega?Pm.mega.f:Pm.id; if(this.pspr._cur!==fid+''+Pm.dyn){ setSprite(this.pspr,fid,true); this.pspr._cur=fid+''+Pm.dyn;} this.pspr.classList.toggle('dyn',Pm.dyn); this.pspr.classList.toggle('shiny',Pm.shiny); this.pspr.style.opacity=1;
       $('#ptera').classList.toggle('hidden',!Pm.tera); if(Pm.tera){$('#ptera').style.bottom='300px';$('#ptera').style.left='185px';} }
     else if(Pm&&Pm.fainted){this.pspr.classList.add('faint');}
+    /* ★ 太晶化水晶质感 & Mega彩虹纹理 */
+this.espr.classList.toggle('tera',!!(E&&E.tera&&!E.fainted));
+this.espr.classList.toggle('mega',!!(E&&E.mega&&!E.fainted));
+this.pspr.classList.toggle('tera',!!(Pm&&Pm.tera&&!Pm.fainted));
+this.pspr.classList.toggle('mega',!!(Pm&&Pm.mega&&!Pm.fainted));
+/* Mega彩虹光环定位与显隐 */
+const ema=$('#emegaAura'),pma=$('#pmegaAura');
+ema.classList.toggle('on',!!(E&&E.mega&&!E.fainted));
+pma.classList.toggle('on',!!(Pm&&Pm.mega&&!Pm.fainted));
+if(E&&E.mega&&!E.fainted){ema.style.top='100px';ema.style.right='110px';}
+if(Pm&&Pm.mega&&!Pm.fainted){pma.style.bottom='130px';pma.style.left='80px';}
     this.scene.classList.toggle('dyna',!!(E&&E.dyn)||(Pm&&Pm.dyn));
     /* ★ 平台与投影响应形态/存活状态 */
     const pe=document.querySelector('.plat.e'),pp=document.querySelector('.plat.p');
@@ -4325,8 +4370,9 @@ function showDetail(m,battle){
       <span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;background:linear-gradient(180deg,#e0fbff,#b8f0f8)">✦ 太晶·${TNAME[m.teraType]}</span>
       ${m.status?`<span class="abchip" style="color:#c22e28;border-color:#e08a8a;background:#ffe8e8">${STNAME[m.status]||m.status}</span>`:''}
       ${m.vol.confuse>0?`<span class="abchip" style="color:#e0912b;border-color:#f0c060;background:#fff3d8">混乱（剩余${m.vol.confuse}回合）</span>`:''}
-      ${m.mega?'<span class="abchip" style="color:#b3188d;border-color:#e08ac2;background:#ffe0f5">Mega进化</span>':''}
-      ${m.dyn?'<span class="abchip" style="color:#d21f3c;border-color:#f08a9a;background:#ffe0e5">极巨化中</span>':''}
+${m.mega?'<span class="abchip" style="color:#b3188d;border-color:#e08ac2;background:linear-gradient(90deg,#ffe0f5,#f0e0ff,#e0f0ff);animation:rainbowChip 3s linear infinite">◆ Mega进化</span>':''}
+${m.dyn?'<span class="abchip" style="color:#d21f3c;border-color:#f08a9a;background:#ffe0e5">极巨化中</span>':''}
+${m.tera?`<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;background:linear-gradient(135deg,#e0fbff,#d0f0ff,#e8e0ff)">⬡ 太晶化·${TNAME[m.teraType]}</span>`:''}
       ${m.id===778?(m.disguiseUsed?'<span class="abchip" style="color:#999;border-color:#ccc;background:#f0f0f0;text-decoration:line-through">画皮已破</span>':'<span class="abchip" style="color:#9b6fd8;border-color:#c8a0e8;background:#f5ecff">画皮未触发</span>'):''}
     </div>
     <div class="dHpBig">
