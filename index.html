@@ -1191,7 +1191,7 @@ let t=0;(V[kind]||V.win).forEach(([f,d])=>{ if(f)this.tone(f,d*.16,'square',.16,
 };
 const N={C3:131,D3:147,E3:165,F3:175,G3:196,A3:220,B3:247,C4:262,D4:294,E4:330,F4:349,G4:392,A4:440,B4:494,C5:523,D5:587,E5:659,F5:698,G5:784,A5:880,B5:988,C6:1046};
 /* ★ 全局画面/声音设置（localStorage 持久化） */
-const CFG=Object.assign({muted:false,music:true,weatherFx:true,fxShake:true,enemyHpPct:true,enemyAbility:true,enemyItem:true},JSON.parse(localStorage.getItem('pif_cfg')||'{}'));
+const CFG=Object.assign({muted:false,music:true,weatherFx:true,fxShake:true,entryAnim:true},JSON.parse(localStorage.getItem('pif_cfg')||'{}'));
 function saveCfg(){localStorage.setItem('pif_cfg',JSON.stringify(CFG));}
 const MUSIC={
   title:{bpm:132,trks:[
@@ -1360,7 +1360,7 @@ A('chlorophyll','叶绿素','晴天时速度翻倍');A('swiftswim','悠游自如
 A('solarpower','太阳之力','晴天时特攻×1.5，每回合损失HP');A('sandforce','沙之力','沙暴时岩/地/钢招式×1.3');
 A('drought','日照','出场时天气变为大晴天');A('drizzle','降雨','出场时天气变为下雨');A('sandstream','扬沙','出场时天气变为沙暴');A('snowwarning','降雪','出场时天气变为冰雹');
 A('airlock','气闸','天气的影响全部无效化');
-A('intimidate','威吓','出场时降低对手攻击');A('pressure','压力','对手招式消耗PP翻倍');
+A('intimidate','威吓','出场时降低对手攻击');A('pressure','压迫感','对手招式消耗PP翻倍');
 A('levitate','漂浮','免疫地面属性招式');A('wonderguard','神奇守护','只有效果绝佳的招式能造成伤害');
 A('voltabsorb','蓄电','受电属性招式时回复HP');A('waterabsorb','储水','受水属性招式时回复HP');
 A('flashfire','引火','受火属性招式时火属性威力提升');A('sapsipper','食草','受草属性招式时攻击提升');
@@ -1412,8 +1412,8 @@ A('steadfastx','不屈之心','畏缩时速度提升');A('shadowtagx','踩影','
 A('obliviousx','迟钝','不会陷入着迷或被挑衅');A('shellarmor','硬壳盔甲','不会受到会心一击');
 A('bulletproof','防弹','免疫弹类和球类招式');A('infiltrator','穿透','无视对手的屏障和替身');
 A('overcoatx','防尘','免疫天气和粉末类伤害');
-A('swordofruin','灾厄之剑','降低全体1/3防御')
-A('merciless','无情','对中毒的对手必定会心一击');
+A('swordofruin','灾祸之剑','降低全体1/3防御')
+A('merciless','不仁不义','对中毒的对手必定会心一击');
 A('grassysurge','青草制造者','出场时场地变为青草场地');
 
 /* ---- 道具 ---- */
@@ -1455,7 +1455,7 @@ S(9,'水箭龟','water','79/83/100/85/105/78','torrent/raindish',['hydropump','s
 S(10,'绿毛虫','bug','45/30/35/20/20/45','shielddust/shielddust',['tackle','stringshot','swift','terablast'],{evo:1});
 S(12,'巴大蝶','bug/flying','60/45/50/90/80/70','compoundeyes/compoundeyes',['bugbuzz','psychic','sleeppowder','energyball','hurricane']);
 S(16,'波波','normal/flying','40/45/40/35/35/56','keeneye/tangledfeet',['tackle','gust','quickattack'],{evo:1});
-S(18,'比雕','normal/flying','83/80/75/70/70/101','keeneye/tangledfeet',['hurricane','heatwave','uturn','roost','quickattack','aerialace']);
+S(18,'大比鸟','normal/flying','83/80/75/70/70/101','keeneye/tangledfeet',['hurricane','heatwave','uturn','roost','quickattack','aerialace']);
 S(19,'小拉达','normal','30/56/35/25/35/72','runaway/guts',['tackle','quickattack','crunch','facade'],{evo:1});
 S(24,'阿柏怪','poison','60/95/69/65/79/80','intimidate/shedskin',['poisonjab','crunch','glare','suckerpunch','earthquake']);
 S(25,'皮卡丘','electric','35/55/40/50/50/90','static/lightningrod',['thunderbolt','quickattack','irontail','thunderwave','voltswitch'],{evo:1});
@@ -1476,7 +1476,7 @@ S(110,'双弹瓦斯','poison','65/90/120/85/70/60','levitate/levitate',['sludgeb
 S(112,'钻角犀兽','ground/rock','105/130/120/45/45/40','lightningrod/rockhead',['earthquake','stoneedge','megahorn','superpower','icepunch']);
 S(120,'海星星','water','30/45/55/70/55/85','naturalcure/illuminate',['scald','icebeam','thunderbolt','recover','psychic'],{evo:1});
 S(121,'宝石海星','water/psychic','60/75/85/100/85/115','naturalcure/illuminate',['surf','icebeam','thunderbolt','psychic','recover','scald']);
-S(127,'大甲','bug','65/125/100/55/70/85','hyperCutterx/moldbreaker',['xscissor','earthquake','stoneedge','swordsdance','quickattack','closecombat'].filter(m=>MV[m]));
+S(127,'凯罗斯','bug','65/125/100/55/70/85','hyperCutterx/moldbreaker',['xscissor','earthquake','stoneedge','swordsdance','quickattack','closecombat'].filter(m=>MV[m]));
 S(129,'鲤鱼王','water','20/10/55/15/20/80','swiftswim/swiftswim',['splash','tackle','facade','terablast'],{evo:1});
 S(130,'暴鲤龙','water/flying','95/125/79/60/100/81','intimidate/moxie',['waterfall','crunch','earthquake','dragondance','icepunch','powerwhip','taunt']);
 S(131,'拉普拉斯','water/ice','130/85/80/85/95/60','waterabsorb/shellarmor',['surf','icebeam','thunderbolt','freezedry','bodyslam','icepunch']);
@@ -1642,11 +1642,11 @@ const MEGA={
 3:{f:10033,t:'grass/poison',s:[80,100,123,122,120,80],a:'thickfat',stone:'妙蛙花石'},
 6:[{f:10034,t:'fire/dragon',s:[78,130,111,130,85,100],a:'toughclaws',stone:'喷火龙石Ｘ'},{f:10035,t:'fire/flying',s:[78,104,78,159,115,100],a:'drought',stone:'喷火龙石Ｙ'}],
 9:{f:10036,t:'water',s:[79,103,120,135,115,78],a:'megalauncher',stone:'水箭龟石'},
-18:{f:10073,t:'normal/flying',s:[83,80,80,135,80,121],a:'adaptability',stone:'比雕石'},
+18:{f:10073,t:'normal/flying',s:[83,80,80,135,80,121],a:'adaptability',stone:'大比鸟石'},
 65:{f:10037,t:'psychic',s:[55,50,65,175,105,150],a:'trace',stone:'胡地石'},
 80:{f:10071,t:'water/psychic',s:[95,75,180,130,80,30],a:'shellarmor',stone:'呆壳兽石'},
 94:{f:10038,t:'ghost/poison',s:[60,65,80,170,95,130],a:'shadowtagx',stone:'耿鬼石'},
-127:{f:10040,t:'bug/flying',s:[65,155,120,65,90,105],a:'aerilate',stone:'大甲石'},
+127:{f:10040,t:'bug/flying',s:[65,155,120,65,90,105],a:'aerilate',stone:'凯罗斯石'},
 130:{f:10041,t:'water/dark',s:[95,155,109,70,130,81],a:'moldbreaker',stone:'暴鲤龙石'},
 150:[{f:10043,t:'psychic/fighting',s:[106,190,100,154,100,130],a:'steadfastx',stone:'超梦石Ｘ'},{f:10044,t:'psychic',s:[106,150,70,194,120,140],a:'insomnia',stone:'超梦石Ｙ'}],
 181:{f:10045,t:'electric/dragon',s:[90,95,105,165,110,45],a:'moldbreaker',stone:'电龙石'},
@@ -1680,7 +1680,7 @@ const MAXFX={
   normal:{drop:'spe'},           // 极巨攻击：降对方速度
   fire:{weather:'sun'},          // 极巨火焰：大晴天
   water:{weather:'rain'},        // 极巨水流：下雨
-  electric:{terrain:'electric'}, // 极巨闪电：电流场地
+  electric:{terrain:'electric'}, // 极巨闪电：电气场地
   grass:{terrain:'grassy'},      // 极巨草原：青草场地
   ice:{weather:'hail'},          // 极巨冰霜：冰雹
   fighting:{up:'atk'},           // 极巨拳斗：己方物攻↑
@@ -1696,7 +1696,7 @@ const MAXFX={
   steel:{up:'def'},              // 极巨钢铁：己方物防↑
   fairy:{terrain:'misty'}        // 极巨妖精：薄雾场地
 };
-const TERRNAME={electric:'电流场地',grassy:'青草场地',psychic:'精神场地',misty:'薄雾场地'};
+const TERRNAME={electric:'电气场地',grassy:'青草场地',psychic:'精神场地',misty:'薄雾场地'};
 function maxPower(mv){ if(!mv.p)return 0; const p=mv.p;
   if(mv.t==='fighting'||mv.t==='poison'){return p<=40?70:p<=50?75:p<=60?80:p<=70?85:p<=100?90:95;}
   return p<=40?90:p<=50?100:p<=60?110:p<=70?120:p<=100?130:140;}
@@ -1875,7 +1875,7 @@ const BUI={
     const wx=$('#wxchip');
     const chips=[];
     if(b.wx)chips.push({sun:'☀ 大晴天',rain:'🌧 下雨',sand:'🌪 沙暴',hail:'🌨 冰雹'}[b.wx]+`(${b.wxT})`);
-    if(b.terrain)chips.push({electric:'⚡ 电流场地',grassy:'🌿 青草场地',psychic:'🔮 精神场地',misty:'🌫 薄雾场地'}[b.terrain]+`(${b.terrainT})`);
+    if(b.terrain)chips.push({electric:'⚡ 电气场地',grassy:'🌿 青草场地',psychic:'🔮 精神场地',misty:'🌫 薄雾场地'}[b.terrain]+`(${b.terrainT})`);
     if(b.trickT>0)chips.push(`🌀 戏法空间(${b.trickT})`);
     if(chips.length){wx.textContent=chips.join('  ');wx.classList.add('on');}
     else wx.classList.remove('on');
@@ -1924,9 +1924,17 @@ const spr=side==='p'?this.pspr:this.espr;
 /* ★ 先彻底隐藏立绘并禁用过渡，杜绝投球/滑入前的渐隐闪现 */
 spr.style.transition='none';
 spr.style.opacity=0;
-void spr.offsetWidth;            // 强制重排，让"隐藏"立即生效，不被过渡动画接管
+void spr.offsetWidth;
 this.loadSprite(side,m);
 spr.classList.remove('faint','dyn');
+/* ★ 出场动画关闭：直接显示，仅播放音效 */
+if(!CFG.entryAnim){
+spr.style.transition='';
+spr.style.opacity=1;
+AU.ball();
+await sleep(120);
+return;
+}
 if(isWild){
 spr.style.transition='';
 spr.style.opacity=1;
@@ -3186,7 +3194,7 @@ if(mv.powder){
     BUI.refresh(this);
   }
   async tryInflict(foe,st,src,mvType){
-    /* ★ 场地防护：薄雾场地免疫异常状态，电流场地免疫睡眠 */
+    /* ★ 场地防护：薄雾场地免疫异常状态，电气场地免疫睡眠 */
     if(st!=='confuse'&&foe.status){await say(`${foe.name} 已经有异常状态了！`);return;}
     await this.inflictStatus(foe,st,src,mvType);
   }
@@ -3195,9 +3203,9 @@ if(mv.powder){
     /* ★ 薄雾场地：地面上的宝可梦免疫异常状态（混乱除外） */
 if(st!=='confuse'&&this.terrain==='misty'&&this.grounded(m)){
   await say('薄雾场地守护着宝可梦，无法附加异常状态！');return false;}
-/* ★ 电流场地：免疫睡眠 */
+/* ★ 电气场地：免疫睡眠 */
 if(st==='sleep'&&this.terrain==='electric'&&this.grounded(m)){
-  await say('电流场地守护着宝可梦，无法入睡！');return false;}
+  await say('电气场地守护着宝可梦，无法入睡！');return false;}
     if(st==='confuse'){m.vol.confuse=rnd(2,4);await say(`${m.name} 混乱了！`);AU.status();return true;}
     /* ★ 属性免疫（绝对，与来源招式属性无关） */
     if(st==='burn'&&m.types.includes('fire')){await say(`${m.name} 是火属性，不会灼伤！`);return false;}
@@ -4614,6 +4622,8 @@ function openSettings(){
       if(!v)$('#bscene').classList.remove('wx-sun','wx-rain','wx-sand','wx-hail','tr-electric','tr-grassy','tr-psychic','tr-misty');}));
   box.appendChild(settingsRow('战斗演出','濒死白红闪屏、场景震动、金星迸溅',
     ()=>CFG.fxShake, v=>{CFG.fxShake=v;}));
+  box.appendChild(settingsRow('出场动画','投球→弹跳→爆开→实体化的出场演出',
+()=>CFG.entryAnim, v=>{CFG.entryAnim=v;}));
   box.appendChild(settingsRow('敌方HP百分比','在敌方信息卡上显示HP百分比',
 ()=>CFG.enemyHpPct, v=>{CFG.enemyHpPct=v;}));
 box.appendChild(settingsRow('敌方特性显示','在敌方信息卡上显示特性名称',
