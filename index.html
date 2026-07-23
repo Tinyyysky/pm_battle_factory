@@ -1170,12 +1170,12 @@ const AU={
   run(){this.tone(800,.3,'square',.15,0,-600);},
   protect(){this.tone(900,.15,'sine',.2);this.tone(1200,.2,'sine',.15,.08);},
   lowhp(){this.tone(980,.09,'square',.12);this.tone(980,.09,'square',.12,.18);},
-  jingle(kind){
-    const V={ win:[[659,1],[784,1],[988,1],[1318,2],[988,1],[1318,3],[0,1],[1046,1],[1318,3]],
-      lose:[[440,1],[392,1],[349,1],[330,2],[294,1],[262,3]],
-      badge:[[523,1],[659,1],[784,1],[1046,1],[784,1],[1046,4]] };
-    let t=0;(V[kind]||V.win).forEach(([f,d])=>{ if(f)this.tone(f,d*.16,'square',.16,t); if(f)this.tone(f/2,d*.16,'triangle',.14,t); t+=d*.16;});
-  },
+jingle(kind){
+const V={ win:[[659,1],[784,1],[988,1],[1318,2],[988,1],[1318,4]],
+lose:[[440,1],[392,1],[349,1],[330,2],[294,1],[262,3]],
+badge:[[523,1],[659,1],[784,1],[1046,1],[784,1],[1046,4]] };
+let t=0;(V[kind]||V.win).forEach(([f,d])=>{ if(f)this.tone(f,d*.16,'square',.16,t); if(f)this.tone(f/2,d*.16,'triangle',.14,t); t+=d*.16;});
+},
   /* --- 简易音序器 BGM --- */
   seq:null,
   playMusic(name){ if(!this.ctx||this.muted||!this.musOn)return; this.stopMusic();
@@ -1398,7 +1398,7 @@ A('unaware','纯朴','无视对手的能力变化');A('toxicdebris','毒满地',
 A('quarkdrive','夸克充能','电场下最高能力×1.3（速度×1.5，HP除外）');
 A('protosynthesis','古代活性','晴天下最高能力×1.3（速度×1.5，HP除外）');
 A('hadronengine','强子引擎','出场开启电场，电场下特攻×1.3');
-A('orichalcumpulse','绯红脉动','出场开启晴天，电场下物攻×1.3');
+A('orichalcumpulse','绯红脉动','出场开启晴天，晴天下物攻×1.3');
 A('fairyaura','妖精光环','全场妖精招式×1.33');A('darkaura','暗黑光环','全场恶属性招式×1.33');
 A('intrepidsword','不挠之剑','出场时攻击提升');A('dauntlessshield','不屈之盾','出场时防御提升');
 A('multitype','多属性','阿尔宙斯专属');A('victorystar2','胜利之星','命中率提升');
@@ -2302,9 +2302,15 @@ if (first === 'p') {
     await this.sendOut('p', 0, true, true);
 }
 BUI.refresh(this);
-// ★ 双方宝可梦都出场后，再依次发动入场特性
-await this.entryEffects(this.E(), 'e');
-if (!this.over) await this.entryEffects(this.P(), 'p');
+// ★ 双方宝可梦都出场后，按速度顺序发动入场特性（受戏法空间影响）
+if (first === 'p') {
+  await this.entryEffects(this.P(), 'p');
+  if (!this.over) await this.entryEffects(this.E(), 'e');
+} else {
+  await this.entryEffects(this.E(), 'e');
+  if (!this.over) await this.entryEffects(this.P(), 'p');
+}
+BUI.refresh(this);
 /* ★ 首发出场不视为"替换上场"：清除标记，使加速特性第一回合末即可触发 */
 if(this.P())this.P().vol.switchedInThisTurn=false;
 if(this.E())this.E().vol.switchedInThisTurn=false;
@@ -2375,7 +2381,7 @@ const msg=async t=>{await say(`${m.name} 的特性发动了！${t}`);};
     if(ab==='intimidate'&&foe&&foe.alive()){ await msg(''); await this.changeStat(foe,'atk',-1,m); }
     if(ab==='drought'){await this.setWeather('sun',m);} if(ab==='drizzle'){await this.setWeather('rain',m);}
     if(ab==='sandstream'){await this.setWeather('sand',m);} if(ab==='snowwarning'){await this.setWeather('hail',m);}
-    if(ab==='orichalcumpulse'){await this.setWeather('sun',m);}
+    if(ab==='orichalcumpulse'){await this.setWeather('sun',m);await say(`${m.name} 的绯红脉动发动了，物攻提升了！`);}
     if(ab==='hadronengine'){await this.setTerrain('electric',m);await say(`${m.name} 的强子引擎发动了，特攻提升了！`);}
     if(ab==='grassysurge'){await this.setTerrain('grassy',m);}
     if(ab==='intrepidsword'){await this.changeStat(m,'atk',1,m);}
@@ -2395,6 +2401,7 @@ const msg=async t=>{await say(`${m.name} 的特性发动了！${t}`);};
     const nm={sun:'大晴天',rain:'下雨了',sand:'刮起了沙暴',hail:'下起了冰雹'}[w];
     await say(`${nm}！`);
     if(w==='sun'){for(const mon of [this.P(),this.E()]){if(mon&&mon.alive()&&mon.has('protosynthesis')&&mon!==m)await say(`${mon.name} 的古代活性发动了！${STN[mon.bestStat()]}提升了！`);}}
+    BUI.refresh(this);   // ★ 天气变化立即刷新背景特效
   }
   async setTerrain(t,m){
     // ★ 同种场地已存在：不刷新持续时间，仅提示
@@ -2402,6 +2409,7 @@ const msg=async t=>{await say(`${m.name} 的特性发动了！${t}`);};
     this.terrain=t;this.terrainT=5;
     await say(`场地变成了${TERRNAME[t]}！`);
     if(t==='electric'){for(const mon of [this.P(),this.E()]){if(mon&&mon.alive()&&mon.has('quarkdrive')&&mon!==m)await say(`${mon.name} 的夸克充能发动了！${STN[mon.bestStat()]}提升了！`);}}
+    BUI.refresh(this);   // ★ 场地变化立即刷新背景特效
   }
   grounded(m){ return !m.types.includes('flying')&&!m.has('levitate'); } /* 是否站在地面上 */
   wxActive(){ const P=this.P(),E=this.E(); if((P&&P.has('airlock'))||(E&&E.has('airlock')))return null; return this.wx; } /* 气闸：天气无效 */
@@ -3279,17 +3287,20 @@ async resolvePendingSwitches(){
     const pNeeds=batch.some(ps=>ps.side==='p');
     const eNeeds=batch.some(ps=>ps.side==='e');
     if(pNeeds&&eNeeds){
-      /* ★ 双方同时濒死：按上场宝可梦速度决定出场顺序（受戏法空间影响） */
-      const pIdx=await this.chooseParty(false,false);
-      const eIdx=this.aiBestSwitch();
-      const pMon=pIdx!=null?this.pp[pIdx]:null;
-      const eMon=eIdx>=0?this.ep[eIdx]:null;
-      if(pMon&&eMon){
-        const first=this.speedOrder(pMon,eMon);
-        if(first==='p'){await this.doSwitch('p',pIdx);await this.doSwitch('e',eIdx);}
-        else{await this.doSwitch('e',eIdx);await this.doSwitch('p',pIdx);}
-      } else if(pMon){await this.doSwitch('p',pIdx);}
-      else if(eMon){await this.doSwitch('e',eIdx);}
+/* ★ 双方同时濒死：按上场宝可梦速度决定出场顺序（受戏法空间影响） */
+const pIdx=await this.chooseParty(false,false);
+const eIdx=this.aiBestSwitch();
+const pMon=pIdx!=null?this.pp[pIdx]:null;
+const eMon=eIdx>=0?this.ep[eIdx]:null;
+/* ★ 比较速度前先清零能力等级，确保用基础速度排序（sendOut 中也会重置，此处提前保证 speedOrder 准确） */
+if(pMon)pMon.stages={atk:0,def:0,spa:0,spd:0,spe:0};
+if(eMon)eMon.stages={atk:0,def:0,spa:0,spd:0,spe:0};
+if(pMon&&eMon){
+const first=this.speedOrder(pMon,eMon);
+if(first==='p'){await this.doSwitch('p',pIdx);await this.doSwitch('e',eIdx);}
+else{await this.doSwitch('e',eIdx);await this.doSwitch('p',pIdx);}
+} else if(pMon){await this.doSwitch('p',pIdx);}
+else if(eMon){await this.doSwitch('e',eIdx);}
     } else {
       for(const ps of batch){
         if(this.over)break;
@@ -4073,7 +4084,11 @@ const grid=$('#freeGrid');grid.innerHTML='';
 SP.filter(sp=>(!g||genOf(sp.id)===g)&&(!ty||sp.t.includes(ty))&&(!q||sp.n.includes(q)||String(sp.id)===q))
 .forEach(sp=>{
 const c=el('div','pickCell');const img=new Image();setSprite(img,sp.id);c.appendChild(img);
-c.insertAdjacentHTML('beforeend',`<div><b>${sp.n}</b><br><span style="color:#888;font-size:10px">#${sp.id} · ${bst(sp)}</span></div>`);
+c.insertAdjacentHTML('beforeend',`<div style="flex:1"><b>${sp.n}</b><br><span style="color:#888;font-size:10px">#${sp.id} ${bst(sp)}</span></div>`);
+const det=el('button','btn tiny','详情');
+det.style.cssText='flex:none;margin-left:4px';
+det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(previewMon(sp),null);};
+c.appendChild(det);
 c.onclick=()=>{
 const team=editing==='player'?playerTeam:enemyTeam;
 if(team.length>=6){toast('最多6只！');AU.no();return;}
@@ -4118,7 +4133,9 @@ enemy=enemyTeam.map(cfg=>new P(cfg.sp.id,cfg.lvl,{iv:30,nature:cfg.nature,ev:cfg
 const r=await startBattle({player,enemy,trainer:'自由对战对手',
 rules:{mega:$('#rMega').checked,dyna:$('#rDyna').checked,tera:$('#rTera').checked,capture:false,run:true},ai:1.2});
 await fadeTo('#free');
-if(r.result==='win'){AU.jingle('win');toast('🎉 胜利！');}
+if(r.result==='win'){
+  AU.jingle('win');
+  toast('🎉 胜利！');}
 else if(r.result==='lose'){AU.jingle('lose');toast('战败…再接再厉！');}
 };
 render();renderTeam();
@@ -4164,22 +4181,28 @@ teraRow.appendChild(teraSel);box.appendChild(teraRow);
 // 对战点数
 box.appendChild(el('h3','disp','对战点数（总和≤66，单项≤32）'));
 const evKeys=['hp','atk','def','spa','spd','spe'],evNames=['HP','攻击','防御','特攻','特防','速度'];
+const evStCols=['#e07b00','#e2574c','#3f8fe0','#8a63d2','#4caf7d','#e0912b'];
 const evInfo=el('div','');evInfo.style.cssText='font-size:12px;color:#888;margin:4px 0';
 box.appendChild(evInfo);
 const evWrap=el('div','');box.appendChild(evWrap);
+const tmpMon=new P(sp.id,cfg.lvl||lvl,{iv:30,nature:cfg.nature,ev:{hp:0,atk:0,def:0,spa:0,spd:0,spe:0},moves:cfg.moves,ability:cfg.ability});
 function refreshEV(){
 const total=evKeys.reduce((a,k)=>a+cfg.ev[k],0);
 evInfo.textContent=`已分配 ${total}/66 · 剩余 ${66-total}`;
 evWrap.innerHTML='';
 evKeys.forEach((k,i)=>{
-const r=el('div','');r.style.cssText='display:flex;align-items:center;gap:8px;margin:3px 0';
-r.innerHTML=`<span style="width:40px;font-weight:900;font-size:12px">${evNames[i]}</span>`;
+const base=statPreview(tmpMon,k,0,cfg.nature);
+const fin=statPreview(tmpMon,k,cfg.ev[k],cfg.nature);
+const r=el('div','');r.style.cssText='display:flex;align-items:center;gap:6px;margin:4px 0';
+r.innerHTML=`<span style="width:42px;font-weight:900;font-size:12px;color:${evStCols[i]}">${evNames[i]}${cfg.nature?.up===k?' <b style="color:#e2574c">↑</b>':cfg.nature?.down===k?' <b style="color:#3f8fe0">↓</b>':''}</span>`;
 const minus=el('button','btn tiny','－');
 const val=el('span','px',String(cfg.ev[k]));val.style.cssText='font-size:9px;width:30px;text-align:center';
 const plus=el('button','btn tiny','＋');
+const stat=el('span','');stat.style.cssText='font-size:11px;color:#666;margin-left:4px';
+stat.innerHTML=`${base} → <b style="color:${fin>base?'#3ecf6c':fin<base?'#e2574c':'#666'}">${fin}</b>`;
 minus.onclick=()=>{if(cfg.ev[k]>0){cfg.ev[k]--;AU.cursor();refreshEV();}};
 plus.onclick=()=>{const t=evKeys.reduce((a,kk)=>a+cfg.ev[kk],0);if(cfg.ev[k]<32&&t<66){cfg.ev[k]++;AU.cursor();refreshEV();}};
-r.appendChild(minus);r.appendChild(val);r.appendChild(plus);
+r.appendChild(minus);r.appendChild(val);r.appendChild(plus);r.appendChild(stat);
 evWrap.appendChild(r);
 });
 }
