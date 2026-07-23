@@ -1157,7 +1157,7 @@ const AU={
 };
 const N={C3:131,D3:147,E3:165,F3:175,G3:196,A3:220,B3:247,C4:262,D4:294,E4:330,F4:349,G4:392,A4:440,B4:494,C5:523,D5:587,E5:659,F5:698,G5:784,A5:880,B5:988,C6:1046};
 /* ★ 全局画面/声音设置（localStorage 持久化） */
-const CFG=Object.assign({muted:false,music:true,weatherFx:true,fxShake:true},JSON.parse(localStorage.getItem('pif_cfg')||'{}'));
+const CFG=Object.assign({muted:false,music:true,weatherFx:true,fxShake:true,enemyHpPct:true,enemyAbility:true,enemyItem:true},JSON.parse(localStorage.getItem('pif_cfg')||'{}'));
 function saveCfg(){localStorage.setItem('pif_cfg',JSON.stringify(CFG));}
 const MUSIC={
   title:{bpm:132,trks:[
@@ -1750,6 +1750,7 @@ class P{
     this.status=null; this.sleepT=0; this.toxicN=0;
     this.vol={}; if(id===778)this.vol.disguise=true;
     this.fainted=false; this.xpGot=false;
+    this.disguiseUsed=false;   // ★ 画皮本场是否已触发（跨换人保留）
   }
   /* ★ 重算能力：当前形态(普通/Mega)种族值 + 个体值 + 对战点数(EV)；极巨化时HP翻倍 */
   recalc(){
@@ -1849,15 +1850,16 @@ const BUI={
     const pct=Math.round(m.hpPct()*100);
     const cls=pct>50?'':pct>20?'mid':'low';
     const stch=m.status?`<span class="stchip" style="background:${{burn:'#e2574c',par:'#e0912b',psn:'#a33ea1',tox:'#a33ea1',sleep:'#666',frz:'#63c5c2'}[m.status]}">${{burn:'灼',par:'麻',psn:'毒',tox:'剧',sleep:'眠',frz:'冰'}[m.status]}</span>`:'';
-    const tags=(m.mega?'<span class="formtag">Mega</span>':'')+(m.dyn?'<span class="formtag" style="color:#d21f3c">极巨</span>':'')+(m.tera?`<span class="formtag" style="color:#0aa">晶(${TNAME[m.teraType]})</span>`:'');
+    const confCh=m.vol.confuse>0?`<span class="stchip" style="background:#e0912b">乱${m.vol.confuse}</span>`:'';
+    const tags=(m.mega?'<span class="formtag">Mega</span>':'')+(m.dyn?'<span class="formtag" style="color:#d21f3c">极巨</span>':'')+(m.tera?`<span class="formtag" style="color:#0aa">晶(${TNAME[m.teraType]})</span>`:'')+(m.id===778&&m.disguiseUsed?'<span class="formtag" style="color:#999;text-decoration:line-through">画皮</span>':'')+(m.id===778&&!m.disguiseUsed?'<span class="formtag" style="color:#c8a0e8">画皮</span>':'');
     const types=m.types.map(tyBadge).join(' ');
     let pips='';
     if(side==='e'){const arr=b.ep;pips='<div class="pips">'+arr.map(x=>`<span class="pip ${x.alive()?'':'down'}"></span>`).join('')+'</div>';}
-    const hpnum=side==='p'?`<div class="hpnum">${m.hp} / ${m.maxhp}</div>`:'';
+    const hpnum=side==='p'?`<div class="hpnum">${m.hp} / ${m.maxhp}</div>`:(CFG.enemyHpPct?`<div class="hpnum">${Math.round(m.hpPct()*100)}%</div>`:'');
     const xp=side==='p'?`<div class="xpbar"><div class="xpfill" style="width:${Math.round(100*(m.xp-Math.pow(m.lvl,3))/(Math.pow(m.lvl+1,3)-Math.pow(m.lvl,3)))}%"></div></div>`:'';
-        const it=m.item?`<div style="font-size:10px;color:#888;font-weight:700">持有：${IT[m.item]?.n||''}</div>`:'';
+        const it=(m.item&&(side==='p'||CFG.enemyItem))?`<div style="font-size:10px;color:#888;font-weight:700">持有：${IT[m.item]?.n||''}</div>`:'';
     const ab=AB[m.ability];
-    const abRow=ab?`<div style="margin-top:3px"><span class="abchip" title="${ab.d}">${ab.n}</span></div>`:'';
+const abRow=(ab&&(side==='p'||CFG.enemyAbility))?`<div style="margin-top:3px"><span class="abchip" title="${ab.d}">${ab.n}</span></div>`:'';
     /* 能力等级实时显示（红升蓝降） */
     const sig=STATKEYS.map(k=>m.stages[k]).join(',');
     const cardEl=this.card(side);
@@ -1869,7 +1871,7 @@ const BUI={
 const protoActive=(m.has('protosynthesis')&&b&&b.wx==='sun')||(m.has('quarkdrive')&&b&&b.terrain==='electric');
 const protoChip=protoActive?`<span class="stg up" style="background:#fff3c4;color:#c07a2a;border-color:#f2c230">⚡${AB[m.ability]?.n||''} ${STN[m.bestStat()]}↑</span>`:'';
 const stgrow=(stgs||protoChip)?`<div class="stgrow">${protoChip}${stgs}</div>`:'';
-    return `<div class="row1"><span class="nm">${m.name}${m.shiny?' ✦':''}</span><span class="lv">${m.lvl}</span>${stch}${tags}</div>
+    return `<div class="row1"><span class="nm">${m.name}${m.shiny?' ✦':''}</span><span class="lv">${m.lvl}</span>${stch}${confCh}${tags}</div>
       <div style="margin-top:2px">${types}</div>
       <div class="hpwrap"><span class="hplabel">HP</span><div class="hpbar"><div class="hpfill ${cls}" style="width:${pct}%"></div></div></div>
       ${hpnum}${xp}${pips}${it}${abRow}${stgrow}`;
@@ -2237,6 +2239,7 @@ speedOrder(pMon,eMon){
       m.mega=null;m.dyn=false;m.dynT=0;m.tera=false;m.types=m.baseTypes.slice();
       m.recalc();
       m.hp=Math.min(m.hp,m.maxhp);m.xpGot=false;
+      m.disguiseUsed=false;
     });
     this.turn=1;
 const first = this.speedOrder(this.pp[0], this.ep[0]);
@@ -2251,6 +2254,9 @@ BUI.refresh(this);
 // ★ 双方宝可梦都出场后，再依次发动入场特性
 await this.entryEffects(this.E(), 'e');
 if (!this.over) await this.entryEffects(this.P(), 'p');
+/* ★ 首发出场不视为"替换上场"：清除标记，使加速特性第一回合末即可触发 */
+if(this.P())this.P().vol.switchedInThisTurn=false;
+if(this.E())this.E().vol.switchedInThisTurn=false;
     while(!this.over){
       await this.doTurn();                    // ① 本回合行动阶段
       if(this.over)break;
@@ -2265,20 +2271,31 @@ if (!this.over) await this.entryEffects(this.P(), 'p');
       this.turn++;
     }
     AU.stopMusic();
+    /* ★ 战斗结束后：重置双方所有宝可梦的临时状态（形态/异常/能力等级/濒死等） */
+[...this.pp,...this.ep].forEach(m=>{
+  m.mega=null; m.dyn=false; m.dynT=0; m.tera=false;
+  m.types=m.baseTypes.slice();
+  m.stages={atk:0,def:0,spa:0,spd:0,spe:0};
+  m.status=null; m.sleepT=0; m.toxicN=0;
+  m.fainted=false;
+  m.vol={}; if(m.id===778&&!m.disguiseUsed)m.vol.disguise=true;
+  m.recalc();
+  m.hp=Math.min(m.hp,m.maxhp);
+});
     LOGFN=null;
     if(this.onEnd)this.onEnd(this.result,this);
   }
   async sendOut(side,idx,first,skipEffects=false){
 if(side==='p'){
 this.pi=idx;const m=this.P();
-m.vol={};if(m.id===778)m.vol.disguise=true;m.vol.switchedInThisTurn=true;m.stages={atk:0,def:0,spa:0,spd:0,spe:0};m.fainted=false;
+m.vol={};if(m.id===778&&!m.disguiseUsed)m.vol.disguise=true;m.vol.switchedInThisTurn=true;m.stages={atk:0,def:0,spa:0,spd:0,spe:0};m.fainted=false;
 await BUI.entryAnim('p',m,false);
 await say(first?`去吧！${m.name}！`:`${m.name}，就决定是你了！`);
 this.participants.add(m);
 if(!skipEffects)await this.entryEffects(m,'p');
 } else {
 this.ei=idx;const m=this.E();
-m.vol={};if(m.id===778)m.vol.disguise=true;m.vol.switchedInThisTurn=true;m.stages={atk:0,def:0,spa:0,spd:0,spe:0};m.fainted=false;
+m.vol={};if(m.id===778&&!m.disguiseUsed)m.vol.disguise=true;m.vol.switchedInThisTurn=true;m.stages={atk:0,def:0,spa:0,spd:0,spe:0};m.fainted=false;
 await BUI.entryAnim('e',m,this.wild);
 await say(this.wild?`野生的 ${m.name} 出现了！`:`${this.trainerName||'对手'} 派出了 ${m.name}！`);
 if(!skipEffects)await this.entryEffects(m,'e');
@@ -2598,8 +2615,8 @@ if(this.over)return;
     const foe=this.foeOf(mon);
     // 懒惰
     if(mon.has('truant')){ if(mon.vol.loaf){mon.vol.loaf=false;await say(`${mon.name} 正在偷懒！`);return;} mon.vol.loaf=true; }
-    // 蓄力招式
-    if(mon.vol.charge){ const ck=mon.vol.charge; mon.vol.charge=null; moveSel={k:ck}; await say(`${mon.name} 释放了积蓄的能量！`); }
+// 蓄力招式
+if(mon.vol.charge){ const ck=mon.vol.charge; mon.vol.charge=null; mon.vol.justCharged=true; moveSel={k:ck}; await say(`${mon.name} 释放了积蓄的能量！`); }
     else if(mon.vol.recharge){ mon.vol.recharge=false; await say(`${mon.name} 必须休息一回合！`); return; }
     // 锁定（逆鳞）
     if(mon.vol.lock)moveSel={k:mon.vol.lock.k};
@@ -2607,12 +2624,38 @@ if(this.over)return;
     const mvObj=mon.moves.find(x=>x.k===mvk);
     let mv=MV[mvk];
     // 状态检查
-    if(mon.status==='sleep'){ mon.sleepT-=mon.has('earlybird')?2:1;
-      if(mon.sleepT>0){await say(`${mon.name} 正在呼呼大睡…`);return;}
-      mon.status=null;await say(`${mon.name} 醒来了！`); }
-    if(mon.status==='frz'){ if(Math.random()<.2){mon.status=null;await say(`${mon.name} 解冻了！`);}
-      else{await say(`${mon.name} 被冻住无法行动！`);return;} }
-    if(mon.status==='par'&&Math.random()<.25){await say(`${mon.name} 全身麻痹无法行动！`);AU.status();return;}
+/* ★ 睡眠：第一回合必睡 → 第二回合1/3概率醒 → 第三回合必醒（最多2回合无法行动） */
+if(mon.status==='sleep'){
+  if(mon.sleepT>=2){
+    /* 第一回合：必定无法行动 */
+    mon.sleepT-=mon.has('earlybird')?2:1;
+    await say(`${mon.name} 正在呼呼大睡…`);return;
+  }else if(mon.sleepT===1){
+    /* 第二回合：1/3概率提前醒来 */
+    if(Math.random()<1/3){
+      mon.status=null;mon.sleepT=0;
+      await say(`${mon.name} 醒来了！`);
+    }else{
+      mon.sleepT-=mon.has('earlybird')?2:1;
+      await say(`${mon.name} 正在呼呼大睡…`);return;
+    }
+  }else{
+    /* 第三回合及以后：必定醒来 */
+    mon.status=null;mon.sleepT=0;
+    await say(`${mon.name} 醒来了！`);
+  }
+}
+/* ★ 冰冻：每回合20%解冻，第三回合必定解冻 */
+if(mon.status==='frz'){
+  mon.vol.frzT=(mon.vol.frzT||0)+1;
+  if(mon.vol.frzT>=3||Math.random()<.2){
+    mon.status=null;mon.vol.frzT=0;
+    await say(`${mon.name} 解冻了！`);
+  }else{
+    await say(`${mon.name} 被冻住无法行动！`);return;
+  }
+}
+    if(mon.status==='par'&&Math.random()<1/8){await say(`${mon.name} 全身麻痹无法行动！`);AU.status();return;}
     if(mon.vol.confuse&&mon.vol.confuse>0){
       if(Math.random()<1/3){
         await say(`${mon.name} 在混乱中攻击了自己！`);AU.hit();
@@ -2633,6 +2676,16 @@ if(this.over)return;
 if(mon.vol.disabled&&mon.vol.disabled.k===mvk){
   await say(`${mon.name} 的${mv.n}被封印了，无法使用！`);return;
 }
+/* ★ 蓄力招式（日光束等）：晴天秒发，否则第一回合蓄力、第二回合释放 */
+if(mv.charge&&!mon.vol.justCharged){
+  if(this.wxActive()!=='sun'){
+    mon.vol.charge=mvk;
+    await say(`${mon.name} 吸收了光能！`);
+    if(mvObj&&mvk!=='struggle'){let cost=foe.has('pressure')?2:1;mvObj.pp=Math.max(0,mvObj.pp-cost);}
+    return;
+  }
+}
+mon.vol.justCharged=false;
     if(!foe||foe.fainted){return;}
     // 极巨化转换
     // 极巨化转换
@@ -2743,11 +2796,12 @@ if(acc!=null&&!mon.has('keeneye')&&!mon.has('illuminate')){
       BUI.dmgPop(side,`-${rec}`,'#ff9d8a');
     }
     if(mon.item==='lifeorb'&&totalDmg>0&&!mon.has('magicguard')&&!(mon.has('sheerforce')&&useMv.sec)&&!mon.fainted){
-      const lo=Math.max(1,Math.floor(mon.baseMax/10));   // ★ 按未翻倍HP计算
-      mon.hp=Math.max(0,mon.hp-lo);
-      await say('生命宝珠消耗了HP…');
-      BUI.dmgPop(side,`-${lo}`,'#ff9d8a');
-    }
+const lo=Math.max(1,Math.floor(mon.baseMax/10));   // ★ 按未翻倍HP计算
+mon.hp=Math.max(0,mon.hp-lo);
+await say('生命宝珠消耗了HP…');
+this.addLog(`↳ ${mon.name} 生命宝珠反伤 -${lo} HP（剩余 ${Math.round(mon.hp/mon.maxhp*100)}%）`);
+BUI.dmgPop(side,`-${lo}`,'#ff9d8a');
+}
     BUI.refresh(this);
     // ★ 击倒结算：先对手（被招式击倒），后自己（被反伤/命玉击倒）
     if(koed){ await this.handleKO(side,mon,foe); }
@@ -2804,6 +2858,7 @@ if(protectPierce)dmg=Math.max(1,Math.floor(dmg/4));   // ★ 穿透保护：1/4�
 // ★ 破格/流星闪冲等无视对手特性的招式可穿透画皮
 if(foe.vol.disguise&&!mon.has('moldbreaker')&&!mv.ignAb){
       foe.vol.disguise=false;this.abBanner(foe);
+      foe.disguiseUsed=true;   // ★ 本场已触发，换人后不再恢复
       await say(`${foe.name} 的画皮抵挡了攻击！`);
       BUI.dmgPop(side==='p'?'e':'p','抵挡','#ffd93b');
       if(!foe.has('magicguard')){
@@ -2886,7 +2941,7 @@ if(mv.ct&&foe.has('poisonpoint')&&Math.random()<.3&&!mon.status){this.abBanner(f
     if(mv.salt&&foe.hp>0){foe.vol.salt=true;await say(`${foe.name} 被盐腌住了！`);}
     // 愤怒之拳计数已在 vol.rage
     // 文柚果
-    if(foe.item==='sitrus'&&foe.hp>0&&foe.hpPct()<=.5){foe.item=null;foe.hp=Math.min(foe.maxhp,foe.hp+Math.floor(foe.maxhp/4));AU.heal();await say(`${foe.name} 吃了文柚果，回复了HP！`);}
+if(foe.item==='sitrus'&&foe.hp>0&&foe.hpPct()<=.5){foe.item=null;const h=Math.floor(foe.maxhp/4);foe.hp=Math.min(foe.maxhp,foe.hp+h);AU.heal();await say(`${foe.name} 吃了文柚果，回复了HP！`);this.addLog(`↳ ${foe.name} 文柚果回复 +${h} HP（剩余 ${Math.round(foe.hp/foe.maxhp*100)}%）`);}
     // ★ 极巨招式固有效果：仅在真正造成伤害时触发（天气/场地不受击倒影响）
     if(mv.maxfx&&dmg>0){ const f=mv.maxfx;
       if(f.up)await this.changeStat(mon,f.up,1,mon);
@@ -2997,8 +3052,6 @@ if(!mb&&(foe.has('multiscale')||foe.has('shadowshield'))&&foe.hp===foe.maxhp)dmg
 if(!mb&&foe.has('filter')&&eff>1)dmg=Math.floor(dmg*.75);
 if(!mb&&foe.has('thickfat')&&(mv.t==='fire'||mv.t==='ice'))dmg=Math.floor(dmg*.5);
 if(!mb&&foe.has('heatproof')&&mv.t==='fire')dmg=Math.floor(dmg*.5);
-    // 灼伤
-    if(mv.c==='P'&&mon.status==='burn'&&!mon.has('guts')&&!mv.facade)dmg=Math.floor(dmg*.5);
     // 会心倍率
     if(crit)dmg=Math.floor(dmg*(mon.has('sniper')?2.25:1.5));
     // 随机
@@ -3041,7 +3094,10 @@ if(mv.a!=null&&Math.random()*100>mv.a*(mon.has('compoundeyes')?1.3:1)){await say
       if(mv.hazard==='sr'){ if(this.haz[ts].sr){await say('场上已经撒过隐形岩了！');return;} this.haz[ts].sr=1;await say(`${mon.name} 撒下了隐形岩！`);}
       if(mv.hazard==='spikes'){ if(this.haz[ts].spikes>=3){await say('场上已经布满撒菱了！');return;} this.haz[ts].spikes++;await say(`${mon.name} 撒下了撒菱！`);} return;}
       // ★ 防尘：免疫粉末招式
-    if(mv.powder&&foe.has('overcoatx')){this.abBanner(foe);await say(`${foe.name} 的防尘发动了！粉末招式无效！`);return;}
+if(mv.powder){
+  if(foe.types.includes('grass')){await say(`对 ${foe.name} 没有效果…`);return;}
+  if(foe.has('overcoatx')){this.abBanner(foe);await say(`${foe.name} 的防尘发动了！粉末招式无效！`);return;}
+}
     if(mv.setSt){ await this.tryInflict(foe,mv.setSt,mon,mv.t); return; }
     if(mv.setDrop){ await this.changeStat(foe,mv.setDrop.drop,mv.setDrop.n,mon); return; }
     if(mv.heal){ const h=Math.floor(mon.maxhp/2); mon.hp=Math.min(mon.maxhp,mon.hp+h);AU.heal();await say(`${mon.name} 回复了HP！`);BUI.refresh(this);return; }
@@ -3071,13 +3127,17 @@ if(mv.a!=null&&Math.random()*100>mv.a*(mon.has('compoundeyes')?1.3:1)){await say
   }
   async tryInflict(foe,st,src,mvType){
     /* ★ 场地防护：薄雾场地免疫异常状态，电流场地免疫睡眠 */
-    if(this.terrain==='misty'&&this.grounded(foe)){await say('薄雾场地守护着宝可梦，无法附加异常状态！');return;}
-    if(this.terrain==='electric'&&this.grounded(foe)&&st==='sleep'){await say('电流场地守护着宝可梦，无法入睡！');return;}
     if(st!=='confuse'&&foe.status){await say(`${foe.name} 已经有异常状态了！`);return;}
     await this.inflictStatus(foe,st,src,mvType);
   }
    async inflictStatus(m,st,src,mvType,noSync){
     if(m.status&&st!=='confuse')return false;
+    /* ★ 薄雾场地：地面上的宝可梦免疫异常状态（混乱除外） */
+if(st!=='confuse'&&this.terrain==='misty'&&this.grounded(m)){
+  await say('薄雾场地守护着宝可梦，无法附加异常状态！');return false;}
+/* ★ 电流场地：免疫睡眠 */
+if(st==='sleep'&&this.terrain==='electric'&&this.grounded(m)){
+  await say('电流场地守护着宝可梦，无法入睡！');return false;}
     if(st==='confuse'){m.vol.confuse=rnd(2,4);await say(`${m.name} 混乱了！`);AU.status();return true;}
     /* ★ 属性免疫（绝对，与来源招式属性无关） */
     if(st==='burn'&&m.types.includes('fire')){await say(`${m.name} 是火属性，不会灼伤！`);return false;}
@@ -3094,8 +3154,10 @@ if(mv.a!=null&&Math.random()*100>mv.a*(mon.has('compoundeyes')?1.3:1)){await say
     m.status=st;AU.status();
     const nm={burn:'被灼伤了',par:'麻痹了',psn:'中毒了',tox:'中了剧毒',sleep:'睡着了',frz:'被冻住了'}[st];
     await say(`${m.name} ${nm}！`);
-    if(st==='sleep')m.sleepT=m.has('earlybird')?1:rnd(1,3);
+    /* ★ 睡眠：固定2回合计数（第一回合必睡，第二回合1/3醒，第三回合必醒） */
+if(st==='sleep')m.sleepT=m.has('earlybird')?1:2;
     if(st==='tox')m.toxicN=0;
+    if(st==='frz')m.vol.frzT=0;   // ★ 冰冻回合计数器
     /* 同步：反射同样经过免疫判定，noSync 防止连锁 */
     if(!noSync&&m.has('synchronize')&&src&&src!==m&&!src.status&&src.hp>0){
       await say(`${m.name} 的同步特性发动了！`);
@@ -3253,33 +3315,33 @@ async resolvePendingSwitches(){
       // 天气伤害
 const wx=this.wxActive();
 if(wx==='sand'&&!m.has('overcoatx')&&!['rock','ground','steel'].includes(m.types[0])&&!['rock','ground','steel'].includes(m.types[1]||'')){
-if(!m.has('sandveil')&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(B/16));await say(`沙暴袭击了 ${m.name}！`);} }
+if(!m.has('sandveil')&&!m.has('magicguard')){const d=Math.floor(B/16);m.hp=Math.max(0,m.hp-d);await say(`沙暴袭击了 ${m.name}！`);this.addLog(`↳ ${m.name} 受沙暴伤害 -${d} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);} }
 if(wx==='hail'&&!m.has('overcoatx')&&!m.types.includes('ice')){
-if(!m.has('snowcloak')&&!m.has('magicguard')){m.hp=Math.max(0,m.hp-Math.floor(B/16));await say(`冰雹袭击了 ${m.name}！`);} }
-      if(m.has('solarpower')&&wx==='sun'&&!m.has('magicguard')){this.abBanner(m);m.hp=Math.max(0,m.hp-Math.floor(B/8));await say(`${m.name} 的太阳之力发动了！`);}
-      if(m.has('raindish')&&wx==='rain'){this.abBanner(m);m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));await say(`${m.name} 的雨盘回复了HP！`);}
+if(!m.has('snowcloak')&&!m.has('magicguard')){const d=Math.floor(B/16);m.hp=Math.max(0,m.hp-d);await say(`冰雹袭击了 ${m.name}！`);this.addLog(`↳ ${m.name} 受冰雹伤害 -${d} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);} }
+      if(m.has('solarpower')&&wx==='sun'&&!m.has('magicguard')){this.abBanner(m);const d=Math.floor(B/8);m.hp=Math.max(0,m.hp-d);await say(`${m.name} 的太阳之力发动了！`);this.addLog(`↳ ${m.name} 太阳之力 -${d} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);}
+      if(m.has('raindish')&&wx==='rain'){this.abBanner(m);const h=Math.floor(B/16);m.hp=Math.min(m.maxhp,m.hp+h);await say(`${m.name} 的雨盘回复了HP！`);this.addLog(`↳ ${m.name} 雨盘回复 +${h} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);}
       // 青草场地回复
-      if(this.terrain==='grassy'&&this.grounded(m)&&m.hp>0){m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));await say(`${m.name} 在青草场地上回复了HP！`);}
+      if(this.terrain==='grassy'&&this.grounded(m)&&m.hp>0){const h=Math.floor(B/16);m.hp=Math.min(m.maxhp,m.hp+h);await say(`${m.name} 在青草场地上回复了HP！`);this.addLog(`↳ ${m.name} 青草场地回复 +${h} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);}
       // 寄生种子
       if(m.vol.seed&&m.hp>0){const src=m.vol.seed;
-        if(src.alive()&&this.foeOf(src)===m){const d=Math.max(1,Math.floor(B/8));
-          m.hp=Math.max(0,m.hp-d);src.hp=Math.min(src.maxhp,src.hp+d);await say(`${m.name} 被寄生种子吸取了HP！`);} }
+if(src.alive()&&this.foeOf(src)===m){const d=Math.max(1,Math.floor(B/8));
+m.hp=Math.max(0,m.hp-d);src.hp=Math.min(src.maxhp,src.hp+d);await say(`${m.name} 被寄生种子吸取了HP！`);this.addLog(`↳ ${m.name} 寄生种子 -${d} HP → ${src.name} +${d} HP`);} }
       // 盐腌
       if(m.vol.salt&&m.hp>0){const d=Math.max(1,Math.floor(B/(['water','steel'].includes(m.types[0])?4:8)));
-        m.hp=Math.max(0,m.hp-d);await say(`盐腌正在侵蚀 ${m.name}！`);}
+m.hp=Math.max(0,m.hp-d);await say(`盐腌正在侵蚀 ${m.name}！`);this.addLog(`↳ ${m.name} 盐腌伤害 -${d} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);}
       // 异常状态
-      if(m.status==='burn'){m.hp=Math.max(0,m.hp-Math.floor(B/16));await say(`${m.name} 被灼伤伤害了！`);}
-      if(m.status==='psn'){m.hp=Math.max(0,m.hp-Math.floor(B/8));await say(`${m.name} 受到了毒素伤害！`);}
-      if(m.status==='tox'){m.toxicN++;m.hp=Math.max(0,m.hp-Math.floor(B*m.toxicN/16));await say(`${m.name} 受到了剧毒伤害！`);}
-      if(m.has('poisonheal')&&(m.status==='psn'||m.status==='tox')){this.abBanner(m);m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/8));await say(`${m.name} 的毒疗发动了，回复了HP！`);}
+      if(m.status==='burn'){const d=Math.floor(B/16);m.hp=Math.max(0,m.hp-d);await say(`${m.name} 被灼伤伤害了！`);this.addLog(`↳ ${m.name} 灼伤伤害 -${d} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);}
+      if(m.status==='psn'){const d=Math.floor(B/8);m.hp=Math.max(0,m.hp-d);await say(`${m.name} 受到了毒素伤害！`);this.addLog(`↳ ${m.name} 中毒伤害 -${d} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);}
+      if(m.status==='tox'){m.toxicN++;const d=Math.floor(B*m.toxicN/16);m.hp=Math.max(0,m.hp-d);await say(`${m.name} 受到了剧毒伤害！`);this.addLog(`↳ ${m.name} 剧毒伤害 -${d} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);}
+      if(m.has('poisonheal')&&(m.status==='psn'||m.status==='tox')){this.abBanner(m);const h=Math.floor(B/8);m.hp=Math.min(m.maxhp,m.hp+h);await say(`${m.name} 的毒疗发动了，回复了HP！`);this.addLog(`↳ ${m.name} 毒疗回复 +${h} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);}
       // 道具回复
-      if(m.item==='leftovers')m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));
-      if(m.item==='blacksludge'){ if(m.types.includes('poison'))m.hp=Math.min(m.maxhp,m.hp+Math.floor(B/16));
-        else if(!m.has('magicguard'))m.hp=Math.max(0,m.hp-Math.floor(B/8)); }
+      if(m.item==='leftovers'){const h=Math.floor(B/16);m.hp=Math.min(m.maxhp,m.hp+h);this.addLog(`↳ ${m.name} 吃剩的东西回复 +${h} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);}
+      if(m.item==='blacksludge'){ if(m.types.includes('poison')){const h=Math.floor(B/16);m.hp=Math.min(m.maxhp,m.hp+h);this.addLog(`↳ ${m.name} 黑色污泥回复 +${h} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);}
+else if(!m.has('magicguard')){const d=Math.floor(B/8);m.hp=Math.max(0,m.hp-d);this.addLog(`↳ ${m.name} 黑色污泥伤害 -${d} HP（剩余 ${Math.round(m.hp/m.maxhp*100)}%）`);} }
       // 梦魇
       const foe=this.foeOf(m);
       if(m.has('baddreams')&&foe&&foe.alive()&&foe.status==='sleep'&&!foe.has('magicguard')){
-        this.abBanner(m);foe.hp=Math.max(0,foe.hp-Math.floor(foe.baseMax/8));await say(`${foe.name} 被梦魇折磨着！`);}
+this.abBanner(m);const d=Math.floor(foe.baseMax/8);foe.hp=Math.max(0,foe.hp-d);await say(`${foe.name} 被梦魇折磨着！`);this.addLog(`↳ ${foe.name} 梦魇伤害 -${d} HP（剩余 ${Math.round(foe.hp/foe.maxhp*100)}%）`);}
       // 蜕皮
       if(m.has('shedskin')&&m.status&&Math.random()<1/3){this.abBanner(m);m.status=null;m.sleepT=0;m.toxicN=0;await say(`${m.name} 的蜕皮发动了，状态恢复了！`);}
 // 加速（替换上场的当回合不触发）
@@ -3461,7 +3523,7 @@ const FAC={
     const sets=[];
     for(let s=0;s<3;s++){
       const set=[];
-      for(let i=0;i<3;i++){ const sp=cands.pop()||pick(SP); set.push(this.build(sp,50,round)); }
+      for(let i=0;i<3;i++){ const sp=cands.pop()||pick(SP); set.push(this.build(sp,this.lvl(round,i),round)); }
       sets.push(set);
     }
     return sets;
@@ -4262,8 +4324,10 @@ function showDetail(m,battle){
       ${m.item?`<span class="abchip" style="color:#a06a00;border-color:#e0c060;background:linear-gradient(180deg,#fff8e0,#ffe9a8)" title="${IT[m.item]?.d||''}">🎒 ${IT[m.item].n}</span>`:''}
       <span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;background:linear-gradient(180deg,#e0fbff,#b8f0f8)">✦ 太晶·${TNAME[m.teraType]}</span>
       ${m.status?`<span class="abchip" style="color:#c22e28;border-color:#e08a8a;background:#ffe8e8">${STNAME[m.status]||m.status}</span>`:''}
+      ${m.vol.confuse>0?`<span class="abchip" style="color:#e0912b;border-color:#f0c060;background:#fff3d8">混乱（剩余${m.vol.confuse}回合）</span>`:''}
       ${m.mega?'<span class="abchip" style="color:#b3188d;border-color:#e08ac2;background:#ffe0f5">Mega进化</span>':''}
       ${m.dyn?'<span class="abchip" style="color:#d21f3c;border-color:#f08a9a;background:#ffe0e5">极巨化中</span>':''}
+      ${m.id===778?(m.disguiseUsed?'<span class="abchip" style="color:#999;border-color:#ccc;background:#f0f0f0;text-decoration:line-through">画皮已破</span>':'<span class="abchip" style="color:#9b6fd8;border-color:#c8a0e8;background:#f5ecff">画皮未触发</span>'):''}
     </div>
     <div class="dHpBig">
       <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:900;color:#777"><span>HP</span><span class="px" style="font-size:9px">${m.hp} / ${m.maxhp}</span></div>
@@ -4429,6 +4493,12 @@ function openSettings(){
       if(!v)$('#bscene').classList.remove('wx-sun','wx-rain','wx-sand','wx-hail','tr-electric','tr-grassy','tr-psychic','tr-misty');}));
   box.appendChild(settingsRow('战斗演出','濒死白红闪屏、场景震动、金星迸溅',
     ()=>CFG.fxShake, v=>{CFG.fxShake=v;}));
+  box.appendChild(settingsRow('敌方HP百分比','在敌方信息卡上显示HP百分比',
+()=>CFG.enemyHpPct, v=>{CFG.enemyHpPct=v;}));
+box.appendChild(settingsRow('敌方特性显示','在敌方信息卡上显示特性名称',
+()=>CFG.enemyAbility, v=>{CFG.enemyAbility=v;}));
+box.appendChild(settingsRow('敌方道具显示','在敌方信息卡上显示持有道具名称',
+()=>CFG.enemyItem, v=>{CFG.enemyItem=v;}));
   box.insertAdjacentHTML('beforeend','<div style="font-size:11px;color:#888;padding:10px 4px 2px">设置自动保存。关闭天气/场地特效后，场景顶部的天气/场地文字指示仍会保留，仅移除画面氛围层。</div>');
   const back=el('button','btn small','关闭 (ESC)');back.style.marginTop='10px';
   back.onclick=()=>{AU.no();close();};
