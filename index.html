@@ -4610,7 +4610,11 @@ function openEVAllocation(team){
 function openSettings(){
   const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
   const box=el('div','ovBox panel');box.style.maxWidth='480px';ov.appendChild(box);
-  box.appendChild(el('h3','disp','⚙ 游戏设置'));
+  const head=el('div','');head.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:4px';
+head.appendChild(el('h3','disp','⚙ 游戏设置'));
+const xBtn=el('button','btn small','✕');xBtn.style.cssText='width:36px;height:36px;padding:0;font-size:16px;line-height:1;border-radius:9px';xBtn.onclick=()=>{AU.no();close();};
+head.appendChild(xBtn);
+box.appendChild(head);
   let offEsc=null;
   const close=()=>{ if(offEsc){offEsc();offEsc=null;} ov.classList.add('hidden'); saveCfg(); };
   box.appendChild(settingsRow('音效','攻击、命中、状态、菜单等提示音',
@@ -4631,10 +4635,12 @@ box.appendChild(settingsRow('敌方特性显示','在敌方信息卡上显示特
 box.appendChild(settingsRow('敌方道具显示','在敌方信息卡上显示持有道具名称',
 ()=>CFG.enemyItem, v=>{CFG.enemyItem=v;}));
   box.insertAdjacentHTML('beforeend','<div style="font-size:11px;color:#888;padding:10px 4px 2px">设置自动保存。关闭天气/场地特效后，场景顶部的天气/场地文字指示仍会保留，仅移除画面氛围层。</div>');
-  const back=el('button','btn small','关闭 (ESC)');back.style.marginTop='10px';
-  back.onclick=()=>{AU.no();close();};
-  box.appendChild(back);
-  offEsc=onEsc(()=>{AU.no();close();});
+const about=el('button','btn blue','📖 关于作者');about.style.cssText='width:100%;margin-top:12px';
+about.onclick=()=>{AU.ok();close();openAbout();};
+box.appendChild(about);
+
+
+offEsc=onEsc(()=>{AU.no();close();});
 }
 /* ★ 重新游戏：清空工厂进度（保留历史最佳记录） */
 $('#facReset').onclick=async()=>{
@@ -4646,6 +4652,48 @@ $('#facReset').onclick=async()=>{
     toast('已重新开始！');
   }
 };
+function openAbout(){
+const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
+const box=el('div','ovBox panel');box.style.cssText='max-width:520px;text-align:center';ov.appendChild(box);
+let offEsc=null;
+const close=()=>{if(offEsc){offEsc();offEsc=null;}ov.classList.add('hidden');};
+offEsc=onEsc(()=>{AU.no();close();});
+
+box.insertAdjacentHTML('beforeend',`
+<div style="padding:10px 0 6px">
+  <div style="font-size:48px;margin-bottom:8px">🎮</div>
+  <h3 class="disp" style="font-size:26px;letter-spacing:3px">宝可梦·无限工厂</h3>
+  <div class="px" style="font-size:8px;color:#999;margin-top:4px">POKÉMON INFINITE FACTORY</div>
+</div>
+<div style="border-top:2px dashed #d8cfb4;margin:14px 0;padding-top:14px;text-align:left">
+  <div style="font-weight:900;font-size:15px;margin-bottom:6px">✍ 作者</div>
+  <div style="font-size:14px;color:#555;line-height:1.8;margin-bottom:14px">
+    <!-- 作者名 -->
+    （作者名）
+  </div>
+  <div style="font-weight:900;font-size:15px;margin-bottom:6px">💬 作者的话</div>
+  <div style="font-size:13px;color:#666;line-height:1.9;margin-bottom:14px;font-style:italic">
+    <!-- 作者的话 -->
+    （作者的话）
+  </div>
+  <div style="font-weight:900;font-size:15px;margin-bottom:6px">🔗 项目地址</div>
+  <div style="font-size:13px;margin-bottom:6px">
+    <a href="#" target="_blank" rel="noopener" style="color:#2a6dd4;font-weight:700;text-decoration:underline;word-break:break-all">
+      <!-- 链接 -->
+      （链接）
+    </a>
+  </div>
+</div>
+<div style="border-top:2px dashed #d8cfb4;margin-top:10px;padding-top:10px;font-size:10px;color:#aaa;line-height:1.7">
+  同人演示作品 · 图像素材来自 PokéAPI 公开素材库<br>
+  全部音效由 Web Audio 实时合成 · 仅供学习交流
+</div>
+`);
+
+const back=el('button','btn small','返回设置');back.style.marginTop='12px';
+back.onclick=()=>{AU.no();close();openSettings();};
+box.appendChild(back);
+}
 /* ★ ESC = 返回上一步 */
 function onEsc(fn){
   const h=e=>{if(e.key==='Escape'){e.preventDefault();window.removeEventListener('keydown',h);fn();}};
