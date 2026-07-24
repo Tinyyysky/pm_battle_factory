@@ -510,7 +510,7 @@ clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);filter:drop-shad
   box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 7px #d8cfb4,0 24px 60px rgba(0,0,0,.6);padding:20px 22px;overflow:auto;
   animation:cardPop .3s cubic-bezier(.2,1.4,.4,1)}
 @keyframes cardPop{from{transform:scale(.85) translateY(24px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
-#detailClose{position:absolute;top:10px;right:12px;z-index:2}
+#detailClose{position:absolute;top:14px;right:18px;z-index:72}
 .dLeft{text-align:center}
 #dSprite{width:192px;height:192px;object-fit:contain;
   animation:bobP 2.6s ease-in-out infinite;filter:drop-shadow(0 8px 6px rgba(0,0,0,.3))}
@@ -1033,7 +1033,7 @@ clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);filter:drop-shad
     <div class="scrHead"><h2 id="storyTitle">剧情模式 · 关都之旅</h2><div class="spacer"></div>
       <span id="storyBadges" style="font-size:12px;font-weight:900;color:var(--gold)"></span>
       <button class="btn small" id="storyPartyBtn" style="margin-left:10px">队伍</button>
-      <button class="btn small" data-back id="storyBack">返回</button></div>
+      <button class="btn small" id="storyBack">返回</button></div>
     <div class="scrBody" id="storyBody" style="overflow:auto"></div>
   </div>
 
@@ -2618,14 +2618,21 @@ if(m.vol.disabled&&m.vol.disabled.k===mv.k)info+=' · ⛔封印中('+m.vol.disab
         const it=IT[k];const r=el('div','itemRow');
         r.innerHTML=`<div><b>${it.n}</b><div style="font-size:11px;color:#777">${it.d}</div></div><span class="cnt">×${bag[k]}</span>`;
         r.onclick=async()=>{
-          if(['pokeball','greatball','ultraball'].includes(k)){ if(!this.rules.capture||!this.wild){toast('只能对野生宝可梦使用！');AU.no();return;}
-            AU.ok();close({type:'ball',item:k});return; }
-          if(k==='revive'){ const idx=this.pp.findIndex(m=>m.fainted); if(idx<0){toast('没有濒死的宝可梦');AU.no();return;}
-            AU.ok();close({type:'item',item:k,idx});return; }
-          // 治疗类：选择目标
-          const idx=await this.chooseParty(true); if(idx==null){close(null);return;}
-          AU.ok();close({type:'item',item:k,idx});
-        };
+if(['pokeball','greatball','ultraball'].includes(k)){ if(!this.rules.capture||!this.wild){toast('只能对野生宝可梦使用！');AU.no();return;}
+AU.ok();close({type:'ball',item:k});return; }
+if(k==='revive'){ const idx=this.pp.findIndex(m=>m.fainted); if(idx<0){toast('没有濒死的宝可梦');AU.no();return;}
+AU.ok();close({type:'item',item:k,idx});return; }
+// ★ 治疗类：先关闭背包面板，再打开专用选择面板（可选当前出场，满血不可用）
+ov.classList.add('hidden');
+if(offEsc){offEsc();offEsc=null;}
+const idx=await this.choosePartyForItem();
+if(idx==null){
+  ov.classList.remove('hidden');
+  offEsc=onEsc(()=>{AU.no();close(null);});
+  return;
+}
+res({type:'item',item:k,idx});
+};
         box.appendChild(r);
       });
       const back=el('button','btn small','返回');back.style.marginTop='8px';
@@ -2634,6 +2641,31 @@ if(m.vol.disabled&&m.vol.disabled.k===mv.k)info+=' · ⛔封印中('+m.vol.disab
       offEsc=onEsc(()=>{AU.no();close(null);});
     });
   }
+  /* ★ 药水专用选择面板：可选当前出场宝可梦，满血/濒死不可用 */
+choosePartyForItem(){
+return new Promise(res=>{
+const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
+const box=el('div','ovBox panel');ov.appendChild(box);
+box.appendChild(el('h3','disp','选择使用对象'));
+let offEsc=null;
+const close=val=>{ if(offEsc){offEsc();offEsc=null;} ov.classList.add('hidden'); res(val); };
+this.pp.forEach((m,i)=>{
+const canUse=m.alive()&&m.hp<m.maxhp;
+const s=el('div','slot'+(i===this.pi?' active':'')+(canUse?'':' fainted'));
+s.appendChild(miniSprite(m.id));
+s.insertAdjacentHTML('beforeend',`<div style="flex:1"><div class="sname">${m.name} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${i===this.pi?' <span style="font-size:10px;color:#2a6dd4;font-weight:900">战斗中</span>':''}</div>
+<div class="hpbar" style="max-width:200px"><div class="hpfill ${m.hpPct()>.5?'':m.hpPct()>.2?'mid':'low'}" style="width:${Math.round(m.hpPct()*100)}%"></div></div>
+<div style="font-size:11px;color:#666;font-weight:700">${m.hp}/${m.maxhp}</div></div>`);
+if(canUse){ s.onclick=()=>{AU.ok();close(i);}; }
+else{ s.insertAdjacentHTML('beforeend',`<span style="font-size:11px;font-weight:900;color:#999">${!m.alive()?'濒死':'HP已满'}</span>`); }
+box.appendChild(s);
+});
+const back=el('button','btn small','返回');back.style.marginTop='8px';
+back.onclick=()=>{AU.no();close(null);};
+box.appendChild(back);
+offEsc=onEsc(()=>{AU.no();close(null);});
+});
+}
   async useItem(k,idx){
     GM.bag[k]--;
     const m=this.pp[idx];const heals={potion:20,superpotion:60,hyperpotion:120,maxpotion:9999,fullrestore:9999};
@@ -3564,11 +3596,62 @@ if(m.vol.disabled){m.vol.disabled.turns--;if(m.vol.disabled.turns<=0){await say(
    8. 全局存档
 ============================================================ */
 const GM={
-  story:{started:false,idx:0,party:[],box:[],badges:0,rivalStarter:null},
+  story:{started:false,idx:0,party:[],box:[],badges:0,rivalStarter:null,battleCount:0},
+storySlot:null,
   bag:{potion:3,superpotion:1,pokeball:5,greatball:2,ultraball:1,revive:1,fullrestore:1},
   fac:{round:1,win:0,bp:0,party:null,best:parseInt(localStorage.getItem('pif_best')||'0'),
 revives:0,bag:{},mode:'rent3',nextExpert:null},
 };
+/* ============ 剧情模式存档系统（3个槽位） ============ */
+const STORY_SLOTS=3;
+function storySlotKey(i){return 'pif_story_'+i;}
+function loadStorySlot(i){
+  try{return JSON.parse(localStorage.getItem(storySlotKey(i))||'null');}catch(e){return null;}
+}
+function saveStorySlot(i){
+  const data={
+    exists:true,
+    timestamp:Date.now(),
+    story:{
+      started:GM.story.started,
+      idx:GM.story.idx,
+      badges:GM.story.badges,
+      rivalStarter:GM.story.rivalStarter,
+      battleCount:GM.story.battleCount||0,
+      party:GM.story.party.map(serializeMon),
+      box:GM.story.box.map(serializeMon)
+    },
+    bag:{...GM.bag}
+  };
+  localStorage.setItem(storySlotKey(i),JSON.stringify(data));
+}
+function loadStoryToGM(i){
+  const d=loadStorySlot(i);
+  if(!d||!d.exists)return false;
+  GM.story.started=d.story.started;
+  GM.story.idx=d.story.idx;
+  GM.story.badges=d.story.badges;
+  GM.story.rivalStarter=d.story.rivalStarter;
+  GM.story.battleCount=d.story.battleCount||0;
+  GM.story.party=d.story.party.map(deserializeMon);
+  GM.story.box=(d.story.box||[]).map(deserializeMon);
+  GM.bag={...d.bag};
+  GM.storySlot=i;
+  return true;
+}
+function deleteStorySlot(i){
+  localStorage.removeItem(storySlotKey(i));
+}
+function newStoryGame(i){
+  GM.story={started:false,idx:0,party:[],box:[],badges:0,rivalStarter:null,battleCount:0};
+  GM.bag={potion:3,superpotion:1,pokeball:5,greatball:2,ultraball:1,revive:1,fullrestore:1};
+  GM.storySlot=i;
+  saveStorySlot(i);
+}
+/* 自动保存（在关键节点调用） */
+function autoSaveStory(){
+  if(GM.storySlot!=null&&GM.story.started)saveStorySlot(GM.storySlot);
+}
 function newMon(id,lvl,o){return new P(id,lvl,o||{});}
 function healAll(arr){arr.forEach(m=>{m.hp=m.maxhp;m.status=null;m.sleepT=0;m.toxicN=0;m.fainted=false;m.vol={};if(m.id===778)m.vol.disguise=true;m.moves.forEach(x=>x.pp=x.maxpp);});}
 /* ============ 对战工厂存档（持久化） ============ */
@@ -3699,7 +3782,12 @@ const box=el('div','ovBox panel');box.style.maxWidth='520px';ov.appendChild(box)
 let offEsc=null;
 const close=()=>{if(offEsc){offEsc();offEsc=null;}ov.classList.add('hidden');this.ui();};
 offEsc=onEsc(()=>{AU.no();close();});
-box.appendChild(el('h3','disp',`携带道具 · ${m.name}`));
+const equipHead=el('div','');equipHead.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:4px';
+equipHead.appendChild(el('h3','disp',`携带道具 · ${m.name}`));
+const equipClose=el('button','btn small','✕');equipClose.style.cssText='width:36px;height:36px;padding:0;font-size:16px;line-height:1;border-radius:9px';
+equipClose.onclick=()=>{AU.no();close();};
+equipHead.appendChild(equipClose);
+box.appendChild(equipHead);
 box.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:#888;margin-bottom:8px">当前：${m.item?IT[m.item].n:'无道具'}</div>`);
 /* 无道具选项 */
 const none=el('div','itemRow');none.innerHTML=`<div><b>无道具</b><div style="font-size:11px;color:#777">卸下当前道具</div></div>`;
@@ -3719,8 +3807,6 @@ m.item=k;AU.ok();saveFac();close();
 };
 box.appendChild(r);
 });
-const back=el('button','btn small','关闭');back.style.marginTop='10px';back.onclick=()=>{AU.no();close();};
-box.appendChild(back);
 },
 /* ★ 道具商店面板 */
 openShop(){
@@ -3729,7 +3815,12 @@ const box=el('div','ovBox panel');box.style.maxWidth='560px';ov.appendChild(box)
 let offEsc=null;
 const close=()=>{if(offEsc){offEsc();offEsc=null;}ov.classList.add('hidden');this.ui();};
 offEsc=onEsc(()=>{AU.no();close();});
-box.appendChild(el('h3','disp','🛒 道具商店'));
+const shopHead=el('div','');shopHead.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:4px';
+shopHead.appendChild(el('h3','disp','🛒 道具商店'));
+const shopClose=el('button','btn small','✕');shopClose.style.cssText='width:36px;height:36px;padding:0;font-size:16px;line-height:1;border-radius:9px';
+shopClose.onclick=()=>{AU.no();close();};
+shopHead.appendChild(shopClose);
+box.appendChild(shopHead);
 box.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:#888;margin-bottom:8px">当前 BP：<b style="color:#f2b705">${GM.fac.bp}</b> · 购买的道具存入局外背包，可在匹配前给队伍携带</div>`);
 this.SHOP.forEach(s=>{
 const it=IT[s.k];if(!it)return;
@@ -3746,8 +3837,6 @@ AU.ok();saveFac();close();this.openShop();
 r.appendChild(buy);
 box.appendChild(r);
 });
-const back=el('button','btn small','关闭');back.style.marginTop='10px';back.onclick=()=>{AU.no();close();};
-box.appendChild(back);
 },
 /* ============ 大厅 ============ */
 async lobby(){
@@ -3755,7 +3844,8 @@ show('#factory');AU.playMusic('factory');
 this.ui();
 const mid=$('#facMid');
 if(!GM.fac.party){
-/* ★ 模式选择 */
+if(GM.fac.round===1){
+/* ★ 第一轮：可选择租借模式 */
 mid.innerHTML=`<h3 class="disp" style="color:#ffd93b;font-size:24px;text-align:center;margin:8px">选择租借模式</h3>
 <div style="display:flex;gap:10px;justify-content:center;margin-bottom:12px">
 <button class="btn ${GM.fac.mode==='rent3'?'blue':''}" id="modeRent3">三选一队伍</button>
@@ -3764,6 +3854,12 @@ mid.innerHTML=`<h3 class="disp" style="color:#ffd93b;font-size:24px;text-align:c
 <div id="facModeArea"></div>`;
 $('#modeRent3').onclick=()=>{GM.fac.mode='rent3';saveFac();this.lobby();};
 $('#modePick3').onclick=()=>{GM.fac.mode='pick3';saveFac();this.lobby();};
+} else {
+/* ★ 第二轮及以后：模式已锁定，直接进入队伍选择 */
+mid.innerHTML=`<h3 class="disp" style="color:#ffd93b;font-size:24px;text-align:center;margin:8px">选择租借队伍</h3>
+<div style="color:#aab;font-size:13px;text-align:center;margin-bottom:8px">第 ${GM.fac.round} 轮 · ${GM.fac.mode==='rent3'?'三选一':'六选三'}模式 <span style="color:#ffd93b">（已锁定）</span></div>
+<div id="facModeArea"></div>`;
+}
 const area=$('#facModeArea');
 /* ★ 第一把显示对手类型 */
 if(GM.fac.win===0&&GM.fac.nextExpert){
@@ -3975,23 +4071,26 @@ offEsc=onEsc(()=>{AU.no();close();});
 const STORY={
   rivalCounter:{1:4,4:7,7:1}, // 妙蛙种子→小火龙(4) etc
   async run(){
-    show('#story');AU.playMusic('story');
-    const S=GM.story;
-    if(!S.started){
-      await dlg('大木博士','欢迎来到宝可梦的世界！我是大木博士。这个世界栖息着名为「宝可梦」的不可思议的生物。',151);
-      await dlg('大木博士','今天是你成为训练家的日子。从这三只宝可梦中，选择你的伙伴吧！',151);
-      const ch=await this.pickStarter();
-      S.party=[newMon(ch,5,{iv:25})];
-      S.rivalStarter=this.rivalCounter[ch];
-      await dlg('大木博士','你选择了 '+SPDB[ch].n+' 吗？真是不错的选择！带上图鉴，开始你的旅程吧！',151);
-      await dlg('???','喂！等等我！',6);
-      await dlg('小茂','本大爷也要成为最强的训练家！我的宝可梦可比你的强多了，来打一场吧！',6);
-      S.started=true;S.idx=1;
-      await this.rivalBattle(8);
-      await dlg('小茂','哼……算你走运！下次绝对不会输给你！',6);
-    }
-    await this.chapterLoop();
-  },
+show('#story');AU.playMusic('story');
+const S=GM.story;
+if(!S.started){
+await dlg('大木博士','欢迎来到宝可梦的世界！我是大木博士。这个世界栖息着名为「宝可梦」的不可思议的生物。',151);
+await dlg('大木博士','今天是你成为训练家的日子。从这三只宝可梦中，选择你的伙伴吧！',151);
+const ch=await this.pickStarter();
+S.party=[newMon(ch,5,{iv:25})];
+S.rivalStarter=this.rivalCounter[ch];
+await dlg('大木博士','你选择了 '+SPDB[ch].n+' 吗？真是不错的选择！带上图鉴，开始你的旅程吧！',151);
+await dlg('???','喂！等等我！',6);
+await dlg('小茂','本大爷也要成为最强的训练家！我的宝可梦可比你的强多了，来打一场吧！',6);
+S.started=true;S.idx=1;
+await this.rivalBattle(8);
+await dlg('小茂','哼……算你走运！下次绝对不会输给你！',6);
+}
+/* ★ 循环执行章节，直到通关（S.idx > 8） */
+while(S.idx>=1&&S.idx<=8){
+await this.chapterLoop();
+}
+},
   pickStarter(){
     return new Promise(res=>{
       const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
@@ -4010,22 +4109,34 @@ const STORY={
     });
   },
   async rivalBattle(lvl){
-    const rs=GM.story.rivalStarter;
-    const team=lvl<=10?[newMon(rs,lvl)]:lvl<=20?[newMon(16,lvl-2),newMon(rs,lvl)]:[newMon(18,lvl-4),newMon(130,lvl-3),newMon(rs,lvl)];
+const rs=GM.story.rivalStarter;
+let team;
+if(lvl<=10){
+  /* ★ 第一次对战：小茂的宝可梦不携带本系技能，降低初期难度 */
+  const rival=newMon(rs,lvl);
+  rival.moves=rival.moves.filter(mv=>!rival.types.includes(MV[mv.k].t));
+  if(!rival.moves.length)rival.moves=[{k:'tackle',pp:MV.tackle.pp,maxpp:MV.tackle.pp}];
+  team=[rival];
+}else if(lvl<=20){
+  team=[newMon(16,lvl-2),newMon(rs,lvl)];
+}else{
+  team=[newMon(18,lvl-4),newMon(130,lvl-3),newMon(rs,lvl)];
+}
     const r=await startBattle({player:GM.story.party,enemy:team,trainer:'劲敌·小茂',rules:{capture:false,run:false},ai:1.2});
     if(r.result==='lose'){await dlg('小茂','哈哈哈！就凭你还想当冠军？再练一百年吧！',6);await this.heal();await this.rivalBattle(lvl);return;}
     await this.postBattle(r);
   },
   async heal(){ healAll(GM.story.party); AU.heal(); await dlg('宝可梦中心','欢迎来到宝可梦中心！您的宝可梦已经完全恢复了！',113); },
     async postBattle(r){
-    if(!r||!r.battle)return;
-    [...r.battle.participants].forEach(m=>{ if(GM.story.party.includes(m)) m.battles=(m.battles||0)+1; });
-    GM.story.battleCount=(GM.story.battleCount||0)+1;
-    if(GM.story.battleCount%3===0 && GM.story.party.some(m=>evCap(m)-evTotal(m)>0)){
-      await dlg('大木博士','你的宝可梦通过实战成长了！现在可以为其中一只分配对战点数（提升能力）。',151);
-      await openEVAllocation(GM.story.party);
-    }
-  },
+if(!r||!r.battle)return;
+[...r.battle.participants].forEach(m=>{ if(GM.story.party.includes(m)) m.battles=(m.battles||0)+1; });
+GM.story.battleCount=(GM.story.battleCount||0)+1;
+if(GM.story.battleCount%3===0 && GM.story.party.some(m=>evCap(m)-evTotal(m)>0)){
+await dlg('大木博士','你的宝可梦通过实战成长了！现在可以为其中一只分配对战点数（提升能力）。',151);
+await openEVAllocation(GM.story.party);
+}
+autoSaveStory();  // ★ 每场战斗后自动保存
+},
   async wild(ids,lo,hi){
     const id=pick(ids);const m=newMon(id,rnd(lo,hi));
     const r=await startBattle({player:GM.story.party,enemy:[m],wild:true,rules:{capture:true,run:true,items:true},ai:.7});
@@ -4053,42 +4164,43 @@ const STORY={
   },
   async chapterLoop(){
     const S=GM.story;
-    const badge=async n=>{S.badges++;AU.jingle('badge');await dlg('广播','🏅 获得了 '+n+'！('+S.badges+'/3)',95);};
+    const badge=async n=>{S.badges++;AU.jingle('badge');await dlg('广播','🏅 获得了 '+n+'！('+S.badges+'/3)',95);autoSaveStory();};
     switch(S.idx){
       case 1:
         await dlg('广播','【第1章 · 常磐森林】沿着 1 号道路前进，先去常磐森林看看吧。野外 encounter 可以用精灵球收服宝可梦！',16);
         await this.wild([16,19],3,5);
         GM.bag.pokeball+=3;await dlg('商店店员','欢迎光临！送您 3 个精灵球和 1 瓶药水，祝您好运！',36);GM.bag.potion+=1;
         await this.trainer('捕虫少年·阿虫',[[10,6],[12,8]],12,async()=>{await dlg('捕虫少年·阿虫','可恶……你的宝可梦真强！',12);});
-        S.idx=2;break;
+        S.idx=2;S.idx=2;autoSaveStory();break;
+        break;
       case 2:
         await dlg('广播','【第2章 · 尼比道馆】道馆馆主小刚擅长岩石属性。草属性或水属性的宝可梦会很有优势！',74);
         await this.heal();
         await this.trainer('道馆馆主·小刚',[[74,10],[95,12]],95,async()=>{await badge('灰色徽章');GM.bag.superpotion+=2;});
-        S.idx=3;break;
+        S.idx=3;S.idx=3;autoSaveStory();break;break;
       case 3:
         await dlg('广播','【第3章 · 华蓝市】火箭队在城里鬼鬼祟祟……先去教训他们，再挑战道馆馆主小霞！',131);
         await this.trainer('火箭队·队员',[[24,14]],24,async()=>{await dlg('火箭队·队员','哼，火箭队可不会这么轻易放过你！',24);});
         await this.heal();
         await this.trainer('道馆馆主·小霞',[[120,16],[121,18]],121,async()=>{await badge('蓝色徽章');GM.bag.greatball+=2;});
-        S.idx=4;break;
+        S.idx=4;S.idx=4;autoSaveStory();break;break;
       case 4:
         await dlg('小茂','哟，又见面了！看看谁先收集齐徽章吧！',6);
         await this.rivalBattle(20);
         await dlg('小茂','嘁……这次算你厉害。冠军之路见！',6);
-        S.idx=5;break;
+        S.idx=5;S.idx=5;autoSaveStory();break;
       case 5:
         await dlg('广播','【第4章 · 金黄市】超能力少女娜姿在道馆等你。恶属性与幽灵属性是她的克星！',65);
         await this.heal();
         await this.trainer('道馆馆主·娜姿',[[64,22],[65,24]],65,async()=>{await badge('金色徽章');GM.bag.ultraball+=2;GM.bag.hyperpotion+=2;});
-        S.idx=6;break;
+        S.idx=6;S.idx=6;autoSaveStory();break;
       case 6:
         await dlg('广播','【第5章 · 常磐道馆的真相】常磐道馆的馆主竟然是……火箭队首领坂木！',34);
         await this.heal();
         await this.trainer('火箭队首领·坂木',[[34,27],[112,29]],112,async()=>{
           await badge('绿色徽章');
           await dlg('坂木','……后生可畏。火箭队就此解散，我也该重新思考自己的人生了。',112);});
-        S.idx=7;break;
+        S.idx=7;S.idx=7;autoSaveStory();break;
       case 7:
         await dlg('广播','【最终章 · 冠军之路】收集齐 3 枚徽章的你，获得了挑战四天王……不，直接挑战冠军的资格！冠军正是你的劲敌——小茂！',149);
         await this.heal();
@@ -4102,13 +4214,14 @@ const STORY={
         AU.jingle('badge');
         await dlg('大木博士','恭喜你！你战胜了小茂，成为了新的冠军！你的名字将被永远刻在殿堂之中！🏆',151);
         await dlg('广播','🎊 通关！感谢游玩剧情模式。现在可以去【对战工厂】挑战无限连胜，或在【自由对战】中组建梦之队！',151);
-        S.idx=8;
-        await fadeTo('#title');
+        S.idx=8;autoSaveStory();
+await fadeTo('#title');
         break;
       case 8:
-        await dlg('广播','你已经通关了剧情模式！去挑战对战工厂吧，那里有更强的对手在等着你！',151);
-        await fadeTo('#title');
-        break;
+await dlg('广播','你已经通关了剧情模式！去挑战对战工厂吧，那里有更强的对手在等着你！',151);
+await fadeTo('#title');
+S.idx=9;  /* ★ 退出 while 循环 */
+break;
     }
   }
 };
@@ -4499,13 +4612,14 @@ function buildItemDex(){
 /* 标题与导航 */
 $('#dexCount').textContent=SP.length+' 种';
 $('#itemCount').textContent=Object.keys(IT).length+' 种';
-$('#mStory').onclick=async()=>{AU.ok();await fadeTo('#story');STORY.run();};
+$('#mStory').onclick=async()=>{AU.ok();showStorySlotSelect();};
 $('#mFactory').onclick=async()=>{AU.ok();await fadeTo('#factory');FAC.lobby();};
 $('#mFree').onclick=async()=>{AU.ok();buildFree();await fadeTo('#free');};
 $('#mDex').onclick=async()=>{AU.ok();buildDex();await fadeTo('#dex');};
 $('#mItemDex').onclick=async()=>{AU.ok();buildItemDex();await fadeTo('#itemdex');};
 $('#mSound').onclick=()=>{AU.ok();openSettings();};
 $$('[data-back]').forEach(b=>b.onclick=async()=>{AU.no();await fadeTo('#title');AU.playMusic('title');});
+$('#storyBack').onclick=async()=>{AU.no();autoSaveStory();await fadeTo('#title');AU.playMusic('title');};
 $('#storyPartyBtn').onclick=()=>{
   const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
   const box=el('div','ovBox panel');ov.appendChild(box);
@@ -4664,8 +4778,8 @@ const raceStats=m.mega?m.mega.s:sp.s;
 const raceTypes=m.mega?m.mega.t.split('/'):m.types;
 const raceAbility=m.mega?m.ability:m.ability;
   const card=el('div','');card.id='detailCard';
-  const close=el('button','btn small','✕ 关闭 (ESC)');close.id='detailClose';close.onclick=shut;
-  card.appendChild(close);
+const close=el('button','btn small','✕ 关闭 (ESC)');close.id='detailClose';close.onclick=shut;
+ov.appendChild(close);
   const left=el('div','dLeft');
   const img=new Image();img.id='dSprite';setSprite(img,m.mega?m.mega.f:m.id);
   if(m.fainted)img.classList.add('faint');
@@ -4922,6 +5036,63 @@ box.insertAdjacentHTML('beforeend',`
 const back=el('button','btn small','返回设置');back.style.marginTop='12px';
 back.onclick=()=>{AU.no();close();openSettings();};
 box.appendChild(back);
+}
+/* ============ 剧情模式存档选择界面 ============ */
+function showStorySlotSelect(){
+  const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
+  const box=el('div','ovBox panel');box.style.maxWidth='560px';ov.appendChild(box);
+  let offEsc=null;
+  const close=()=>{if(offEsc){offEsc();offEsc=null;}ov.classList.add('hidden');};
+  offEsc=onEsc(()=>{AU.no();close();});
+
+  const head=el('div','');head.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:12px';
+  head.appendChild(el('h3','disp','📂 选择存档'));
+  const xBtn=el('button','btn small','✕');xBtn.style.cssText='width:36px;height:36px;padding:0;font-size:16px;line-height:1;border-radius:9px';
+  xBtn.onclick=()=>{AU.no();close();};
+  head.appendChild(xBtn);
+  box.appendChild(head);
+
+  for(let i=0;i<STORY_SLOTS;i++){
+    const d=loadStorySlot(i);
+    const row=el('div','');row.style.cssText='display:flex;align-items:center;gap:10px;padding:12px;margin-bottom:10px;background:#fff;border:3px solid var(--ink);border-radius:12px;';
+
+    if(d&&d.exists){
+      const date=new Date(d.timestamp);
+      const dateStr=`${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
+      const progress=d.story.started?`第${d.story.idx}章 · ${d.story.badges}枚徽章`:'已开始';
+      const partyCount=(d.story.party||[]).length;
+      row.innerHTML=`
+        <div style="flex:1">
+          <div style="font-weight:900;font-size:16px;font-family:'ZCOOL KuaiLe'">存档 ${i+1}</div>
+          <div style="font-size:12px;color:#666;margin-top:2px">${progress} · 队伍${partyCount}只</div>
+          <div style="font-size:11px;color:#999;margin-top:2px">最后保存：${dateStr}</div>
+        </div>`;
+      const btnCol=el('div','');btnCol.style.cssText='display:flex;flex-direction:column;gap:6px';
+      const loadBtn=el('button','btn blue small','读取');
+      loadBtn.onclick=()=>{AU.ok();close();loadStoryToGM(i);startStoryGame();};
+      const delBtn=el('button','btn small','删除');delBtn.style.color='#e3350d';
+      delBtn.onclick=async()=>{
+        const confirm=await dlgChoices('删除存档',`确定要删除存档 ${i+1} 吗？此操作不可撤销！`,['确定删除','取消']);
+        if(confirm===0){deleteStorySlot(i);AU.no();close();showStorySlotSelect();}
+      };
+      btnCol.appendChild(loadBtn);btnCol.appendChild(delBtn);
+      row.appendChild(btnCol);
+    } else {
+      row.innerHTML=`
+        <div style="flex:1">
+          <div style="font-weight:900;font-size:16px;font-family:'ZCOOL KuaiLe';color:#999">存档 ${i+1}</div>
+          <div style="font-size:12px;color:#bbb;margin-top:2px">空</div>
+        </div>`;
+      const newBtn=el('button','btn blue small','新游戏');
+      newBtn.onclick=()=>{AU.ok();close();newStoryGame(i);startStoryGame();};
+      row.appendChild(newBtn);
+    }
+    box.appendChild(row);
+  }
+}
+async function startStoryGame(){
+  await fadeTo('#story');
+  STORY.run();
 }
 /* ★ ESC = 返回上一步 */
 function onEsc(fn){
