@@ -1022,6 +1022,7 @@ clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);filter:drop-shad
 <div class="facCol panel" style="height:fit-content">
 <div style="font-weight:900;color:#777;text-align:center">我的租借队伍</div>
 <button class="btn blue" id="facStart" style="width:100%;margin-top:12px">开始匹配</button>
+<button class="btn" id="facShop" style="width:100%;margin-top:8px">🛒 道具商店</button>
 <div id="facParty" style="flex-direction:column;margin-top:10px"></div>
 </div>
     </div></div>
@@ -1376,7 +1377,7 @@ A('contrary','唱反调','能力变化反转');A('moxie','自信过剩','打倒�
 A('speedboost','加速','每回合速度提升');A('regenerator','再生力','交换下场时回复1/3HP');A('naturalcure','自然回复','交换下场时治愈异常状态');
 A('poisonheal','毒疗','中毒时反而回复HP');A('guts','毅力','异常状态时攻击×1.5');A('shedskin','蜕皮','每回合有几率治愈异常');
 A('hugepower','大力士','攻击×2');A('purepower','瑜伽之力','攻击×2');
-A('adaptability','适应力','属性一致加成提升至2倍');A('technician','技师','威力60以下的招式×1.5');
+A('adaptability','适应力','属性一致加成提升至2倍');A('technician','技术高手','威力60以下的招式×1.5');
 A('sheerforce','强行','追加效果消失，招式威力×1.3');A('serenegrace','天恩','追加效果发动率翻倍');
 A('superluck','超幸运','会心一击率提高');A('sniper','狙击手','会心一击伤害更高');
 A('aerilate','飞行皮肤','一般属性招式变为飞行属性且×1.2');A('pixilate','妖精皮肤','一般属性招式变为妖精属性且×1.2');
@@ -1674,11 +1675,11 @@ const MEGA={
 531:{f:10068,t:'normal/fairy',s:[103,60,126,80,126,50],a:'regenerator',stone:'差不多娃娃石'},
 };
 const GMAXLIST=new Set([3,6,9,25,131,143,809,812,815,818,823,849,858,861,892]);
-const MAXMV={normal:'极巨攻击',fire:'极巨火焰',water:'极巨水流',electric:'极巨闪电',grass:'极巨草原',ice:'极巨冰霜',fighting:'极巨拳斗',poison:'极巨酸毒',ground:'极巨大地',flying:'极巨飞冲',psychic:'极巨超能',bug:'极巨虫蛊',rock:'极巨岩石',ghost:'极巨幽魂',dragon:'极巨龙骑',dark:'极巨恶霸',steel:'极巨钢铁',fairy:'极巨妖精'};
+const MAXMV={normal:'极巨攻击',fire:'极巨火爆',water:'极巨水流',electric:'极巨闪电',grass:'极巨草原',ice:'极巨冰霜',fighting:'极巨拳斗',poison:'极巨酸毒',ground:'极巨大地',flying:'极巨飞冲',psychic:'极巨超能',bug:'极巨虫蛊',rock:'极巨岩石',ghost:'极巨幽魂',dragon:'极巨龙骑',dark:'极巨恶霸',steel:'极巨钢铁',fairy:'极巨妖精'};
 /* ★ 极巨招式固有效果（对齐正作：能力变化 + 天气 + 场地） */
 const MAXFX={
   normal:{drop:'spe'},           // 极巨攻击：降对方速度
-  fire:{weather:'sun'},          // 极巨火焰：大晴天
+  fire:{weather:'sun'},          // 极巨火爆：大晴天
   water:{weather:'rain'},        // 极巨水流：下雨
   electric:{terrain:'electric'}, // 极巨闪电：电气场地
   grass:{terrain:'grassy'},      // 极巨草原：青草场地
@@ -2655,14 +2656,15 @@ let acts=[];
     if(ea.type==='move')acts.push({side:'e',mon:E,...ea});
     // 排序：优先级 → 速度
 const prio=a=>{ const mv=MV[a.move.k]; const m=a.mon;
-let p=mv?.pri||0;
-// 特性先制（恶作剧之心/疾风之翼）——极巨化时不作用于极巨招式
-if(!m.dyn){
+let p=0;
+if(m.dyn){
+/* ★ 极巨化：变化招式→极巨防壁（先制+4）；攻击招式→极巨攻击（先制0，不保留突袭/电光一闪等原始先制） */
+if(mv?.c==='X')p=4;
+} else {
+p=mv?.pri||0;
 if(m.has('prankster')&&mv?.c==='X')p+=1;
 if(m.has('galewings')&&mv?.t==='flying'&&m.hp===m.maxhp)p+=1;
 }
-// ★ 极巨化时变化招式变为极巨防壁，先制+4
-if(m.dyn&&mv?.c==='X')p=4;
 return p; };
     acts.sort((x,y)=>{ const px=prio(x),py=prio(y); if(px!==py)return py-px;
       const qx=x.mon.item==='quickclaw'&&Math.random()<.2, qy=y.mon.item==='quickclaw'&&Math.random()<.2;
@@ -2744,8 +2746,8 @@ if(mon.status==='frz'){
 if(mon.vol.disabled&&mon.vol.disabled.k===mvk){
   await say(`${mon.name} 的${mv.n}被封印了，无法使用！`);return;
 }
-/* ★ 蓄力招式（日光束等）：晴天秒发，否则第一回合蓄力、第二回合释放 */
-if(mv.charge&&!mon.vol.justCharged){
+/* ★ 蓄力招式（日光束等）：晴天秒发，否则第一回合蓄力、第二回合释放；极巨化时直接变为极巨草原，无需蓄力 */
+if(mv.charge&&!mon.vol.justCharged&&!mon.dyn){
   if(this.wxActive()!=='sun'){
     mon.vol.charge=mvk;
     await say(`${mon.name} 吸收了光能！`);
@@ -2795,8 +2797,10 @@ mon.vol.proteanUsed=true;mon.types=[useMv.t];showAbilityBanner(mon,side);await s
     if(mon.has('stancechange')){ if(useMv.k==='kingshield'){mon.vol.shield=true;} else if(useMv.c!=='X'){mon.vol.shield=false;}
       mon.st.def=mon.vol.shield?Math.floor(mon.st.def*1):mon.st.def; }
     // 保护类
-    if(useMv.protect){ const chain=(mon.vol.pchain||0)+1;mon.vol.pchain=chain;
-      if(Math.random()>1/chain){mon.vol.protect=false;await say(`${mon.name} 的保护失败了！`);}
+if(useMv.protect){ const chain=(mon.vol.pchain||0)+1;mon.vol.pchain=chain;
+/* ★ 连续使用保护：第1次100%，第2次1/3，第3次1/9…即 (1/3)^(n-1) */
+const prob=Math.pow(1/3,chain-1);
+if(Math.random()>prob){mon.vol.protect=false;await say(`${mon.name} 的保护失败了！`);}
       else{mon.vol.protect=true;mon.vol.ks=useMv.ks;mon.vol.bb=useMv.bb;mon.vol.maxguard=!!useMv.maxguard;AU.protect();statusVFX(side);await say(`${mon.name} ${useMv.maxguard?'用极巨防壁':'保护'}了自己！`);}
       if(useMv.ks&&mon.has('stancechange'))mon.vol.shield=true;
       return; }
@@ -3541,15 +3545,16 @@ if(m.vol.disabled){m.vol.disabled.turns--;if(m.vol.disabled.turns<=0){await say(
 const GM={
   story:{started:false,idx:0,party:[],box:[],badges:0,rivalStarter:null},
   bag:{potion:3,superpotion:1,pokeball:5,greatball:2,ultraball:1,revive:1,fullrestore:1},
-  fac:{round:1,win:0,bp:0,party:null,best:parseInt(localStorage.getItem('pif_best')||'0')},
+  fac:{round:1,win:0,bp:0,party:null,best:parseInt(localStorage.getItem('pif_best')||'0'),
+revives:0,bag:{},mode:'rent3',nextExpert:null},
 };
 function newMon(id,lvl,o){return new P(id,lvl,o||{});}
 function healAll(arr){arr.forEach(m=>{m.hp=m.maxhp;m.status=null;m.sleepT=0;m.toxicN=0;m.fainted=false;m.vol={};if(m.id===778)m.vol.disguise=true;m.moves.forEach(x=>x.pp=x.maxpp);});}
 /* ============ 对战工厂存档（持久化） ============ */
 function serializeMon(m){return {id:m.id,lvl:m.lvl,xp:m.xp,iv:m.iv,ev:m.ev,nature:m.nature,item:m.item,tera:m.teraType,ability:m.ability,moves:m.moves.map(x=>x.k),shiny:m.shiny,battles:m.battles};}
 function deserializeMon(d){return new P(d.id,d.lvl,{iv:d.iv,ev:d.ev,nature:d.nature,item:d.item,tera:d.tera,ability:d.ability,moves:d.moves,shiny:d.shiny,battles:d.battles,xp:d.xp});}
-function saveFac(){localStorage.setItem('pif_fac',JSON.stringify({round:GM.fac.round,win:GM.fac.win,bp:GM.fac.bp,best:GM.fac.best,party:GM.fac.party?GM.fac.party.map(serializeMon):null}));}
-function loadFac(){try{const d=JSON.parse(localStorage.getItem('pif_fac')||'null');if(d){GM.fac.round=d.round||1;GM.fac.win=d.win||0;GM.fac.bp=d.bp||0;if(d.best!=null)GM.fac.best=d.best;GM.fac.party=d.party?d.party.map(deserializeMon):null;}}catch(e){}}
+function saveFac(){localStorage.setItem('pif_fac',JSON.stringify({round:GM.fac.round,win:GM.fac.win,bp:GM.fac.bp,best:GM.fac.best,revives:GM.fac.revives,bag:GM.fac.bag,mode:GM.fac.mode,nextExpert:GM.fac.nextExpert,party:GM.fac.party?GM.fac.party.map(serializeMon):null}));}
+function loadFac(){try{const d=JSON.parse(localStorage.getItem('pif_fac')||'null');if(d){GM.fac.round=d.round||1;GM.fac.win=d.win||0;GM.fac.bp=d.bp||0;if(d.best!=null)GM.fac.best=d.best;GM.fac.revives=d.revives||0;GM.fac.bag=d.bag||{};GM.fac.mode=d.mode||'rent3';GM.fac.nextExpert=d.nextExpert||null;GM.fac.party=d.party?d.party.map(deserializeMon):null;}}catch(e){}}
 
 /* ============================================================
    9. 对战入口（通用）
@@ -3565,179 +3570,382 @@ function startBattle(cfg){
    10. 对战工厂（重点模式）
 ============================================================ */
 const FAC={
-  tier(sp){const b=bst(sp);if(sp.leg||b>=570)return 4;if(b>=510)return 3;if(b>=430)return 2;return 1;},
-  lvl(round,i){return Math.min(100,48+(round-1)*7+Math.floor(i/2));},
-  pickMoves(sp){
-    const dmg=shuffle(sp.mv.filter(k=>MV[k].c!=='X'&&k!=='terablast')), st=shuffle(sp.mv.filter(k=>MV[k].c==='X'));
-    const out=dmg.slice(0,st.length?3:4);
-    if(st.length)out.push(st[0]);
-    if(Math.random()<0.2){ if(out.length>=4)out[3]='terablast';else out.push('terablast'); }   // ★ 20%携带太晶爆发
-    return out.slice(0,4);
-  },
-  pickItem(sp,moves){
-    const r=Math.random();
-    const dmgT=moves.map(k=>MV[k].t).find(t=>TYPEITEM[t]);
-    if(r<.25&&dmgT)return TYPEITEM[dmgT];
-    const pool=['leftovers','sitrus','lifeorb','expertbelt','quickclaw','scopelens','focussash','blacksludge','eviolite','choiceband','choicespecs','choicescarf','airballoon','weaknesspolicy'];
-    let it=pick(pool);
-    if(it==='blacksludge'&&!sp.t.includes('poison'))it='leftovers';
-    if(it==='eviolite'&&!sp.evo)it='sitrus';
-    return it;
-  },
-  build(sp,lvl,round){
-    const moves=this.pickMoves(sp);
-    return new P(sp.id,lvl,{moves,item:this.pickItem(sp,moves),iv:28,tera:pick(TYP),ev:genEV(sp,round||1)});
-  },
-  rentalSets(round){
-    const minT=round<=1?1:round<=3?2:3, maxT=round<=1?2:round<=2?3:4;
-    let cands=shuffle(SP.filter(s=>{const t=this.tier(s);return t>=minT&&t<=maxT;}));
-    const sets=[];
-    for(let s=0;s<3;s++){
-      const set=[];
-      for(let i=0;i<3;i++){ const sp=cands.pop()||pick(SP); set.push(this.build(sp,this.lvl(round,i),round)); }
-      sets.push(set);
-    }
-    return sets;
-  },
-  enemyTeam(round,i){
-    const lvl=this.lvl(round,i);
-    const isHead=round%3===0&&i===6;
-    if(isHead){ return {head:true,team:[
-      this.build(SPDB[275],lvl+4,round), this.build(SPDB[303],lvl+4,round), this.build(SPDB[214],lvl+4,round)]}; }
-    const minT=round<=1?1:round<=3?2:3, maxT=round<=1?2:round<=2?3:4;
-    let cands=shuffle(SP.filter(s=>{const t=this.tier(s);return t>=minT&&t<=maxT;}));
-    const team=[];
-    for(let k=0;k<3;k++){const sp=cands.pop()||pick(SP);team.push(this.build(sp,lvl,round));}
-    return {head:false,team};
-  },
-  ui(){
-    $('#facRound').textContent=GM.fac.round;
-    $('#facBP').textContent='BP '+GM.fac.bp;
-    $('#facBest').textContent=GM.fac.best+' 连胜';
-    const pips=$('#facPips');pips.innerHTML='';
-    for(let i=0;i<7;i++){const s=el('span','bpip'+(i<GM.fac.win?' win':'')+(i===GM.fac.win?' cur':''));pips.appendChild(s);}
-    const party=$('#facParty');party.innerHTML='';
-    if(GM.fac.party){ GM.fac.party.forEach(m=>{
-      const c=el('div','slot');c.appendChild(miniSprite(m.id));
-      c.insertAdjacentHTML('beforeend',`<div><b>${m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x=>MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:'无道具'} · 晶${TNAME[m.teraType]}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span></div></div>`);
-            const det=el('button','btn tiny','详情');det.style.marginLeft='auto';det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};c.appendChild(det);
-      party.appendChild(c); }); }
-    else party.innerHTML='<div style="color:#888;font-size:13px;padding:10px">尚未选择租借队伍</div>';
-  },
-  async lobby(){
-    show('#factory');AU.playMusic('factory');
-    this.ui();
-    const mid=$('#facMid');
-    if(!GM.fac.party){
-      mid.innerHTML='<h3 class="disp" style="color:#ffd93b;font-size:24px;text-align:center;margin:8px">选择你的租借队伍</h3><div style="color:#aab;font-size:13px;text-align:center;margin-bottom:8px">第 '+GM.fac.round+' 轮 · 从下面三组中选择一组开始挑战</div>';
-      const sets=this.rentalSets(GM.fac.round);
-      ['A','B','C'].forEach((L,si)=>{
-        mid.appendChild(el('div','setLabel','队伍 '+L));
-        const row=el('div','rentSet');
-        sets[si].forEach(m=>{
-          const c=el('div','rentCard');
-          c.appendChild(miniSprite(m.id));c.children[0].style.width='84px';c.children[0].style.height='84px';
-          c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
-            <div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${Math.max(m.st.atk,m.st.spa)}</span></div><div class="statMini"><span>防 ${Math.max(m.st.def,m.st.spd)}</span><span>速 ${m.st.spe}</span></div>
-            <div style="font-size:10px;color:#555;font-weight:700;margin-top:3px">${m.moves.map(x=>MV[x.k].n).join('·')}</div>
-            <div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span></div>`);
-          const det=el('button','btn tiny','详情');
-          det.style.marginTop='6px';
-          det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};
-          c.appendChild(det);
-          row.appendChild(c);
-        });
-        const btn=el('button','btn blue','租借队伍 '+L);btn.style.width='100%';
-        btn.onclick=()=>{AU.ok();GM.fac.party=sets[si];saveFac();this.ui();this.lobby();};
-        mid.appendChild(row);mid.appendChild(btn);
-      });
-    } else {
-      mid.innerHTML='<h3 class="disp" style="color:#ffd93b;font-size:24px;text-align:center;margin:10px">准备就绪</h3><div style="color:#aab;font-size:14px;text-align:center;line-height:2">第 <b style="color:#fff">'+GM.fac.round+'</b> 轮 · 第 <b style="color:#fff">'+(GM.fac.win+1)+'</b> / 7 场<br>点击右侧「开始匹配」进入对战'+(GM.fac.round%3===0&&GM.fac.win===6?'<br><b style="color:#ff6b6b">⚠ 下一场：工厂头目 达拉！</b>':'')+'</div>';
-    }
-    $('#facStart').onclick=async()=>{ if(!GM.fac.party){toast('请先选择租借队伍！');AU.no();return;} await this.match(); };
-  },
-  async match(){
-    const i=GM.fac.win;
-    const et=this.enemyTeam(GM.fac.round,i);
-    healAll(GM.fac.party);
-    if(et.head){
-      await fadeTo('#battle');
-      await dlg('工厂头目·达拉','呵呵呵……又见面了。让我和我的宝可梦来检验一下你的实力吧！',275);
-      await fadeTo('#factory');
-    }
-    const r=await startBattle({
-      player:GM.fac.party,enemy:et.team,
-      trainer:et.head?'工厂头目·达拉':'工厂训练家',
-      rules:{mega:true,dyna:true,tera:true,switch:true,items:false,run:false,capture:false},
-      ai:1+GM.fac.round*0.3, aiSwitches:1
-    });
-    if(r.result==='win'){
-      GM.fac.win++;GM.fac.bp+=GM.fac.round;
-      [...r.battle.participants].forEach(m=>{ if(GM.fac.party.includes(m)) m.battles=(m.battles||0)+1; });
-      const streak=(GM.fac.round-1)*7+GM.fac.win;
-      if(streak>GM.fac.best){GM.fac.best=streak;localStorage.setItem('pif_best',streak);}
-      AU.jingle('win');
-      await fadeTo('#factory');
-      await dlg('广播','胜利！获得 '+GM.fac.round+' BP！可以选择交换对手的宝可梦。',132);
-      await this.swapScreen(et.team);
-      /* ★ 每3场（交换宝可梦之后）可为当前队伍一只宝可梦自由分配对战点数 */
-      if(GM.fac.win%3===0 && GM.fac.party.some(m=>evCap(m)-evTotal(m)>0)){
-        await dlg('广播','你的宝可梦通过实战成长了！可以为其中一只分配对战点数。',132);
-        await openEVAllocation(GM.fac.party);
-        this.ui();
-      }
-      if(GM.fac.win>=7){
-        GM.fac.bp+=10;GM.fac.round++;GM.fac.win=0;GM.fac.party=null;
-        AU.jingle('badge');
-        await dlg('广播','🎉 本轮 7 连胜达成！额外获得 10 BP！进入第 '+GM.fac.round+' 轮，请重新选择租借队伍。',132);
-      }
-      saveFac();
-      this.ui();this.lobby();
-    } else if(r.result==='lose'||r.result==='run'){
-      AU.jingle('lose');
-      await dlg('广播','挑战失败……连胜 '+((GM.fac.round-1)*7+GM.fac.win)+' 场。获得 BP：'+GM.fac.bp+'。重新挑战吧！',132);
-      GM.fac.round=1;GM.fac.win=0;GM.fac.party=null;
-      saveFac();
-      this.ui();this.lobby();
-    }
-  },
-  async swapScreen(enemyTeam){
-    return new Promise(res=>{
-      const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
-      const box=el('div','ovBox panel');ov.appendChild(box);
-      box.appendChild(el('h3','disp','宝可梦交换 — 点选想要的对手宝可梦'));
-      let pickE=null,pickP=null;
-      const eg=el('div','');eg.style.display='flex';eg.style.gap='10px';eg.style.flexWrap='wrap';
-      enemyTeam.forEach((m,i)=>{
-        const c=el('div','rentCard');c.appendChild(miniSprite(m.id));c.children[0].style.width='48px';c.children[0].style.height='48px';
-        c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x=>MV[x.k].n).join('·')}</div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div>`);
-                const det=el('button','btn tiny','详情');det.style.marginTop='4px';det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};c.appendChild(det);
-        c.onclick=()=>{AU.cursor();eg.querySelectorAll('.rentCard').forEach(x=>x.classList.remove('swapPick'));c.classList.add('swapPick');pickE=i;};
-        eg.appendChild(c);
-      });
-      box.appendChild(eg);
-      box.appendChild(el('h3','disp','再点选要交出的我方宝可梦'));
-      const pg=el('div','');pg.style.display='flex';pg.style.gap='10px';pg.style.flexWrap='wrap';
-      GM.fac.party.forEach((m,i)=>{
-        const c=el('div','rentCard');c.appendChild(miniSprite(m.id));c.children[0].style.width='70px';c.children[0].style.height='70px';
-        c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x=>MV[x.k].n).join('·')}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div>`);
-                const det=el('button','btn tiny','详情');det.style.marginTop='4px';det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};c.appendChild(det);
-        c.onclick=()=>{AU.cursor();pg.querySelectorAll('.rentCard').forEach(x=>x.classList.remove('swapPick'));c.classList.add('swapPick');pickP=i;};
-        pg.appendChild(c);
-      });
-      box.appendChild(pg);
-      const row=el('div','');row.style.display='flex';row.style.gap='10px';row.style.marginTop='12px';
-            let offEsc=null;
-      const close=()=>{ if(offEsc){offEsc();offEsc=null;} ov.classList.add('hidden'); res(); };
-      const ok=el('button','btn red','确认交换');
-      ok.onclick=()=>{ if(pickE==null||pickP==null){toast('请分别点选双方宝可梦');AU.no();return;}
-        AU.ok();GM.fac.party[pickP]=enemyTeam[pickE];close(); };
-      const skip=el('button','btn','不交换，继续');
-      skip.onclick=()=>{AU.no();close();};
-      row.appendChild(ok);row.appendChild(skip);box.appendChild(row);
-      offEsc=onEsc(()=>{AU.no();close();}); // ESC = 不交换
-    });
-  }
+/* ============ 道具商店 ============ */
+SHOP:[
+{k:'sitrus',price:1},{k:'quickclaw',price:1},{k:'scopelens',price:1},
+{k:'leftovers',price:2},{k:'expertbelt',price:2},{k:'airballoon',price:2},{k:'blacksludge',price:2},
+{k:'lifeorb',price:3},{k:'focussash',price:3},{k:'weaknesspolicy',price:3},
+{k:'choiceband',price:4},{k:'choicespecs',price:4},{k:'choicescarf',price:4},
+{k:'eviolite',price:5},{k:'assaultvest',price:5},
+],
+/* ============ 基础工具 ============ */
+tier(sp){const b=bst(sp);if(sp.leg||b>=570)return 4;if(b>=510)return 3;if(b>=430)return 2;return 1;},
+lvl(round,i){return Math.min(100,48+(round-1)*7+Math.floor(i/2));},
+pickMoves(sp){
+const dmg=shuffle(sp.mv.filter(k=>MV[k].c!=='X'&&k!=='terablast')), st=shuffle(sp.mv.filter(k=>MV[k].c==='X'));
+const out=dmg.slice(0,st.length?3:4);
+if(st.length)out.push(st[0]);
+if(Math.random()<0.2){ if(out.length>=4)out[3]='terablast';else out.push('terablast'); }
+return out.slice(0,4);
+},
+pickItem(sp,moves){
+const r=Math.random();
+const dmgT=moves.map(k=>MV[k].t).find(t=>TYPEITEM[t]);
+if(r<.25&&dmgT)return TYPEITEM[dmgT];
+const pool=['leftovers','sitrus','lifeorb','expertbelt','quickclaw','scopelens','focussash','blacksludge','eviolite','choiceband','choicespecs','choicescarf','airballoon','weaknesspolicy'];
+let it=pick(pool);
+if(it==='blacksludge'&&!sp.t.includes('poison'))it='leftovers';
+if(it==='eviolite'&&!sp.evo)it='sitrus';
+return it;
+},
+build(sp,lvl,round){
+const moves=this.pickMoves(sp);
+return new P(sp.id,lvl,{moves,item:this.pickItem(sp,moves),iv:28,tera:pick(TYP),ev:genEV(sp,round||1)});
+},
+/* ============ 属性专家 ============ */
+expertProb(round,i){
+if(round>=4)return 0.2;
+return Math.max(0.2, 0.7-(round-1)*0.17-i*0.02);
+},
+rollExpert(round,i){
+const p=this.expertProb(round,i);
+if(Math.random()<p){
+const t=pick(TYP);
+return {type:t,name:TNAME[t]+'属性专家'};
+}
+return {type:null,name:'全能高手'};
+},
+/* ============ 队伍生成 ============ */
+rentalSets(round){
+const minT=round<=1?1:round<=3?2:3, maxT=round<=1?2:round<=2?3:4;
+let cands=shuffle(SP.filter(s=>{const t=this.tier(s);return t>=minT&&t<=maxT;}));
+const sets=[];
+for(let s=0;s<3;s++){
+const set=[];
+for(let i=0;i<3;i++){ const sp=cands.pop()||pick(SP); set.push(this.build(sp,this.lvl(round,i),round)); }
+sets.push(set);
+}
+return sets;
+},
+/* ★ 六选三：生成6个候选宝可梦 */
+pickPool(round){
+const minT=round<=1?1:round<=3?2:3, maxT=round<=1?2:round<=2?3:4;
+let cands=shuffle(SP.filter(s=>{const t=this.tier(s);return t>=minT&&t<=maxT;}));
+const pool=[];
+for(let i=0;i<6;i++){ const sp=cands.pop()||pick(SP); pool.push(this.build(sp,this.lvl(round,i),round)); }
+return pool;
+},
+/* ★ 敌方队伍（支持属性专家） */
+enemyTeam(round,i,expert){
+const lvl=this.lvl(round,i);
+const isHead=round%3===0&&i===6;
+if(isHead){ return {head:true,team:[
+this.build(SPDB[275],lvl+4,round), this.build(SPDB[303],lvl+4,round), this.build(SPDB[214],lvl+4,round)]}; }
+const minT=round<=1?1:round<=3?2:3, maxT=round<=1?2:round<=2?3:4;
+let cands=shuffle(SP.filter(s=>{const t=this.tier(s);return t>=minT&&t<=maxT;}));
+const team=[];
+if(expert&&expert.type){
+/* ★ 属性专家：至少2只为指定属性 */
+const typed=shuffle(SP.filter(s=>s.t.includes(expert.type)&&this.tier(s)>=minT&&this.tier(s)<=maxT));
+for(let k=0;k<Math.min(2,typed.length);k++){team.push(this.build(typed[k],lvl,round));}
+}
+while(team.length<3){const sp=cands.pop()||pick(SP);team.push(this.build(sp,lvl,round));}
+return {head:false,team,expert};
+},
+/* ============ UI ============ */
+ui(){
+$('#facRound').textContent=GM.fac.round;
+$('#facBP').textContent='BP '+GM.fac.bp;
+$('#facBest').textContent=GM.fac.best+' 连胜';
+const pips=$('#facPips');pips.innerHTML='';
+for(let i=0;i<7;i++){const s=el('span','bpip'+(i<GM.fac.win?' win':'')+(i===GM.fac.win?' cur':''));pips.appendChild(s);}
+const party=$('#facParty');party.innerHTML='';
+if(GM.fac.party){ GM.fac.party.forEach((m,idx)=>{
+const c=el('div','slot');c.appendChild(miniSprite(m.id));
+c.insertAdjacentHTML('beforeend',`<div style="flex:1"><b>${m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x=>MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:'无道具'} · 晶${TNAME[m.teraType]}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span></div></div>`);
+const btnCol=el('div','');btnCol.style.cssText='display:flex;flex-direction:column;gap:4px;margin-left:auto;flex:none';
+const det=el('button','btn tiny','详情');det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};btnCol.appendChild(det);
+const itemBtn=el('button','btn tiny','道具');itemBtn.onclick=e=>{e.stopPropagation();AU.cursor();this.equipItem(idx);};btnCol.appendChild(itemBtn);
+c.appendChild(btnCol);
+party.appendChild(c); }); }
+else party.innerHTML='<div style="color:#888;font-size:13px;padding:10px">尚未选择租借队伍</div>';
+},
+/* ★ 携带道具面板 */
+equipItem(monIdx){
+const m=GM.fac.party[monIdx];
+const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
+const box=el('div','ovBox panel');box.style.maxWidth='520px';ov.appendChild(box);
+let offEsc=null;
+const close=()=>{if(offEsc){offEsc();offEsc=null;}ov.classList.add('hidden');this.ui();};
+offEsc=onEsc(()=>{AU.no();close();});
+box.appendChild(el('h3','disp',`携带道具 · ${m.name}`));
+box.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:#888;margin-bottom:8px">当前：${m.item?IT[m.item].n:'无道具'}</div>`);
+/* 无道具选项 */
+const none=el('div','itemRow');none.innerHTML=`<div><b>无道具</b><div style="font-size:11px;color:#777">卸下当前道具</div></div>`;
+none.onclick=()=>{if(m.item){GM.fac.bag[m.item]=(GM.fac.bag[m.item]||0)+1;}m.item=null;AU.ok();saveFac();close();};
+box.appendChild(none);
+/* 背包中的道具 */
+const bagKeys=Object.keys(GM.fac.bag).filter(k=>GM.fac.bag[k]>0);
+if(!bagKeys.length)box.insertAdjacentHTML('beforeend','<div style="color:#999;font-size:12px;padding:8px">背包为空，请先在商店购买道具</div>');
+bagKeys.forEach(k=>{
+const it=IT[k];if(!it)return;
+const r=el('div','itemRow');
+r.innerHTML=`<div><b>${it.n}</b> <span style="font-size:10px;color:#999">×${GM.fac.bag[k]}</span><div style="font-size:11px;color:#777">${it.d}</div></div>`;
+r.onclick=()=>{
+if(m.item){GM.fac.bag[m.item]=(GM.fac.bag[m.item]||0)+1;}
+GM.fac.bag[k]--;if(GM.fac.bag[k]<=0)delete GM.fac.bag[k];
+m.item=k;AU.ok();saveFac();close();
+};
+box.appendChild(r);
+});
+const back=el('button','btn small','关闭');back.style.marginTop='10px';back.onclick=()=>{AU.no();close();};
+box.appendChild(back);
+},
+/* ★ 道具商店面板 */
+openShop(){
+const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
+const box=el('div','ovBox panel');box.style.maxWidth='560px';ov.appendChild(box);
+let offEsc=null;
+const close=()=>{if(offEsc){offEsc();offEsc=null;}ov.classList.add('hidden');this.ui();};
+offEsc=onEsc(()=>{AU.no();close();});
+box.appendChild(el('h3','disp','🛒 道具商店'));
+box.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:#888;margin-bottom:8px">当前 BP：<b style="color:#f2b705">${GM.fac.bp}</b> · 购买的道具存入局外背包，可在匹配前给队伍携带</div>`);
+this.SHOP.forEach(s=>{
+const it=IT[s.k];if(!it)return;
+const owned=GM.fac.bag[s.k]||0;
+const r=el('div','itemRow');
+r.innerHTML=`<div style="flex:1"><b>${it.n}</b> ${owned?`<span style="font-size:10px;color:#999">已有×${owned}</span>`:''}<div style="font-size:11px;color:#777">${it.d}</div></div><span class="px" style="font-size:9px;color:#f2b705">${s.price}BP</span>`;
+const buy=el('button','btn tiny','购买');buy.style.marginLeft='8px';
+buy.disabled=GM.fac.bp<s.price;
+buy.onclick=()=>{
+if(GM.fac.bp<s.price){toast('BP不足！');AU.no();return;}
+GM.fac.bp-=s.price;GM.fac.bag[s.k]=(GM.fac.bag[s.k]||0)+1;
+AU.ok();saveFac();close();this.openShop();
+};
+r.appendChild(buy);
+box.appendChild(r);
+});
+const back=el('button','btn small','关闭');back.style.marginTop='10px';back.onclick=()=>{AU.no();close();};
+box.appendChild(back);
+},
+/* ============ 大厅 ============ */
+async lobby(){
+show('#factory');AU.playMusic('factory');
+this.ui();
+const mid=$('#facMid');
+if(!GM.fac.party){
+/* ★ 模式选择 */
+mid.innerHTML=`<h3 class="disp" style="color:#ffd93b;font-size:24px;text-align:center;margin:8px">选择租借模式</h3>
+<div style="display:flex;gap:10px;justify-content:center;margin-bottom:12px">
+<button class="btn ${GM.fac.mode==='rent3'?'blue':''}" id="modeRent3">三选一队伍</button>
+<button class="btn ${GM.fac.mode==='pick3'?'blue':''}" id="modePick3">六选三自选</button>
+</div>
+<div id="facModeArea"></div>`;
+$('#modeRent3').onclick=()=>{GM.fac.mode='rent3';saveFac();this.lobby();};
+$('#modePick3').onclick=()=>{GM.fac.mode='pick3';saveFac();this.lobby();};
+const area=$('#facModeArea');
+/* ★ 第一把显示对手类型 */
+if(GM.fac.win===0&&GM.fac.nextExpert){
+area.insertAdjacentHTML('beforeend',`<div style="text-align:center;margin-bottom:10px;padding:8px;background:rgba(255,255,255,.06);border-radius:10px;border:2px dashed rgba(255,217,59,.4)">
+<span style="color:#ffd93b;font-weight:900">下一场对手：</span><span style="color:#fff;font-weight:700">${GM.fac.nextExpert.name}</span></div>`);
+}
+if(GM.fac.mode==='rent3'){
+area.insertAdjacentHTML('beforeend','<div style="color:#aab;font-size:13px;text-align:center;margin-bottom:8px">第 '+GM.fac.round+' 轮 · 从下面三组中选择一组开始挑战</div>');
+const sets=this.rentalSets(GM.fac.round);
+['A','B','C'].forEach((L,si)=>{
+area.appendChild(el('div','setLabel','队伍 '+L));
+const row=el('div','rentSet');
+sets[si].forEach(m=>{
+const c=el('div','rentCard');
+c.appendChild(miniSprite(m.id));c.children[0].style.width='84px';c.children[0].style.height='84px';
+c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
+<div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${Math.max(m.st.atk,m.st.spa)}</span></div><div class="statMini"><span>防 ${Math.max(m.st.def,m.st.spd)}</span><span>速 ${m.st.spe}</span></div>
+<div style="font-size:10px;color:#555;font-weight:700;margin-top:3px">${m.moves.map(x=>MV[x.k].n).join('·')}</div>
+<div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span></div>`);
+const det=el('button','btn tiny','详情');det.style.marginTop='6px';det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};c.appendChild(det);
+row.appendChild(c);
+});
+const btn=el('button','btn blue','租借队伍 '+L);btn.style.width='100%';
+btn.onclick=()=>{AU.ok();GM.fac.party=sets[si];saveFac();this.ui();this.lobby();};
+area.appendChild(row);area.appendChild(btn);
+});
+} else {
+/* ★ 六选三模式 */
+area.insertAdjacentHTML('beforeend','<div style="color:#aab;font-size:13px;text-align:center;margin-bottom:8px">第 '+GM.fac.round+' 轮 · 从6只中选择3只组队（可调整顺序）</div>');
+const pool=this.pickPool(GM.fac.round);
+const picked=[];
+const grid=el('div','');grid.style.cssText='display:flex;flex-wrap:wrap;gap:10px;justify-content:center';
+pool.forEach((m,pi)=>{
+const c=el('div','rentCard');
+c.appendChild(miniSprite(m.id));c.children[0].style.width='84px';c.children[0].style.height='84px';
+c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
+<div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${Math.max(m.st.atk,m.st.spa)}</span></div><div class="statMini"><span>防 ${Math.max(m.st.def,m.st.spd)}</span><span>速 ${m.st.spe}</span></div>
+<div style="font-size:10px;color:#555;font-weight:700;margin-top:3px">${m.moves.map(x=>MV[x.k].n).join('·')}</div>
+<div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span></div>`);
+const det=el('button','btn tiny','详情');det.style.marginTop='6px';det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};c.appendChild(det);
+c.onclick=()=>{
+if(picked.includes(pi)){picked.splice(picked.indexOf(pi),1);c.style.outline='';AU.cursor();}
+else{if(picked.length>=3){toast('最多选3只！');AU.no();return;}picked.push(pi);c.style.outline='4px solid #ffd93b';AU.ok();}
+renderPicked();
+};
+grid.appendChild(c);
+});
+area.appendChild(grid);
+/* 已选展示 + 排序 */
+const pickedArea=el('div','');pickedArea.style.cssText='margin-top:12px';
+area.appendChild(pickedArea);
+function renderPicked(){
+pickedArea.innerHTML='';
+if(!picked.length){pickedArea.innerHTML='<div style="color:#999;font-size:12px;text-align:center">点击上方卡牌选择（最多3只）</div>';return;}
+pickedArea.appendChild(el('div','setLabel','已选（点击交换顺序）'));
+const row=el('div','rentSet');
+picked.forEach((pi,order)=>{
+const m=pool[pi];
+const c=el('div','rentCard');c.style.cssText='width:140px;position:relative';
+c.appendChild(miniSprite(m.id));c.children[0].style.width='56px';c.children[0].style.height='56px';
+c.insertAdjacentHTML('beforeend',`<div class="rn" style="font-size:13px">${m.name}</div>`);
+c.insertAdjacentHTML('beforeend',`<span style="position:absolute;top:4px;right:6px;font-family:'Press Start 2P';font-size:10px;color:#fff;background:#e3350d;border:2px solid var(--ink);border-radius:6px;padding:1px 5px;line-height:1.4">${order+1}</span>`);
+c.onclick=()=>{
+if(order<picked.length-1){[picked[order],picked[order+1]]=[picked[order+1],picked[order]];AU.cursor();renderPicked();}
+};
+row.appendChild(c);
+});
+pickedArea.appendChild(row);
+}
+renderPicked();
+const confirm=el('button','btn red','确认组队');confirm.style.cssText='width:100%;margin-top:12px';
+confirm.onclick=()=>{
+if(picked.length!==3){toast('请选择3只宝可梦！');AU.no();return;}
+AU.ok();
+GM.fac.party=picked.map(pi=>pool[pi]);
+saveFac();this.ui();this.lobby();
+};
+area.appendChild(confirm);
+}
+} else {
+/* ★ 已有队伍：准备匹配 */
+const expertInfo=GM.fac.nextExpert?`<br><span style="color:#ffd93b">下一场对手：<b>${GM.fac.nextExpert.name}</b></span>`:'';
+mid.innerHTML=`<h3 class="disp" style="color:#ffd93b;font-size:24px;text-align:center;margin:10px">准备就绪</h3>
+<div style="color:#aab;font-size:14px;text-align:center;line-height:2">第 <b style="color:#fff">${GM.fac.round}</b> 轮 · 第 <b style="color:#fff">${GM.fac.win+1}</b> / 7 场${expertInfo}
+${GM.fac.round%3===0&&GM.fac.win===6?'<br><b style="color:#ff6b6b">⚠ 下一场：工厂头目 达拉！</b>':''}</div>
+<div style="text-align:center;margin-top:10px"><button class="btn" id="facShopBtn">🛒 道具商店</button></div>`;
+$('#facShopBtn').onclick=()=>{AU.cursor();this.openShop();};
+}
+$('#facStart').onclick=async()=>{ if(!GM.fac.party){toast('请先选择租借队伍！');AU.no();return;} await this.match(); };
+$('#facShop').onclick=()=>{AU.cursor();this.openShop();};
+},
+/* ============ 匹配对战 ============ */
+async match(){
+const i=GM.fac.win;
+/* ★ 决定本场对手类型 */
+const expert=GM.fac.nextExpert||this.rollExpert(GM.fac.round,i);
+GM.fac.nextExpert=null;
+const et=this.enemyTeam(GM.fac.round,i,expert);
+healAll(GM.fac.party);
+if(et.head){
+await fadeTo('#battle');
+await dlg('工厂头目·达拉','呵呵呵……又见面了。让我和我的宝可梦来检验一下你的实力吧！',275);
+await fadeTo('#factory');
+}
+const r=await startBattle({
+player:GM.fac.party,enemy:et.team,
+trainer:et.head?'工厂头目·达拉':(expert.type?expert.name:'工厂训练家'),
+rules:{mega:true,dyna:true,tera:true,switch:true,items:false,run:false,capture:false},
+ai:1+GM.fac.round*0.3, aiSwitches:1
+});
+if(r.result==='win'){
+GM.fac.win++;GM.fac.bp+=GM.fac.round;
+[...r.battle.participants].forEach(m=>{ if(GM.fac.party.includes(m)) m.battles=(m.battles||0)+1; });
+const streak=(GM.fac.round-1)*7+GM.fac.win;
+if(streak>GM.fac.best){GM.fac.best=streak;localStorage.setItem('pif_best',streak);}
+AU.jingle('win');
+await fadeTo('#factory');
+/* ★ 最后一把（第7场）不触发交换 */
+if(GM.fac.win<7){
+/* ★ 提前决定下一场对手类型，在交换界面同步提示，方便玩家针对性选宝可梦 */
+const nextExpert=this.rollExpert(GM.fac.round,GM.fac.win);
+GM.fac.nextExpert=nextExpert;
+await dlg('广播','胜利！获得 '+GM.fac.round+' BP！可以选择交换对手的宝可梦。',132);
+await this.swapScreen(et.team, nextExpert);
+}
+/* ★ 每3场分配对战点数 */
+if(GM.fac.win%3===0 && GM.fac.party.some(m=>evCap(m)-evTotal(m)>0)){
+await dlg('广播','你的宝可梦通过实战成长了！可以为其中一只分配对战点数。',132);
+await openEVAllocation(GM.fac.party);
+this.ui();
+}
+if(GM.fac.win>=7){
+GM.fac.bp+=10;GM.fac.round++;GM.fac.win=0;GM.fac.party=null;
+GM.fac.nextExpert=this.rollExpert(GM.fac.round,0);
+// AU.jingle('badge');
+await dlg('广播','🎉 本轮 7 连胜达成！额外获得 10 BP！进入第 '+GM.fac.round+' 轮，请重新选择租借队伍。',132);
+}
+saveFac();this.ui();this.lobby();
+} else if(r.result==='lose'||r.result==='run'){
+/* ★ BP复活系统 */
+if(GM.fac.bp>=8){
+const choice=await dlgChoices('广播','挑战失败……是否花费 8 BP 复活？（保留当前阵容、轮次与连胜）\n当前 BP：'+GM.fac.bp,['花费 8 BP 复活','放弃，重新开始'],132);
+if(choice===0){
+GM.fac.bp-=8;GM.fac.revives++;
+AU.heal();healAll(GM.fac.party);
+saveFac();this.ui();
+await dlg('广播','复活成功！已消耗 8 BP（累计复活 '+GM.fac.revives+' 次）。继续挑战第 '+(GM.fac.win+1)+' 场！',132);
+this.lobby();
+return;
+}
+}
+AU.jingle('lose');
+await dlg('广播','挑战失败……连胜 '+((GM.fac.round-1)*7+GM.fac.win)+' 场。获得 BP：'+GM.fac.bp+'。重新挑战吧！',132);
+GM.fac.round=1;GM.fac.win=0;GM.fac.party=null;GM.fac.nextExpert=null;
+saveFac();this.ui();this.lobby();
+}
+},
+/* ============ 交换宝可梦 ============ */
+async swapScreen(enemyTeam,nextExpert){
+return new Promise(res=>{
+const ov=$('#partyOv');ov.classList.remove('hidden');ov.innerHTML='';
+const box=el('div','ovBox panel');ov.appendChild(box);
+box.appendChild(el('h3','disp','宝可梦交换 — 点选想要的对手宝可梦'));
+/* ★ 下一场对手类型提示：帮助玩家针对性选择交换宝可梦 */
+if(nextExpert){
+box.insertAdjacentHTML('beforeend',`<div style="text-align:center;margin:8px 0;padding:8px 12px;background:rgba(255,217,59,.08);border-radius:10px;border:2px dashed rgba(255,217,59,.4)">
+<span style="color:#ffd93b;font-weight:900;font-size:14px">⚔ 下一场对手：</span>
+<span style="color:${TCOL[nextExpert.type]};font-size:14px;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.5)">${nextExpert.name}</span>
+${nextExpert.type?`<br><span style="color:${TCOL[nextExpert.type]};font-size:12px;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.5)">${TNAME[nextExpert.type]}属性宝可梦 ×2 以上</span>`:'<br><span style="color:#e0d8f0;font-size:12px;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.5)">无固定属性偏好</span>'}
+</div>`);
+}
+let pickE=null,pickP=null;
+const eg=el('div','');eg.style.display='flex';eg.style.gap='10px';eg.style.flexWrap='wrap';
+enemyTeam.forEach((m,i)=>{
+const c=el('div','rentCard');c.appendChild(miniSprite(m.id));c.children[0].style.width='48px';c.children[0].style.height='48px';
+c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x=>MV[x.k].n).join('·')}</div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div>`);
+const det=el('button','btn tiny','详情');det.style.marginTop='4px';det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};c.appendChild(det);
+c.onclick=()=>{AU.cursor();eg.querySelectorAll('.rentCard').forEach(x=>x.classList.remove('swapPick'));c.classList.add('swapPick');pickE=i;};
+eg.appendChild(c);
+});
+box.appendChild(eg);
+box.appendChild(el('h3','disp','再点选要交出的我方宝可梦'));
+const pg=el('div','');pg.style.display='flex';pg.style.gap='10px';pg.style.flexWrap='wrap';
+GM.fac.party.forEach((m,i)=>{
+const c=el('div','rentCard');c.appendChild(miniSprite(m.id));c.children[0].style.width='70px';c.children[0].style.height='70px';
+c.insertAdjacentHTML('beforeend',`<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x=>MV[x.k].n).join('·')}</div></div><div style="font-size:10px;color:#999">${m.item?IT[m.item].n:''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||''}</span></div>`);
+const det=el('button','btn tiny','详情');det.style.marginTop='4px';det.onclick=e=>{e.stopPropagation();AU.cursor();showDetail(m,null);};c.appendChild(det);
+c.onclick=()=>{AU.cursor();pg.querySelectorAll('.rentCard').forEach(x=>x.classList.remove('swapPick'));c.classList.add('swapPick');pickP=i;};
+pg.appendChild(c);
+});
+box.appendChild(pg);
+const row=el('div','');row.style.display='flex';row.style.gap='10px';row.style.marginTop='12px';
+let offEsc=null;
+const close=()=>{ if(offEsc){offEsc();offEsc=null;} ov.classList.add('hidden'); res(); };
+const ok=el('button','btn red','确认交换');
+ok.onclick=()=>{ if(pickE==null||pickP==null){toast('请分别点选双方宝可梦');AU.no();return;}
+AU.ok();GM.fac.party[pickP]=enemyTeam[pickE];close(); };
+const skip=el('button','btn','不交换，继续');
+skip.onclick=()=>{AU.no();close();};
+row.appendChild(ok);row.appendChild(skip);box.appendChild(row);
+offEsc=onEsc(()=>{AU.no();close();});
+});
+}
 };
 
 /* ============================================================
@@ -4646,7 +4854,7 @@ offEsc=onEsc(()=>{AU.no();close();});
 $('#facReset').onclick=async()=>{
   const idx=await dlgChoices('重新游戏','确定要清空当前轮次、连胜、BP 与租借队伍，重新开始挑战吗？（历史最佳记录将保留）',['确定，重新开始','取消']);
   if(idx===0){
-    GM.fac.round=1;GM.fac.win=0;GM.fac.bp=0;GM.fac.party=null;
+    GM.fac.round=1;GM.fac.win=0;GM.fac.bp=0;GM.fac.party=null;GM.fac.revives=0;GM.fac.nextExpert=null;
     saveFac();
     FAC.ui();FAC.lobby();
     toast('已重新开始！');
