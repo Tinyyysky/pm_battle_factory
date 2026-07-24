@@ -560,9 +560,9 @@ clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);filter:drop-shad
 .moveBtn .mi{font-size:10px;font-weight:700;opacity:.95}
 .moveBtn .pp{position:absolute;right:8px;bottom:4px;font-family:'Press Start 2P';font-size:7px}
 .moveBtn{position:relative}
-#formCol{display:flex;flex-direction:column;gap:6px;min-width:124px}
-#formCol .dynToggle{width:100%;padding:7px 6px;font-size:12px}
-#formCol .backBtn{margin-top:auto;justify-content:center}
+#formCol{display:flex;flex-direction:column;gap:5px;min-width:124px}
+#formCol .dynToggle{width:100%;padding:6px 6px;font-size:12px}
+#formCol .backBtn{justify-content:center;margin-top:2px}
 #formHint{font-size:9px;color:#c8b8e8;font-weight:700;text-align:center;line-height:1.5;white-space:pre-line;padding:0 2px}
 .dynToggle{font-size:12px;font-weight:900;padding:5px 10px;border-radius:8px;border:2px solid var(--ink);background:#efe7cf;box-shadow:0 3px 0 var(--ink)}
 .dynToggle.on{background:linear-gradient(90deg,#ff5f6d,#ffc371);color:#fff}
@@ -2396,7 +2396,26 @@ const msg=async t=>{await say(`${m.name} 的特性发动了！${t}`);};
     if(ab==='intrepidsword'){await this.changeStat(m,'atk',1,m);}
     if(ab==='dauntlessshield'){await this.changeStat(m,'def',1,m);}
     if(ab==='download'&&foe){ const boost=foe.st.def>=foe.st.spd?'spa':'atk'; await this.changeStat(m,boost,1,m); }
-    if(ab==='trace'&&foe){ m.ability=foe.ability; await say(`${m.name} 复制了 ${foe.name} 的${AB[foe.ability]?.n||'特性'}！`); }
+    if(ab==='trace'&&foe){
+const newAb=foe.ability;
+m.ability=newAb;
+await say(`${m.name} 复制了 ${foe.name} 的${AB[newAb]?.n||'特性'}！`);
+/* ★ 复制的主动特性立即触发（不再递归调用 switchInAbility，避免无限循环） */
+if(newAb==='drought')await this.setWeather('sun',m);
+else if(newAb==='drizzle')await this.setWeather('rain',m);
+else if(newAb==='sandstream')await this.setWeather('sand',m);
+else if(newAb==='snowwarning')await this.setWeather('hail',m);
+else if(newAb==='grassysurge')await this.setTerrain('grassy',m);
+else if(newAb==='hadronengine'){await this.setTerrain('electric',m);await say(`${m.name} 的强子引擎发动了，特攻提升了！`);}
+else if(newAb==='orichalcumpulse'){await this.setWeather('sun',m);await say(`${m.name} 的绯红脉动发动了，物攻提升了！`);}
+else if(newAb==='intimidate'&&foe.alive()){await this.changeStat(foe,'atk',-1,m);}
+else if(newAb==='intrepidsword')await this.changeStat(m,'atk',1,m);
+else if(newAb==='dauntlessshield')await this.changeStat(m,'def',1,m);
+else if(newAb==='download'){const boost=foe.st.def>=foe.st.spd?'spa':'atk';await this.changeStat(m,boost,1,m);}
+else if(newAb==='swordofruin'){await say(`${m.name} 的灾祸之剑发动了！对手的防御下降了！`);AU.statDn();}
+else if(newAb==='fairyaura')await say('妖精光环笼罩了全场！');
+else if(newAb==='darkaura')await say('暗黑光环笼罩了全场！');
+}
 /* ★ 注意：复制/Mega改变的特性在战斗结束时由 baseAbility 统一还原 */
     if(ab==='swordofruin'){ await say(`${m.name} 的灾祸之剑发动了！对手的防御下降了！`); AU.statDn(); }
     if(ab==='fairyaura'){await say('妖精光环笼罩了全场！');} if(ab==='darkaura'){await say('暗黑光环笼罩了全场！');}
@@ -2487,8 +2506,13 @@ async doTurn(){
             const render=()=>{
         mm.innerHTML='';backs.forEach(([b,h])=>b.removeEventListener('click',h));backs=[];
         const formCol=el('div','');formCol.id='formCol';
-        const moveGrid=el('div','');moveGrid.id='moveGrid';
-        mm.appendChild(formCol);mm.appendChild(moveGrid);
+const moveGrid=el('div','');moveGrid.id='moveGrid';
+/* ★ 返回按钮放在三形态按钮左边（formCol 最前面） */
+const back=el('button','btn small backBtn','返回 (ESC)');
+const bh=()=>{AU.no();cleanup();res(null);};
+back.addEventListener('click',bh);backs.push([back,bh]);
+formCol.appendChild(back);
+mm.appendChild(formCol);mm.appendChild(moveGrid);
         if(canMega){const b=el('button','dynToggle mega'+(wantMega?' on':''),'◆ 超级进化');
           b.onclick=()=>{AU.cursor();wantMega=!wantMega;if(wantMega){wantDyn=false;wantTera=false;}render();};
           formCol.appendChild(b);}
@@ -2498,11 +2522,11 @@ async doTurn(){
         if(canTera){const b=el('button','dynToggle tera'+(wantTera?' on':''),'✦ 太晶化('+TNAME[m.teraType]+')');
           b.onclick=()=>{AU.cursor();wantTera=!wantTera;if(wantTera){wantMega=false;wantDyn=false;}render();};
           formCol.appendChild(b);}
-        if(canMega||canDyn||canTera){
-          const hint=el('div','');hint.id='formHint';
-          hint.textContent=wantMega?'本场已选Mega\n形态变化优先出手':wantDyn?'本场已选极巨\n招式变为极巨招式':wantTera?'本场已选太晶\n属性变为晶属性':'三形态互斥\n本场仅可用一次';
-          formCol.appendChild(hint);
-        }
+        // if(canMega||canDyn||canTera){
+        //   const hint=el('div','');hint.id='formHint';
+        //   hint.textContent=wantMega?'本场已选Mega\n形态变化优先出手':wantDyn?'本场已选极巨\n招式变为极巨招式':wantTera?'本场已选太晶\n属性变为晶属性':'三形态互斥\n本场仅可用一次';
+        //   formCol.appendChild(hint);
+        // }
         if(m.dyn){
           const tag=el('div','');tag.id='formHint';tag.style.color='#ff8a9a';
           tag.textContent=`● 极巨化中\n剩余 ${m.dynT} 回合`;
@@ -2531,8 +2555,8 @@ async doTurn(){
                 :fx.up?` · 己方${STN[fx.up]}↑`:fx.drop?` · 对方${STN[fx.drop]}↓`:''):'';
               info=`极巨招式 · 威力 ${maxPower(d)}${fxTxt}`;} }
           else if(wantTera){ if(d.terablast){nm=`太晶爆发 (${TNAME[m.teraType]})`;tcol=TCOL[m.teraType];info=`${TNAME[m.teraType]} · 特殊 · 威力 80`;}
-            else if(d.c!=='X')info+=' · 晶化一致×2'; }
-          else if(wantMega){ info+=' · Mega优先生效'; }
+            else if(d.c!=='X')info+=''; }
+          else if(wantMega){ info+=''; }
 if(m.vol.disabled&&m.vol.disabled.k===mv.k)info+=' · ⛔封印中('+m.vol.disabled.turns+'回合)';
           const b=el('button','btn moveBtn');
           b.style.background=`linear-gradient(180deg,${tcol},${tcol}cc)`;
@@ -2541,9 +2565,6 @@ if(m.vol.disabled&&m.vol.disabled.k===mv.k)info+=' · ⛔封印中('+m.vol.disab
           const h=()=>{AU.ok();cleanup();res({type:'move',move:mv,mega:wantMega,dyn:wantDyn,tera:wantTera});};
           b.addEventListener('click',h);backs.push([b,h]);moveGrid.appendChild(b);
         });
-        const back=el('button','btn small backBtn','返回 (ESC)');
-        const bh=()=>{AU.no();cleanup();res(null);};
-        back.addEventListener('click',bh);backs.push([back,bh]);formCol.appendChild(back);
       };
       offEsc=onEsc(()=>{AU.no();cleanup();res(null);});
       render();
