@@ -1790,7 +1790,11 @@ const MEGA={
 354:{f:10056,t:'ghost',s:[64,165,75,95,83,75],a:'prankster',stone:'诅咒娃娃石'},
 475:{f:10068,t:'psychic/fighting',s:[68,165,95,65,115,110],a:'innerfocus',stone:'艾路雷朵石'},
 };
-
+/* ---- 道具形态表（苍响/藏玛然特：携带专属道具切换形态） ---- */
+const FORMS={
+888:{f:'888-crowned',t:'fairy/steel',s:[92,170,115,80,115,148],a:'intrepidsword',name:'苍响(剑之王)',tag:'剑之王',item:'rustedsword',stone:'腐朽之剑',formTag:'剑之王形态'},
+889:{f:'889-crowned',t:'fighting/steel',s:[92,130,145,80,145,128],a:'dauntlessshield',name:'藏玛然特(盾之王)',tag:'盾之王',item:'rustedshield',stone:'腐朽之盾',formTag:'盾之王形态'},
+};
 const GMAXLIST=new Set([3,6,9,25,131,143,809,812,815,818,823,849,858,861,892]);
 const MAXMV={normal:'极巨攻击',fire:'极巨火爆',water:'极巨水流',electric:'极巨闪电',grass:'极巨草原',ice:'极巨冰霜',fighting:'极巨拳斗',poison:'极巨酸毒',ground:'极巨大地',flying:'极巨飞冲',psychic:'极巨超能',bug:'极巨虫蛊',rock:'极巨岩石',ghost:'极巨幽魂',dragon:'极巨龙骑',dark:'极巨恶霸',steel:'极巨钢铁',fairy:'极巨妖精'};
 /* ★ 极巨招式固有效果（对齐正作：能力变化 + 天气 + 场地） */
@@ -4185,7 +4189,7 @@ box.appendChild(equipHead);
 box.insertAdjacentHTML('beforeend',`<div style="font-size:12px;color:#888;margin-bottom:8px">当前：${m.item?IT[m.item].n:'无道具'}</div>`);
 /* 无道具选项 */
 const none=el('div','itemRow');none.innerHTML=`<div><b>无道具</b><div style="font-size:11px;color:#777">卸下当前道具</div></div>`;
-none.onclick=()=>{if(m.item){GM.fac.bag[m.item]=(GM.fac.bag[m.item]||0)+1;}m.item=null;AU.ok();saveFac();close();};
+none.onclick=()=>{if(m.item){GM.fac.bag[m.item]=(GM.fac.bag[m.item]||0)+1;}m.item=null;m.recalc();m.hp=Math.min(m.hp,m.maxhp);AU.ok();saveFac();close();};
 box.appendChild(none);
 /* 背包中的道具 */
 const bagKeys=Object.keys(GM.fac.bag).filter(k=>GM.fac.bag[k]>0);
@@ -4197,7 +4201,7 @@ r.innerHTML=`<div><b>${it.n}</b> <span style="font-size:10px;color:#999">×${GM.
 r.onclick=()=>{
 if(m.item){GM.fac.bag[m.item]=(GM.fac.bag[m.item]||0)+1;}
 GM.fac.bag[k]--;if(GM.fac.bag[k]<=0)delete GM.fac.bag[k];
-m.item=k;AU.ok();saveFac();close();
+m.item=k;m.recalc();m.hp=Math.min(m.hp,m.maxhp);AU.ok();saveFac();close();
 };
 box.appendChild(r);
 });
@@ -4684,6 +4688,32 @@ showDetail(p,null);
 };
 d.appendChild(detBtn);
 }
+/* ★ 道具形态图鉴详情（苍响/藏玛然特） */
+function dexDetailForm(sp,cfg){
+const d=$('#dexDetail');
+const img=new Image();setSprite(img,cfg.f);img._urls.push(SPRBASE+sp.id+'.png');
+img.style.width='96px';img.style.height='96px';img.style.objectFit='contain';img.style.display='block';img.style.margin='0 auto';
+d.innerHTML='';d.appendChild(img);
+const names=['HP','攻击','防御','特攻','特防','速度'];
+d.insertAdjacentHTML('beforeend',`
+<div style="text-align:center"><span class="px" style="font-size:8px;color:#c07a2a">#${String(sp.id).padStart(4,'0')} ★</span>
+<div class="disp" style="font-size:22px;color:#c07a2a">${cfg.name}</div>
+<div style="margin:4px 0">${cfg.t.split('/').map(tyBadge).join(' ')}</div>
+<div style="font-size:11px;color:#888;font-weight:700">道具形态 · 总和 ${cfg.s.reduce((a,b)=>a+b,0)}</div></div>
+${cfg.s.map((v,i)=>`<div class="statRow"><span style="width:30px;font-weight:900;color:#777;font-size:11px">${names[i]}</span><span class="px" style="font-size:8px;width:26px;text-align:right">${v}</span><div class="bar"><div class="fill" style="width:${Math.min(100,v/1.8)}%;background:${v>=100?'#3ecf6c':v>=70?'#8bc34a':v>=45?'#f2c230':'#ef4444'}"></div></div></div>`).join('')}
+<div style="margin-top:8px;font-size:12px"><b>特性：</b>${AB[cfg.a]?.n||cfg.a}（${AB[cfg.a]?.d||''}）</div>
+<div style="margin-top:6px;font-size:11px;color:#c07a2a;font-weight:900">专属道具：${cfg.stone}（携带后切换为此形态）</div>
+<div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k=>`<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p?' '+MV[k].p:''}</span>`).join('')}</div>`);
+const detBtn=el('button','btn blue','📋 完整详情');
+detBtn.style.cssText='width:100%;margin-top:12px';
+detBtn.onclick=()=>{
+AU.ok();
+const p=previewMon(sp);
+p.mega=cfg;p.name=cfg.name;p.types=cfg.t.split('/');p.ability=cfg.a;p.recalc();p.hp=p.maxhp;
+showDetail(p,null);
+};
+d.appendChild(detBtn);
+}
 function buildDex(){
   $('#dexTotal').textContent='收录 '+SP.length+' 种 · 覆盖第1~9世代';
   const genSel=$('#dexGen'),tySel=$('#dexType');
@@ -4713,6 +4743,19 @@ mc.insertAdjacentHTML('beforeend',`<div class="no" style="color:#b3188d">#${Stri
 mc.onclick=()=>{AU.cursor();dexDetailMega(sp,cfg,mi);};
 grid.appendChild(mc);
 });
+}
+/* ★ 道具形态图鉴条目（苍响/藏玛然特） */
+if(FORMS[sp.id]){
+const cfg=FORMS[sp.id];
+if((!ty||cfg.t.includes(ty))&&(!q||cfg.name.includes(q)||String(sp.id)===q||cfg.stone.includes(q))){
+const fc=el('div','dexCell');
+fc.style.borderColor='#c07a2a';
+const fimg=new Image();setSprite(fimg,cfg.f);fimg._urls.push(SPRBASE+sp.id+'.png');
+fc.appendChild(fimg);
+fc.insertAdjacentHTML('beforeend',`<div class="no" style="color:#c07a2a">#${String(sp.id).padStart(4,'0')}★</div><div class="nm" style="color:#c07a2a;font-size:10px">${cfg.tag}</div>`);
+fc.onclick=()=>{AU.cursor();dexDetailForm(sp,cfg);};
+grid.appendChild(fc);
+}
 }
 });
 };
@@ -5179,21 +5222,23 @@ function moveDesc(k){
 function showDetail(m,battle){
   const ov=$('#detailOv');ov.innerHTML='';ov.classList.remove('hidden');
   const sp=m.sp;
-  /* ★ Mega形态：种族值/属性/特性均使用Mega数据 */
-const raceStats=m.mega?m.mega.s:sp.s;
-const raceTypes=m.mega?m.mega.t.split('/'):m.types;
-const raceAbility=m.mega?m.ability:m.ability;
+/* ★ 形态识别：Mega > 道具形态（苍响/藏玛然特携带专属道具）> 基础形态 */
+const formCfg=(FORMS[m.id]&&m.item===FORMS[m.id].item)?FORMS[m.id]:null;
+/* ★ Mega形态：种族值/属性/特性均使用Mega数据 */
+const raceStats=m.mega?m.mega.s:(formCfg?formCfg.s:sp.s);
+const raceTypes=m.mega?m.mega.t.split('/'):(formCfg?formCfg.t.split('/'):m.types);
+const raceAbility=m.ability;
   const card=el('div','');card.id='detailCard';
 const close=el('button','btn small','✕ 关闭 (ESC)');close.id='detailClose';close.onclick=shut;
 ov.appendChild(close);
   const left=el('div','dLeft');
-  const img=new Image();img.id='dSprite';setSprite(img,m.mega?m.mega.f:m.id);
+  const img=new Image();img.id='dSprite';setSprite(img,m.mega?m.mega.f:(formCfg?formCfg.f:m.id));
   if(m.fainted)img.classList.add('faint');
   if(m.shiny)img.style.filter='hue-rotate(130deg) saturate(1.5)';
   left.appendChild(img);
   left.insertAdjacentHTML('beforeend',`
     <div id="dName">${m.name}${m.shiny?' <span style="color:#e0a400">✦</span>':''}</div>
-    <div id="dLv">Lv.${m.lvl} · ${sp.leg?'传说宝可梦':'普通宝可梦'} · 种族值和 ${raceStats.reduce((a,b)=>a+b,0)}${m.mega?' <span style="color:#b3188d;font-weight:900">◆Mega</span>':''}</div>
+    <div id="dLv">Lv.${m.lvl} · ${sp.leg?'传说宝可梦':'普通宝可梦'} · 种族值和 ${raceStats.reduce((a,b)=>a+b,0)}${m.mega?(m.mega.formTag?` <span style="color:#c07a2a;font-weight:900">★${m.mega.formTag}</span>`:' <span style="color:#b3188d;font-weight:900">◆Mega</span>'):(formCfg?` <span style="color:#c07a2a;font-weight:900">★${formCfg.formTag}</span>`:'')}</div>
     <div class="dMetaRow">${raceTypes.map(tyBadge).join('')}</div>
     <div class="dMetaRow">
       <span class="abchip" title="${AB[m.ability]?.d||''}">${AB[m.ability]?.n||'—'}</span>
@@ -5202,7 +5247,7 @@ ov.appendChild(close);
       <span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;background:linear-gradient(180deg,#e0fbff,#b8f0f8)">✦ 太晶·${TNAME[m.teraType]}</span>
       ${m.status?`<span class="abchip" style="color:#c22e28;border-color:#e08a8a;background:#ffe8e8">${STNAME[m.status]||m.status}</span>`:''}
       ${m.vol.confuse>0?`<span class="abchip" style="color:#e0912b;border-color:#f0c060;background:#fff3d8">混乱（剩余${m.vol.confuse}回合）</span>`:''}
-${m.mega?'<span class="abchip" style="color:#b3188d;border-color:#e08ac2;background:linear-gradient(90deg,#ffe0f5,#f0e0ff,#e0f0ff);animation:rainbowChip 3s linear infinite">◆ Mega进化</span>':''}
+${m.mega?(m.mega.formTag?`<span class="abchip" style="color:#c07a2a;border-color:#e0c060;background:linear-gradient(90deg,#fff2e0,#ffe9c0,#fff8e8)">★ ${m.mega.formTag}</span>`:'<span class="abchip" style="color:#b3188d;border-color:#e08ac2;background:linear-gradient(90deg,#ffe0f5,#f0e0ff,#e0f0ff);animation:rainbowChip 3s linear infinite">◆ Mega进化</span>'):''}
 ${m.dyn?'<span class="abchip" style="color:#d21f3c;border-color:#f08a9a;background:#ffe0e5">极巨化中</span>':''}
 ${m.tera?`<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;background:linear-gradient(135deg,#e0fbff,#d0f0ff,#e8e0ff)">⬡ 太晶化·${TNAME[m.teraType]}</span>`:''}
       ${m.id===778?(m.disguiseUsed?'<span class="abchip" style="color:#999;border-color:#ccc;background:#f0f0f0;text-decoration:line-through">画皮已破</span>':'<span class="abchip" style="color:#9b6fd8;border-color:#c8a0e8;background:#f5ecff">画皮未触发</span>'):''}
