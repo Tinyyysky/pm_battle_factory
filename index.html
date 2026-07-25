@@ -164,6 +164,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 #bscene.wx-hail .bsun{background:radial-gradient(circle at 35% 35%,#fff,#dceaff 60%,#a8c8e8);box-shadow:0 0 50px 14px rgba(220,235,255,.6)}
 #bscene.wx-rain .bcloud{background:rgba(84,94,116,.9)}
 #bscene.wx-rain .bcloud::before{background:rgba(84,94,116,.9)}
+
 /* --- 晴天光轮 --- */
 .atmo-sunray{transform-origin:12% 10%;
   background:radial-gradient(circle at 12% 10%,rgba(255,242,170,.5),transparent 40%),
@@ -190,6 +191,50 @@ button:disabled{opacity:.4;cursor:not-allowed}
   repeating-linear-gradient(84deg,transparent 0 26px,rgba(232,202,142,.42) 26px 30px,transparent 30px 58px)}
 #bscene.wx-sand .atmo-sand{opacity:.85;animation:sandBlow 2.2s linear infinite}
 @keyframes sandBlow{from{background-position:0 0,0 0}to{background-position:0 0,-224px 10px}}
+
+/* --- 德尔塔气流：灰绿神秘湍流天空 --- */
+#bscene.wx-delta{background:linear-gradient(180deg,#24403f 0%,#4a6e64 42%,#6e8f7d 43%,#4a6856 68%,#31493d 100%)}
+/* 太阳被湍流遮蔽：昏暗+模糊+去色 */
+#bscene.wx-delta .bsun{opacity:.12;filter:grayscale(.85) blur(1.5px)}
+/* 云层染成灰绿色 */
+#bscene.wx-delta .bcloud{background:rgba(122,145,132,.8)}
+#bscene.wx-delta .bcloud::before{background:rgba(122,145,132,.8)}
+/* 平台调色：偏灰绿的冷调 */
+#bscene.wx-delta .plat{filter:brightness(.82) saturate(.55) hue-rotate(45deg)}
+
+/* --- 第1层：双向交错风痕（湍流主体，快速流动） --- */
+.atmo-delta{background:
+repeating-linear-gradient(72deg,transparent 0 34px,rgba(195,230,212,.15) 34px 37px,transparent 37px 82px),
+repeating-linear-gradient(108deg,transparent 0 52px,rgba(165,205,188,.11) 52px 55px,transparent 55px 112px);
+animation:deltaFlow 2.6s linear infinite}
+@keyframes deltaFlow{
+from{background-position:0 0,0 0}
+to{background-position:-264px 44px,300px -34px}}
+#bscene.wx-delta .atmo-delta{opacity:1}
+
+/* --- 第2层：顶部旋转涡旋（缓慢庄严，混合模式发光） --- */
+.atmo-deltavortex{
+background:repeating-conic-gradient(from 0deg at 50% 20%,
+rgba(185,225,208,0) 0deg 7deg,
+rgba(185,225,208,.11) 7deg 9deg,
+rgba(185,225,208,0) 9deg 21deg);
+-webkit-mask:radial-gradient(ellipse 92% 56% at 50% 20%,#000 28%,transparent 74%);
+mask:radial-gradient(ellipse 92% 56% at 50% 20%,#000 28%,transparent 74%);
+mix-blend-mode:screen;
+animation:deltaSpin 14s linear infinite}
+@keyframes deltaSpin{to{transform:rotate(360deg)}}
+#bscene.wx-delta .atmo-deltavortex{opacity:1}
+
+/* --- 第3层：漂浮光尘（被气流卷起的微粒，斜向飘移） --- */
+.atmo-deltamote{background-image:
+radial-gradient(2px 2px at 18% 24%,rgba(215,245,228,.7) 50%,transparent 51%),
+radial-gradient(2px 2px at 56% 46%,rgba(195,230,212,.55) 50%,transparent 51%),
+radial-gradient(3px 3px at 82% 30%,rgba(215,245,228,.5) 50%,transparent 51%),
+radial-gradient(2px 2px at 36% 66%,rgba(195,230,212,.45) 50%,transparent 51%);
+background-size:300px 300px;
+animation:deltaMote 4.2s linear infinite}
+@keyframes deltaMote{from{background-position:0 0}to{background-position:-130px 190px}}
+#bscene.wx-delta .atmo-deltamote{opacity:.85}
 /* --- 场地：地面能量光晕 --- */
 #bscene.tr-electric .atmo-terr{opacity:1;background:linear-gradient(0deg,rgba(255,220,60,.5),rgba(255,220,60,.12) 45%,transparent 72%)}
 #bscene.tr-grassy .atmo-terr{opacity:1;background:linear-gradient(0deg,rgba(90,225,120,.5),rgba(90,225,120,.12) 45%,transparent 72%)}
@@ -1051,6 +1096,9 @@ clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);filter:drop-shad
         <div class="atmo-terr"></div>
         <div class="atmo-mist"></div>
         <div class="atmo-spark"></div>
+        <div class="atmo-delta"></div>
+<div class="atmo-deltavortex"></div>
+<div class="atmo-deltamote"></div>
       </div>
       <div id="koFlash"></div>
       <div id="wxchip"></div>
@@ -1369,6 +1417,7 @@ A('chlorophyll','叶绿素','晴天时速度翻倍');A('swiftswim','悠游自如
 A('solarpower','太阳之力','晴天时特攻×1.5，每回合损失HP');A('sandforce','沙之力','沙暴时岩/地/钢招式×1.3');
 A('drought','日照','出场时天气变为大晴天');A('drizzle','降雨','出场时天气变为下雨');A('sandstream','扬沙','出场时天气变为沙暴');A('snowwarning','降雪','出场时天气变为冰雹');
 A('airlock','气闸','天气的影响全部无效化');
+A('deltastream','德尔塔气流','出场时产生德尔塔气流，全场飞行属性的弱点消失（岩石/电/冰对飞行不再克制）');
 A('intimidate','威吓','出场时降低对手攻击');A('pressure','压迫感','对手招式消耗PP翻倍');
 A('levitate','漂浮','免疫地面属性招式');A('wonderguard','神奇守护','只有效果绝佳的招式能造成伤害');
 A('voltabsorb','蓄电','受电属性招式时回复HP');A('waterabsorb','储水','受水属性招式时回复HP');
@@ -1433,7 +1482,7 @@ A('simple','单纯','自身能力变化的幅度翻倍');
 A('motordrive','电气引擎','受电属性招式时速度提升1级（免疫电属性伤害）');
 A('justified','正义之心','受恶属性招式攻击时攻击提升1级');
 A('zenmode','达摩模式','HP降至一半以下时变为达摩形态（火/超能，物攻特攻互换）');
-A('illusion','幻觉','出场时伪装为队伍中最后一只宝可梦的外观');
+A('illusion','幻觉','出场时伪装为队伍中最后一只宝可梦的外观（还没做好）');
 A('unnerve','紧张感','对手无法食用树果类道具');
 A('suctioncups','吸盘','不会被强制替换下场');
 A('longreach','远隔','所有招式不触发接触类效果');
@@ -1776,7 +1825,7 @@ const MEGA={
 359:{f:10057,t:'dark',s:[65,150,60,115,60,115],a:'magicbounce',stone:'阿勃梭鲁石'},
 373:{f:10089,t:'dragon/flying',s:[95,145,130,120,90,120],a:'aerilate',stone:'暴飞龙石'},
 376:{f:10076,t:'steel/psychic',s:[80,145,150,105,110,110],a:'toughclaws',stone:'巨金怪石'},
-384:{f:10079,t:'dragon/flying',s:[105,180,100,180,100,115],a:'airlock',stone:'无需进化石'},
+384:{f:10079,t:'dragon/flying',s:[105,180,100,180,100,115],a:'deltastream',stone:'无需进化石'},
 428:{f:10088,t:'normal/fighting',s:[65,136,94,54,96,135],a:'scrappy',stone:'长耳兔石'},
 445:{f:10058,t:'dragon/ground',s:[108,170,115,120,95,92],a:'sandforce',stone:'烈咬陆鲨石'},
 448:{f:10059,t:'fighting/steel',s:[70,145,88,140,70,112],a:'adaptability',stone:'路卡利欧石'},
@@ -2006,7 +2055,7 @@ const BUI={
     if(Pm){ $('#pcard').innerHTML=this.cardHTML(Pm,'p',b); this.animHp('p',Pm); }
     this.sprites(b);
     /* ★ 场景氛围随天气/场地实时切换（受设置开关控制） */
-    this.scene.classList.remove('wx-sun','wx-rain','wx-sand','wx-hail','tr-electric','tr-grassy','tr-psychic','tr-misty');
+    this.scene.classList.remove('wx-sun','wx-rain','wx-sand','wx-hail','wx-delta','tr-electric','tr-grassy','tr-psychic','tr-misty');
     if(CFG.weatherFx){
       if(b.wx)this.scene.classList.add('wx-'+b.wx);
       if(b.terrain)this.scene.classList.add('tr-'+b.terrain);
@@ -2014,7 +2063,7 @@ const BUI={
     // 天气 / 场地 / 戏法空间实时指示
     const wx=$('#wxchip');
     const chips=[];
-    if(b.wx)chips.push({sun:'☀ 大晴天',rain:'🌧 下雨',sand:'🌪 沙暴',hail:'🌨 冰雹'}[b.wx]+`(${b.wxT})`);
+    if(b.wx)chips.push({sun:'☀ 大晴天',rain:'🌧 下雨',sand:'🌪 沙暴',hail:'🌨 冰雹',delta:'🌪️ 德尔塔气流'}[b.wx]+(b.wx==='delta'?'':`(${b.wxT})`));
     if(b.terrain)chips.push({electric:'⚡ 电气场地',grassy:'🌿 青草场地',psychic:'🔮 精神场地',misty:'🌫 薄雾场地'}[b.terrain]+`(${b.terrainT})`);
     if(b.trickT>0)chips.push(`🌀 戏法空间(${b.trickT})`);
     if(chips.length){wx.textContent=chips.join('  ');wx.classList.add('on');}
@@ -2258,8 +2307,7 @@ function logClassify(text){
   if(/提升|下降|提高|降低/.test(text))return ['📊','lg-stat'];
   if(/灼伤|麻痹|中毒|剧毒|睡着|冻住|混乱|解冻|醒来|解除了|蜕皮/.test(text))return ['☠️','lg-status'];
   if(/派出了|去吧|就决定|退场|出现了/.test(text))return ['🔄','lg-switch'];
-  if(/天气|大晴天|下雨|沙暴|冰雹|戏法空间|场地/.test(text))return ['🌤️','lg-weather'];
-  if(/保护/.test(text))return ['🛡️','lg-protect'];
+  if(/天气|大晴天|下雨|沙暴|冰雹|德尔塔气流|戏法空间|场地/.test(text))return ['🌤️','lg-weather'];  if(/保护/.test(text))return ['🛡️','lg-protect'];
   if(/经验值|升到|学会了/.test(text))return ['⭐','lg-xp'];
   if(/超级进化|极巨化|太晶化|夸克充能/.test(text))return ['🔥','lg-mega'];
   if(/使用了|扔出|吃了|回复/.test(text))return ['⚔️','lg-move'];
@@ -2538,7 +2586,7 @@ const foe=this.foeOf(m); const ab=m.ability; const side=this.sideOf(m);
 const willTrigger=(ab==='intimidate'&&foe&&foe.alive())
   ||['drought','drizzle','sandstream','snowwarning','orichalcumpulse','hadronengine',
      'grassysurge','electricsurge','intrepidsword','dauntlessshield','swordofruin',
-     'fairyaura','darkaura'].includes(ab)
+     'fairyaura','darkaura','deltastream'].includes(ab)
   ||(ab==='download'&&foe)||(ab==='trace'&&foe)||(ab==='frisk'&&foe)
   ||(ab==='quarkdrive'&&this.terrain==='electric')
   ||(ab==='protosynthesis'&&this.wx==='sun');
@@ -2550,6 +2598,7 @@ const msg=async t=>{await say(`${m.name} 的特性发动了！${t}`);};
     if(ab==='orichalcumpulse'){await this.setWeather('sun',m);await say(`${m.name} 的绯红脉动发动了，物攻提升了！`);}
     if(ab==='hadronengine'){await this.setTerrain('electric',m);await say(`${m.name} 的强子引擎发动了，特攻提升了！`);}
     if(ab==='grassysurge'){await this.setTerrain('grassy',m);}
+    if(ab==='deltastream'){await this.setWeather('delta',m);}
     if(ab==='electricsurge'){await this.setTerrain('electric',m);}
 if(ab==='frisk'&&foe){
   await say(`${m.name} 的察觉发动了！对手的${foe.name}持有「${foe.item?IT[foe.item]?.n||'未知道具':'无道具'}」！`);
@@ -2593,12 +2642,17 @@ else if(newAb==='darkaura')await say('暗黑光环笼罩了全场！');
         if(ab==='quarkdrive'&&this.terrain==='electric'){await say(`${m.name} 的夸克充能发动了！${STN[m.bestStat()]}提升了！`);}
     if(ab==='protosynthesis'&&this.wx==='sun'){await say(`${m.name} 的古代活性发动了！${STN[m.bestStat()]}提升了！`);}
   }
-  async setWeather(w,m){
-    // ★ 同种天气已存在：不刷新持续时间，仅提示
-    if(this.wx===w){ await say(`天气已经是${{sun:'大晴天',rain:'下雨',sand:'沙暴',hail:'冰雹'}[w]}，没有发生变化！`); return; }
-    this.wx=w;this.wxT=5;
-    const nm={sun:'大晴天',rain:'下雨了',sand:'刮起了沙暴',hail:'下起了冰雹'}[w];
-    await say(`${nm}！`);
+async setWeather(w,m){
+// ★ 同种天气已存在：不刷新持续时间，仅提示
+if(this.wx===w){ await say(`天气已经是${{sun:'大晴天',rain:'下雨',sand:'沙暴',hail:'冰雹',delta:'德尔塔气流'}[w]}，没有发生变化！`); return; }
+// ★ 德尔塔气流不能被普通天气覆盖
+if(this.wx==='delta'&&w!=='delta'){
+  await say('德尔塔气流笼罩着全场，天气无法改变！');
+  return;
+}
+this.wx=w;this.wxT=w==='delta'?99:5;
+const nm={sun:'大晴天',rain:'下雨了',sand:'刮起了沙暴',hail:'下起了冰雹',delta:'德尔塔气流笼罩了全场'}[w];
+await say(`${nm}！`);
     if(w==='sun'){for(const mon of [this.P(),this.E()]){if(mon&&mon.alive()&&mon.has('protosynthesis')&&mon!==m)await say(`${mon.name} 的古代活性发动了！${STN[mon.bestStat()]}提升了！`);}}
     BUI.refresh(this);   // ★ 天气变化立即刷新背景特效
   }
@@ -3385,7 +3439,11 @@ if(t==='flying'&&foe.has('windrider')){
     }
     dmg=Math.floor(dmg*stab);
     // 属性相克
-    let eff=effMult(mv.t,foe.types);
+let eff=effMult(mv.t,foe.types);
+    // ★ 德尔塔气流：飞行属性的弱点消失（岩石/电/冰对飞行的2倍克制→1倍）
+if(this.wxActive()==='delta'&&foe.types.includes('flying')&&['rock','electric','ice'].includes(mv.t)){
+  eff/=2;
+}
     if(mv.freezedry&&foe.types.includes('water'))eff*=2;
     if((mv.t==='normal'||mv.t==='fighting')&&foe.types.includes('ghost')&&mon.has('scrappy'))eff=1;
     if(mv.se2&&eff>1)eff*=2;
@@ -3639,6 +3697,16 @@ if(m.has('simple'))n*=2;
     BUI.koFx(lSide,lSide==='p'?BUI.pspr:BUI.espr);
     await sleep(760);
     await say(`${loser.name} 倒下了！`);
+    /* ★ 德尔塔气流随携带者倒下而消散（同命双倒时双方均已离场，一并检测） */
+if(this.wx==='delta'){
+const P=this.P(),E=this.E();
+const still=(m)=>m&&m.alive()&&m.has('deltastream');
+if(!still(P)&&!still(E)){
+this.wx=null;this.wxT=0;
+await say('德尔塔气流消散了，天气恢复了正常。');
+BUI.refresh(this);
+}
+}
     // 自信过剩 / 异兽提升
     if(winner&&winner.alive()){
       if(winner.has('moxie')){this.abBanner(winner);await this.changeStat(winner,'atk',1,winner);}
@@ -3744,6 +3812,12 @@ else if(eMon){await this.doSwitch('e',eIdx);}
         BUI.refresh(this);
       }
     }
+    /* ★ 德尔塔气流随携带者离场而消散 */
+if(old.has('deltastream')&&this.wx==='delta'){
+this.wx=null;this.wxT=0;
+await say('德尔塔气流消散了，天气恢复了正常。');
+BUI.refresh(this);
+}
     await this.sendOut(side,idx,false);
   }
   /* ---------- 回合结束 ---------- */
@@ -3815,8 +3889,8 @@ if(m.has('zenmode')&&!m.fainted){
 }
       if(m.hp<=0&&!m.fainted){await this.handleKO(this.foeSide(side),this.foeOf(m),m);if(this.over)return;}
     }
-    // 天气/场地/空间倒计时
-    if(this.wx){this.wxT--;if(this.wxT<=0){this.wx=null;await say('天气恢复了正常。');}}
+    // 天气/场地/空间倒计时（★德尔塔气流不随回合衰减，仅随携带者离场/倒下消散）
+if(this.wx&&this.wx!=='delta'){this.wxT--;if(this.wxT<=0){this.wx=null;await say('天气恢复了正常。');}}
     if(this.terrain){this.terrainT--;if(this.terrainT<=0){this.terrain=null;await say('场地恢复了原状。');}}
     if(this.trickT>0){this.trickT--;if(this.trickT===0)await say('戏法空间解除了。');}
     // 混乱/挑衅倒计时 + ★畏缩只在当回合生效，回合结束统一清除
