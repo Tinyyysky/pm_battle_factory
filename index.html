@@ -1436,6 +1436,37 @@ I('metalcoat','金属涂层','钢属性招式×1.2','steel');I('silkscarf','丝�
 I('potion','药水','回复20HP');I('superpotion','高级药水','回复60HP');I('hyperpotion','厉害药水','回复120HP');I('maxpotion','全满药','HP完全回复');
 I('fullrestore','全复药','HP与异常状态完全回复');I('revive','活力碎片','让濒死宝可梦回复一半HP');
 I('pokeball','精灵球','捕捉野生宝可梦');I('greatball','超级球','捕捉成功率×1.5');I('ultraball','高级球','捕捉成功率×2');
+/* ---- 阿尔宙斯石板（17属性+传说） ---- */
+I('flameplate','火之石板','火属性招式×1.2，制裁光砾变为火属性');
+I('splashplate','水之石板','水属性招式×1.2，制裁光砾变为水属性');
+I('zapplate','电之石板','电属性招式×1.2，制裁光砾变为电属性');
+I('meadowplate','草之石板','草属性招式×1.2，制裁光砾变为草属性');
+I('icicleplate','冰之石板','冰属性招式×1.2，制裁光砾变为冰属性');
+I('fistplate','格斗石板','格斗属性招式×1.2，制裁光砾变为格斗属性');
+I('toxicplate','毒之石板','毒属性招式×1.2，制裁光砾变为毒属性');
+I('earthplate','地面石板','地面属性招式×1.2，制裁光砾变为地面属性');
+I('skyplate','飞行石板','飞行属性招式×1.2，制裁光砾变为飞行属性');
+I('mindplate','超能石板','超能力招式×1.2，制裁光砾变为超能力属性');
+I('insectplate','虫之石板','虫属性招式×1.2，制裁光砾变为虫属性');
+I('stoneplate','岩石石板','岩石属性招式×1.2，制裁光砾变为岩石属性');
+I('spookyplate','幽灵石板','幽灵属性招式×1.2，制裁光砾变为幽灵属性');
+I('dracoplate','龙之石板','龙属性招式×1.2，制裁光砾变为龙属性');
+I('dreadplate','恶之石板','恶属性招式×1.2，制裁光砾变为恶属性');
+I('ironplate','钢铁石板','钢属性招式×1.2，制裁光砾变为钢属性');
+I('pixieplate','妖精石板','妖精属性招式×1.2，制裁光砾变为妖精属性');
+I('legendplate','传说石板','制裁光砾变为克制对方属性的属性（抵抗优先）');
+const PLATES={flameplate:'fire',splashplate:'water',zapplate:'electric',meadowplate:'grass',icicleplate:'ice',fistplate:'fighting',toxicplate:'poison',earthplate:'ground',skyplate:'flying',mindplate:'psychic',insectplate:'bug',stoneplate:'rock',spookyplate:'ghost',dracoplate:'dragon',dreadplate:'dark',ironplate:'steel',pixieplate:'fairy',legendplate:'legend'};
+const PLATE_KEYS=Object.keys(PLATES);
+/* ★ 传说石板：找克制对方属性的属性，抵抗对方属性的优先 */
+function legendType(foeTypes){
+/* ★ 只选对对手综合克制倍率>1的属性（effMult 会自动把免疫算成0倍，
+   天然排除地面打飞行这类被免疫的属性） */
+const supers=TYP.filter(t=>effMult(t,foeTypes)>1);
+if(!supers.length)return 'normal';
+/* 优先选能抵抗对手全部属性的属性 */
+const resist=supers.filter(t=>foeTypes.every(ft=>{const c=TCH[ft];return !c||!c[t]||c[t]<1;}));
+return pick(resist.length?resist:supers);
+}
 const TYPEITEM=Object.fromEntries(Object.values(IT).filter(i=>i.t).map(i=>[i.t,i.k]));
 
 /* ============================================================
@@ -1552,7 +1583,7 @@ S(474,'多边兽乙型','normal','85/80/70/135/75/90','adaptability/download',['
 S(479,'洛托姆(清洗)','electric/water','50/65/107/105/107/86','levitate/levitate',['hydropump','thunderbolt','voltswitch','willowisp','trick']);
 S(483,'帝牙卢卡','steel/dragon','100/120/120/150/100/90','pressure/pressure',['dragonpulse','flashcannon','thunder','flamethrower','icebeam','stealthrock'],{leg:1});
 S(491,'达克莱伊','dark','70/90/90/135/90/125','baddreams/baddreams',['darkpulse','darkvoid','focusblast','shadowball','nastyplot','suckerpunch'],{leg:1});
-S(493,'阿尔宙斯','normal','120/120/120/120/120/120','multitype/multitype',['judgment','extremespeed','recover','swordsdance','earthquake','shadowball'],{leg:1});
+S(493,'阿尔宙斯','normal','120/120/120/120/120/120','multitype/multitype',['judgment','extremespeed','recover','swordsdance','earthquake','shadowball','flamethrower','hydropump','thunderbolt','energyball','icebeam','focusblast','sludgebomb','earthpower','airslash','psychic','bugbuzz','powergem','dragonpulse','darkpulse','flashcannon','moonblast'],{leg:1});
 S(494,'比克提尼','psychic/fire','100/100/100/100/100/100','victorystar/victorystar',['vcreate','boltstrike','zenheadbutt','uturn','quickattack'],{leg:1});
 /* --- 第5世代 --- */
 S(497,'君主蛇','grass','75/75/95/75/95/113','overgrow/contrary',['leafstorm','dragonpulse','leechseed','glare','darkpulse']);
@@ -1805,6 +1836,12 @@ class P{
     this.st.spe=Math.floor((c(b[5])+(ev.spe||0))*nm('spe'));
     this.baseMax=mhp;   // ★ 未翻倍的原始最大HP：极巨化时被动百分比扣血/回血按此计算
     this.maxhp=this.dyn?mhp*2:mhp;
+    /* ★ 阿尔宙斯携带石板时变为对应属性（传说石板保持一般属性） */
+if(this.id===493){
+const pt=PLATES[this.item];
+if(pt&&pt!=='legend')this.types=[pt];
+else this.types=['normal'];
+}
   }
   hpPct(){return this.hp/this.maxhp;}
   /* ★ 古代活性/夸克充能：返回最高能力键（HP除外） */
@@ -2829,6 +2866,18 @@ else {
       if(tp>0&&tp<60)tp=60;
       useMv={...useMv,t:tt,c:tc,p:tp};
     }
+    /* ★ 制裁光砾属性变化：石板决定属性；传说石板→克制对方属性（抵抗优先） */
+if(mv.k==='judgment'){
+const pt=PLATES[mon.item];
+if(pt&&pt!=='legend'){
+useMv={...useMv,t:pt};
+} else if(pt==='legend'){
+const lt=legendType(foe.types);
+mon.types=[lt];
+useMv={...useMv,t:lt};
+await say(`传说石板发动！${mon.name} 变成了${TNAME[lt]}属性！`);
+}
+}
     // 气象球
     if(useMv.weatherball&&this.wx){useMv={...useMv,t:{sun:'fire',rain:'water',sand:'rock',hail:'ice'}[this.wx],p:100};}
     // ★ 播报使用的招式（对话框 + 对战记录同步显示）
@@ -3168,9 +3217,12 @@ if(mon.has('analytic')&&(foe.vol.actedThisTurn||foe.vol.switchedInThisTurn))dmg=
     if(mv.hex&&foe.status)dmg*=2;
     if(mon.has('reckless')){}
     // 道具
-    const ti=TYPEITEM[mv.t]; if(mon.item===ti)dmg=Math.floor(dmg*1.2);
-    if(mon.item==='lifeorb')dmg=Math.floor(dmg*1.3);
-    if(mon.item==='expertbelt'&&eff>1)dmg=Math.floor(dmg*1.2);
+const ti=TYPEITEM[mv.t]; if(mon.item===ti)dmg=Math.floor(dmg*1.2);
+/* ★ 石板加成：对应属性招式×1.2（传说石板不加成，仅改变制裁光砾属性） */
+const pt=PLATES[mon.item];
+if(pt&&pt!=='legend'&&mv.t===pt)dmg=Math.floor(dmg*1.2);
+if(mon.item==='lifeorb')dmg=Math.floor(dmg*1.3);
+if(mon.item==='expertbelt'&&eff>1)dmg=Math.floor(dmg*1.2);
     // 防御特性
 const mb=mon.has('moldbreaker'); // ★ 破格：无视对手防御特性
 if(!mb&&(foe.has('multiscale')||foe.has('shadowshield'))&&foe.hp===foe.maxhp)dmg=Math.floor(dmg*.5);
@@ -3673,20 +3725,20 @@ function startBattle(cfg){
 /* ============ 冠军级训练家 ============ */
 const CHAMPIONS=[
 {name:'阿渡',sprite:149,team:[130,1007,149],
-lines:{start:'我是四天王之首，阿渡！龙的意志将吞噬一切！',lose:'不可能……我的龙竟然……'}},
+lines:{start:'我是四天王之首，阿渡！龙的意志将吞噬一切！',lose:'不可能……我的龙竟然……',playerLose:'哼，龙的意志不可动摇。回去再修炼一百年吧。'}},
 {name:'大吾',sprite:376,team:[306,384,376],
-lines:{start:'我是冠军大吾。让我和宝可梦们一起，展现钢的意志！',lose:'这就是你的实力吗……了不起。'}},
+lines:{start:'我是丰缘冠军大吾。让我和宝可梦们一起，展现钢之意志！',lose:'这就是你的实力吗……了不起。',playerLose:'结果我第一，又强又厉害。'}},
 {name:'竹兰',sprite:448,team:[448,493,445],
-lines:{start:'我是冠军竹兰。来吧，让我看看你和宝可梦之间的羁绊！',lose:'这就是你的答案吗……我感受到了。'}},
+lines:{start:'我是神奥冠军竹兰。来吧，让我看看你和宝可梦之间的羁绊！',lose:'这就是你的答案吗……我感受到了。',playerLose:'你和宝可梦的羁绊还不够深。回去好好培养羁绊，再来挑战吧。'}},
 {name:'赤红',sprite:6,team:[6,25,150],
-lines:{start:'……',lose:'……！'}},
+lines:{start:'……',lose:'……！',playerLose:'……'}},
 {name:'小茂',sprite:9,team:[3,59,9],
-lines:{start:'哼，终于走到这里了吗？那就让我来检验你的实力！',lose:'嘁……这次算你厉害。'}},
+lines:{start:'哼，终于走到这里了吗？那就让我来检验你的实力！',lose:'嘁……这次算你厉害。',playerLose:'哈哈哈！就凭你还想赢我？本大爷可是冠军！回去再练练吧！'}},
 {name:'小智',sprite:25,team:[25,791,658],
-lines:{start:'我是小智！来吧，让我们用宝可梦的力量一决胜负！',lose:'你真的厉害……我会继续努力的！'}},
+lines:{start:'我是小智！来吧，让我们用宝可梦的力量一决胜负！',lose:'太好了！我们赢了！',playerLose:'嘿嘿，这次是我们赢了！不过你的宝可梦也很强，下次再打一场吧！'}},
 {name:'达拉',sprite:275,
 teams:[[275,303,214],[812,809,888],[798,802,889]],
-lines:{start:'让我和我的宝可梦来检验一下你的实力吧！',lose:'这就是工厂的极限吗……'}},
+lines:{start:'呵呵呵……让我和我的宝可梦来检验一下你的实力吧！',lose:'这就是工厂的极限吗……',playerLose:'呵呵呵……看来你的实力还不够格。工厂的大门随时为你敞开，再来挑战吧。'}},
 ];
 /* ============ 隐藏冠军·灭天（1%概率） ============ */
 const MIE_TIAN={
@@ -3703,7 +3755,7 @@ natures:[{n:'爽朗',up:'spe',down:'spa'},{n:'胆小',up:'spe',down:'atk'},{n:'�
 items:['choiceband','choicespecs','expertbelt'],
 moves:[['pyroball','highjumpkick','zenheadbutt','uturn'],['hydropump','darkpulse','icebeam','uturn'],['flowertrick','knockoff','suckerpunch','uturn']]},
 ],
-lines:{start:'……你，有资格站在这里吗？',lose:'……有意思。'}
+lines:{start:'……你，有资格站在这里吗？',lose:'……有意思。',playerLose:'……还不够。下次有缘再见。'},
 };
 /* ============================================================
    10. 对战工厂（重点模式）
@@ -3711,11 +3763,11 @@ lines:{start:'……你，有资格站在这里吗？',lose:'……有意思。'
 const FAC={
 /* ============ 道具商店 ============ */
 SHOP:[
-{k:'sitrus',price:10},{k:'quickclaw',price:10},{k:'scopelens',price:10},
+{k:'sitrus',price:5},{k:'quickclaw',price:5},{k:'scopelens',price:5},
 {k:'leftovers',price:15},{k:'expertbelt',price:15},{k:'airballoon',price:15},{k:'blacksludge',price:15},
-{k:'lifeorb',price:30},{k:'focussash',price:30},{k:'weaknesspolicy',price:30},
-{k:'choiceband',price:40},{k:'choicespecs',price:40},{k:'choicescarf',price:40},
-{k:'eviolite',price:40},{k:'assaultvest',price:40},
+{k:'lifeorb',price:20},{k:'focussash',price:20},{k:'weaknesspolicy',price:20},
+{k:'choiceband',price:25},{k:'choicespecs',price:25},{k:'choicescarf',price:25},
+{k:'eviolite',price:25},{k:'assaultvest',price:25},
 ],
 /* ============ 基础工具 ============ */
 tier(sp){const b=bst(sp);if(sp.leg||b>=570)return 4;if(b>=510)return 3;if(b>=430)return 2;return 1;},
@@ -3728,6 +3780,11 @@ if(Math.random()<0.2){ if(out.length>=4)out[3]='terablast';else out.push('terabl
 return out.slice(0,4);
 },
 pickItem(sp,moves){
+/* ★ 阿尔宙斯：80%石板（含传说石板），20%其他道具 */
+if(sp.id===493){
+if(Math.random()<0.8)return pick(PLATE_KEYS);
+return pick(['leftovers','sitrus','lifeorb','expertbelt','quickclaw','scopelens','focussash','choicespecs','choicescarf']);
+}
 const r=Math.random();
 const dmgT=moves.map(k=>MV[k].t).find(t=>TYPEITEM[t]);
 if(r<.25&&dmgT)return TYPEITEM[dmgT];
@@ -4056,6 +4113,10 @@ await dlg('广播','🎉 本轮 7 连胜达成！额外获得 10 BP！进入第 
 }
 saveFac();this.ui();this.lobby();
 } else if(r.result==='lose'||r.result==='run'){
+/* ★ 冠军级训练家嘲讽台词 */
+if(et.head&&et.champion&&et.champion.lines.playerLose){
+await dlg(et.champion.name,et.champion.lines.playerLose,et.champion.sprite);
+}
 /* ★ BP复活系统 */
 if(GM.fac.bp>=8){
 const choice=await dlgChoices('广播','挑战失败……是否花费 8 BP 复活？（保留当前阵容、轮次与连胜）\n当前 BP：'+GM.fac.bp,['花费 8 BP 复活','放弃，重新开始'],132);
