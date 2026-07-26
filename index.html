@@ -3764,52 +3764,249 @@
         font-size: 28px !important;
       }
     }
+
     /* ---------- ability dex ---------- */
-#abGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
-.abCard{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:12px 14px;cursor:pointer;
-transition:transform .12s, box-shadow .12s;position:relative}
-.abCard:hover{transform:translateY(-4px);box-shadow:0 6px 0 rgba(20,16,40,.3)}
-.abCard .abNm{font-family:'ZCOOL KuaiLe';font-size:17px;margin-bottom:4px;display:flex;align-items:center;gap:6px}
-.abCard .abNm::before{content:"◈";color:#9b6fd8;font-size:14px}
-.abCard .abDs{font-size:11px;color:#666;line-height:1.6;font-weight:700}
-.abCard .abCnt{position:absolute;top:8px;right:10px;font-family:'Press Start 2P';font-size:7px;color:#b89fe0}
-#abDetail .abDetailNm{font-family:'ZCOOL KuaiLe';font-size:26px;margin-bottom:6px}
-#abDetail .abDetailDs{font-size:14px;color:#444;line-height:1.8;margin-bottom:12px;font-weight:700}
-#abDetail .abMonList{display:flex;flex-wrap:wrap;gap:8px}
-#abDetail .abMonChip{display:inline-flex;align-items:center;gap:5px;background:#f5f0ff;border:2px solid #c8b8e8;
-border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;cursor:pointer;transition:transform .1s}
-#abDetail .abMonChip:hover{transform:translateY(-2px);background:#e8dcff}
-#abDetail .abMonChip img{width:28px;height:28px;object-fit:contain}
+    #abGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px
+    }
 
-/* ---------- move dex ---------- */
-#mvGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-.mvCard{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:10px 12px;cursor:pointer;
-transition:transform .12s, box-shadow .12s;border-left-width:8px}
-.mvCard:hover{transform:translateY(-4px);box-shadow:0 6px 0 rgba(20,16,40,.3)}
-.mvCard .mvNm{font-family:'ZCOOL KuaiLe';font-size:16px;margin-bottom:3px}
-.mvCard .mvInfo{font-size:10px;color:#777;font-weight:700;line-height:1.5}
-.mvCard .mvCatTag{display:inline-block;font-size:9px;font-weight:900;padding:1px 6px;border-radius:5px;
-border:1.5px solid #ddd;color:#666;margin-left:4px}
-#mvDetail .mvDetailTop{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-#mvDetail .mvDetailNm{font-family:'ZCOOL KuaiLe';font-size:26px}
-#mvDetail .mvDetailStats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
-#mvDetail .mvStatBox{background:#f8f5ea;border:2px solid #d8cfb4;border-radius:8px;padding:8px 10px;text-align:center}
-#mvDetail .mvStatBox .lbl{font-size:10px;color:#999;font-weight:900}
-#mvDetail .mvStatBox .val{font-family:'Press Start 2P';font-size:11px;margin-top:3px}
-#mvDetail .mvDetailDesc{font-size:13px;color:#444;line-height:1.8;font-weight:700;margin-top:10px;
-padding:10px 14px;background:#f0fdf4;border:2px solid #a8e6a3;border-radius:10px}
-#mvDetail .mvMonList{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-#mvDetail .mvMonChip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:2px solid #cfc8ad;
-border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;transition:transform .1s}
-#mvDetail .mvMonChip:hover{transform:translateY(-2px);background:#fff8dd}
-#mvDetail .mvMonChip img{width:24px;height:24px;object-fit:contain}
+    .abCard {
+      background: #fff;
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: transform .12s, box-shadow .12s;
+      position: relative
+    }
 
-/* 移动端适配 */
-@media screen and (max-width: 768px), screen and (orientation: portrait) {
-#abGrid{grid-template-columns:1fr !important}
-#mvGrid{grid-template-columns:1fr 1fr !important}
-#mvDetail .mvDetailStats{grid-template-columns:1fr 1fr !important}
-}
+    .abCard:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 0 rgba(20, 16, 40, .3)
+    }
+
+    .abCard .abNm {
+      font-family: 'ZCOOL KuaiLe';
+      font-size: 17px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .abCard .abNm::before {
+      content: "◈";
+      color: #9b6fd8;
+      font-size: 14px
+    }
+
+    .abCard .abDs {
+      font-size: 11px;
+      color: #666;
+      line-height: 1.6;
+      font-weight: 700
+    }
+
+    .abCard .abCnt {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-family: 'Press Start 2P';
+      font-size: 7px;
+      color: #b89fe0
+    }
+
+    #abDetail .abDetailNm {
+      font-family: 'ZCOOL KuaiLe';
+      font-size: 26px;
+      margin-bottom: 6px
+    }
+
+    #abDetail .abDetailDs {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.8;
+      margin-bottom: 12px;
+      font-weight: 700
+    }
+
+    #abDetail .abMonList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    #abDetail .abMonChip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #f5f0ff;
+      border: 2px solid #c8b8e8;
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .1s
+    }
+
+    #abDetail .abMonChip:hover {
+      transform: translateY(-2px);
+      background: #e8dcff
+    }
+
+    #abDetail .abMonChip img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain
+    }
+
+    /* ---------- move dex ---------- */
+    #mvGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px
+    }
+
+    .mvCard {
+      background: #fff;
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: transform .12s, box-shadow .12s;
+      border-left-width: 8px
+    }
+
+    .mvCard:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 0 rgba(20, 16, 40, .3)
+    }
+
+    .mvCard .mvNm {
+      font-family: 'ZCOOL KuaiLe';
+      font-size: 16px;
+      margin-bottom: 3px
+    }
+
+    .mvCard .mvInfo {
+      font-size: 10px;
+      color: #777;
+      font-weight: 700;
+      line-height: 1.5
+    }
+
+    .mvCard .mvCatTag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 5px;
+      border: 1.5px solid #ddd;
+      color: #666;
+      margin-left: 4px
+    }
+
+    #mvDetail .mvDetailTop {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px
+    }
+
+    #mvDetail .mvDetailNm {
+      font-family: 'ZCOOL KuaiLe';
+      font-size: 26px
+    }
+
+    #mvDetail .mvDetailStats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+      margin: 10px 0
+    }
+
+    #mvDetail .mvStatBox {
+      background: #f8f5ea;
+      border: 2px solid #d8cfb4;
+      border-radius: 8px;
+      padding: 8px 10px;
+      text-align: center
+    }
+
+    #mvDetail .mvStatBox .lbl {
+      font-size: 10px;
+      color: #999;
+      font-weight: 900
+    }
+
+    #mvDetail .mvStatBox .val {
+      font-family: 'Press Start 2P';
+      font-size: 11px;
+      margin-top: 3px
+    }
+
+    #mvDetail .mvDetailDesc {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.8;
+      font-weight: 700;
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: #f0fdf4;
+      border: 2px solid #a8e6a3;
+      border-radius: 10px
+    }
+
+    #mvDetail .mvMonList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px
+    }
+
+    #mvDetail .mvMonChip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fff;
+      border: 2px solid #cfc8ad;
+      border-radius: 8px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .1s
+    }
+
+    #mvDetail .mvMonChip:hover {
+      transform: translateY(-2px);
+      background: #fff8dd
+    }
+
+    #mvDetail .mvMonChip img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain
+    }
+
+    /* 移动端适配 */
+    @media screen and (max-width: 768px),
+    screen and (orientation: portrait) {
+      #abGrid {
+        grid-template-columns: 1fr !important
+      }
+
+      #mvGrid {
+        grid-template-columns: 1fr 1fr !important
+      }
+
+      #mvDetail .mvDetailStats {
+        grid-template-columns: 1fr 1fr !important
+      }
+    }
   </style>
 </head>
 
@@ -3833,7 +4030,7 @@ border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;
           <button class="menuItem" id="mFree"><span class="ball"></span>自由对战<small>自选队伍</small></button>
           <button class="menuItem" id="mDex"><span class="ball"></span>宝可梦图鉴<small id="dexCount"></small></button>
           <button class="menuItem" id="mAbilityDex"><span class="ball"></span>特性图鉴<small id="abCount"></small></button>
-<button class="menuItem" id="mMoveDex"><span class="ball"></span>技能图鉴<small id="mvCount"></small></button>
+          <button class="menuItem" id="mMoveDex"><span class="ball"></span>技能图鉴<small id="mvCount"></small></button>
           <button class="menuItem" id="mItemDex"><span class="ball"></span>道具图鉴<small id="itemCount"></small></button>
           <button class="menuItem" id="mSound"><span class="ball"></span>游戏设置<small>音效/画面</small></button>
         </div>
@@ -3920,28 +4117,41 @@ border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;
       </div>
     </div>
     <!-- ======= ABILITYDEX ======= -->
-<div id="abilitydex" class="screen">
-<div class="scrHead"><h2>特性图鉴</h2><span class="px" style="font-size:9px;color:#ffd93b" id="abTotal"></span><div class="spacer"></div><button class="btn small" data-back>返回</button></div>
-<div class="scrBody">
-<div id="dexFilters"><input id="abSearch" placeholder="搜索特性名称 / 效果…"></div>
-<div id="abGrid"></div>
-<div id="abDetail" class="panel hidden" style="padding:16px;margin-top:14px"></div>
-</div>
-</div>
+    <div id="abilitydex" class="screen">
+      <div class="scrHead">
+        <h2>特性图鉴</h2><span class="px" style="font-size:9px;color:#ffd93b" id="abTotal"></span>
+        <div class="spacer"></div><button class="btn small" data-back>返回</button>
+      </div>
+      <div class="scrBody">
+        <div id="dexFilters"><input id="abSearch" placeholder="搜索特性名称 / 效果…"></div>
+        <div id="abGrid"></div>
+        <div id="abDetail" class="panel hidden" style="padding:16px;margin-top:14px"></div>
+      </div>
+    </div>
 
-<!-- ======= MOVEDEX ======= -->
-<div id="movedex" class="screen">
-<div class="scrHead"><h2>技能图鉴</h2><span class="px" style="font-size:9px;color:#ffd93b" id="mvTotal"></span><div class="spacer"></div><button class="btn small" data-back>返回</button></div>
-<div class="scrBody">
-<div id="dexFilters">
-<input id="mvSearch" placeholder="搜索招式名称…">
-<select id="mvType"><option value="">全部属性</option></select>
-<select id="mvCat"><option value="">全部分类</option><option value="P">物理</option><option value="S">特殊</option><option value="X">变化</option></select>
-</div>
-<div id="mvGrid"></div>
-<div id="mvDetail" class="panel hidden" style="padding:16px;margin-top:14px"></div>
-</div>
-</div>
+    <!-- ======= MOVEDEX ======= -->
+    <div id="movedex" class="screen">
+      <div class="scrHead">
+        <h2>技能图鉴</h2><span class="px" style="font-size:9px;color:#ffd93b" id="mvTotal"></span>
+        <div class="spacer"></div><button class="btn small" data-back>返回</button>
+      </div>
+      <div class="scrBody">
+        <div id="dexFilters">
+          <input id="mvSearch" placeholder="搜索招式名称…">
+          <select id="mvType">
+            <option value="">全部属性</option>
+          </select>
+          <select id="mvCat">
+            <option value="">全部分类</option>
+            <option value="P">物理</option>
+            <option value="S">特殊</option>
+            <option value="X">变化</option>
+          </select>
+        </div>
+        <div id="mvGrid"></div>
+        <div id="mvDetail" class="panel hidden" style="padding:16px;margin-top:14px"></div>
+      </div>
+    </div>
     <!-- ======= FACTORY ======= -->
     <div id="factory" class="screen">
       <div class="scrHead">
@@ -4396,7 +4606,7 @@ border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;
     A('orichalcumpulse', '绯红脉动', '出场开启晴天，晴天下物攻×1.3');
     A('fairyaura', '妖精气场', '全场妖精招式×1.33'); A('darkaura', '暗黑光环', '全场恶属性招式×1.33');
     A('intrepidsword', '不挠之剑', '出场时攻击提升'); A('dauntlessshield', '不屈之盾', '出场时防御提升');
-    A('multitype', '多属性', '阿尔宙斯专属');
+    A('multitype', '多属性', '根据石板变换属性');
     A('keeneye', '锐利目光', '命中率不会降低'); A('runaway', '逃跑', '一定能从野生宝可梦逃走'); A('tangledfeet', '蹒跚', '混乱时回避率提升');
     A('illuminate', '发光', '照亮周围'); A('earlybird', '早起', '更快从睡眠中醒来'); A('snowcloak', '雪隐', '冰雹时回避率提升'); A('sandveil', '沙隐', '沙暴时回避率提升');
     A('raindish', '雨盘', '雨天时回复HP'); A('pickpocket', '顺手牵羊', '偷走接触自己的道具'); A('analytic', '分析', '最后行动时威力提升');
@@ -4436,7 +4646,7 @@ border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;
     A('unburden', '轻装', '失去道具时速度翻倍');
     /* ---- 新增特性（第三批） ---- */
     A('tintedlens', '有色眼镜', '效果不佳的招式伤害×2');
-    A('liquidooze', '毒液', '对手吸取HP时反而受到伤害');
+    A('liquidooze', '污泥浆', '对手吸取HP时反而受到伤害；被寄生种子吸取时，吸取方本应回');
     A('leafguard', '叶子防守', '晴天时不会陷入异常状态');
     A('quickfeet', '飞毛腿', '异常状态时速度×1.5');
     A('solidrock', '坚硬岩石', '效果绝佳的伤害×0.75');
@@ -6280,11 +6490,11 @@ border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;
         //   坚硬脑袋/魔法防守免疫反伤；强行+命玉不扣血
         if (useMv.drain && totalDmg > 0 && !mon.has('magicguard') && !mon.fainted) {
           const h = Math.max(1, Math.floor(totalDmg * useMv.drain / 100));
-          // ★ 毒液：对手有liquidooze时，吸取者反而受到伤害
+          // ★ 污泥浆：对手有liquidooze时，吸取者反而受到伤害
           if (foe.has('liquidooze') && foe.hp > 0) {
             mon.hp = Math.max(0, mon.hp - h);
             this.abBanner(foe);
-            await say(`${foe.name} 的毒液发动了！${mon.name} 反而受到了伤害！`);
+            await say(`${foe.name} 的污泥浆发动了！${mon.name} 反而受到了伤害！`);
             BUI.dmgPop(side, `-${h}`, '#ff9d8a');
           } else {
             mon.hp = Math.min(mon.maxhp, mon.hp + h); AU.heal(); await say(`${mon.name} 吸取了对手的HP！`);
@@ -7018,7 +7228,26 @@ border-radius:8px;padding:2px 8px;font-size:11px;font-weight:700;cursor:pointer;
             const src = m.vol.seed;
             if (src.alive() && this.foeOf(src) === m) {
               const d = Math.max(1, Math.floor(B / 8));
-              m.hp = Math.max(0, m.hp - d); src.hp = Math.min(src.maxhp, src.hp + d); await say(`${m.name} 被寄生种子吸取了HP！`); this.addLog(`↳ ${m.name} 寄生种子 -${d} HP → ${src.name} +${d} HP`);
+              m.hp = Math.max(0, m.hp - d);
+              /* ★ 污泥浆：被寄生种子吸取时，吸取方本应回复的HP改为受到同等伤害 */
+              if (m.has('liquidooze')) {
+                this.abBanner(m);
+                await say(`${m.name} 被寄生种子吸取了HP！`);
+                if (!src.has('magicguard')) {
+                  src.hp = Math.max(0, src.hp - d);
+                  await say(`${m.name} 的污泥浆发动了！${src.name} 反而受到了伤害！`);
+                  this.addLog(`↳ ${m.name} 寄生种子 -${d} HP · ${src.name} 污泥浆反伤 -${d} HP（剩余 ${Math.round(src.hp / src.maxhp * 100)}%）`);
+                  BUI.dmgPop(this.sideOf(src), `-${d}`, '#ff9d8a');
+                  if (src.hp <= 0 && !src.fainted) { await this.handleKO(side, m, src); if (this.over) return; }
+                } else {
+                  await say(`${src.name} 的魔法防守发动了！没有受到伤害！`);
+                  this.addLog(`↳ ${m.name} 寄生种子 -${d} HP · ${src.name} 魔法防守免疫反伤`);
+                }
+              } else {
+                src.hp = Math.min(src.maxhp, src.hp + d);
+                await say(`${m.name} 被寄生种子吸取了HP！`);
+                this.addLog(`↳ ${m.name} 寄生种子 -${d} HP → ${src.name} +${d} HP`);
+              }
             }
           }
           // 盐腌
@@ -8372,101 +8601,148 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       search.addEventListener('input', render);
       render();
     }
-/* ============ 特性图鉴 ============ */
-function buildAbilityDex(){
-const allAb=Object.values(AB);
-$('#abTotal').textContent='收录 '+allAb.length+' 种特性';
-$('#abCount').textContent=allAb.length+' 种';
-const grid=$('#abGrid'),search=$('#abSearch'),detail=$('#abDetail');
+    /* ============ 特性图鉴 ============ */
+    function buildAbilityDex() {
+      const allAb = Object.values(AB);
+      $('#abTotal').textContent = '收录 ' + allAb.length + ' 种特性';
+      $('#abCount').textContent = allAb.length + ' 种';
+      const grid = $('#abGrid'), search = $('#abSearch'), detail = $('#abDetail');
 
-/* 统计每个特性被多少宝可梦拥有 */
-function abMonCount(key){return SP.filter(s=>s.ab.includes(key)).length;}
+      /* ★ 收集拥有此特性的所有条目：普通 / Mega / 道具形态 */
+      function abMonList(key) {
+        const list = [];
+        /* 普通宝可梦 */
+        SP.filter(s => s.ab.includes(key)).forEach(sp => {
+          list.push({ type: 'normal', sp, imgId: sp.id, name: sp.n });
+        });
+        /* Mega形态 */
+        Object.keys(MEGA).forEach(id => {
+          const sp = SPDB[+id]; if (!sp) return;
+          const cfg = MEGA[id];
+          const arr = Array.isArray(cfg) ? cfg : [cfg];
+          arr.forEach((c, mi) => {
+            if (c.a === key) {
+              const megaName = 'Mega' + sp.n.replace(/\(.+\)/, '') + (arr.length > 1 ? ' ' + String.fromCharCode(65 + mi) : '');
+              list.push({ type: 'mega', sp, cfg: c, mi, imgId: c.f, name: megaName });
+            }
+          });
+        });
+        /* 道具形态（苍响/藏玛然特） */
+        Object.keys(FORMS).forEach(id => {
+          const sp = SPDB[+id]; if (!sp) return;
+          const c = FORMS[id];
+          if (c.a === key) {
+            list.push({ type: 'form', sp, cfg: c, imgId: c.f, name: c.name });
+          }
+        });
+        return list;
+      }
+      function abMonCount(key) { return abMonList(key).length; }
 
-const render=()=>{
-const q=(search.value||'').trim().toLowerCase();
-grid.innerHTML='';
-detail.classList.add('hidden');
-allAb.filter(ab=>!q||ab.n.toLowerCase().includes(q)||ab.d.toLowerCase().includes(q)||ab.k.includes(q))
-.sort((a,b)=>abMonCount(b.k)-abMonCount(a.k))
-.forEach(ab=>{
-const cnt=abMonCount(ab.k);
-const c=el('div','abCard');
-c.innerHTML=`<div class="abNm">${ab.n}</div><div class="abDs">${ab.d}</div><span class="abCnt">${cnt}种</span>`;
-c.onclick=()=>{AU.cursor();showAbDetail(ab);};
-grid.appendChild(c);
-});
-};
+      const render = () => {
+        const q = (search.value || '').trim().toLowerCase();
+        grid.innerHTML = '';
+        detail.classList.add('hidden');
+        allAb.filter(ab => !q || ab.n.toLowerCase().includes(q) || ab.d.toLowerCase().includes(q) || ab.k.includes(q))
+          .sort((a, b) => abMonCount(b.k) - abMonCount(a.k))
+          .forEach(ab => {
+            const cnt = abMonCount(ab.k);
+            const c = el('div', 'abCard');
+            c.innerHTML = `<div class="abNm">${ab.n}</div><div class="abDs">${ab.d}</div><span class="abCnt">${cnt}种</span>`;
+            c.onclick = () => { AU.cursor(); showAbDetail(ab); };
+            grid.appendChild(c);
+          });
+      };
 
-function showAbDetail(ab){
-detail.classList.remove('hidden');
-const mons=SP.filter(s=>s.ab.includes(ab.k));
-detail.innerHTML=`
+      function showAbDetail(ab) {
+        detail.classList.remove('hidden');
+        const mons = abMonList(ab.k);
+        detail.innerHTML = `
 <div class="abDetailNm">◈ ${ab.n}</div>
 <div style="font-size:11px;color:#999;font-weight:700;margin-bottom:6px">内部ID：${ab.k}</div>
 <div class="abDetailDs">${ab.d}</div>
 <div style="font-weight:900;font-size:14px;margin-bottom:8px">拥有此特性的宝可梦（${mons.length}种）：</div>
-<div class="abMonList">${mons.length?mons.map(sp=>{
-return `<span class="abMonChip" data-id="${sp.id}"><img src="${SPRBASE}${sp.id}.png" onerror="this.src='${SPRBASE}0.png'">${sp.n}</span>`;
-}).join(''):'<span style="color:#999;font-size:12px">暂无</span>'}</div>`;
-/* 点击宝可梦跳转图鉴详情 */
-detail.querySelectorAll('.abMonChip').forEach(chip=>{
-chip.onclick=()=>{const sp=SPDB[+chip.dataset.id];if(sp){AU.ok();dexDetail(sp);show('#dex');buildDex();}};
-});
-detail.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
+<div class="abMonList" id="abMonListWrap"></div>`;
+        const wrap = $('#abMonListWrap');
+        if (!mons.length) { wrap.innerHTML = '<span style="color:#999;font-size:12px">暂无</span>'; }
+        mons.forEach(item => {
+          const chip = el('span', 'abMonChip');
+          if (item.type === 'mega') { chip.style.borderColor = '#b3188d'; chip.style.background = '#fdf0ff'; }
+          else if (item.type === 'form') { chip.style.borderColor = '#c07a2a'; chip.style.background = '#fff6e8'; }
+          const img = new Image(); img.width = 28; img.height = 28; img.style.objectFit = 'contain';
+          setSprite(img, item.imgId);
+          /* 道具形态图可能不存在，回退到普通形态图 */
+          if (item.type === 'form') img._urls.push(SPRBASE + item.sp.id + '.png');
+          chip.appendChild(img);
+          const nm = document.createElement('span');
+          nm.textContent = item.name;
+          if (item.type === 'mega') nm.style.color = '#b3188d';
+          else if (item.type === 'form') nm.style.color = '#c07a2a';
+          chip.appendChild(nm);
+          chip.onclick = () => {
+            AU.ok();
+            show('#dex');
+            buildDex();
+            if (item.type === 'normal') dexDetail(item.sp);
+            else if (item.type === 'mega') dexDetailMega(item.sp, item.cfg, item.mi);
+            else dexDetailForm(item.sp, item.cfg);
+          };
+          wrap.appendChild(chip);
+        });
+        detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
 
-search.addEventListener('input',render);
-render();
-}
+      search.addEventListener('input', render);
+      render();
+    }
+    /* ============ 技能图鉴 ============ */
+    function buildMoveDex() {
+      const allMv = Object.values(MV);
+      $('#mvTotal').textContent = '收录 ' + allMv.length + ' 个招式';
+      $('#mvCount').textContent = allMv.length + ' 个';
+      const grid = $('#mvGrid'), search = $('#mvSearch'), tySel = $('#mvType'), catSel = $('#mvCat'), detail = $('#mvDetail');
 
-/* ============ 技能图鉴 ============ */
-function buildMoveDex(){
-const allMv=Object.values(MV);
-$('#mvTotal').textContent='收录 '+allMv.length+' 个招式';
-$('#mvCount').textContent=allMv.length+' 个';
-const grid=$('#mvGrid'),search=$('#mvSearch'),tySel=$('#mvType'),catSel=$('#mvCat'),detail=$('#mvDetail');
+      /* 填充属性筛选 */
+      if (tySel.options.length <= 1) { TYP.forEach(t => tySel.add(new Option(TNAME[t], t))); }
 
-/* 填充属性筛选 */
-if(tySel.options.length<=1){TYP.forEach(t=>tySel.add(new Option(TNAME[t],t)));}
+      /* 统计每个招式被多少宝可梦可学 */
+      function mvMonCount(key) { return SP.filter(s => s.mv.includes(key)).length; }
 
-/* 统计每个招式被多少宝可梦可学 */
-function mvMonCount(key){return SP.filter(s=>s.mv.includes(key)).length;}
+      const CATN = { P: '物理', S: '特殊', X: '变化' };
+      const CATC = { P: '#e2574c', S: '#8a63d2', X: '#4caf7d' };
 
-const CATN={P:'物理',S:'特殊',X:'变化'};
-const CATC={P:'#e2574c',S:'#8a63d2',X:'#4caf7d'};
-
-const render=()=>{
-const q=(search.value||'').trim().toLowerCase();
-const ty=tySel.value, cat=catSel.value;
-grid.innerHTML='';
-detail.classList.add('hidden');
-allMv.filter(mv=>{
-if(q&&!mv.n.toLowerCase().includes(q)&&!mv.k.includes(q))return false;
-if(ty&&mv.t!==ty)return false;
-if(cat&&mv.c!==cat)return false;
-return true;
-})
-.sort((a,b)=>(b.p||0)-(a.p||0)||(mvMonCount(b.k)-mvMonCount(a.k)))
-.forEach(mv=>{
-const c=el('div','mvCard');
-c.style.borderLeftColor=TCOL[mv.t];
-const info=[];
-if(mv.p)info.push('威力 '+mv.p);
-info.push('命中 '+(mv.a??'—'));
-info.push('PP '+mv.pp);
-if(mv.pri)info.push('先制'+(mv.pri>0?'+':'')+mv.pri);
-c.innerHTML=`<div class="mvNm">${mv.n}<span class="mvCatTag" style="color:${CATC[mv.c]};border-color:${CATC[mv.c]}">${CATN[mv.c]}</span></div>
+      const render = () => {
+        const q = (search.value || '').trim().toLowerCase();
+        const ty = tySel.value, cat = catSel.value;
+        grid.innerHTML = '';
+        detail.classList.add('hidden');
+        allMv.filter(mv => {
+          if (q && !mv.n.toLowerCase().includes(q) && !mv.k.includes(q)) return false;
+          if (ty && mv.t !== ty) return false;
+          if (cat && mv.c !== cat) return false;
+          return true;
+        })
+          .sort((a, b) => (b.p || 0) - (a.p || 0) || (mvMonCount(b.k) - mvMonCount(a.k)))
+          .forEach(mv => {
+            const c = el('div', 'mvCard');
+            c.style.borderLeftColor = TCOL[mv.t];
+            const info = [];
+            if (mv.p) info.push('威力 ' + mv.p);
+            info.push('命中 ' + (mv.a ?? '—'));
+            info.push('PP ' + mv.pp);
+            if (mv.pri) info.push('先制' + (mv.pri > 0 ? '+' : '') + mv.pri);
+            c.innerHTML = `<div class="mvNm">${mv.n}<span class="mvCatTag" style="color:${CATC[mv.c]};border-color:${CATC[mv.c]}">${CATN[mv.c]}</span></div>
 <div class="mvInfo">${tyBadge(mv.t)} ${info.join(' · ')}</div>`;
-c.onclick=()=>{AU.cursor();showMvDetail(mv);};
-grid.appendChild(c);
-});
-};
+            c.onclick = () => { AU.cursor(); showMvDetail(mv); };
+            grid.appendChild(c);
+          });
+      };
 
-function showMvDetail(mv){
-detail.classList.remove('hidden');
-const mons=SP.filter(s=>s.mv.includes(mv.k));
-const desc=moveDesc(mv.k);
-detail.innerHTML=`
+      function showMvDetail(mv) {
+        detail.classList.remove('hidden');
+        const mons = SP.filter(s => s.mv.includes(mv.k));
+        const desc = moveDesc(mv.k);
+        detail.innerHTML = `
 <div class="mvDetailTop">
 ${tyBadge(mv.t)}
 <span class="mvDetailNm">${mv.n}</span>
@@ -8474,45 +8750,45 @@ ${tyBadge(mv.t)}
 </div>
 <div style="font-size:11px;color:#999;font-weight:700">内部ID：${mv.k}</div>
 <div class="mvDetailStats">
-<div class="mvStatBox"><div class="lbl">威力</div><div class="val">${mv.p??'—'}</div></div>
-<div class="mvStatBox"><div class="lbl">命中</div><div class="val">${mv.a??'必中'}</div></div>
+<div class="mvStatBox"><div class="lbl">威力</div><div class="val">${mv.p ?? '—'}</div></div>
+<div class="mvStatBox"><div class="lbl">命中</div><div class="val">${mv.a ?? '必中'}</div></div>
 <div class="mvStatBox"><div class="lbl">PP</div><div class="val">${mv.pp}</div></div>
-<div class="mvStatBox"><div class="lbl">优先级</div><div class="val">${mv.pri?(mv.pri>0?'+':'')+mv.pri:'0'}</div></div>
+<div class="mvStatBox"><div class="lbl">优先级</div><div class="val">${mv.pri ? (mv.pri > 0 ? '+' : '') + mv.pri : '0'}</div></div>
 <div class="mvStatBox"><div class="lbl">分类</div><div class="val" style="color:${CATC[mv.c]}">${CATN[mv.c]}</div></div>
 <div class="mvStatBox"><div class="lbl">可学宝可梦</div><div class="val">${mons.length}种</div></div>
 </div>
-${desc?`<div class="mvDetailDesc">📖 ${desc}</div>`:''}
+${desc ? `<div class="mvDetailDesc">📖 ${desc}</div>` : ''}
 <div style="font-weight:900;font-size:14px;margin-top:14px;margin-bottom:8px">可学会此招式的宝可梦（${mons.length}种）：</div>
-<div class="mvMonList">${mons.length?mons.slice(0,60).map(sp=>{
-return `<span class="mvMonChip" data-id="${sp.id}"><img src="${SPRBASE}${sp.id}.png" onerror="this.src='${SPRBASE}0.png'">${sp.n}</span>`;
-}).join('')+(mons.length>60?`<span style="font-size:11px;color:#999;font-weight:700">…等${mons.length}种</span>`:''):'<span style="color:#999;font-size:12px">暂无</span>'}</div>`;
-detail.querySelectorAll('.mvMonChip').forEach(chip=>{
-chip.onclick=()=>{const sp=SPDB[+chip.dataset.id];if(sp){AU.ok();dexDetail(sp);show('#dex');buildDex();}};
-});
-detail.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
+<div class="mvMonList">${mons.length ? mons.slice(0, 60).map(sp => {
+          return `<span class="mvMonChip" data-id="${sp.id}"><img src="${SPRBASE}${sp.id}.png" onerror="this.src='${SPRBASE}0.png'">${sp.n}</span>`;
+        }).join('') + (mons.length > 60 ? `<span style="font-size:11px;color:#999;font-weight:700">…等${mons.length}种</span>` : '') : '<span style="color:#999;font-size:12px">暂无</span>'}</div>`;
+        detail.querySelectorAll('.mvMonChip').forEach(chip => {
+          chip.onclick = () => { const sp = SPDB[+chip.dataset.id]; if (sp) { AU.ok(); dexDetail(sp); show('#dex'); buildDex(); } };
+        });
+        detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
 
-['input','change'].forEach(ev=>{
-search.addEventListener(ev,render);
-tySel.addEventListener(ev,render);
-catSel.addEventListener(ev,render);
-});
-render();
-}
+      ['input', 'change'].forEach(ev => {
+        search.addEventListener(ev, render);
+        tySel.addEventListener(ev, render);
+        catSel.addEventListener(ev, render);
+      });
+      render();
+    }
 
 
     /* 标题与导航 */
     $('#dexCount').textContent = SP.length + ' 种';
     $('#itemCount').textContent = Object.keys(IT).length + ' 种';
-    $('#abCount').textContent=Object.keys(AB).length+' 种';
-$('#mvCount').textContent=Object.keys(MV).length+' 个';
+    $('#abCount').textContent = Object.keys(AB).length + ' 种';
+    $('#mvCount').textContent = Object.keys(MV).length + ' 个';
     $('#mStory').onclick = async () => { AU.ok(); showStorySlotSelect(); };
     $('#mFactory').onclick = async () => { AU.ok(); await fadeTo('#factory'); FAC.lobby(); };
     $('#mFree').onclick = async () => { AU.ok(); buildFree(); await fadeTo('#free'); };
     $('#mDex').onclick = async () => { AU.ok(); buildDex(); await fadeTo('#dex'); };
     $('#mItemDex').onclick = async () => { AU.ok(); buildItemDex(); await fadeTo('#itemdex'); };
-    $('#mAbilityDex').onclick=async()=>{AU.ok();buildAbilityDex();await fadeTo('#abilitydex');};
-$('#mMoveDex').onclick=async()=>{AU.ok();buildMoveDex();await fadeTo('#movedex');};
+    $('#mAbilityDex').onclick = async () => { AU.ok(); buildAbilityDex(); await fadeTo('#abilitydex'); };
+    $('#mMoveDex').onclick = async () => { AU.ok(); buildMoveDex(); await fadeTo('#movedex'); };
     $('#mSound').onclick = () => { AU.ok(); openSettings(); };
     $$('[data-back]').forEach(b => b.onclick = async () => { AU.no(); await fadeTo('#title'); AU.playMusic('title'); });
     $('#storyBack').onclick = async () => { AU.no(); autoSaveStory(); await fadeTo('#title'); AU.playMusic('title'); };
