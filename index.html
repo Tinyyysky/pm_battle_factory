@@ -5603,40 +5603,43 @@ SP.forEach(s => {
     const EV_RATE = 6, EV_MAX = 66, EV_STAT = 32;
     function evTotal(m) { const e = m.ev || {}; return (e.hp || 0) + (e.atk || 0) + (e.def || 0) + (e.spa || 0) + (e.spd || 0) + (e.spe || 0); }
     function evCap(m) { return Math.min(EV_MAX, (m.battles || 0) * EV_RATE); }   // 可分配上限随出场数增长，封顶66
-    /* 工厂按轮次生成EV：前期随机且总量低，后期总量趋近66且分配更贴合定位（速攻→主攻+速度，坦克→HP+主攻） */
-    function genEV(sp, round, moves) {
-      const ev = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
-      const progress = Math.min(1, (round - 1) / 6);                       // 第1轮0 → 第7轮起1
-      let total = Math.round(6 + progress * 54 + (Math.random() * 2 - 1) * 8);
-      total = Math.max(0, Math.min(EV_MAX, total));
-      const b = sp.s, keys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-      const mainAtk = b[1] >= b[3] ? 'atk' : 'spa';
-      const isFast = b[5] >= 80, isTank = (b[0] >= 90 || b[2] >= 100 || b[4] >= 100) && b[5] < 70;
-      /* ★ 根据招式类别动态调整权重：物理招式数>特殊招式数 → 偏物攻；反之偏特攻；两者均衡则看种族值 */
-      let hasPhys = false, hasSpec = false;
-      if (moves && moves.length) {
-        for (const m of moves) {
-          const d = MV[m.k];
-          if (d && d.c === 'P') hasPhys = true;
-          if (d && d.c === 'S') hasSpec = true;
-        }
-      }
-      const w = { hp: 1, atk: .4, def: .5, spa: .4, spd: .5, spe: .6 };
-      w[mainAtk] = 3;
-      if (hasPhys && !hasSpec) { w.atk = 3; w.spa = .2; }
-      else if (hasSpec && !hasPhys) { w.spa = 3; w.atk = .2; }
-      if (isFast) { w.spe = 3; w.hp = .8; }
-      if (isTank) { w.hp = 2.8; w.spe = .2; w[mainAtk] = 2.5; }
-      const opt = progress * 0.85;                                       // 优化倾向概率，最高85%（保留随机）
-      let remaining = total;
-      while (remaining > 0) {
-        const cand = keys.filter(k => ev[k] < EV_STAT);
-        if (!cand.length) break;
-        const chosen = Math.random() < opt ? cand.reduce((a, c) => w[c] > w[a] ? c : a, cand[0]) : pick(cand);
-        ev[chosen]++; remaining--;
-      }
-      return ev;
-    }
+    /* 工厂按轮次生成EV：前期随机且总量低，后期总量趋近66；
+★ 攻击点数按配招类型分配：物/特攻招式威力最大者为主攻，双刀时另一类型分配1~10点 */
+function genEV(sp, round, moves) {
+const ev = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+const progress = Math.min(1, (round - 1) / 6);                       // 第1轮0 → 第7轮起1
+let total = Math.round(6 + progress * 54 + (Math.random() * 2 - 1) * 8);
+total = Math.max(0, Math.min(EV_MAX, total));
+const b = sp.s, keys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+/* ★ 主攻方向由配招决定：统计物攻/特攻招式的最大威力 */
+const dmgMvs = (moves && moves.length ? moves : sp.mv).map(k => MV[k]).filter(d => d && d.c !== 'X' && d.p);
+const physMax = dmgMvs.filter(d => d.c === 'P').reduce((a, d) => Math.max(a, d.p), 0);
+const specMax = dmgMvs.filter(d => d.c === 'S').reduce((a, d) => Math.max(a, d.p), 0);
+let mainAtk, subAtk = null;
+if (physMax > 0 && specMax > 0) {
+mainAtk = physMax >= specMax ? 'atk' : 'spa';      // 双刀：威力大的类型为主
+subAtk = mainAtk === 'atk' ? 'spa' : 'atk';
+} else {
+mainAtk = physMax > 0 ? 'atk' : specMax > 0 ? 'spa' : (b[1] >= b[3] ? 'atk' : 'spa');
+}
+const isFast = b[5] >= 80, isTank = (b[0] >= 90 || b[2] >= 100 || b[4] >= 100) && b[5] < 70;
+const w = { hp: 1, atk: .4, def: .5, spa: .4, spd: .5, spe: .6 };
+w[mainAtk] = 3;
+if (isFast) { w.spe = 3; w.hp = .8; }
+if (isTank) { w.hp = 2.8; w.spe = .2; w[mainAtk] = 2.5; }
+/* ★ 双刀时为副攻击类型预留 1~10 点（不超过总量的1/3） */
+let subBudget = 0;
+if (subAtk) { subBudget = Math.min(rnd(1, 10), Math.floor(total / 3)); ev[subAtk] = subBudget; }
+const opt = progress * 0.85;                                       // 优化倾向概率，最高85%（保留随机）
+let remaining = total - subBudget;
+while (remaining > 0) {
+const cand = keys.filter(k => ev[k] < EV_STAT && k !== subAtk);
+if (!cand.length) break;
+const chosen = Math.random() < opt ? cand.reduce((a, c) => w[c] > w[a] ? c : a, cand[0]) : pick(cand);
+ev[chosen]++; remaining--;
+}
+return ev;
+}
     /* ============ 性格系统 ============ */
     const STATNM = { atk: '攻击', def: '防御', spa: '特攻', spd: '特防', spe: '速度' };
     const NATURES = [
