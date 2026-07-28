@@ -9073,7 +9073,7 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b styl
               GM.fac.bp -= reviveCost; GM.fac.revives++;
               AU.heal(); healAll(GM.fac.party);
               saveFac(); this.ui();
-              await dlg('广播', '复活成功！已消耗 ${reviveCost} BP（累计复活 ' + GM.fac.revives + ' 次）。继续挑战第 ' + (GM.fac.win + 1) + ' 场！', 132);
+              await dlg('广播', '复活成功！已消耗 \' + reviveCost + \' BP（累计复活 ' + GM.fac.revives + ' 次）。继续挑战第 ' + (GM.fac.win + 1) + ' 场！', 132);
               this.lobby();
               return;
             }
