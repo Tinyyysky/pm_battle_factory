@@ -3015,6 +3015,18 @@
       overflow: auto;
       padding: 16px
     }
+    .modalClose {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 22px;
+      cursor: pointer;
+      color: #aaa;
+      z-index: 10;
+      line-height: 1;
+      user-select: none
+    }
+    .modalClose:hover { color: #fff; }
 
     .slot {
       display: flex;
@@ -3915,6 +3927,46 @@
       height: 28px;
       object-fit: contain
     }
+    /* 模态框中的特性详情样式 */
+    .abDetailNm {
+      font-family: 'ZCOOL KuaiLe';
+      font-size: 26px;
+      margin-bottom: 6px
+    }
+    .abDetailDs {
+      font-size: 14px;
+      color: #444;
+      line-height: 1.8;
+      margin-bottom: 12px;
+      font-weight: 700
+    }
+    .abMonList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+    .abMonChip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #f5f0ff;
+      border: 2px solid #c8b8e8;
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .1s
+    }
+    .abMonChip:hover {
+      transform: translateY(-2px);
+      background: #e8dcff
+    }
+    .abMonChip img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain
+    }
 
     /* ---------- move dex ---------- */
     #mvGrid {
@@ -4040,6 +4092,78 @@
     }
 
     #mvDetail .mvMonChip img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain
+    }
+    /* 模态框中的技能详情样式 */
+    .mvDetailTop {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px
+    }
+    .mvDetailNm {
+      font-family: 'ZCOOL KuaiLe';
+      font-size: 26px
+    }
+    .mvDetailStats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+      margin: 10px 0
+    }
+    .mvStatBox {
+      background: #f8f5ea;
+      border: 2px solid #d8cfb4;
+      border-radius: 8px;
+      padding: 8px 10px;
+      text-align: center
+    }
+    .mvStatBox .lbl {
+      font-size: 10px;
+      color: #999;
+      font-weight: 900
+    }
+    .mvStatBox .val {
+      font-family: 'Press Start 2P';
+      font-size: 11px;
+      margin-top: 3px
+    }
+    .mvDetailDesc {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.8;
+      font-weight: 700;
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: #f0fdf4;
+      border: 2px solid #a8e6a3;
+      border-radius: 10px
+    }
+    .mvMonList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px
+    }
+    .mvMonChip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fffbe6;
+      border: 2px solid #f0d870;
+      border-radius: 8px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .1s
+    }
+    .mvMonChip:hover {
+      transform: translateY(-2px);
+      background: #fff8dd
+    }
+    .mvMonChip img {
       width: 24px;
       height: 24px;
       object-fit: contain
@@ -4341,6 +4465,23 @@
     function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
     function show(id) { $$('.screen').forEach(s => s.classList.remove('on')); $(id).classList.add('on'); }
     async function fadeTo(id) { $('#fade').classList.add('on'); await sleep(360); show(id); await sleep(60); $('#fade').classList.remove('on'); }
+    function showModal(content) {
+      const ov = el('div', 'overlay');
+      const box = el('div', 'ovBox panel');
+      box.style.position = 'relative';
+      box.style.padding = '20px 16px';
+      const close = el('span', 'modalClose', '✕');
+      const rm = () => { ov.remove(); window.removeEventListener('keydown', keyRm); };
+      const keyRm = e => { if (e.key === 'Escape') rm(); };
+      close.onclick = rm;
+      box.appendChild(close);
+      if (typeof content === 'string') box.insertAdjacentHTML('beforeend', content);
+      else box.appendChild(content);
+      ov.appendChild(box);
+      ov.onclick = e => { if (e.target === ov) rm(); };
+      window.addEventListener('keydown', keyRm);
+      document.getElementById('stage').appendChild(ov);
+    }
     function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 1800); }
     function waitKey() { return new Promise(r => { const h = e => { if (['Enter', ' ', 'z', 'Z'].includes(e.key)) { window.removeEventListener('keydown', h); r(); } }; window.addEventListener('keydown', h); }); }
     function waitClick(elm) { return new Promise(r => { const h = () => { elm.removeEventListener('click', h); r(); }; elm.addEventListener('click', h); }); }
@@ -4560,15 +4701,15 @@
     M('moonblast', '月亮之力', 'fairy', 'S', 95, 100, 15, { sec: { drop: 'spa', n: -1, ch: 30 } }); M('dazzlinggleam', '魔法闪耀', 'fairy', 'S', 80, 100, 10, {});
     M('playrough', '嬉闹', 'fairy', 'P', 90, 90, 10, { ct: 1, sec: { drop: 'atk', n: -1, ch: 10 } }); M('drainingkiss', '吸取之吻', 'fairy', 'S', 50, 100, 10, { drain: 75, ct: 1 });
     M('spiritbreak', '灵魂冲击', 'fairy', 'P', 75, 100, 15, { ct: 1, selfDropT: { drop: 'spa', n: -1 } });
-    M('swordsdance', '剑舞', 'normal', 'X', null, null, 20, { selfUp: { drop: 'atk', n: 2 } }); M('nastyplot', '诡计', 'dark', 'X', null, null, 20, { selfUp: { drop: 'spa', n: 2 } });
-    M('dragondance', '龙之舞', 'dragon', 'X', null, null, 20, { selfUp: { drop: 'atk', n: 1 }, selfUp2: { drop: 'spe', n: 1 } });
+    M('swordsdance', '剑舞', 'normal', 'X', null, null, 20, { selfUp: { drop: 'atk', n: 2 }, dance: 1 }); M('nastyplot', '诡计', 'dark', 'X', null, null, 20, { selfUp: { drop: 'spa', n: 2 } });
+    M('dragondance', '龙之舞', 'dragon', 'X', null, null, 20, { selfUp: { drop: 'atk', n: 1 }, selfUp2: { drop: 'spe', n: 1 }, dance: 1 });
     M('bulkup', '健美', 'fighting', 'X', null, null, 20, { selfUp: { drop: 'atk', n: 1 }, selfUp2: { drop: 'def', n: 1 } });
-    M('quiverdance', '蝶舞', 'bug', 'X', null, null, 20, { selfUp: { drop: 'spa', n: 1 }, selfUp2: { drop: 'spd', n: 1 }, selfUp3: { drop: 'spe', n: 1 } });
+    M('quiverdance', '蝶舞', 'bug', 'X', null, null, 20, { selfUp: { drop: 'spa', n: 1 }, selfUp2: { drop: 'spd', n: 1 }, selfUp3: { drop: 'spe', n: 1 }, dance: 1 });
     M('shellsmash', '破壳', 'normal', 'X', null, null, 15, { selfUp: { drop: 'atk', n: 2 }, selfUp2: { drop: 'spa', n: 2 }, selfUp3: { drop: 'spe', n: 2 }, selfDn: { drop: 'def', n: -1 }, selfDn2: { drop: 'spd', n: -1 } });
     M('rockpolish', '岩石打磨', 'rock', 'X', null, null, 20, { selfUp: { drop: 'spe', n: 2 } });
     M('dragonclaw', '龙爪', 'dragon', 'P', 80, 100, 15, { ct: 1 }); M('outrage', '逆鳞', 'dragon', 'P', 120, 100, 10, { ct: 1, rampage: 1 });
     M('dracometeor', '流星群', 'dragon', 'S', 130, 90, 5, { self: { drop: 'spa', n: -2 } }); M('dragonpulse', '龙之波动', 'dragon', 'S', 85, 100, 10, { pulse: 1 });
-    M('dragondarts', '龙箭', 'dragon', 'P', 50, 100, 10, { multi: [2, 2] }); M('clangingscales', '鳞片噪音', 'dragon', 'S', 110, 100, 5, { self: { drop: 'def', n: -1 } });
+    M('dragondarts', '龙箭', 'dragon', 'P', 50, 100, 10, { multi: [2, 2] }); M('clangingscales', '鳞片噪音', 'dragon', 'S', 110, 100, 5, { sound: 1, self: { drop: 'def', n: -1 } });
     M('dragonascent', '画龙点睛', 'flying', 'P', 120, 100, 15, { ct: 1, self: { drop: 'def', n: -1 }, self2: { drop: 'spd', n: -1 } });
     M('earthquake', '地震', 'ground', 'P', 100, 100, 10, {}); M('earthpower', '大地之力', 'ground', 'S', 90, 100, 10, { sec: { drop: 'spd', n: -1, ch: 10 } });
     M('bulldoze', '重踏', 'ground', 'P', 60, 100, 20, { selfDropT: { drop: 'spe', n: -1 } });
@@ -4615,6 +4756,129 @@
     M('explosion', '大爆炸', 'normal', 'P', 250, 100, 5, { selfko: 1 });
     M('psychocut', '精神切割', 'psychic', 'P', 70, 100, 20, { crit: 1 });
     M('lunge', '猛扑', 'bug', 'P', 80, 100, 15, { ct: 1, selfDropT: { drop: 'atk', n: -1 } });
+    /* ---- 新增招式（第五批） ---- */
+    M('lovelykiss','恶魔之吻','normal','X',null,75,10,{setSt:'sleep'});
+    M('transform','变身','normal','X',null,null,10,{transform:1});
+    M('sketch','写生','normal','X',null,null,1,{sketch:1});
+    M('sacredfire','神圣之火','fire','P',100,95,5,{ct:1,sec:{st:'burn',ch:50}});
+    M('petaldance','花瓣舞','grass','S',120,100,10,{ct:1,rampage:1,dance:1});
+    M('revelationdance','觉醒之舞','normal','S',90,100,15,{revelation:1,dance:1});
+    M('spikyshield','尖刺防守','grass','X',null,null,10,{pri:4,protect:1,spiky:1});
+    M('diamondstorm','钻石风暴','rock','P',100,95,5,{sec:{drop:'def',n:2,ch:50}});
+    M('steamroller','疯狂滚压','bug','P',65,100,20,{ct:1,sec:{flinch:1,ch:30}});
+    M('geargrind','齿轮飞盘','steel','P',50,85,15,{ct:1,multi:[2,2]});
+    M('technoblast','高科技光炮','normal','S',120,100,5,{technoblast:1});
+    M('landswrath','大地神力','ground','P',90,100,10,{});
+    M('originpulse','根源波动','water','S',110,85,10,{});
+    M('precipiceblades','断崖之剑','ground','P',120,85,10,{});
+    M('dragonhammer','龙锤','dragon','P',90,100,15,{ct:1});
+    M('fleurcannon','花朵加农炮','fairy','S',130,90,5,{self:{drop:'spa',n:-2}});
+    M('mindblown','惊爆大头','fire','S',150,100,5,{selfko:1});
+    M('photongeyser','光子喷涌','psychic','S',100,100,5,{photon:1});
+    M('snaptrap','捕兽夹','grass','P',35,100,15,{ct:1,partialTrap:1});
+    M('appleacid','苹果酸','grass','S',80,100,10,{sec:{drop:'spd',n:-1,ch:100}});
+    M('gravapple','万有引力','grass','P',80,100,10,{sec:{drop:'def',n:-1,ch:100}});
+    M('bodypress','扑击','fighting','P',80,100,10,{ct:1,bodypress:1});
+    M('decor','装饰','fairy','X',null,null,15,{decor:1});
+    M('snipeshot','狙击','water','S',80,100,15,{});
+    M('stuffcheeks','大快朵颐','normal','X',null,null,10,{stuffcheeks:1});
+    M('tarshot','沥青射击','rock','X',null,100,15,{tarshot:1});
+    M('magicpowder','魔法粉','psychic','X',null,100,20,{magicpowder:1});
+    M('teatime','茶会','normal','X',null,null,10,{teatime:1});
+    M('octolock','蛸固','fighting','X',null,100,15,{octolock:1});
+    M('boltbeak','电喙','electric','P',85,100,10,{ct:1,boltbeak:1});
+    M('fishiousrend','鳃咬','water','P',85,100,10,{ct:1,fishious:1});
+    M('courtchange','换场','normal','X',null,100,10,{courtchange:1});
+    M('clangoroussoul','魂舞烈奏','dragon','X',null,100,5,{clangorous:1});
+    M('breakingwipe','广域破坏','dragon','P',60,100,15,{selfDropT:{drop:'atk',n:-1}});
+    M('dynamaxcannon','极巨炮','dragon','S',100,100,5,{dyna2x:1});
+    M('steelbeam','铁蹄光线','steel','S',140,95,5,{recoil:2});
+    M('expandingforce','广域战力','psychic','S',80,100,10,{expanding:1});
+    M('shellsidearm','贝壳刃','poison','S',90,100,10,{shellside:1});
+    M('mistyexplosion','薄雾炸裂','fairy','S',100,100,5,{selfko:1});
+    M('grassyglide','青草滑梯','grass','P',55,100,20,{ct:1,grassyglide:1});
+    M('risingvoltage','电力上升','electric','S',70,100,20,{risingvolt:1});
+    M('terrainpulse','大地波动','normal','S',50,100,10,{terrainpulse:1});
+    M('skittersmack','爬击','bug','P',70,90,10,{ct:1,selfDropT:{drop:'spa',n:-1}});
+    M('burningjealousy','妒火','fire','S',70,100,5,{burningjeal:1});
+    M('lashout','泄愤','dark','P',75,100,5,{lashout:1});
+    M('poltergeist','灵骚','ghost','P',110,90,5,{});
+    M('corrosivegas','腐蚀气体','poison','X',null,100,40,{corrosivegas:1});
+    M('coaching','指导','fighting','X',null,null,10,{coaching:1});
+    M('flipturn','快速折返','water','P',60,100,20,{ct:1,uturn:1});
+    M('dualwingbeat','双翼','flying','P',40,90,10,{ct:1,multi:[2,2]});
+    M('scorchingsands','热沙大地','ground','S',70,100,10,{sec:{st:'burn',ch:30}});
+    M('junglehealing','丛林治疗','grass','X',null,null,10,{jungleheal:1});
+    M('surgingstrikes','水流连打','water','P',25,100,5,{ct:1,multi:[3,3],alwaysCrit:1});
+    M('thundercage','雷电囚笼','electric','S',80,90,15,{partialTrap:1});
+    M('dragonenergy','巨龙威能','dragon','S',150,100,5,{eruption:1});
+    M('freezingglare','冰冷视线','psychic','S',90,100,10,{sec:{st:'frz',ch:10}});
+    M('fierywrath','怒火中烧','dark','S',90,100,10,{sec:{flinch:1,ch:20}});
+    M('thunderouskick','雷鸣蹴击','fighting','P',90,100,10,{ct:1,selfDropT:{drop:'def',n:-1}});
+    M('glaciallance','雪矛','ice','P',120,100,5,{});
+    M('astralbarrage','星碎','ghost','S',120,100,5,{});
+    M('eeriespell','诡异咒语','psychic','S',80,100,5,{ppDrain:1});
+    M('direclaw','克命爪','poison','P',80,100,15,{ct:1,sec:{st:'tri',ch:50}});
+    M('psyshieldbash','屏障猛攻','psychic','P',70,90,10,{ct:1,selfUp:{drop:'def',n:1}});
+    M('powershift','力量转换','normal','X',null,null,10,{powershift:1});
+    M('stoneaxe','石斧','rock','P',65,90,15,{ct:1,slicing:1,hazard:'sr'});
+    M('springtidestorm','阳春风暴','fairy','S',100,80,5,{sec:{drop:'atk',n:-1,ch:30}});
+    M('mysticalpower','神秘之力','psychic','S',70,90,10,{selfUp:{drop:'spa',n:1}});
+    M('ragingfury','大愤慨','fire','P',120,100,10,{rampage:1});
+    M('chloroblast','叶绿爆震','grass','S',150,95,5,{recoil:2});
+    M('mountaingale','冰山风','ice','P',100,85,10,{sec:{flinch:1,ch:30}});
+    M('victorydance','胜利之舞','fighting','X',null,null,10,{selfUp:{drop:'atk',n:1},selfUp2:{drop:'spe',n:1},dance:1});
+    M('headlongrush','突飞猛扑','ground','P',120,100,5,{ct:1,self:{drop:'def',n:-1},self2:{drop:'spd',n:-1}});
+    M('barbbarrage','毒千针','poison','P',60,100,15,{barb:1,sec:{st:'psn',ch:50}});
+    M('esperwing','气场之翼','psychic','P',80,100,10,{selfUp:{drop:'spe',n:1}});
+    M('bittermalice','冤冤相报','ghost','S',75,100,10,{sec:{drop:'atk',n:-1,ch:100}});
+    M('shelter','闭关','steel','X',null,null,10,{selfUp:{drop:'def',n:2}});
+    M('triplearrows','三连箭','fighting','P',90,100,10,{sec:{flinch:1,ch:30},crit:1});
+    M('infernalparade','群魔乱舞','ghost','S',60,100,15,{infernal:1,sec:{st:'burn',ch:30}});
+    M('ceaselessedge','秘剑·千重涛','dark','P',65,90,15,{ct:1,slicing:1,hazard:'spikes'});
+    M('bleakwindstorm','枯叶风暴','flying','S',100,80,10,{sec:{drop:'spe',n:-1,ch:30}});
+    M('wildboltstorm','鸣雷风暴','electric','S',100,80,10,{sec:{st:'par',ch:20}});
+    M('sandsearstorm','热沙风暴','ground','S',100,80,10,{sec:{st:'burn',ch:20}});
+    M('lunarblessing','新月祈祷','psychic','X',null,null,5,{lunar:1});
+    M('takeheart','勇气填充','psychic','X',null,null,10,{takeheart:1});
+    M('silktrap','线阱','bug','X',null,null,10,{pri:4,protect:1,silk:1});
+    M('icehammer','冰锤','ice','P',100,90,10,{ct:1,punch:1,self:{drop:'spe',n:-1}});
+    M('floralhealing','花疗','fairy','X',null,null,10,{floralheal:1});
+    M('highhorsepower','十万马力','ground','P',95,95,10,{ct:1});
+    M('strengthsap','吸取力量','grass','X',null,100,10,{strengthsap:1});
+    M('solarblade','日光刃','grass','P',125,100,10,{charge:1,ct:1,slicing:1});
+    M('leafage','树叶','grass','P',40,100,40,{});
+    M('spotlight','聚光灯','normal','X',null,null,15,{spotlight:1});
+    M('toxicthread','毒丝','poison','X',null,100,20,{toxicthread:1});
+    M('laserfocus','磨砺','normal','X',null,null,30,{laserfocus:1});
+    M('gearup','辅助齿轮','steel','X',null,null,20,{gearup:1});
+    M('throatchop','地狱突刺','dark','P',80,100,15,{ct:1,throat:1});
+    M('pollenpuff','花粉团','bug','S',90,100,15,{pollen:1,bullet:1});
+    M('anchorshot','掷锚','steel','P',80,100,20,{ct:1,anchor:1});
+    M('psychicterrain','精神场地','psychic','X',null,null,10,{terrain:'psychic'});
+    M('firelash','火焰鞭','fire','P',80,100,15,{ct:1,selfDropT:{drop:'def',n:-1}});
+    M('powertrip','嚣张','dark','P',20,100,10,{ct:1,powertrip:1});
+    M('burnup','燃尽','fire','S',130,100,5,{burnup:1});
+    M('speedswap','速度互换','psychic','X',null,null,10,{speedswap:1});
+    M('smartstrike','修长之角','steel','P',70,null,10,{ct:1});
+    M('purify','净化','poison','X',null,null,20,{purify:1});
+    M('coreenforcer','核心惩罚者','dragon','S',100,100,10,{core:1});
+    M('instruct','号令','psychic','X',null,null,15,{instruct:1});
+    M('beakblast','鸟嘴加农炮','flying','P',100,100,15,{beakblast:1,bullet:1});
+    M('shadowbone','暗影之骨','ghost','P',85,100,10,{sec:{drop:'def',n:-1,ch:20}});
+    M('accelerock','冲岩','rock','P',40,100,20,{pri:1,ct:1});
+    M('prismaticlaser','棱镜镭射','psychic','S',160,100,10,{recharge:1});
+    M('tearfullook','泪眼汪汪','normal','X',null,null,20,{tearful:1});
+    M('zingzap','麻麻刺刺','electric','P',80,100,10,{ct:1,sec:{flinch:1,ch:30}});
+    M('naturesmadness','自然之怒','fairy','S',null,90,10,{naturesmad:1});
+    M('multiattack','多属性攻击','normal','P',120,100,10,{ct:1,multiattack:1});
+    M('lightthatburnsthesky','焚天灭世炽光爆','psychic','S',200,100,1,{photon:1,selfko:1});
+    M('searingsunrazesmash','日光回旋下苍穹','steel','P',200,100,1,{ignAb:1,selfko:1});
+    M('menacingmoonrazemaelstrom','月华飞溅落灵霄','ghost','S',200,100,1,{ignAb:1,selfko:1});
+    M('lets-snuggle-forever','亲密无间大乱揍','fairy','P',190,100,1,{ct:1,selfko:1});
+    M('splinteredstormshards','狼啸石牙飓风暴','rock','P',190,100,1,{selfko:1});
+    M('clangoroussoulblaze','炽魂热舞烈音爆','dragon','S',185,100,1,{sound:1,selfko:1});
+    M('maxguard','极巨防壁','normal','X',null,null,10,{pri:4,protect:1,maxguard:1});
 
     /* ---- 专属/招牌招式（第五批） ---- */
     M('watershuriken', '飞水手里剑', 'water', 'S', 15, 100, 20, { pri: 1, multi: [2, 5] });
@@ -4790,6 +5054,27 @@ A('sweetveil', '甜幕', '自己和同伴不会睡着');
 A('stalwart', '坚毅', '不受吸引和交换招式影响');
 A('stickyhold', '黏着', '道具不会被拍落或夺走');
 A('arenatrap', '沙穴', '对手无法逃走或交换');
+    /* ---- 新增特性（第五批：300只新宝可梦所需） ---- */
+    A('imposter','变身者','出场时自动变身为对手（本作简化为复制对手外观与招式）');
+    A('friendguard','友情防守','同伴受到的伤害减少25%（单打中无实际效果）');
+    A('normalize','一般皮肤','所有招式都变为一般属性且威力×1.2');
+    A('wonderskin','奇迹皮肤','受到变化招式时命中率减半');
+    A('flowerveil','花幕','己方草属性宝可梦不会陷入异常状态，能力不会被降低');
+    A('furcoat','毛皮大衣','受到的物理招式伤害减半');
+    A('dancer','舞者','有宝可梦使出舞蹈招式时，自己也立刻使出相同招式（本作简化为被动）');
+    A('schooling','鱼群','HP多时变为鱼群形态（种族值大幅提升），HP少时变回单独形态');
+    A('fluffy','毛茸茸','受到的接触招式伤害减半，但火属性招式伤害×2');
+    A('receiver','接球手','继承被击倒同伴的特性（单打中无实际效果）');
+    A('wimpout','跃跃欲逃','HP降至一半以下时自动交换下场');
+    A('watercompaction','遇水凝固','受到水属性招式时防御大幅提升（+2）');
+    A('innardsout','飞出的内在物','被击倒时对手受到等同于最后受到伤害量的伤害');
+    A('shieldsdown','界限盾壳','HP降至一半以下时外壳破碎变为核心形态，免疫异常状态');
+    A('cottondown','棉絮','受到攻击时降低对手速度1级');
+    A('ballfetch','捡球','投球失败时捡回精灵球（本作简化为无效果）');
+    A('gulpmissile','一口导弹','使用冲浪后嘴里叼住猎物，受到攻击时吐出猎物反击并降防');
+    A('guarddog','看门犬','受到威吓时攻击反而提升，不会被强制替换下场');
+    A('myceliummight','菌丝之力','变化招式必定最后出手，但无视对手特性');
+    A('flowergift','花之礼','晴天时自己和同伴的攻击和特防×1.5（本作简化为仅自身攻击）');
 
     /* ---- 道具 ---- */
     const IT = {};
@@ -5262,6 +5547,316 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(964,'海豚侠','water','100/70/72/53/62/100','zerotohero/zerotohero',['liquidation','aquajet','knockoff','swordsdance','drainpunch','uturn']);
     S(967,'摩托蜥','dragon/normal','70/95/65/85/65/121','shedskin/regenerator',['dragonclaw','facade','knockoff','uturn','earthquake','dragondance']);
     S(968,'拖拖蚓','steel','70/85/145/60/55/65','eartheater/sandveil',['ironhead','earthquake','knockoff','stealthrock','gigatonhammer','superpower']);
+    /* ============ 第五批新增300只宝可梦 ============ */
+    /* --- 第1世代 ×30 --- */
+    S(11,'铁甲蛹','bug','50/20/55/25/25/30','shedskin/shedskin',['tackle','stringshot','swift','terablast'],{evo:1});
+    S(13,'独角虫','bug/poison','40/35/30/20/20/50','shielddust/shielddust',['tackle','stringshot','poisonjab','terablast'],{evo:1});
+    S(14,'铁壳蛹','bug/poison','45/25/50/25/25/35','shedskin/shedskin',['tackle','stringshot','poisonjab','terablast'],{evo:1});
+    S(17,'比比鸟','normal/flying','63/60/55/50/50/71','keeneye/tangledfeet/bigpecks',['gust','quickattack','aerialace','uturn','roost'],{evo:1});
+    S(21,'烈雀','normal/flying','40/60/30/31/31/70','keeneye/keeneye',['gust','quickattack','drillpeck','uturn'],{evo:1});
+    S(23,'阿柏蛇','poison','35/60/44/40/54/55','intimidate/shedskin/unnerve',['poisonjab','crunch','glare','suckerpunch','earthquake'],{evo:1});
+    S(27,'穿山鼠','ground','50/75/85/20/30/40','sandveil/sandrush',['earthquake','rockslide','xscissor','swordsdance','stealthrock'],{evo:1});
+    S(35,'皮皮','fairy','70/45/48/60/65/35','cutecharm/magicguard/friendguard',['tackle','moonblast','dazzlinggleam','softboiled','thunderwave','calmmind'],{evo:1});
+    S(37,'六尾','fire','38/41/40/50/65/65','flashfire/drought',['ember','flamethrower','darkpulse','willowisp','calmmind','hypnosis'],{evo:1});
+    S(40,'胖丁','normal/fairy','115/45/20/45/25/20','cutecharm/competitive/friendguard',['hypervoice','moonblast','thunderwave','stealthrock','softboiled','dazzlinggleam'],{evo:1});
+    S(41,'超音蝠','poison/flying','40/45/35/30/40/55','innerfocus/infiltrator',['gust','airslash','crosspoison','confuseray','uturn','roost'],{evo:1});
+    S(43,'走路草','grass/poison','45/50/55/75/65/30','chlorophyll/chlorophyll',['razorleaf','sludgebomb','sleeppowder','synthesis','energyball'],{evo:1});
+    S(44,'臭臭花','grass/poison','60/65/70/85/75/40','chlorophyll/effectspore',['razorleaf','sludgebomb','sleeppowder','synthesis','energyball','leechseed'],{evo:1});
+    S(83,'大葱鸭','normal/flying','52/90/55/58/62/60','keeneye/innerfocus/defiant',['aerialace','knockoff','swordsdance','quickattack','roost','leafblade'],{evo:0});
+    S(87,'白海狮','water/ice','90/70/80/70/95/70','thickfat/hydration/icebody',['surf','icebeam','aquajet','bodyslam','rest','signalbeam']);
+    S(105,'嘎啦嘎啦','ground','60/80/110/50/80/45','rockhead/lightningrod/battlearmor',['earthquake','stoneedge','firepunch','thunderpunch','stealthrock','knockoff']);
+    S(106,'飞腿郎','fighting','50/120/53/35/110/87','limber/reckless/unburden',['highjumpkick','knockoff','stoneedge','machpunch','bulkup','closecombat']);
+    S(107,'快拳郎','fighting','50/105/79/35/110/76','keeneye/ironfist/innerfocus',['drainpunch','machpunch','thunderpunch','icepunch','firepunch','bulletpunch']);
+    S(108,'大舌头','normal','90/55/75/60/75/30','owntempo/oblivious/cloudnine',['bodyslam','earthquake','knockoff','firepunch','thunderwave','rest']);
+    S(119,'金鱼王','water','80/92/65/65/80/68','swiftswim/waterveil/lightningrod',['waterfall','megahorn','knockoff','drillpeck','swordsdance','aquajet']);
+    S(122,'魔墙人偶','psychic/fairy','40/45/65/100/120/90','soundproof/filter/technician',['psychic','moonblast','thunderbolt','calmmind','thunderwave','dazzlinggleam']);
+    S(124,'迷唇姐','ice/psychic','65/50/35/115/95/95','oblivious/forewarn/dryskin',['icebeam','psychic','lovelykiss','shadowball','focusblast','nastyplot']);
+    S(125,'电击兽','electric','65/83/57/95/85/105','static/static',['thunderbolt','thunderpunch','icepunch','firepunch','thunderwave','voltswitch'],{evo:1});
+    S(126,'鸭嘴火兽','fire','65/95/57/100/85/93','flamebody/vitalspirit',['flamethrower','thunderpunch','focusblast','willowisp','fireblast','psychic'],{evo:1});
+    S(132,'百变怪','normal','48/48/48/48/48/48','limber/imposter',['transform','terablast']);
+    S(137,'多边兽','normal','65/60/70/85/75/40','trace/download/analytic',['triattack','icebeam','thunderbolt','shadowball','recover','nastyplot'],{evo:1});
+    S(139,'多刺菊石兽','rock/water','70/60/125/115/70/55','swiftswim/shellarmor/weakarmor',['hydropump','powergem','icebeam','earthpower','stealthrock','shellsmash']);
+    S(141,'镰刀盔','rock/water','60/115/105/65/70/80','swiftswim/battlearmor/weakarmor',['liquidation','stoneedge','xscissor','earthquake','swordsdance','aquajet']);
+    S(147,'迷你龙','dragon','41/64/45/50/50/50','shedskin/marvelscale',['dragonclaw','aquajet','thunderwave','dragondance','outrage'],{evo:1});
+    S(148,'哈克龙','dragon','61/84/65/70/70/70','shedskin/marvelscale',['dragonclaw','aquajet','thunderwave','dragondance','outrage','fireblast'],{evo:1});
+    /* --- 第2世代 ×35 --- */
+    S(152,'菊草叶','grass','45/49/65/49/65/45','overgrow/leafguard',['tackle','razorleaf','synthesis','leechseed','energyball'],{evo:1});
+    S(153,'月桂叶','grass','60/62/80/63/80/60','overgrow/leafguard',['razorleaf','synthesis','leechseed','energyball','bodyslam'],{evo:1});
+    S(155,'火球鼠','fire','39/52/43/60/50/65','blaze/flashfire',['tackle','ember','flamethrower','quickattack','willowisp'],{evo:1});
+    S(156,'火岩鼠','fire','58/64/58/80/65/80','blaze/flashfire',['ember','flamethrower','quickattack','willowisp','fireblast'],{evo:1});
+    S(158,'小锯鳄','water','50/65/64/44/48/43','torrent/sheerforce',['scratch','aquajet','scald','crunch','icepunch'],{evo:1});
+    S(159,'蓝鳄','water','65/80/80/59/63/58','torrent/sheerforce',['aquajet','scald','crunch','icepunch','dragondance'],{evo:1});
+    S(161,'尾立','normal','35/46/34/35/45/20','runaway/keeneye/frisk',['tackle','quickattack','knockoff','uturn','suckerpunch'],{evo:1});
+    S(163,'咕咕','normal/flying','60/30/30/36/56/50','insomnia/keeneye/tintedlens',['gust','hypervoice','psychic','hypnosis','roost'],{evo:1});
+    S(165,'芭瓢虫','bug/flying','40/20/30/40/80/55','swarm/earlybird/rattled',['tackle','bugbuzz','airslash','lightscreen','roost'],{evo:1});
+    S(166,'安瓢虫','bug/flying','55/35/50/55/110/85','swarm/earlybird/rattled',['bugbuzz','airslash','lightscreen','roost','thunderwave','uturn']);
+    S(167,'圆丝蛛','bug/poison','40/60/40/40/40/30','swarm/insomnia/sniper',['poisonjab','xscissor','suckerpunch','toxic','stringshot'],{evo:1});
+    S(170,'灯笼鱼','water/electric','75/38/38/56/56/67','voltabsorb/illuminate/waterabsorb',['thunderbolt','hydropump','icebeam','voltswitch','thunderwave'],{evo:1});
+    S(172,'皮丘','electric','20/40/15/35/35/60','static/lightningrod',['thunderbolt','quickattack','irontail','thunderwave','voltswitch'],{evo:1});
+    S(173,'皮宝宝','fairy','50/25/28/45/55/15','cutecharm/magicguard/friendguard',['tackle','moonblast','dazzlinggleam','softboiled','thunderwave'],{evo:1});
+    S(174,'宝宝丁','normal/fairy','90/30/15/40/20/15','cutecharm/competitive/friendguard',['hypervoice','moonblast','thunderwave','softboiled','dazzlinggleam'],{evo:1});
+    S(175,'波克比','fairy','35/20/65/40/65/20','hustle/serenegrace/superluck',['tackle','moonblast','dazzlinggleam','thunderwave','softboiled'],{evo:1});
+    S(177,'天然雀','psychic/flying','40/50/45/70/45/70','synchronize/earlybird/magicbounce',['psychic','airslash','calmmind','roost','thunderwave'],{evo:1});
+    S(179,'咩利羊','electric','55/40/40/65/45/35','static/plus',['thunderbolt','thunderwave','signalbeam','swift'],{evo:1});
+    S(180,'茸茸羊','electric','70/55/55/80/60/45','static/plus',['thunderbolt','thunderwave','signalbeam','powergem'],{evo:1});
+    S(183,'玛力露','water/fairy','70/20/50/20/50/40','thickfat/hugepower/sapsipper',['playrough','waterfall','aquajet','swordsdance','knockoff'],{evo:1});
+    S(187,'毽子草','grass/flying','35/35/40/35/55/50','chlorophyll/leafguard/infiltrator',['tackle','energyball','sleeppowder','synthesis','uturn'],{evo:1});
+    S(188,'毽子花','grass/flying','55/45/50/45/65/80','chlorophyll/leafguard/infiltrator',['energyball','sleeppowder','synthesis','uturn','acrobatics'],{evo:1});
+    S(189,'毽子棉','grass/flying','75/55/70/55/95/110','chlorophyll/leafguard/infiltrator',['energyball','sleeppowder','synthesis','uturn','leechseed','cottonspore']);
+    S(190,'长尾怪手','normal','55/70/55/40/55/85','runaway/pickup/skilllink',['tackle','knockoff','firepunch','icepunch','thunderpunch','uturn'],{evo:1});
+    S(191,'向日种子','grass','30/30/30/30/30/30','chlorophyll/solarpower/earlybird',['tackle','energyball','sunnyday','synthesis'],{evo:1});
+    S(192,'向日花怪','grass','75/75/55/105/85/30','chlorophyll/solarpower/earlybird',['energyball','sunnyday','synthesis','earthpower','leafstorm','solarbeam']);
+    S(193,'蜻蜻蜓','bug/flying','65/65/45/75/45/95','speedboost/compoundeyes/frisk',['bugbuzz','airslash','darkpulse','uturn','roost','protect']);
+    S(194,'乌波','water/ground','55/45/45/25/25/15','damp/waterabsorb/unaware',['earthquake','waterfall','recover','toxic','stealthrock','icepunch'],{evo:1});
+    S(198,'黑暗鸦','dark/flying','60/85/42/85/42/91','insomnia/superluck/prankster',['darkpulse','airslash','heatwave','roost','suckerpunch','thunderwave']);
+    S(201,'未知图腾','psychic','48/72/48/72/48/48','levitate/levitate',['psychic','terablast']);
+    S(203,'麒麟奇','normal/psychic','70/80/65/90/65/85','innerfocus/earlybird/sapsipper',['psychic','hypervoice','shadowball','thunderbolt','calmmind','agility']);
+    S(204,'榛果球','bug/steel','50/65/90/35/35/15','sturdy/overcoatx',['gyroball','powerwhip','stealthrock','spikes','voltswitch','ironhead'],{evo:1});
+    S(206,'土龙弟弟','normal','100/70/70/65/65/45','serenegrace/runaway/rattled',['bodyslam','earthquake','rockslide','thunderwave','roost','stealthrock']);
+    S(207,'天蝎','ground/flying','65/75/105/35/65/85','hyperCutterx/sandveil/immunity',['earthquake','knockoff','toxic','protect','roost','uturn'],{evo:1});
+    S(209,'布鲁','fairy','60/80/50/40/40/30','intimidate/runaway/rattled',['playrough','earthquake','closecombat','firefang','thunderfang','swordsdance'],{evo:1});
+    /* --- 第3世代 ×35 --- */
+    S(252,'木守宫','grass','40/45/35/65/55/70','overgrow/unburden',['tackle','leafblade','dragonpulse','quickattack','energyball'],{evo:1});
+    S(253,'森林蜥蜴','grass','50/65/45/85/65/95','overgrow/unburden',['leafblade','dragonpulse','focusblast','quickattack','swordsdance','earthquake'],{evo:1});
+    S(255,'火稚鸡','fire','45/60/40/70/50/45','blaze/speedboost',['scratch','ember','flamethrower','quickattack','firepunch'],{evo:1});
+    S(256,'力壮鸡','fire/fighting','60/85/60/85/60/55','blaze/speedboost',['ember','flamethrower','highjumpkick','quickattack','thunderpunch'],{evo:1});
+    S(258,'水跃鱼','water','50/70/50/50/50/40','torrent/damp',['tackle','aquajet','scald','earthquake','icepunch'],{evo:1});
+    S(259,'沼跃鱼','water/ground','70/85/70/60/70/50','torrent/damp',['aquajet','scald','earthquake','icepunch','stealthrock'],{evo:1});
+    S(261,'土狼犬','dark','35/55/35/30/30/35','runaway/quickfeet/rattled',['crunch','firefang','thunderfang','icefang','suckerpunch'],{evo:1});
+    S(263,'蛇纹熊','normal','38/30/41/30/41/60','pickup/gluttony/quickfeet',['tackle','knockoff','uturn','swordsdance','extremespeed'],{evo:1});
+    S(265,'刺尾虫','bug','45/45/35/20/30/20','shielddust/runaway',['tackle','stringshot','bugbuzz','terablast'],{evo:1});
+    S(266,'甲壳茧','bug','50/35/55/25/25/15','shedskin/shedskin',['tackle','stringshot','ironhead','terablast'],{evo:1});
+    S(268,'盾甲茧','bug','50/35/55/25/25/15','shedskin/shedskin',['tackle','stringshot','ironhead','terablast'],{evo:1});
+    S(270,'莲叶童子','water/grass','40/30/30/40/50/30','swiftswim/raindish/owntempo',['tackle','scald','energyball','raindance','icebeam'],{evo:1});
+    S(271,'莲帽小童','water/grass','60/50/50/60/70/50','swiftswim/raindish/owntempo',['scald','energyball','raindance','icebeam','knockoff'],{evo:1});
+    S(273,'橡实果','grass/dark','40/40/50/30/30/30','chlorophyll/earlybird/pickpocket',['tackle','energyball','darkpulse','swordsdance','seedbomb'],{evo:1});
+    S(274,'长鼻叶','grass/dark','70/70/40/60/40/60','chlorophyll/earlybird/pickpocket',['energyball','darkpulse','swordsdance','lowkick','leafstorm'],{evo:1});
+    S(276,'傲骨燕','normal/flying','40/55/30/30/30/85','guts/scrappy',['aerialace','quickattack','uturn','roost','bravebird'],{evo:1});
+    S(278,'长翅鸥','water/flying','40/30/30/55/30/85','keeneye/drizzle/raindish',['scald','airslash','icebeam','raindance','roost','knockoff'],{evo:1});
+    S(280,'拉鲁拉丝','psychic/fairy','28/25/25/45/35/40','synchronize/trace/telepathy',['tackle','psychic','moonblast','calmmind','thunderwave'],{evo:1});
+    S(281,'奇鲁莉安','psychic/fairy','38/35/35/65/55/50','synchronize/trace/telepathy',['psychic','moonblast','calmmind','shadowball','thunderbolt'],{evo:1});
+    S(283,'溜溜糖球','bug/water','40/30/32/50/52/65','swiftswim/raindish',['scald','bugbuzz','icebeam','energyball','raindance'],{evo:1});
+    S(284,'雨翅蛾','bug/flying','70/60/62/100/82/80','intimidate/unnerve',['bugbuzz','airslash','hydropump','quiverdance','roost','hurricane']);
+    S(285,'蘑蘑菇','grass','60/40/60/40/60/35','effectspore/poisonheal/quickfeet',['tackle','seedbomb','spore','swordsdance','drainpunch'],{evo:1});
+    S(287,'懒人獭','normal','60/60/60/35/35/30','truant/truant',['tackle','facade','knockoff','earthquake'],{evo:1});
+    S(288,'过动猿','normal','80/80/80/55/55/90','truant/truant',['facade','knockoff','earthquake','firepunch','icepunch'],{evo:1});
+    S(290,'土居忍士','bug/ground','31/45/90/30/30/40','compoundeyes/infiltrator',['xscissor','earthquake','swordsdance','protect','quickattack'],{evo:1});
+    S(293,'咕妞妞','normal','64/51/23/51/23/28','soundproof/rattled',['hypervoice','shadowball','flamethrower','icebeam'],{evo:1});
+    S(294,'吼爆弹','normal','84/71/43/71/43/48','soundproof/scrappy',['boomburst','hypervoice','shadowball','flamethrower','icebeam','thunderbolt'],{evo:1});
+    S(296,'幕下力士','fighting','72/60/30/20/30/25','thickfat/guts/sheerforce',['closecombat','knockoff','stoneedge','icepunch','bulkup'],{evo:1});
+    S(298,'露力丽','normal/fairy','50/20/40/20/40/20','thickfat/hugepower/sapsipper',['playrough','waterfall','aquajet','swordsdance'],{evo:1});
+    S(299,'朝北鼻','rock','30/45/135/45/90/30','sturdy/magnetpull/sandforce',['powergem','earthpower','stealthrock','thunderwave','flashcannon','trickroom']);
+    S(300,'向尾喵','normal','50/45/45/35/35/50','cutecharm/normalize/wonderskin',['tackle','playrough','thunderwave','calmmind','suckerpunch'],{evo:1});
+    S(301,'优雅猫','normal','70/65/65/55/55/90','cutecharm/normalize/wonderskin',['facade','playrough','thunderwave','calmmind','suckerpunch','healbell']);
+    S(304,'可可多拉','steel/rock','50/70/100/40/40/30','sturdy/rockhead/heavymetal',['ironhead','stoneedge','earthquake','stealthrock','superpower'],{evo:1});
+    S(305,'可多拉','steel/rock','60/90/140/50/50/40','sturdy/rockhead/heavymetal',['ironhead','stoneedge','earthquake','stealthrock','superpower','thunderwave'],{evo:1});
+    S(307,'玛沙那','fighting/psychic','30/40/55/40/55/60','purepower/telepathy',['highjumpkick','zenheadbutt','fakeout','icepunch','thunderpunch'],{evo:1});
+    /* --- 第4世代 ×35 --- */
+    S(387,'草苗龟','grass','55/68/64/45/55/31','overgrow/shellarmor',['tackle','seedbomb','earthquake','stealthrock','leechseed'],{evo:1});
+    S(388,'树林龟','grass','75/89/85/55/65/36','overgrow/shellarmor',['seedbomb','earthquake','stealthrock','leechseed','swordsdance','woodhammer'],{evo:1});
+    S(390,'小火焰猴','fire','44/58/44/58/44/61','blaze/ironfist',['scratch','ember','flamethrower','machpunch','thunderpunch'],{evo:1});
+    S(391,'猛火猴','fire/fighting','64/78/52/78/52/81','blaze/ironfist',['ember','flamethrower','closecombat','machpunch','thunderpunch','stealthrock'],{evo:1});
+    S(393,'波加曼','water','53/51/53/61/56/40','torrent/competitive',['tackle','scald','icebeam','stealthrock','agility'],{evo:1});
+    S(394,'波皇子','water','64/66/68/81/76/50','torrent/competitive',['scald','icebeam','stealthrock','agility','flashcannon'],{evo:1});
+    S(396,'姆克儿','normal/flying','40/55/30/30/30/60','keeneye/reckless',['tackle','aerialace','quickattack','uturn','bravebird'],{evo:1});
+    S(397,'姆克鸟','normal/flying','55/75/50/40/40/80','intimidate/reckless',['aerialace','quickattack','uturn','bravebird','roost'],{evo:1});
+    S(399,'大牙狸','normal/water','59/45/40/35/40/31','simple/unaware/moody',['tackle','waterfall','aquajet','stealthrock','swordsdance'],{evo:1});
+    S(401,'圆法师','bug','37/25/41/25/41/25','shedskin/runaway',['tackle','bugbuzz','stringshot','terablast'],{evo:1});
+    S(402,'音箱蟀','bug','77/85/51/55/51/65','swarm/technician',['xscissor','knockoff','swordsdance','uturn','roost','nightslash']);
+    S(403,'小猫怪','electric','45/65/34/40/34/45','rivalry/intimidate/guts',['wildcharge','playrough','firefang','icefang','crunch'],{evo:1});
+    S(404,'勒克猫','electric','60/85/49/60/49/60','rivalry/intimidate/guts',['wildcharge','playrough','firefang','icefang','crunch','voltswitch'],{evo:1});
+    S(406,'含羞苞','grass/poison','40/30/35/50/70/55','naturalcure/poisonpoint/leafguard',['energyball','sludgebomb','sleeppowder','synthesis','leafstorm'],{evo:1});
+    S(408,'头盖龙','rock','67/125/40/30/30/58','moldbreaker/sheerforce',['headsmash','earthquake','firepunch','rockslide','superpower'],{evo:1});
+    S(410,'盾甲龙','rock/steel','30/42/118/42/88/30','sturdy/soundproof',['ironhead','stoneedge','stealthrock','flashcannon','earthquake'],{evo:1});
+    S(412,'结草儿','bug','40/29/45/29/45/36','shedskin/overcoatx',['tackle','bugbuzz','protect','terablast'],{evo:1});
+    S(413,'结草贵妇','bug/steel','60/59/85/79/105/36','overcoatx/overcoatx',['bugbuzz','flashcannon','energyball','psychic','protect']);
+    S(414,'绅士蛾','bug/flying','70/94/50/94/50/66','swarm/tintedlens',['bugbuzz','airslash','psychic','energyball','quiverdance','roost']);
+    S(415,'三蜜蜂','bug/flying','30/30/42/30/42/70','honeygather/hustle',['gust','bugbuzz','airslash','uturn'],{evo:1});
+    S(417,'帕奇利兹','electric','60/45/70/45/90/95','runaway/pickup/voltabsorb',['thunderbolt','thunderwave','uturn','superfang','nuzzle']);
+    S(418,'泳圈鼬','water','55/65/35/60/30/85','swiftswim/waterveil',['waterfall','aquajet','icepunch','crunch','swordsdance','closecombat'],{evo:1});
+    S(420,'樱花宝','grass','45/35/45/62/53/35','chlorophyll/chlorophyll',['tackle','energyball','sunnyday','synthesis','dazzlinggleam'],{evo:1});
+    S(421,'樱花儿','grass','70/60/70/87/78/85','flowergift/flowergift',['energyball','sunnyday','synthesis','dazzlinggleam','solarbeam','weatherball']);
+    S(422,'无壳海兔','water/ground','76/48/48/57/62/34','stickyhold/stormdrain/sandforce',['earthpower','surf','icebeam','recover','toxic'],{evo:1});
+    S(425,'飘飘球','ghost/flying','90/50/34/60/44/70','aftermath/unburden/flareboost',['shadowball','airslash','thunderbolt','nastyplot','willowisp','destinybond'],{evo:1});
+    S(427,'卷卷耳','normal','55/66/44/44/56/85','runaway/klutz/limber',['quickattack','highjumpkick','fakeout','facade','icepunch'],{evo:1});
+    S(431,'魅力喵','normal','49/55/42/42/37/85','limber/owntempo/keeneye',['facade','knockoff','playrough','uturn','hypnosis'],{evo:1});
+    S(432,'东施喵','normal','71/82/64/64/59/112','thickfat/owntempo/keeneye',['facade','knockoff','playrough','uturn','suckerpunch','swordsdance']);
+    S(433,'铃铛响','psychic','45/30/50/65/50/45','levitate/levitate',['psychic','shadowball','thunderbolt','calmmind','recover'],{evo:1});
+    S(434,'臭鼬噗','poison/dark','63/63/47/41/41/74','stench/aftermath/keeneye',['gunkshot','suckerpunch','knockoff','fireblast','sludgebomb'],{evo:1});
+    S(436,'铜镜怪','steel/psychic','57/24/86/24/86/23','levitate/heatproof/heavymetal',['gyroball','zenheadbutt','earthquake','stealthrock','trickroom'],{evo:1});
+    S(438,'盆才怪','rock','50/80/95/10/45/10','sturdy/rockhead/rattled',['stoneedge','earthquake','suckerpunch','stealthrock','woodhammer'],{evo:1});
+    S(439,'魔尼尼','psychic/fairy','20/25/45/70/90/60','soundproof/filter/technician',['psychic','moonblast','thunderbolt','calmmind','thunderwave'],{evo:1});
+    S(440,'小福蛋','normal','100/5/5/15/65/30','naturalcure/serenegrace/friendguard',['softboiled','seismictoss','thunderwave','stealthrock','toxic'],{evo:1});
+    /* --- 第5世代 ×35 --- */
+    S(495,'藤藤蛇','grass','45/45/55/45/55/63','overgrow/contrary',['tackle','leafblade','dragonpulse','leechseed','glare'],{evo:1});
+    S(496,'青藤蛇','grass','60/60/75/60/75/83','overgrow/contrary',['leafblade','dragonpulse','leechseed','glare','darkpulse','leafstorm'],{evo:1});
+    S(498,'暖暖猪','fire','65/63/45/45/45/45','blaze/thickfat',['tackle','ember','flamethrower','wildcharge','headsmash'],{evo:1});
+    S(499,'炒炒猪','fire/fighting','90/93/55/70/55/55','blaze/reckless',['ember','flamethrower','closecombat','wildcharge','headsmash','suckerpunch'],{evo:1});
+    S(501,'水水獭','water','55/55/45/63/45/45','torrent/shellarmor',['tackle','aquajet','scald','icebeam','swordsdance'],{evo:1});
+    S(502,'双刃丸','water','75/75/60/83/60/60','torrent/shellarmor',['aquajet','scald','icebeam','swordsdance','xscissor','waterfall'],{evo:1});
+    S(504,'探探鼠','normal','45/55/39/35/39/42','runaway/keeneye/analytic',['tackle','knockoff','uturn','swordsdance','hypnosis'],{evo:1});
+    S(506,'小约克','normal','45/60/45/25/45/55','vitalspirit/pickup/runaway',['tackle','playrough','firefang','thunderfang','icefang','crunch'],{evo:1});
+    S(507,'哈约克','normal','65/80/65/35/65/60','intimidate/sandrush/scrappy',['facade','playrough','firefang','thunderfang','icefang','crunch'],{evo:1});
+    S(509,'扒手猫','dark','41/50/37/50/37/66','limber/unburden/prankster',['darkpulse','shadowball','hypervoice','nastyplot','suckerpunch','uturn'],{evo:1});
+    S(511,'花椰猴','grass','50/53/48/53/48/64','gluttony/overgrow',['energyball','knockoff','swordsdance','seedbomb','leechseed'],{evo:1});
+    S(512,'花椰猿','grass','75/98/63/98/63/101','gluttony/overgrow',['energyball','knockoff','swordsdance','seedbomb','leechseed','synthesis']);
+    S(513,'爆香猴','fire','50/53/48/53/48/64','gluttony/blaze',['flamethrower','knockoff','nastyplot','fireblast','solarbeam'],{evo:1});
+    S(514,'爆香猿','fire','75/98/63/98/63/101','gluttony/blaze',['flamethrower','knockoff','nastyplot','fireblast','solarbeam','focusblast']);
+    S(515,'冷水猴','water','50/53/48/53/48/64','gluttony/torrent',['surf','knockoff','nastyplot','hydropump','icebeam'],{evo:1});
+    S(516,'冷水猿','water','75/98/63/98/63/101','gluttony/torrent',['surf','knockoff','nastyplot','hydropump','icebeam','focusblast']);
+    S(517,'食梦梦','psychic','76/25/45/67/55/24','forewarn/synchronize/telepathy',['psychic','shadowball','thunderbolt','calmmind','hypnosis'],{evo:1});
+    S(518,'梦梦蚀','psychic','116/55/85/107/95/29','forewarn/synchronize/telepathy',['psychic','shadowball','thunderbolt','calmmind','hypnosis','energyball']);
+    S(519,'豆豆鸽','normal/flying','50/55/50/36/30/43','bigpecks/superluck/rivalry',['aerialace','quickattack','uturn','roost','swordsdance'],{evo:1});
+    S(520,'咕咕鸽','normal/flying','62/77/62/50/42/65','bigpecks/superluck/rivalry',['bravebird','facade','uturn','roost','quickattack','swordsdance'],{evo:1});
+    S(522,'斑斑马','electric','45/60/32/50/32/76','lightningrod/motordrive/sapsipper',['wildcharge','flamecharge','voltswitch','thunderwave','quickattack'],{evo:1});
+    S(523,'雷电斑马','electric','75/100/63/80/63/116','lightningrod/motordrive/sapsipper',['wildcharge','flamecharge','voltswitch','thunderwave','overheat','quickattack']);
+    S(524,'石丸子','rock','55/75/85/25/25/15','sturdy/weakarmor/sandforce',['earthquake','stoneedge','explosion','stealthrock','superpower'],{evo:1});
+    S(525,'地幔岩','rock','70/105/105/50/40/20','sturdy/weakarmor/sandforce',['earthquake','stoneedge','explosion','stealthrock','superpower','ironhead'],{evo:1});
+    S(527,'滚滚蝙蝠','psychic/flying','65/45/43/55/43/72','unaware/klutz/simple',['psychic','airslash','calmmind','roost','shadowball'],{evo:1});
+    S(528,'心蝙蝠','psychic/flying','67/57/55/77/55/114','unaware/klutz/simple',['psychic','airslash','calmmind','roost','shadowball','energyball']);
+    S(529,'螺钉地鼠','ground','60/85/40/30/45/68','sandrush/sandforce/moldbreaker',['earthquake','ironhead','rockslide','swordsdance','xscissor'],{evo:1});
+    S(532,'搬运小匠','fighting','75/80/55/25/35/35','guts/sheerforce/ironfist',['drainpunch','machpunch','knockoff','icepunch','facade'],{evo:1});
+    S(533,'铁骨土人','fighting','85/105/85/40/50/40','guts/ironfist/sheerforce',['drainpunch','machpunch','knockoff','icepunch','facade','bulkup'],{evo:1});
+    S(535,'圆蝌蚪','water','50/50/40/50/40/64','swiftswim/hydration/waterabsorb',['scald','earthpower','icebeam','raindance','hypnosis'],{evo:1});
+    S(536,'蓝蟾蜍','water/ground','75/65/55/65/55/69','swiftswim/hydration/waterabsorb',['scald','earthpower','icebeam','raindance','hypnosis','focusblast'],{evo:1});
+    S(538,'投摔鬼','fighting','120/100/85/30/85/45','guts/innerfocus/moldbreaker',['closecombat','knockoff','stoneedge','icepunch','bulkup','payback']);
+    S(540,'虫宝包','bug/grass','45/53/70/40/60/42','swarm/chlorophyll/overcoatx',['xscissor','seedbomb','knockoff','swordsdance','leechseed'],{evo:1});
+    S(541,'宝包茧','bug/grass','55/63/90/50/80/42','swarm/chlorophyll/overcoatx',['xscissor','seedbomb','knockoff','swordsdance','leechseed'],{evo:1});
+    S(542,'保姆虫','bug/grass','75/103/80/70/80/92','swarm/chlorophyll/overcoatx',['xscissor','leafblade','knockoff','swordsdance','leechseed','synthesis']);
+    /* --- 第6世代 ×35 --- */
+    S(650,'哈力栗','grass','56/61/65/48/45/38','overgrow/bulletproof',['tackle','seedbomb','earthquake','leechseed','bulkup'],{evo:1});
+    S(651,'胖胖哈力','grass','61/78/95/56/58/57','overgrow/bulletproof',['seedbomb','earthquake','leechseed','bulkup','protect','woodhammer'],{evo:1});
+    S(653,'火狐狸','fire','40/45/40/62/60/60','blaze/magician',['ember','flamethrower','psychic','willowisp','calmmind'],{evo:1});
+    S(654,'长尾火狐','fire','59/59/58/90/70/73','blaze/magician',['flamethrower','psychic','shadowball','calmmind','willowisp','fireblast'],{evo:1});
+    S(656,'呱呱泡蛙','water','41/56/40/62/44/71','torrent/protean',['scald','darkpulse','icebeam','uturn','gunkshot'],{evo:1});
+    S(657,'呱头蛙','water','54/63/52/83/56/97','torrent/protean',['hydropump','darkpulse','icebeam','uturn','gunkshot','spikes'],{evo:1});
+    S(659,'掘掘兔','normal','38/36/38/32/36/57','pickup/cheekpouch/hugepower',['tackle','earthquake','knockoff','swordsdance','uturn'],{evo:1});
+    S(661,'小箭雀','normal/flying','45/50/43/40/38/62','bigpecks/galewings',['aerialace','quickattack','uturn','roost','swordsdance'],{evo:1});
+    S(662,'火箭雀','fire/flying','62/73/55/56/52/84','flamebody/galewings',['bravebird','flareblitz','roost','swordsdance','uturn'],{evo:1});
+    S(664,'粉蝶虫','bug','38/35/40/27/25/35','shielddust/compoundeyes/friendguard',['tackle','bugbuzz','stringshot','terablast'],{evo:1});
+    S(665,'粉蝶蛹','bug','45/22/60/27/30/29','shielddust/friendguard',['tackle','bugbuzz','protect','terablast'],{evo:1});
+    S(666,'彩粉蝶','bug/flying','80/52/50/90/50/89','shielddust/compoundeyes/friendguard',['bugbuzz','hurricane','energyball','quiverdance','roost','sleeppowder']);
+    S(667,'小狮狮','fire/normal','62/50/58/73/54/72','rivalry/unnerve/moxie',['flamethrower','hypervoice','darkpulse','willowisp','calmmind'],{evo:1});
+    S(669,'花蓓蓓','fairy','44/38/39/61/79/42','flowerveil/symbiosis',['moonblast','psychic','calmmind','synthesis','energyball','dazzlinggleam'],{evo:1});
+    S(670,'花叶蒂','fairy','54/45/47/75/98/52','flowerveil/symbiosis',['moonblast','psychic','calmmind','synthesis','energyball','dazzlinggleam'],{evo:1});
+    S(672,'坐骑小羊','grass','66/65/48/62/57/52','sapsipper/grasspelt',['hornleech','earthquake','rockslide','bulkup','synthesis'],{evo:1});
+    S(674,'顽皮熊猫','fighting','67/82/62/46/48/43','ironfist/moldbreaker/scrappy',['closecombat','knockoff','icepunch','drainpunch','bulkup','stoneedge'],{evo:1});
+    S(676,'多丽米亚','normal','75/80/60/65/90/102','furcoat/furcoat',['facade','knockoff','swordsdance','earthquake','firefang','thunderfang']);
+    S(677,'妙喵','psychic','62/48/54/63/60/68','keeneye/infiltrator/owntempo',['psychic','shadowball','thunderbolt','calmmind','thunderwave'],{evo:1});
+    S(678,'超能妙喵','psychic','74/48/76/83/81/104','keeneye/infiltrator/prankster',['psychic','shadowball','thunderbolt','calmmind','thunderwave','energyball']);
+    S(679,'独剑鞘','steel/ghost','45/80/100/35/37/28','noguard/noguard',['ironhead','shadowclaw','swordsdance','shadowsneak','sacredsword'],{evo:1});
+    S(680,'双剑鞘','steel/ghost','59/110/150/45/49/35','noguard/noguard',['ironhead','shadowclaw','swordsdance','shadowsneak','sacredsword','kingshield'],{evo:1});
+    S(682,'粉香香','fairy','78/52/60/63/65/23','healer/aromaveil',['moonblast','psychic','calmmind','synthesis','dazzlinggleam'],{evo:1});
+    S(684,'绵绵泡芙','fairy','62/48/66/59/57/49','sweetveil/unburden',['playrough','drainpunch','swordsdance','suckerpunch','flamethrower'],{evo:1});
+    S(686,'好啦鱿','dark/psychic','53/54/53/37/46/45','contrary/suctioncups/infiltrator',['superpower','psychocut','knockoff','calmmind'],{evo:1});
+    S(688,'龟脚脚','rock/water','42/52/67/39/56/50','toughclaws/sniper/pickpocket',['crabhammer','stoneedge','knockoff','swordsdance','aquajet'],{evo:1});
+    S(690,'垃垃藻','poison/water','50/60/60/60/60/30','poisonpoint/poisontouch/adaptability',['sludgebomb','hydropump','thunderbolt','shadowball','toxic'],{evo:1});
+    S(692,'铁臂枪虾','water','50/53/62/58/63/44','megalauncher/megalauncher',['waterpulse','aurasphere','darkpulse','dragonpulse','icebeam'],{evo:1});
+    S(694,'伞电蜥','electric/normal','44/38/33/61/43/70','dryskin/sandveil/solarpower',['thunderbolt','hypervoice','flamethrower','energyball','thunderwave'],{evo:1});
+    S(696,'宝宝暴龙','rock/dragon','58/89/77/45/45/48','strongjaw/sturdy',['stoneedge','dragonclaw','earthquake','firefang','thunderfang'],{evo:1});
+    S(698,'冰雪龙龙','rock/ice','77/59/50/67/63/46','refrigerate/snowwarning',['icebeam','powergem','thunderbolt','earthpower','blizzard'],{evo:1});
+    S(702,'咚咚鼠','electric/fairy','67/58/57/81/67/101','cheekpouch/pickup/plus',['thunderbolt','moonblast','thunder','dazzlinggleam','roost','nuzzle']);
+    S(703,'小碎钻','rock/fairy','50/50/150/50/150/50','clearbody/sturdy',['powergem','moonblast','stealthrock','earthpower','dazzlinggleam','recover']);
+    S(704,'黏黏宝','dragon','45/50/35/55/75/40','sapsipper/hydration/gooey',['dragonpulse','flamethrower','thunderbolt','sludgebomb','raindance'],{evo:1});
+    S(705,'黏美儿','dragon','68/75/53/83/113/60','sapsipper/hydration/gooey',['dragonpulse','flamethrower','thunderbolt','sludgebomb','icebeam','raindance'],{evo:1});
+    /* --- 第7世代 ×35 --- */
+    S(722,'木木枭','grass/flying','68/55/55/50/50/42','overgrow/longreach',['tackle','leafblade','bravebird','shadowsneak','roost'],{evo:1});
+    S(723,'投羽枭','grass/flying','78/75/75/70/70/52','overgrow/longreach',['leafblade','bravebird','shadowsneak','roost','swordsdance'],{evo:1});
+    S(725,'火斑喵','fire','45/65/40/60/40/70','blaze/intimidate',['scratch','ember','flamethrower','crunch','firefang'],{evo:1});
+    S(726,'炎热喵','fire','65/85/50/80/50/90','blaze/intimidate',['flareblitz','crunch','firefang','swordsdance','uturn'],{evo:1});
+    S(728,'球球海狮','water','50/54/54/66/56/40','torrent/liquidvoice',['scald','moonblast','icebeam','energyball','psychic'],{evo:1});
+    S(729,'花漾海狮','water','60/69/69/91/81/50','torrent/liquidvoice',['hydropump','moonblast','icebeam','energyball','psychic'],{evo:1});
+    S(731,'小笃儿','normal/flying','35/75/30/30/30/65','keeneye/skilllink/pickup',['aerialace','rockblast','bulletseed','roost','uturn'],{evo:1});
+    S(732,'喇叭啄鸟','normal/flying','55/85/50/40/50/75','keeneye/skilllink/pickup',['bravebird','rockblast','bulletseed','roost','uturn','knockoff'],{evo:1});
+    S(734,'猫鼬少','normal','48/70/30/30/30/45','stakeout/strongjaw/adaptability',['facade','crunch','earthquake','suckerpunch','swordsdance'],{evo:1});
+    S(736,'强颚鸡母虫','bug/electric','47/62/45/55/45/46','levitate/levitate',['thunderbolt','bugbuzz','energyball','voltswitch'],{evo:1});
+    S(737,'虫电宝','bug/electric','57/82/95/55/75/36','levitate/levitate',['thunderbolt','bugbuzz','energyball','voltswitch','stickyweb'],{evo:1});
+    S(739,'好胜蟹','fighting','47/82/57/42/47/63','hyperCutterx/ironfist/angerpoint',['closecombat','icepunch','stoneedge','xscissor','bulkup'],{evo:1});
+    S(741,'花舞鸟','fire/flying','75/70/70/98/70/93','dancer/dancer',['revelationdance','airslash','hurricane','roost','calmmind','uturn']);
+    S(742,'萌虻','bug/fairy','40/45/40/55/40/84','honeygather/shielddust/sweetveil',['bugbuzz','moonblast','dazzlinggleam','quiverdance','roost'],{evo:1});
+    S(744,'岩狗狗','rock','45/65/40/30/40/60','keeneye/vitalspirit/steadfastx',['stoneedge','closecombat','suckerpunch','stealthrock','firepunch'],{evo:1});
+    S(746,'弱丁鱼','water','45/20/20/25/25/40','schooling/schooling',['scald','icebeam','earthquake','uturn','hydropump']);
+    S(747,'好坏星','poison/water','50/53/62/43/52/45','merciless/limber/regenerator',['scald','toxic','recover','banefulbunker','knockoff'],{evo:1});
+    S(749,'泥驴仔','ground','70/100/70/45/55/45','owntempo/stamina/innerfocus',['earthquake','stoneedge','stealthrock','icepunch','superpower'],{evo:1});
+    S(751,'滴蛛','water/bug','38/40/52/40/72/27','waterbubble/waterabsorb',['liquidation','lunge','knockoff','swordsdance','aquajet'],{evo:1});
+    S(753,'伪螳草','grass','40/55/35/50/35/35','leafguard/contrary',['leafblade','knockoff','swordsdance','synthesis','xscissor'],{evo:1});
+    S(755,'睡睡菇','grass/fairy','40/35/55/65/75/15','illuminate/effectspore/raindish',['gigadrain','moonblast','sleeppowder','synthesis','energyball'],{evo:1});
+    S(756,'灯罩夜菇','grass/fairy','60/45/80/90/100/30','illuminate/effectspore/raindish',['gigadrain','moonblast','sleeppowder','synthesis','energyball','dazzlinggleam']);
+    S(757,'夜盗火蜥','poison/fire','48/44/40/71/40/77','corrosion/obliviousx',['flamethrower','sludgewave','nastyplot','dragonpulse'],{evo:1});
+    S(759,'童偶熊','normal/fighting','70/75/50/45/50/50','fluffy/klutz/cutecharm',['doubleedge','closecombat','knockoff','earthquake','swordsdance'],{evo:1});
+    S(761,'甜竹竹','grass','42/30/38/30/38/32','leafguard/obliviousx/sweetveil',['tackle','razorleaf','synthesis','leechseed'],{evo:1});
+    S(762,'甜舞妮','grass','52/40/48/40/48/62','leafguard/obliviousx/sweetveil',['tropkick','knockoff','swordsdance','synthesis','uturn'],{evo:1});
+    S(764,'花疗环环','fairy','51/52/90/82/110/100','flowerveil/healer/naturalcure',['moonblast','psychic','calmmind','synthesis','dazzlinggleam','thunderbolt']);
+    S(765,'智挥猩','normal/psychic','90/60/80/90/110/60','innerfocus/telepathy/symbiosis',['psychic','shadowball','calmmind','thunderbolt','energyball','trickroom']);
+    S(766,'投掷猴','fighting','100/120/90/40/60/80','receiver/defiant',['closecombat','knockoff','stoneedge','earthquake','swordsdance','icepunch']);
+    S(767,'胆小虫','bug/water','25/35/40/20/30/80','wimpout/wimpout',['liquidation','lunge','knockoff','swordsdance','aquajet'],{evo:1});
+    S(769,'沙丘娃','ghost/ground','55/55/80/70/45/15','watercompaction/sandveil',['earthpower','shadowball','energyball','stealthrock','toxic'],{evo:1});
+    S(770,'噬沙堡爷','ghost/ground','85/75/110/100/75/35','watercompaction/sandveil',['earthpower','shadowball','energyball','stealthrock','toxic','darkpulse']);
+    S(771,'拳海参','water','55/60/130/30/130/5','innardsout/unaware',['scald','toxic','recover','knockoff','painsplit']);
+    S(772,'属性：空','normal','95/95/95/95/95/59','battlearmor/battlearmor',['doubleedge','crunch','swordsdance','uturn','flamethrower','icebeam']);
+    S(774,'小陨星','rock/flying','60/60/100/60/100/60','shieldsdown/shieldsdown',['powergem','airslash','earthquake','stealthrock','calmmind']);
+    /* --- 第8世代 ×30 --- */
+    S(810,'敲音猴','grass','50/65/50/40/40/65','overgrow/grassysurge',['tackle','woodhammer','knockoff','superpower','uturn'],{evo:1});
+    S(811,'啪咚猴','grass','70/85/70/55/60/80','overgrow/grassysurge',['woodhammer','knockoff','superpower','uturn','drumbeating','swordsdance'],{evo:1});
+    S(813,'炎兔儿','fire','50/71/40/40/40/69','blaze/libero',['tackle','pyroball','highjumpkick','zenheadbutt','uturn'],{evo:1});
+    S(814,'腾蹴小将','fire','65/86/60/55/60/94','blaze/libero',['pyroball','highjumpkick','zenheadbutt','uturn','suckerpunch','swordsdance'],{evo:1});
+    S(816,'泪眼蜥','water','50/40/40/70/40/70','torrent/sniper',['tackle','hydropump','icebeam','darkpulse','uturn'],{evo:1});
+    S(817,'变涩蜥','water','65/60/55/95/55/90','torrent/sniper',['hydropump','icebeam','darkpulse','uturn','shadowball'],{evo:1});
+    S(819,'贪心栗鼠','normal','70/55/55/35/35/25','pickup/gluttony',['tackle','knockoff','earthquake','swordsdance','uturn'],{evo:1});
+    S(821,'稚山雀','flying','38/47/35/33/35/57','keeneye/unnerve/bigpecks',['aerialace','quickattack','uturn','roost'],{evo:1});
+    S(822,'蓝鸦','flying','68/67/55/43/55/77','keeneye/unnerve/bigpecks',['bravebird','ironhead','roost','bulkup','uturn'],{evo:1});
+    S(824,'索侦虫','bug','25/20/20/25/45/45','swarm/compoundeyes/telepathy',['tackle','bugbuzz','stringshot','terablast'],{evo:1});
+    S(825,'天罩虫','bug/psychic','50/35/80/50/90/30','swarm/compoundeyes/telepathy',['bugbuzz','psychic','calmmind','trickroom'],{evo:1});
+    S(827,'偷儿狐','dark','40/28/28/47/52/50','runaway/unburden/stakeout',['darkpulse','knockoff','nastyplot','suckerpunch'],{evo:1});
+    S(829,'幼棉棉','grass','40/40/60/40/60/10','cottondown/regenerator/effectspore',['tackle','energyball','sleeppowder','synthesis','leechseed'],{evo:1});
+    S(830,'白蓬蓬','grass','60/50/90/80/120/60','cottondown/regenerator/effectspore',['energyball','sleeppowder','synthesis','leechseed','cottonspore','dazzlinggleam']);
+    S(831,'毛辫羊','normal','42/40/55/40/45/48','fluffy/runaway/bulletproof',['tackle','knockoff','swordsdance','uturn','earthquake'],{evo:1});
+    S(833,'咬咬龟','water','50/64/50/38/38/44','strongjaw/shellarmor/swiftswim',['waterfall','stoneedge','crunch','psychicfangs','liquidation'],{evo:1});
+    S(835,'来电汪','electric','59/45/50/45/50/26','pickup/ballfetch',['wildcharge','playrough','firefang','thunderfang','crunch'],{evo:1});
+    S(837,'小炭仔','rock','30/40/50/40/50/30','steamengine/flashfire',['flamethrower','stoneedge','stealthrock','willowisp'],{evo:1});
+    S(838,'大炭车','rock/fire','80/60/90/60/70/50','steamengine/flashfire',['flamethrower','stoneedge','stealthrock','willowisp','earthpower'],{evo:1});
+    S(840,'啃果虫','grass/dragon','40/40/80/40/40/20','ripen/gluttony/bulletproof',['tackle','dragonclaw','seedbomb','terablast'],{evo:1});
+    S(843,'沙包蛇','ground','52/57/75/35/50/46','sandspit/shedskin/sandveil',['earthquake','stoneedge','knockoff','swordsdance','stealthrock'],{evo:1});
+    S(845,'古月鸟','flying/water','70/85/55/85/95/85','gulpmissile/gulpmissile',['bravebird','hydropump','icebeam','roost','hurricane','surf']);
+    S(846,'刺梭鱼','water','41/63/40/40/30/66','swiftswim/propellertail',['liquidation','drillpeck','knockoff','swordsdance','aquajet'],{evo:1});
+    S(848,'毒电婴','electric/poison','40/38/35/54/35/40','rattled/static/klutz',['thunderbolt','sludgewave','voltswitch','nuzzle'],{evo:1});
+    S(850,'烧火蚣','fire/bug','50/65/45/50/50/45','flashfire/whitesmoke/flamebody',['flareblitz','lunge','knockoff','earthquake','willowisp'],{evo:1});
+    S(852,'拳拳蛸','fighting','50/68/60/50/50/32','limber/technician',['closecombat','knockoff','suckerpunch','drainpunch','poisonjab'],{evo:1});
+    S(854,'来悲茶','ghost','40/45/45/74/54/50','weakarmor/cursedbodyx',['shadowball','energyball','willowisp','calmmind','darkpulse'],{evo:1});
+    S(856,'迷布莉姆','psychic','42/30/45/56/53/39','healer/anticipation/magicbounce',['psychic','moonblast','shadowball','calmmind','thunderwave'],{evo:1});
+    S(857,'提布莉姆','psychic/fairy','57/40/65/86/73/49','healer/anticipation/magicbounce',['psychic','moonblast','shadowball','calmmind','trickroom'],{evo:1});
+    S(859,'捣蛋小妖','dark/fairy','45/45/30/55/40/50','prankster/frisk/pickpocket',['playrough','drainpunch','taunt','thunderwave','suckerpunch'],{evo:1});
+    /* --- 第9世代 ×30 --- */
+    S(906,'新叶喵','grass','40/61/54/45/45/65','overgrow/protean',['tackle','leafblade','knockoff','uturn','playrough'],{evo:1});
+    S(907,'蒂蕾喵','grass/dark','61/80/63/60/63/83','overgrow/protean',['flowertrick','knockoff','suckerpunch','uturn','playrough','swordsdance'],{evo:1});
+    S(909,'呆火鳄','fire','67/45/59/63/40/36','blaze/unaware',['tackle','ember','flamethrower','earthpower','willowisp'],{evo:1});
+    S(910,'炙烫鳄','fire/ghost','81/55/78/90/58/49','blaze/unaware',['torchsong','shadowball','earthpower','willowisp','slackoff','flamethrower'],{evo:1});
+    S(912,'润水鸭','water','55/65/45/50/45/50','torrent/moxie',['tackle','aquastep','closecombat','icepunch','uturn'],{evo:1});
+    S(913,'涌跃鸭','water/fighting','70/85/65/65/60/65','torrent/moxie',['aquastep','closecombat','icepunch','uturn','swordsdance','liquidation'],{evo:1});
+    S(915,'爱吃豚','normal','54/45/40/35/45/35','aromaveil/gluttony/thickfat',['tackle','earthquake','knockoff','swordsdance','doubleedge'],{evo:1});
+    S(917,'团珠蛛','bug','35/41/45/29/40/20','insomnia/stickyhold',['tackle','lunge','knockoff','suckerpunch','poisonjab'],{evo:1});
+    S(919,'豆蟋蟀','bug','33/46/40/21/25/45','swarm/scrappy',['tackle','xscissor','knockoff','swordsdance','uturn'],{evo:1});
+    S(921,'布拨','electric','45/50/20/40/25/60','voltabsorb/naturalcure/ironfist',['tackle','wildcharge','machpunch','closecombat','thunderwave'],{evo:1});
+    S(922,'布土拨','electric/fighting','60/75/40/50/40/85','voltabsorb/naturalcure/ironfist',['doubleedge','closecombat','machpunch','wildcharge','revivalblessing'],{evo:1});
+    S(924,'一对鼠','normal','40/45/20/45/20/75','runaway/pickup/owntempo',['tackle','knockoff','uturn','swordsdance','doubleedge'],{evo:1});
+    S(925,'一家鼠','normal','74/75/70/65/75/111','friendguard/cheekpouch/technician',['doubleedge','knockoff','uturn','swordsdance','playrough','seedbomb']);
+    S(926,'狗仔包','fairy','37/55/70/30/55/65','wellbakedbody/aromaveil',['tackle','playrough','knockoff','swordsdance','firefang'],{evo:1});
+    S(928,'迷你芙','grass/normal','41/35/45/58/51/30','seedsower/harvest',['tackle','gigadrain','earthpower','synthesis','energyball'],{evo:1});
+    S(929,'奥利纽','grass/normal','52/53/60/78/78/33','seedsower/harvest',['gigadrain','earthpower','synthesis','energyball','leafstorm','dazzlinggleam'],{evo:1});
+    S(932,'盐石宝','rock','55/55/75/35/35/25','purifyingsalt/sturdy/clearbody',['tackle','stoneedge','recover','stealthrock','earthquake'],{evo:1});
+    S(933,'盐石垒','rock','60/60/100/35/65/35','purifyingsalt/sturdy/clearbody',['saltcure','stoneedge','recover','stealthrock','earthquake','bodypress'],{evo:1});
+    S(935,'炭小侍','fire','40/50/40/50/40/35','flashfire/flamebody',['tackle','ember','flamethrower','willowisp','fireblast'],{evo:1});
+    S(938,'光蚪仔','electric','61/31/41/59/35/45','electromorphosis/static/damp',['thunderbolt','voltswitch','thunderwave','discharge','surf'],{evo:1});
+    S(940,'电海燕','electric/flying','40/40/35/55/40/70','windpower/voltabsorb',['thunderbolt','airslash','voltswitch','roost','thunder'],{evo:1});
+    S(942,'偶叫獒','dark','60/78/60/40/51/51','intimidate/runaway/stakeout',['crunch','playrough','firefang','thunderfang','swordsdance'],{evo:1});
+    S(943,'獒教父','dark','80/120/90/60/70/85','intimidate/guarddog',['crunch','playrough','firefang','thunderfang','swordsdance','closecombat']);
+    S(944,'滋汁鼹','poison/normal','40/65/40/40/40/75','poisontouch/unburden/pickpocket',['gunkshot','knockoff','suckerpunch','swordsdance','poisonjab'],{evo:1});
+    S(946,'纳噬草','grass/ghost','40/65/30/45/35/60','windrider/infiltrator',['tackle','hornleech','shadowclaw','knockoff','swordsdance'],{evo:1});
+    S(948,'原野水母','ground/grass','40/40/35/50/100/70','myceliummight/myceliummight',['earthpower','gigadrain','energyball','stealthrock','toxic'],{evo:1});
+    S(950,'毛崖蟹','rock','70/100/115/35/55/75','angerpoint/shellarmor/moldbreaker',['stoneedge','crabhammer','knockoff','swordsdance','earthquake']);
+    S(951,'热辣娃','grass/fire','50/62/40/62/40/50','chlorophyll/insomnia/moody',['tackle','energyball','flamethrower','willowisp','synthesis'],{evo:1});
+    S(952,'狠辣椒','grass/fire','65/108/65/108/65/75','chlorophyll/insomnia/moody',['energyball','flamethrower','willowisp','synthesis','leafstorm','fireblast']);
+    S(953,'虫滚泥','bug','41/50/60/31/58/30','swarm/scrappy',['tackle','lunge','knockoff','swordsdance','poisonjab'],{evo:1});
 
     /* 修正：过滤掉不存在的招式键 */
     SP.forEach(s => s.mv = s.mv.filter(k => MV[k]));
@@ -5547,7 +6142,182 @@ const THIRD_ABILITY_PATCH = {
   945: 'prankster',
   956: 'speedboost',
   967: 'regenerator',
-  968: 'sandveil',
+   968: 'sandveil',
+   /* ★ 第5批隐藏特性（新增300只宝可梦对应） */
+   11:'shedskin', 13:'runaway', 14:'shedskin',
+   17:'bigpecks', 21:'keeneye', 23:'unnerve', 27:'sandrush',
+   35:'friendguard', 37:'drought', 40:'friendguard',
+   41:'infiltrator', 43:'runaway', 44:'effectspore',
+   83:'defiant', 87:'icebody',
+   105:'battlearmor', 106:'unburden', 107:'innerfocus',
+   108:'cloudnine', 119:'lightningrod',
+   122:'technician', 124:'dryskin',
+   125:'vitalspirit', 126:'vitalspirit',
+   132:'imposter', 137:'analytic',
+   139:'weakarmor', 141:'weakarmor',
+   147:'marvelscale', 148:'marvelscale',
+   152:'leafguard', 153:'leafguard',
+   155:'flashfire', 156:'flashfire',
+   158:'sheerforce', 159:'sheerforce',
+   161:'frisk', 163:'tintedlens',
+   165:'rattled', 166:'rattled',
+   167:'sniper',
+   170:'waterabsorb', 172:'lightningrod',
+   173:'friendguard', 174:'friendguard',
+   175:'superluck',
+   177:'magicbounce',
+   179:'plus', 180:'plus',
+   183:'sapsipper',
+   187:'infiltrator', 188:'infiltrator', 189:'infiltrator',
+   190:'skilllink',
+   191:'earlybird', 192:'earlybird',
+   193:'frisk',
+   194:'unaware',
+   198:'prankster',
+   203:'sapsipper',
+   204:'overcoatx',
+   206:'rattled',
+   207:'immunity',
+   209:'rattled',
+   252:'unburden', 253:'unburden',
+   255:'speedboost', 256:'speedboost',
+   258:'damp', 259:'damp',
+   261:'rattled', 263:'quickfeet',
+   265:'runaway',
+   270:'owntempo', 271:'owntempo',
+   273:'pickpocket', 274:'pickpocket',
+   278:'raindish',
+   280:'telepathy', 281:'telepathy',
+   284:'unnerve',
+   285:'quickfeet',
+   290:'infiltrator',
+   293:'rattled', 294:'scrappy',
+   296:'sheerforce',
+   298:'sapsipper',
+   299:'sandforce',
+   300:'wonderskin', 301:'wonderskin',
+   304:'heavymetal', 305:'heavymetal',
+   307:'telepathy',
+   387:'shellarmor', 388:'shellarmor',
+   390:'ironfist', 391:'ironfist',
+   393:'competitive', 394:'competitive',
+   396:'reckless', 397:'reckless',
+   399:'moody',
+   401:'runaway',
+   403:'guts', 404:'guts',
+   406:'leafguard',
+   408:'sheerforce',
+   412:'overcoatx',
+   415:'hustle',
+   417:'voltabsorb',
+   418:'waterveil',
+   422:'sandforce',
+   425:'flareboost',
+   427:'limber',
+   431:'keeneye', 432:'keeneye',
+   434:'keeneye',
+   436:'heavymetal',
+   438:'rattled',
+   439:'technician',
+   440:'friendguard',
+   495:'contrary', 496:'contrary',
+   498:'thickfat', 499:'reckless',
+   501:'shellarmor', 502:'shellarmor',
+   504:'analytic',
+   506:'runaway', 507:'scrappy',
+   509:'prankster',
+   511:'overgrow', 513:'blaze', 515:'torrent',
+   517:'telepathy', 518:'telepathy',
+   519:'rivalry', 520:'rivalry',
+   522:'sapsipper', 523:'sapsipper',
+   524:'sandforce', 525:'sandforce',
+   527:'simple', 528:'simple',
+   529:'moldbreaker',
+   532:'ironfist', 533:'sheerforce',
+   535:'waterabsorb', 536:'waterabsorb',
+   538:'moldbreaker',
+   540:'overcoatx', 541:'overcoatx', 542:'overcoatx',
+   650:'bulletproof', 651:'bulletproof',
+   653:'magician', 654:'magician',
+   656:'protean', 657:'protean',
+   659:'hugepower',
+   661:'galewings', 662:'galewings',
+   664:'friendguard', 665:'friendguard', 666:'friendguard',
+   667:'moxie',
+   669:'symbiosis', 670:'symbiosis',
+   672:'grasspelt',
+   674:'scrappy',
+   677:'owntempo', 678:'prankster',
+   682:'aromaveil',
+   684:'unburden',
+   686:'infiltrator',
+   688:'pickpocket',
+   690:'adaptability',
+   694:'solarpower',
+   696:'sturdy',
+   698:'snowwarning',
+   702:'plus',
+   703:'sturdy',
+   704:'gooey', 705:'gooey',
+   722:'longreach', 723:'longreach',
+   725:'intimidate', 726:'intimidate',
+   728:'liquidvoice', 729:'liquidvoice',
+   731:'pickup', 732:'pickup',
+   734:'adaptability',
+   737:'levitate',
+   739:'angerpoint',
+   742:'sweetveil',
+   744:'steadfastx',
+   747:'regenerator',
+   749:'innerfocus',
+   751:'waterabsorb',
+   753:'contrary',
+   755:'raindish', 756:'raindish',
+   757:'obliviousx',
+   759:'cutecharm',
+   761:'sweetveil', 762:'sweetveil',
+   764:'naturalcure',
+   765:'symbiosis',
+   766:'defiant',
+   769:'sandveil', 770:'sandveil',
+   771:'unaware',
+   810:'grassysurge', 811:'grassysurge',
+   813:'libero', 814:'libero',
+   816:'sniper', 817:'sniper',
+   821:'bigpecks', 822:'bigpecks',
+   824:'telepathy', 825:'telepathy',
+   827:'stakeout',
+   829:'effectspore', 830:'effectspore',
+   831:'bulletproof',
+   833:'swiftswim',
+   837:'flashfire', 838:'flashfire',
+   840:'bulletproof',
+   843:'sandveil',
+   846:'propellertail',
+   848:'klutz',
+   850:'flamebody',
+   852:'technician',
+   854:'cursedbodyx',
+   856:'magicbounce', 857:'magicbounce',
+   859:'pickpocket',
+   906:'protean', 907:'protean',
+   909:'unaware', 910:'unaware',
+   912:'moxie', 913:'moxie',
+   915:'thickfat',
+   919:'scrappy',
+   921:'ironfist', 922:'ironfist',
+   924:'owntempo', 925:'technician',
+   928:'harvest', 929:'harvest',
+   932:'clearbody', 933:'clearbody',
+   938:'damp',
+   940:'voltabsorb',
+   942:'stakeout',
+   943:'guarddog',
+   944:'pickpocket',
+   946:'infiltrator',
+   950:'moldbreaker',
+   951:'moody', 952:'moody',
+   953:'scrappy',
 
 };
 
@@ -5620,7 +6390,7 @@ SP.forEach(s => {
       888: { f: '888-crowned', t: 'fairy/steel', s: [92, 170, 115, 80, 115, 148], a: 'intrepidsword', name: '苍响(剑之王)', tag: '剑之王', item: 'rustedsword', stone: '腐朽之剑', formTag: '剑之王形态' },
       889: { f: '889-crowned', t: 'fighting/steel', s: [92, 130, 145, 80, 145, 128], a: 'dauntlessshield', name: '藏玛然特(盾之王)', tag: '盾之王', item: 'rustedshield', stone: '腐朽之盾', formTag: '盾之王形态' },
     };
-    const GMAXLIST = new Set([3, 6, 9, 25, 52, 68, 94, 99, 131, 133, 143, 569, 809, 812, 815, 818, 823, 826, 834, 839, 841, 842, 844, 849, 851, 858, 861, 869, 879, 884, 892]);
+    const GMAXLIST = new Set([3, 6, 9, 25, 52, 68, 94, 99, 131, 133, 143, 569, 809, 812, 815, 818, 823, 826, 834, 839, 841, 842, 844, 845, 849, 851, 858, 861, 869, 879, 884, 892]);
     /* ★ 超极巨招式（G-Max）：超极巨化的宝可梦使用对应属性的G-Max招式替代普通极巨招式 */
 const GMAXMOVE = {
       3:  { t: 'grass',   n: '超极巨灰飞鞭灭', fx: { terrain: 'grassy' }, dot: 'grass',
@@ -5647,9 +6417,15 @@ const GMAXMOVE = {
             desc: '巨大身躯中蕴藏的能量使已消耗的树果重新生长出来' },
       569:{ t: 'poison',  n: '超极巨臭气冲天', fx: { sec: 'psn' },
             desc: '喷出恶臭的毒气攻击对手，使对方所有宝可梦陷入中毒状态' },
-      809:{ t: 'steel',   n: '超极巨液金熔击', fx: { torment: 1 },
-            desc: '喷出熔化的液态金属攻击对手，使对方无法连续使用相同的招式' },
-      823:{ t: 'flying',  n: '超极巨旋风袭卷', fx: { clearscreens: 1, clearhaz: 1 },
+       809:{ t: 'steel',   n: '超极巨液金熔击', fx: { torment: 1 },
+             desc: '喷出熔化的液态金属攻击对手，使对方无法连续使用相同的招式' },
+       812:{ t: 'grass',   n: '超极巨鼓擂狂打', fx: {}, dot: 'grass',
+             desc: '用巨大的鼓槌敲打地面，攻击后4回合内每回合对草属性以外的宝可梦造成最大HP 1/6的伤害' },
+       815:{ t: 'fire',    n: '超极巨破阵火球', fx: {}, dot: 'fire',
+             desc: '踢出巨大的火球贯穿对手，攻击后4回合内每回合对火属性以外的宝可梦造成最大HP 1/6的伤害' },
+       818:{ t: 'water',   n: '超极巨狙击神射', fx: {}, dot: 'water',
+             desc: '以惊人的狙击精度射出高压水流，攻击后4回合内每回合对水属性以外的宝可梦造成最大HP 1/6的伤害' },
+       823:{ t: 'flying',  n: '超极巨旋风袭卷', fx: { clearscreens: 1, clearhaz: 1 },
             desc: '刮起狂风席卷全场，消除双方场地上的反射壁、光墙、极光幕、撒菱、隐形岩等' },
       826:{ t: 'psychic', n: '超极巨天谴雷珠', fx: { terrain: 'psychic' },
             desc: '释放积存在体内的精神能量，5回合内变为精神场地，地面系招式可击中飞行/飘浮宝可梦' },
@@ -5677,8 +6453,10 @@ const GMAXMOVE = {
             desc: '释放金属香气，提升自身防御并在对方脚下撒下撒菱' },
       884:{ t: 'dragon',  n: '超极巨劣化衰变', fx: { ppDrain: 2 },
             desc: '释放衰变射线攻击对手，使对手随机一个招式的PP减少2点' },
-      892:{ t: 'fighting',n: '超极巨夺命一击', fx: { bypassProtect: 1 },
+       892:{ t: 'fighting',n: '超极巨夺命一击', fx: { bypassProtect: 1 },
             desc: '集中全部精神的一击必杀之拳，能够无视对手的守住及极巨防壁直接造成伤害' },
+       845:{ t: 'flying', n: '超极巨一口导弹', fx: { partialTrap: 1, drop: 'def' },
+            desc: '从嘴里吐出巨大的猎物攻击对手，使对手陷入束缚状态并降低防御' },
     };
     const MAXMV = { normal: '极巨攻击', fire: '极巨火爆', water: '极巨水流', electric: '极巨闪电', grass: '极巨草原', ice: '极巨冰霜', fighting: '极巨拳斗', poison: '极巨酸毒', ground: '极巨大地', flying: '极巨飞冲', psychic: '极巨超能', bug: '极巨虫蛊', rock: '极巨岩石', ghost: '极巨幽魂', dragon: '极巨龙骑', dark: '极巨恶霸', steel: '极巨钢铁', fairy: '极巨妖精' };
     /* ★ 极巨招式固有效果（对齐正作：能力变化 + 天气 + 场地） */
@@ -5961,7 +6739,7 @@ return ev;
         if (m.vol.gmaxTorment) gmaxChips += '<span class="stchip" style="background:#888">液金</span>';
         if (m.vol.gmaxCrit) gmaxChips += '<span class="stchip" style="background:#c07a2a">会心↑</span>';
         const confCh = m.vol.confuse > 0 ? `<span class="stchip" style="background:#e0912b">乱${m.vol.confuse}</span>` : '';
-        const tags = (m.mega ? '<span class="formtag" style="color:#e040fb">◆Mega</span>' : '') + (m.dyn ? '<span class="formtag" style="color:#d21f3c">极巨</span>' : '') + (m.tera ? `<span class="formtag" style="color:#0aa">⬡晶(${TNAME[m.teraType]})</span>` : ''); +(m.id === 778 && m.disguiseUsed ? '<span class="formtag" style="color:#999;text-decoration:line-through">画皮</span>' : '') + (m.id === 778 && !m.disguiseUsed ? '<span class="formtag" style="color:#c8a0e8">画皮</span>' : '');
+        const tags = (m.mega ? '<span class="formtag" style="color:#e040fb">◆Mega</span>' : '') + (m.dyn ? '<span class="formtag" style="color:#d21f3c">极巨</span>' : '') + (m.tera ? `<span class="formtag" style="color:#0aa">⬡晶(${TNAME[m.teraType]})</span>` : '') + (m.vol.transformed ? '<span class="formtag" style="color:#888">◈变身</span>' : '') + (m.id === 778 && m.disguiseUsed ? '<span class="formtag" style="color:#999;text-decoration:line-through">画皮</span>' : '') + (m.id === 778 && !m.disguiseUsed ? '<span class="formtag" style="color:#c8a0e8">画皮</span>' : '');
         const illusTypes = m.vol.illusion ? (SPDB[m.vol.illusion]?.t.split('/') || m.types) : m.types;
         const types = illusTypes.map(tyBadge).join(' ');
         let pips = '';
@@ -6500,6 +7278,7 @@ return ev;
           this.pi = idx; const m = this.P();
           const keepSwitched = m.vol?.wasSwitchedOut || false;
           m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; m.vol.switchedInThisTurn = true; m.vol.wasSwitchedOut = keepSwitched; m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; m.fainted = false;
+          if (m._transformed) { m.id = m._originalId; m.sp = m._originalSp; m.name = m._originalName; m.types = m._originalTypes; m.baseTypes = m._originalBaseTypes; m.ability = m._originalAbility; m.baseAbility = m._originalBaseAbility; m.moves = m._originalMoves; m.mega = null; m._transformed = false; m.recalc(); if (m.hp > m.maxhp) m.hp = m.maxhp; }
           /* ★ 幻觉：上场前即设置伪装（显示伪装宝可梦的外观与名称） */
           if (m.has('illusion')) {
             const arr = this.pp, lastMon = arr[arr.length - 1];
@@ -6513,6 +7292,7 @@ return ev;
           this.ei = idx; const m = this.E();
           const keepSwitchedE = m.vol?.wasSwitchedOut || false;
           m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; m.vol.switchedInThisTurn = true; m.vol.wasSwitchedOut = keepSwitchedE; m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; m.fainted = false;
+          if (m._transformed) { m.id = m._originalId; m.sp = m._originalSp; m.name = m._originalName; m.types = m._originalTypes; m.baseTypes = m._originalBaseTypes; m.ability = m._originalAbility; m.baseAbility = m._originalBaseAbility; m.moves = m._originalMoves; m.mega = null; m._transformed = false; m.recalc(); if (m.hp > m.maxhp) m.hp = m.maxhp; }
           /* ★ 幻觉：上场前即设置伪装（显示伪装宝可梦的外观与名称） */
           if (m.has('illusion')) {
             const arr = this.ep, lastMon = arr[arr.length - 1];
@@ -6613,6 +7393,39 @@ return ev;
           m.vol.illusionName = lastMon.name;
         }
       }
+        /* ★ 变身者：上场后自动变为对手的样子 */
+        if (ab === 'imposter' && foe && foe.alive() && !foe.vol.transformed) {
+          showAbilityBanner(m, side);
+          m._originalId = m.id;
+          m._originalSp = m.sp;
+          m._originalName = m.name;
+          m._originalTypes = m.types;
+          m._originalBaseTypes = m.baseTypes;
+          m._originalAbility = m.ability;
+          m._originalBaseAbility = m.baseAbility;
+          m._originalMoves = m.moves;
+          m._transformed = true;
+          m.id = foe.id;
+          m.sp = foe.sp;
+          m.mega = foe.mega ? { f: foe.mega.f, s: [...foe.mega.s], t: foe.mega.t, a: foe.mega.a } : null;
+          m.types = foe.types.slice();
+          m.baseTypes = foe.baseTypes.slice();
+          m.ability = foe.ability;
+          m.baseAbility = foe.baseAbility;
+          m.vol.transformed = true;
+          m.moves = foe.moves.map(x => ({ k: x.k, pp: 5, maxpp: 5 }));
+          const _saveItem = m.item, _saveName = m.name;
+          const _saveMaxhp = m.maxhp, _saveBaseMax = m.baseMax;
+          m.item = foe.item;
+          m.recalc();
+          m.item = _saveItem;
+          m.name = _saveName;
+          m.maxhp = _saveMaxhp;
+          m.baseMax = _saveBaseMax;
+          if (m.hp > m.maxhp) m.hp = m.maxhp;
+          await say(`${_saveName} 的${AB[ab].n}发动了！变身成了${foe.name}！`);
+          BUI.refresh(this);
+        }
         if (ab === 'intrepidsword') { await this.changeStat(m, 'atk', 1, m); }
         if (ab === 'dauntlessshield') { await this.changeStat(m, 'def', 1, m); }
         if (ab === 'download' && foe) { const boost = foe.st.def >= foe.st.spd ? 'spa' : 'atk'; await this.changeStat(m, boost, 1, m); }
@@ -7060,8 +7873,19 @@ return ev;
           if (this.over) return;
           if (a.mon.fainted) continue;
           a.mon.vol.actedThisTurn = true;   // ★ 标记本回合已出手（供突袭判定）
+          const _danceMvKey = (a.move && typeof a.move === 'object' ? a.move.k : a.move);
           await this.doMove(a.side, a.mon, a.move, a);
           if (this.over) return;
+          /* ★ 舞者：使出舞蹈招式后，对手若有舞者则立即用相同招式 */
+          if (_danceMvKey && MV[_danceMvKey] && MV[_danceMvKey].dance) {
+            const foe = this.foeOf(a.mon);
+            if (foe && foe.alive() && foe.has('dancer') && !foe.vol.dancerUsed && !this.over && foe !== a.mon) {
+              foe.vol.dancerUsed = true;
+              this.abBanner(foe);
+              await say(`${foe.vol.illusionName || foe.name} 的舞者发动了！`);
+              await this.doMove(this.sideOf(foe), foe, { k: _danceMvKey }, { side: this.sideOf(foe), mon: foe, move: { k: _danceMvKey } });
+            }
+          }
         }
       }
       /* ---------- 出招 ---------- */
@@ -7437,6 +8261,7 @@ return ev;
         await BUI.anim(tgtSpr, 'hit', 400);
         AU.hit(); if (r.eff > 1) { AU.superEff(); await say('效果绝佳！'); } else if (r.eff > 0 && r.eff < 1) { AU.notEff(); await say('收效甚微…'); }
         foe.hp = Math.max(0, foe.hp - dmg);
+        if (dmg > 0) foe.lastDmgTaken = dmg;
         foe.vol.rage = (foe.vol.rage || 0) + 1;
         /* ★ 碎裂铠甲：受到物理攻击时防御-1、速度+2 */
         if (dmg > 0 && mv.c === 'P' && foe.has('weakarmor') && foe.hp > 0 && !mon.has('moldbreaker') && !mv.ignAb) {
@@ -7479,6 +8304,22 @@ return ev;
           if (mon.has('poisontouch') && foe.hp > 0 && !foe.status && Math.random() < .3) {
             this.abBanner(mon);
             await this.inflictStatus(foe, 'psn', mon, mv.t);
+          }
+          /* ★ 棉絮：受攻击时降对手速度 */
+          if (foe.has('cottondown') && foe.hp > 0 && !mon.has('moldbreaker') && !mv.ignAb) {
+            this.abBanner(foe);
+            await say(`${foe.name} 的棉絮发动了！`);
+            await this.changeStat(mon, 'spe', -1, foe);
+          }
+          /* ★ 一口导弹：受攻击时吐出猎物反击并降防 */
+          if (foe.has('gulpmissile') && foe.hp > 0 && foe.vol.gulpPrey && !mon.has('magicguard')) {
+            this.abBanner(foe);
+            const gd = Math.max(1, Math.floor(mon.maxhp / 4));
+            mon.hp = Math.max(0, mon.hp - gd);
+            foe.vol.gulpPrey = false;
+            await say(`${foe.name} 吐出了嘴里的猎物！${mon.name} 受到了伤害！`);
+            await this.changeStat(mon, 'def', -1, foe);
+            BUI.dmgPop(this.sideOf(mon), `-${gd}`, '#ff9d8a');
           }
         }
         // ★ 顺手牵羊：被接触招式击中时偷走对手道具（自身无道具时）
@@ -7688,6 +8529,13 @@ return ev;
         }
         if (t === 'electric' && foe.has('voltabsorb')) { this.abBanner(foe); foe.hp = Math.min(foe.maxhp, foe.hp + Math.floor(foe.maxhp / 4)); await say(`${foe.name} 的蓄电发动了，回复了HP！`); AU.heal(); return 'absorb'; }
         if (t === 'water' && foe.has('waterabsorb')) { this.abBanner(foe); foe.hp = Math.min(foe.maxhp, foe.hp + Math.floor(foe.maxhp / 4)); await say(`${foe.name} 的储水发动了，回复了HP！`); AU.heal(); return 'absorb'; }
+        /* ★ 遇水凝固：受水属性招式时防御+2（免疫伤害） */
+        if (t === 'water' && foe.has('watercompaction')) {
+          this.abBanner(foe);
+          await this.changeStat(foe, 'def', 2, foe);
+          await say(`${foe.name} 的遇水凝固发动了！防御大幅提升！`);
+          return 'absorb';
+        }
         if (t === 'water' && foe.has('stormdrain')) { this.abBanner(foe); await this.changeStat(foe, 'spa', 1, foe); await say(`${foe.name} 的引水发动了！`); return 'absorb'; }
         if (t === 'electric' && foe.has('lightningrod')) { this.abBanner(foe); await this.changeStat(foe, 'spa', 1, foe); await say(`${foe.name} 的避雷针发动了！`); return 'absorb'; }
         if (t === 'fire' && foe.has('flashfire')) { this.abBanner(foe); foe.vol.ff = true; await say(`${foe.name} 的引火发动了！火属性招式威力提升了！`); return 'absorb'; }
@@ -7810,6 +8658,17 @@ return ev;
         if (mon.has('ironfist') && mv.punch) dmg = Math.floor(dmg * 1.2);
         if (mon.has('megalauncher') && mv.pulse) dmg = Math.floor(dmg * 1.5);
         if (mon.has('toughclaws') && mv.ct) dmg = Math.floor(dmg * 1.3);
+        /* ★ 毛茸茸：接触招式伤害减半，火属性×2 */
+        if (!mb && foe.has('fluffy')) {
+          if (mv.ct) dmg = Math.floor(dmg * 0.5);
+          if (mv.t === 'fire') dmg = Math.floor(dmg * 2);
+        }
+        /* ★ 毛皮大衣：物理伤害减半 */
+        if (!mb && foe.has('furcoat') && mv.c === 'P') dmg = Math.floor(dmg * 0.5);
+        /* ★ 一般皮肤：所有招式变一般且×1.2 */
+        if (mon.has('normalize')) dmg = Math.floor(dmg * 1.2);
+        /* ★ 花之礼：晴天时攻击×1.5（简化为仅自身） */
+        if (mon.has('flowergift') && this.wxActive() === 'sun' && atkK === 'atk') dmg = Math.floor(dmg * 1.5);
         if (mon.has('reckless') && mv.recoil) dmg = Math.floor(dmg * 1.2);
         // ★ 有色眼镜：效果不佳时伤害×2
         if (mon.has('tintedlens') && eff > 0 && eff < 1) dmg = Math.floor(dmg * 2);
@@ -7877,6 +8736,7 @@ return ev;
       async directDmg(m, d, side, msg) {
         if (m.has('magicguard')) return;
         m.hp = Math.max(0, m.hp - d); if (msg) await say(msg);
+        if (d > 0) m.lastDmgTaken = d;
         this.addLog(`↳ ${m.name} 损失 ${d} HP（${Math.max(1, Math.round(d / m.maxhp * 100))}%）· 剩余 ${Math.round(m.hp / m.maxhp * 100)}%`);
         BUI.refresh(this);
         if (m.hp <= 0) { const foe = this.foeOf(m); await this.handleKO(this.sideOf(m) === 'p' ? 'e' : 'p', foe, m); }
@@ -7982,6 +8842,39 @@ return ev;
           target.hp = Math.floor(target.maxhp / 2);
           AU.heal();
           await say(`${mon.vol.illusionName || mon.name} 的复生祈祷发动了！${target.name} 恢复了活力，回复了50%的HP！`);
+          BUI.refresh(this);
+          return;
+        }
+        if (mv.transform) {
+          if (!foe || foe.vol.transformed) { await say('变身失败了…'); return; }
+          mon._originalId = mon.id;
+          mon._originalSp = mon.sp;
+          mon._originalName = mon.name;
+          mon._originalTypes = mon.types;
+          mon._originalBaseTypes = mon.baseTypes;
+          mon._originalAbility = mon.ability;
+          mon._originalBaseAbility = mon.baseAbility;
+          mon._originalMoves = mon.moves;
+          mon._transformed = true;
+          mon.id = foe.id;
+          mon.sp = foe.sp;
+          mon.mega = foe.mega ? { f: foe.mega.f, s: [...foe.mega.s], t: foe.mega.t, a: foe.mega.a } : null;
+          mon.types = foe.types.slice();
+          mon.baseTypes = foe.baseTypes.slice();
+          mon.ability = foe.ability;
+          mon.baseAbility = foe.baseAbility;
+          mon.vol.transformed = true;
+          mon.moves = foe.moves.map(x => ({ k: x.k, pp: 5, maxpp: 5 }));
+          const _saveItem = mon.item, _saveName = mon.name;
+          const _saveMaxhp = mon.maxhp, _saveBaseMax = mon.baseMax;
+          mon.item = foe.item;
+          mon.recalc();
+          mon.item = _saveItem;
+          mon.name = _saveName;
+          mon.maxhp = _saveMaxhp;
+          mon.baseMax = _saveBaseMax;
+          if (mon.hp > mon.maxhp) mon.hp = mon.maxhp;
+          await say(`${mon.vol.illusionName || _saveName} 变身成了${foe.name}！`);
           BUI.refresh(this);
           return;
         }
@@ -8119,6 +9012,14 @@ return ev;
           winner.hp = Math.max(0, winner.hp - ad);
           await say(`${loser.name} 的引爆发动了！${winner.name} 受到了伤害！`);
           BUI.dmgPop(this.sideOf(winner), `-${ad}`, '#ff9d8a');
+        }
+        /* ★ 飞出的内在物：被击倒时对手受到等同于最后受到伤害量的伤害 */
+        if (loser.has('innardsout') && winner && winner.alive() && loser.lastDmgTaken > 0 && !winner.has('magicguard')) {
+          this.abBanner(loser);
+          const id = Math.min(loser.lastDmgTaken, winner.hp);
+          winner.hp = Math.max(0, winner.hp - id);
+          await say(`${loser.name} 的飞出的内在物发动了！${winner.name} 受到了 ${id} 点伤害！`);
+          BUI.dmgPop(this.sideOf(winner), `-${id}`, '#ff9d8a');
         }
         /* ★ 濒死演出：闪屏+震动+旋转坠落+金星 */
         BUI.koFx(lSide, lSide === 'p' ? BUI.pspr : BUI.espr);
@@ -8364,6 +9265,11 @@ return ev;
             await this.changeStat(m, down, -1, m);
           }
 
+          /* ★ 一口导弹：使用冲浪后标记嘴里有猎物 */
+          if (m.has('gulpmissile') && m.vol.lastMove === 'surf' && !m.vol.gulpPrey) {
+            m.vol.gulpPrey = true;
+            await say(`${m.name} 的嘴里叼住了猎物！`);
+          }
           // 加速（替换上场的当回合不触发）
           if (m.has('speedboost') && !m.vol.switchedInThisTurn) { this.abBanner(m); await this.changeStat(m, 'spe', 1, m); }
           // 极巨化倒计时
@@ -8374,6 +9280,51 @@ return ev;
               m.hp = Math.max(1, Math.round(m.maxhp * pct));
               await say(`${m.name} 的极巨化解除了！HP按比例还原。`);
               BUI.refresh(this);
+            }
+          }
+          /* ★ 鱼群（弱丁鱼）：HP>25%时鱼群形态，否则单独形态 */
+          if (m.has('schooling') && !m.fainted) {
+            if (m.hpPct() > 0.25 && !m.vol.schoolForm) {
+              m.vol.schoolForm = true;
+              m.mega = { f: 746, t: 'water', s: [45,140,130,140,135,30], a: 'schooling' };
+              m.recalc();
+              this.abBanner(m);
+              await say(`${m.name} 的鱼群特性发动了！变成了鱼群形态！`);
+            } else if (m.hpPct() <= 0.25 && m.vol.schoolForm) {
+              m.vol.schoolForm = false;
+              m.mega = null;
+              m.recalc();
+              await say(`${m.name} 的鱼群解散了，变回了单独形态！`);
+            }
+          }
+          /* ★ 界限盾壳（小陨星）：HP≤50%时核心形态，免疫异常 */
+          if (m.has('shieldsdown') && !m.fainted) {
+            if (m.hpPct() <= 0.5 && !m.vol.coreForm) {
+              m.vol.coreForm = true;
+              m.mega = { f: 774, t: 'rock/flying', s: [60,100,60,100,60,120], a: 'shieldsdown' };
+              m.recalc();
+              if (m.status) { m.status = null; m.sleepT = 0; m.toxicN = 0; }
+              this.abBanner(m);
+              await say(`${m.name} 的外壳破碎了！变成了核心形态！`);
+            } else if (m.hpPct() > 0.5 && m.vol.coreForm) {
+              m.vol.coreForm = false;
+              m.mega = null;
+              m.recalc();
+              await say(`${m.name} 重新形成了外壳！`);
+            }
+          }
+          /* ★ 跃跃欲逃 / 危险回避：HP≤50%时自动换下 */
+          if ((m.has('wimpout') || m.has('emergencyexit')) && m.hpPct() <= 0.5 && !m.vol.fledThisBattle) {
+            const arr = this.sideOf(m) === 'p' ? this.pp : this.ep;
+            if (arr.filter(x => x.alive()).length > 1) {
+              m.vol.fledThisBattle = true;
+              this.abBanner(m);
+              await say(`${m.name} 的${AB[m.ability].n}发动了！`);
+              const sd = this.sideOf(m);
+              if (sd === 'p') { const idx = await this.chooseParty(false); if (idx != null) await this.doSwitch('p', idx); }
+              else { const to = this.aiBestSwitch(); if (to > -1) await this.doSwitch('e', to); }
+              if (this.over) return;
+              continue;
             }
           }
           // ★ 达摩模式
@@ -9794,15 +10745,15 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       };
 
       function showAbDetail(ab) {
-        detail.classList.remove('hidden');
         const mons = abMonList(ab.k);
-        detail.innerHTML = `
+        const box = el('div', '');
+        box.innerHTML = `
 <div class="abDetailNm">◈ ${ab.n}</div>
 <div style="font-size:11px;color:#999;font-weight:700;margin-bottom:6px">内部ID：${ab.k}</div>
 <div class="abDetailDs">${ab.d}</div>
 <div style="font-weight:900;font-size:14px;margin-bottom:8px">拥有此特性的宝可梦（${mons.length}种）：</div>
-<div class="abMonList" id="abMonListWrap"></div>`;
-        const wrap = $('#abMonListWrap');
+<div class="abMonList"></div>`;
+        const wrap = box.querySelector('.abMonList');
         if (!mons.length) { wrap.innerHTML = '<span style="color:#999;font-size:12px">暂无</span>'; }
         mons.forEach(item => {
           const chip = el('span', 'abMonChip');
@@ -9810,7 +10761,6 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
           else if (item.type === 'form') { chip.style.borderColor = '#c07a2a'; chip.style.background = '#fff6e8'; }
           const img = new Image(); img.width = 28; img.height = 28; img.style.objectFit = 'contain';
           setSprite(img, item.imgId);
-          /* 道具形态图可能不存在，回退到普通形态图 */
           if (item.type === 'form') img._urls.push(SPRBASE + item.sp.id + '.png');
           chip.appendChild(img);
           const nm = document.createElement('span');
@@ -9819,16 +10769,13 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
           else if (item.type === 'form') nm.style.color = '#c07a2a';
           chip.appendChild(nm);
           chip.onclick = () => {
-            AU.ok();
-            show('#dex');
-            buildDex();
-            if (item.type === 'normal') dexDetail(item.sp);
-            else if (item.type === 'mega') dexDetailMega(item.sp, item.cfg, item.mi);
-            else dexDetailForm(item.sp, item.cfg);
+            if (item.type === 'normal') { AU.ok(); show('#dex'); buildDex(); dexDetail(item.sp); }
+            else if (item.type === 'mega') { AU.ok(); show('#dex'); buildDex(); dexDetailMega(item.sp, item.cfg, item.mi); }
+            else { AU.ok(); show('#dex'); buildDex(); dexDetailForm(item.sp, item.cfg); }
           };
           wrap.appendChild(chip);
         });
-        detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        showModal(box);
       }
 
       search.addEventListener('input', render);
@@ -9888,11 +10835,10 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       };
 
       function showMvDetail(mv) {
-        detail.classList.remove('hidden');
         const mons = mv.maxmv || mv.gmax ? [] : SP.filter(s => s.mv.includes(mv.k));
         const desc = mv.desc || moveDesc(mv.k);
         const pwrInfo = mv.maxmv || mv.gmax ? '（随原招式威力变化）' : (mv.p ?? '—');
-        detail.innerHTML = `
+        const html = `
 <div class="mvDetailTop">
 ${tyBadge(mv.t)}
 <span class="mvDetailNm">${mv.n}</span>
@@ -9912,10 +10858,12 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
 <div class="mvMonList">${mons.length ? mons.slice(0, 60).map(sp => {
           return `<span class="mvMonChip" data-id="${sp.id}"><img src="${SPRBASE}${sp.id}.png" onerror="this.src='${SPRBASE}0.png'">${sp.n}</span>`;
         }).join('') + (mons.length > 60 ? `<span style="font-size:11px;color:#999;font-weight:700">…等${mons.length}种</span>` : '') : '<span style="color:#999;font-size:12px">暂无</span>'}</div>`}`;
-        detail.querySelectorAll('.mvMonChip').forEach(chip => {
-          chip.onclick = () => { const sp = SPDB[+chip.dataset.id]; if (sp) { AU.ok(); dexDetail(sp); show('#dex'); buildDex(); } };
+        const box = el('div', '');
+        box.innerHTML = html;
+        box.querySelectorAll('.mvMonChip').forEach(chip => {
+          chip.onclick = () => { const sp = SPDB[+chip.dataset.id]; if (sp) { AU.ok(); show('#dex'); buildDex(); dexDetail(sp); } };
         });
-        detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        showModal(box);
       }
 
       ['input', 'change'].forEach(ev => {
