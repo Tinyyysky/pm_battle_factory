@@ -2876,7 +2876,13 @@
     .moveBtn .mn {
       font-family: 'ZCOOL KuaiLe';
       font-size: 17px;
-      letter-spacing: 1px
+      letter-spacing: 1px;
+      line-height: 1.15;
+      word-break: break-all
+    }
+    .moveBtn .mn.long {
+      font-size: 12px;
+      letter-spacing: 0
     }
 
     .moveBtn .mi {
@@ -2887,11 +2893,43 @@
 
     .moveBtn .pp {
       position: absolute;
-      right: 8px;
-      bottom: 4px;
+      right: 4px;
+      bottom: 2px;
       font-family: 'Press Start 2P';
-      font-size: 7px
+      font-size: 6px;
+      opacity: .7
     }
+
+    .eff {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      font-family: 'Press Start 2P';
+      font-size: 7px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 6px;
+      text-shadow: none;
+      line-height: 1.4
+    }
+    .eff.eff0 { background: #888; color: #fff }
+    .eff.eff4 { background: #e0a000; color: #fff }
+    .eff.eff2 { background: #e2574c; color: #fff }
+    .eff.eff1 { background: rgba(255,255,255,.3); color: #fff }
+    .eff.eff05 { background: #3f8fe0; color: #fff }
+
+    .mvtag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-right: 3px;
+      text-shadow: none;
+      line-height: 1.4
+    }
+    .mvtag.mvcat { background: rgba(255,255,255,.25); color: #fff }
+    .mvtag.mvpw { background: rgba(0,0,0,.3); color: #ffd93b }
 
     .moveBtn {
       position: relative
@@ -2946,6 +2984,16 @@
 
     .dynToggle.tera.on {
       background: linear-gradient(90deg, #00d4ff, #7bffb0)
+    }
+
+    .dynToggle.gmax {
+      border: 2px solid #c07a2a;
+      color: #c07a2a
+    }
+
+    .dynToggle.gmax.on {
+      background: linear-gradient(90deg, #c07a2a, #e0a040);
+      color: #fff
     }
 
     /* party / bag overlays */
@@ -3589,6 +3637,11 @@
 
       .moveBtn .mn {
         font-size: 14px !important;
+      }
+
+      .moveBtn .mn.long {
+        font-size: 10px !important;
+        letter-spacing: 0 !important;
       }
 
       .moveBtn .mi {
@@ -5567,7 +5620,66 @@ SP.forEach(s => {
       888: { f: '888-crowned', t: 'fairy/steel', s: [92, 170, 115, 80, 115, 148], a: 'intrepidsword', name: '苍响(剑之王)', tag: '剑之王', item: 'rustedsword', stone: '腐朽之剑', formTag: '剑之王形态' },
       889: { f: '889-crowned', t: 'fighting/steel', s: [92, 130, 145, 80, 145, 128], a: 'dauntlessshield', name: '藏玛然特(盾之王)', tag: '盾之王', item: 'rustedshield', stone: '腐朽之盾', formTag: '盾之王形态' },
     };
-    const GMAXLIST = new Set([3, 6, 9, 25, 131, 143, 809, 812, 815, 818, 823, 849, 858, 861, 892]);
+    const GMAXLIST = new Set([3, 6, 9, 25, 52, 68, 94, 99, 131, 133, 143, 569, 809, 812, 815, 818, 823, 826, 834, 839, 841, 842, 844, 849, 851, 858, 861, 869, 879, 884, 892]);
+    /* ★ 超极巨招式（G-Max）：超极巨化的宝可梦使用对应属性的G-Max招式替代普通极巨招式 */
+const GMAXMOVE = {
+      3:  { t: 'grass',   n: '超极巨灰飞鞭灭', fx: { terrain: 'grassy' }, dot: 'grass',
+            desc: '在对手周围降下灰飞鞭，攻击后4回合内每回合对草属性以外的宝可梦造成最大HP 1/6的伤害，同时变为青草场地' },
+      6:  { t: 'fire',    n: '超极巨地狱灭焰', fx: {}, dot: 'fire',
+            desc: '在对手周围燃起地狱之火，攻击后4回合内每回合对火属性以外的宝可梦造成最大HP 1/6的伤害' },
+      9:  { t: 'water',   n: '超极巨水炮轰坠', fx: {}, dot: 'water',
+            desc: '在对手周围降下激流瀑布，攻击后4回合内每回合对水属性以外的宝可梦造成最大HP 1/6的伤害' },
+      25: { t: 'electric',n: '超极巨万雷轰顶', fx: { sec: 'par' },
+            desc: '召唤万钧雷霆轰击对手，使对方所有宝可梦陷入麻痹状态' },
+      52: { t: 'normal',  n: '超极巨淘金潮', fx: { sec: 'confuse', drop: 'spd' },
+            desc: '洒出大量金币攻击对手，使对方陷入混乱并大幅降低特防' },
+      68: { t: 'fighting',n: '超极巨会心一击', fx: { critUp: 1 },
+            desc: '摆出格斗架势蓄力攻击，使用后我方全体会心率大幅提升，更容易击中要害' },
+      94: { t: 'ghost',   n: '超极巨幻影幽魂', fx: { trap: 1 },
+            desc: '放出无数鬼魂包围对手，使对方陷入踩影状态，无法替换宝可梦' },
+      99: { t: 'water',   n: '超极巨激旋泡漩', fx: { partialTrap: 1 },
+            desc: '激起的巨大水泡漩涡将对手困在其中，每回合造成束缚伤害' },
+      131:{ t: 'ice',     n: '超极巨极光旋律', fx: { auroraveil: 5 },
+            desc: '奏响极光旋律，为己方场地施加5回合极光幕效果，受到的特殊攻击伤害减半' },
+      133:{ t: 'normal',  n: '超极巨热情拥抱', fx: { sec: 'attract' },
+            desc: '用巨大的身躯热情拥抱对手，使对方与自己性别不同的宝可梦陷入着迷状态' },
+      143:{ t: 'normal',  n: '超极巨资源再生', fx: { berry: 1 },
+            desc: '巨大身躯中蕴藏的能量使已消耗的树果重新生长出来' },
+      569:{ t: 'poison',  n: '超极巨臭气冲天', fx: { sec: 'psn' },
+            desc: '喷出恶臭的毒气攻击对手，使对方所有宝可梦陷入中毒状态' },
+      809:{ t: 'steel',   n: '超极巨液金熔击', fx: { torment: 1 },
+            desc: '喷出熔化的液态金属攻击对手，使对方无法连续使用相同的招式' },
+      823:{ t: 'flying',  n: '超极巨旋风袭卷', fx: { clearscreens: 1, clearhaz: 1 },
+            desc: '刮起狂风席卷全场，消除双方场地上的反射壁、光墙、极光幕、撒菱、隐形岩等' },
+      826:{ t: 'psychic', n: '超极巨天谴雷珠', fx: { terrain: 'psychic' },
+            desc: '释放积存在体内的精神能量，5回合内变为精神场地，地面系招式可击中飞行/飘浮宝可梦' },
+      834:{ t: 'water',   n: '超极巨岩阵以待', fx: { hazard: 'sr' },
+            desc: '从巨岩中喷出水柱攻击对手，同时在对方脚下撒下隐形岩' },
+      839:{ t: 'rock',    n: '超极巨岩石喷发', fx: {}, dot: 'rock',
+            desc: '喷发灼热的岩石雨攻击对手，攻击后4回合内每回合对岩石属性以外的宝可梦造成最大HP 1/6的伤害' },
+      841:{ t: 'grass',   n: '超极巨酸之苹果', fx: { drop: 'spa', dropN: 2, terrain: 'grassy' },
+            desc: '喷出酸性苹果汁攻击对手，使对方闪避率大幅下降（本作简化为特攻降低2级），并变为青草场地' },
+      842:{ t: 'grass',   n: '超极巨甜之苹果', fx: { healStatus: 1, terrain: 'grassy' },
+            desc: '洒出甜美的苹果蜜，治愈我方所有宝可梦的异常状态，并变为青草场地' },
+      844:{ t: 'ground',  n: '超极巨沙尘漫天', fx: { up: 'spd', partialTrap: 1 },
+            desc: '扬起漫天沙尘攻击对手，提升自身特防并将对方困在沙尘中，每回合造成束缚伤害' },
+      849:{ t: 'electric',n: '超极巨异毒电场', fx: { terrain: 'electric', sec: 'psn_par' },
+            desc: '释放带毒的高压电流攻击对手，使对方随机陷入中毒或麻痹状态，并变为电气场地' },
+      851:{ t: 'fire',    n: '超极巨百火焚野', fx: {}, dot: 'fire',
+            desc: '以百道火焰包围对手，攻击后4回合内每回合对火属性以外的宝可梦造成最大HP 1/6的伤害' },
+      858:{ t: 'fairy',   n: '超极巨天降雷嗔', fx: { sec: 'confuse' },
+            desc: '从天空降下愤怒的雷霆攻击对手，使对方所有宝可梦陷入混乱状态' },
+      861:{ t: 'dark',    n: '超极巨睡魔降临', fx: { sec: 'drowsy' },
+            desc: '释放催眠魔气，使对方在回合末陷入瞌睡状态，下回合必定睡着' },
+      869:{ t: 'fairy',   n: '超极巨幸福圆满', fx: { healTeam: 1 },
+            desc: '释放甜蜜的香气，回复我方所有宝可梦最大HP的1/6' },
+      879:{ t: 'steel',   n: '超极巨钢之残香', fx: { up: 'def', hazard: 'spikes' },
+            desc: '释放金属香气，提升自身防御并在对方脚下撒下撒菱' },
+      884:{ t: 'dragon',  n: '超极巨劣化衰变', fx: { ppDrain: 2 },
+            desc: '释放衰变射线攻击对手，使对手随机一个招式的PP减少2点' },
+      892:{ t: 'fighting',n: '超极巨夺命一击', fx: { bypassProtect: 1 },
+            desc: '集中全部精神的一击必杀之拳，能够无视对手的守住及极巨防壁直接造成伤害' },
+    };
     const MAXMV = { normal: '极巨攻击', fire: '极巨火爆', water: '极巨水流', electric: '极巨闪电', grass: '极巨草原', ice: '极巨冰霜', fighting: '极巨拳斗', poison: '极巨酸毒', ground: '极巨大地', flying: '极巨飞冲', psychic: '极巨超能', bug: '极巨虫蛊', rock: '极巨岩石', ghost: '极巨幽魂', dragon: '极巨龙骑', dark: '极巨恶霸', steel: '极巨钢铁', fairy: '极巨妖精' };
     /* ★ 极巨招式固有效果（对齐正作：能力变化 + 天气 + 场地） */
     const MAXFX = {
@@ -5828,21 +5940,33 @@ return ev;
         if (eHaz.sr) chips.push(`🪨 对手·岩(${eHaz.sr})`);
         if (eHaz.spikes) chips.push(`▲ 对手·菱${'×'.repeat(eHaz.spikes)}`);
         if (eHaz.tspikes) chips.push(`☠ 对手·毒菱${eHaz.tspikes >= 2 ? '²' : '¹'}`);
+        /* ★ 超极巨DOT显示 */
+        if (b.gmaxDot) chips.push('🔥 ' + (b.gmaxDot.name || TNAME[b.gmaxDot.type]) + '(' + b.gmaxDot.turns + ')');
+        /* ★ 极光幕显示 */
+        if (b.auroraveil.p > 0) chips.push(`🌈 己方·极光幕(${b.auroraveil.p})`);
+        if (b.auroraveil.e > 0) chips.push(`🌈 对手·极光幕(${b.auroraveil.e})`);
         if (chips.length) { wx.textContent = chips.join('  '); wx.classList.add('on'); }
         else wx.classList.remove('on');
       },
       cardHTML(m, side, b) {
         const displayName = m.vol.illusionName || m.name;
-        const pct = Math.round(m.hpPct() * 100);
+        const pct = m.hp > 0 ? Math.max(1, Math.ceil(m.hpPct() * 100)) : 0;
         const cls = pct > 50 ? '' : pct > 20 ? 'mid' : 'low';
         const stch = m.status ? `<span class="stchip" style="background:${{ burn: '#e2574c', par: '#e0912b', psn: '#a33ea1', tox: '#a33ea1', sleep: '#666', frz: '#63c5c2' }[m.status]}">${{ burn: '灼', par: '麻', psn: '毒', tox: '剧', sleep: '眠', frz: '冰' }[m.status]}</span>` : '';
+        /* ★ G-Max状态芯片 */
+        let gmaxChips = '';
+        if (m.vol.drowsy) gmaxChips += '<span class="stchip" style="background:#666">瞌睡</span>';
+        if (m.vol.binding && m.vol.binding > 0) gmaxChips += '<span class="stchip" style="background:#8b4513">束缚</span>';
+        if (m.vol.gmaxTrap) gmaxChips += '<span class="stchip" style="background:#6a0dad">无法替换</span>';
+        if (m.vol.gmaxTorment) gmaxChips += '<span class="stchip" style="background:#888">液金</span>';
+        if (m.vol.gmaxCrit) gmaxChips += '<span class="stchip" style="background:#c07a2a">会心↑</span>';
         const confCh = m.vol.confuse > 0 ? `<span class="stchip" style="background:#e0912b">乱${m.vol.confuse}</span>` : '';
         const tags = (m.mega ? '<span class="formtag" style="color:#e040fb">◆Mega</span>' : '') + (m.dyn ? '<span class="formtag" style="color:#d21f3c">极巨</span>' : '') + (m.tera ? `<span class="formtag" style="color:#0aa">⬡晶(${TNAME[m.teraType]})</span>` : ''); +(m.id === 778 && m.disguiseUsed ? '<span class="formtag" style="color:#999;text-decoration:line-through">画皮</span>' : '') + (m.id === 778 && !m.disguiseUsed ? '<span class="formtag" style="color:#c8a0e8">画皮</span>' : '');
         const illusTypes = m.vol.illusion ? (SPDB[m.vol.illusion]?.t.split('/') || m.types) : m.types;
         const types = illusTypes.map(tyBadge).join(' ');
         let pips = '';
         if (side === 'e') { const arr = b.ep; pips = '<div class="pips">' + arr.map(x => `<span class="pip ${x.alive() ? '' : 'down'}"></span>`).join('') + '</div>'; }
-        const hpnum = side === 'p' ? `<div class="hpnum">${m.hp} / ${m.maxhp}</div>` : (CFG.enemyHpPct ? `<div class="hpnum">${Math.round(m.hpPct() * 100)}%</div>` : '');
+        const hpnum = side === 'p' ? `<div class="hpnum">${m.hp} / ${m.maxhp}</div>` : (CFG.enemyHpPct ? `<div class="hpnum">${m.hp > 0 ? Math.max(1, Math.ceil(m.hpPct() * 100)) : 0}%</div>` : '');
         const xp = side === 'p' ? `<div class="xpbar"><div class="xpfill" style="width:${Math.round(100 * (m.xp - Math.pow(m.lvl, 3)) / (Math.pow(m.lvl + 1, 3) - Math.pow(m.lvl, 3)))}%"></div></div>` : '';
         const it = (m.item && (side === 'p' || CFG.enemyItem)) ? `<div style="font-size:10px;color:#888;font-weight:700">持有：${IT[m.item]?.n || ''}</div>` : '';
         const ab = AB[m.ability];
@@ -5860,7 +5984,7 @@ return ev;
         const protoActive = (m.has('protosynthesis') && b && b.wx === 'sun') || (m.has('quarkdrive') && b && b.terrain === 'electric');
         const protoChip = protoActive ? `<span class="stg up" style="background:#fff3c4;color:#c07a2a;border-color:#f2c230">⚡${AB[m.ability]?.n || ''} ${STN[m.bestStat()]}↑</span>` : '';
         const stgrow = (stgs || protoChip) ? `<div class="stgrow">${protoChip}${stgs}</div>` : '';
-        return `<div class="row1"><span class="nm">${displayName}${m.shiny ? ' ✦' : ''}</span><span class="lv">${m.lvl}</span>${stch}${confCh}${tags}</div>
+        return `<div class="row1"><span class="nm">${displayName}${m.shiny ? ' ✦' : ''}</span><span class="lv">${m.lvl}</span>${stch}${gmaxChips}${confCh}${tags}</div>
       <div style="margin-top:2px">${types}</div>
       <div class="hpwrap"><span class="hplabel">HP</span><div class="hpbar"><div class="hpfill ${cls}" style="width:${pct}%"></div></div></div>
       ${hpnum}${xp}${pips}${it}${abRow}${stgrow}`;
@@ -6242,6 +6366,7 @@ return ev;
       if (foe.has('shadowtagx')) return '踩影';
       if (foe.has('magnetpull') && m.types.includes('steel')) return '磁力';
       if (foe.has('arenatrap') && battle.grounded(m)) return '沙穴';
+      if (m.vol.gmaxTrap) return '超极巨幽灵陷阱';
       return null;
     }
 
@@ -6254,7 +6379,9 @@ return ev;
         this.pi = 0; this.ei = 0; this.turn = 0; this.over = false; this.result = null;
         this.wx = null; this.wxT = 0; this.trickT = 0; this.terrain = null; this.terrainT = 0;
         this.haz = { p: { sr: 0, spikes: 0, tspikes: 0 }, e: { sr: 0, spikes: 0, tspikes: 0 } };
-        this.usedForm = { p: false, e: false }; // ★ 三种形态互斥：每场战斗每方只能用一次，下场重置
+        this.gmaxDot = null;
+        this.auroraveil = { p: 0, e: 0 };   // 极光幕（超极巨极光旋律）
+        this.usedForm = { p: false, e: false };
         this.aiSwitches = o.aiSwitches ?? 1;
         this.caught = null; this.participants = new Set(); this.log = []; this.pendingSwitches = [];
       }
@@ -6284,9 +6411,11 @@ return ev;
           m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
           m.status = null; m.sleepT = 0; m.toxicN = 0;
           m.fainted = false;
+          const keepCanGmax = m.vol.canGmax;
           m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true;
           m.vol.illusion = null; m.vol.illusionName = null;
           m.vol.wasSwitchedOut = false; m.vol.heroForm = false;
+          if (keepCanGmax) m.vol.canGmax = true;
           m.recalc();
           m.hp = Math.min(m.hp, m.maxhp);
           m.xpGot = false;
@@ -6355,9 +6484,11 @@ return ev;
           m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
           m.status = null; m.sleepT = 0; m.toxicN = 0;
           m.fainted = false;
+          const keepCanGmax2 = m.vol.canGmax;
           m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true;
           m.vol.illusion = null; m.vol.illusionName = null;
           m.vol.wasSwitchedOut = false; m.vol.heroForm = false;
+          if (keepCanGmax2) m.vol.canGmax = true;
           m.recalc();
           m.hp = Math.min(m.hp, m.maxhp);
         });
@@ -6687,30 +6818,43 @@ return ev;
                 else if (m.has('refrigerate')) showT = 'ice';
               }
               let nm = showNm || d.n, tcol = TCOL[showT] || TCOL[d.t];
-              let info = `${TNAME[showT] || TNAME[d.t]} · ${d.c === 'P' ? '物理' : d.c === 'S' ? '特殊' : '变化'}${d.p ? ' · 威力' + d.p : ''}`;
+              let info = `<span class="mvtag mvty" style="background:${tcol}">${TNAME[showT] || TNAME[d.t]}</span>` +
+                `<span class="mvtag mvcat">${d.c === 'P' ? '物理' : d.c === 'S' ? '特殊' : '变化'}</span>` +
+                (d.p ? `<span class="mvtag mvpw">威力${d.p}</span>` : '');
+              /* ★ 效果提示（独立徽章，右上角） */
+              let effBadge = '';
+              if (d.c !== 'X' && d.p) {
+                const foe = this.E();
+                if (foe && foe.alive()) {
+                  let mEff = effMult(showT, foe.types);
+                  if (d.freezedry && foe.types.includes('water')) mEff *= 4;
+                  if (!mEff || mEff === 0) effBadge = '<span class="eff eff0">⛔</span>';
+                  else if (mEff >= 4) effBadge = '<span class="eff eff4">★4×</span>';
+                  else if (mEff > 1) effBadge = '<span class="eff eff2">▲2×</span>';
+                  else if (mEff < 1) effBadge = '<span class="eff eff05">½×</span>';
+                  else effBadge = '<span class="eff eff1">1×</span>';
+                }
+              }
               if (wantDyn || m.dyn) {
-                if (d.c === 'X') { nm = '极巨防壁'; info = '极巨招式 · 守住自己'; }
+                const willGmax = m.vol.gmax || (wantDyn && (m.vol.canGmax !== undefined ? m.vol.canGmax : GMAXLIST.has(m.id)));
+                /* ★ G-Max：只有同属性招式才变为专属超极巨招式 */
+                const isGmaxType = willGmax && GMAXMOVE[m.id] && (showT || d.t) === GMAXMOVE[m.id].t;
+                if (isGmaxType) nm = GMAXMOVE[m.id].n;
+                if (d.c === 'X') { nm = '极巨防壁'; info = '<span class="mvtag mvcat">变化</span>'; }
                 else {
-                  nm = MAXMV[d.t] || '极巨攻击';
-                  const fx = MAXFX[d.t];
-                  const fxTxt = fx ? (fx.weather ? (this.wx === fx.weather ? ' · ⚠天气已生效'
-                    : ` · 开启${{ sun: '大晴天', rain: '下雨', sand: '沙暴', hail: '冰雹' }[fx.weather]}`)
-                    : fx.terrain ? (this.terrain === fx.terrain ? ' · ⚠场地已生效'
-                      : ` · 开启${TERRNAME[fx.terrain]}`)
-                      : fx.up ? ` · 己方${STN[fx.up]}↑` : fx.drop ? ` · 对方${STN[fx.drop]}↓` : '') : '';
-                  info = `极巨招式 · 威力 ${maxPower(d)}${fxTxt}`;
+                  if (isGmaxType) { nm = GMAXMOVE[m.id].n; }
+                  else { nm = MAXMV[d.t] || '极巨攻击'; }
+                  info = `<span class="mvtag mvty" style="background:${tcol}">${TNAME[showT] || TNAME[d.t]}</span><span class="mvtag mvcat">特殊</span><span class="mvtag mvpw">威力${maxPower(d)}</span>`;
                 }
               }
               else if (wantTera) {
-                if (d.terablast) { nm = `太晶爆发 (${TNAME[m.teraType]})`; tcol = TCOL[m.teraType]; info = `${TNAME[m.teraType]} · 特殊 · 威力 80`; }
-                else if (d.c !== 'X') info += '';
+                if (d.terablast) { nm = `太晶爆发 (${TNAME[m.teraType]})`; tcol = TCOL[m.teraType]; info = `<span class="mvtag mvty" style="background:${TCOL[m.teraType]}">${TNAME[m.teraType]}</span><span class="mvtag mvcat">特殊</span><span class="mvtag mvpw">威力80</span>`; }
               }
-              else if (wantMega) { info += ''; }
-              if (m.vol.disabled && m.vol.disabled.k === mv.k) info += ' · ⛔封印中(' + m.vol.disabled.turns + '回合)';
+              if (m.vol.disabled && m.vol.disabled.k === mv.k) info += '<span class="mvtag eff0" style="display:inline-block;background:#888;color:#fff">⛔封印中(' + m.vol.disabled.turns + ')</span>';
               const b = el('button', 'btn moveBtn');
               b.style.background = `linear-gradient(180deg,${tcol},${tcol}cc)`;
               if (dis) b.disabled = true;
-              b.innerHTML = `<span class="mn">${nm}</span><span class="mi">${info}</span><span class="pp">PP ${mv.pp}/${mv.maxpp}</span>`;
+              b.innerHTML = `<span class="mn${nm.length > 5 ? ' long' : ''}">${nm}</span><span class="mi">${info}</span>${effBadge}<span class="pp">PP ${mv.pp}/${mv.maxpp}</span>`;
               const h = () => { AU.ok(); cleanup(); $('#menuMoves').classList.add('hidden'); $('#menuMain').classList.add('hidden'); res({ type: 'move', move: mv, mega: wantMega, dyn: wantDyn, tera: wantTera }); };
               b.addEventListener('click', h); backs.push([b, h]); moveGrid.appendChild(b);
             });
@@ -7018,10 +7162,15 @@ return ev;
         if (mon.dyn && mv) {
           if (mv.c === 'X') useMv = { k: 'maxguard', n: '极巨防壁', c: 'X', pri: 4, protect: 1, maxguard: 1 };
           else {
-            // ★ 先计算变威力招式的实际威力（陀螺球等），再传给 maxPower
             let effectiveP = mv.p;
             if (mv.gyro) { effectiveP = Math.min(150, Math.floor(25 * foe.effStat('spe', this) / Math.max(1, mon.effStat('spe', this)))); }
-            useMv = { k: 'maxmv', n: MAXMV[mv.t] || '极巨攻击', p: maxPower({ ...mv, p: effectiveP }), a: null, c: mv.c, t: mv.t, maxfx: MAXFX[mv.t] };
+            /* ★ 超极巨化：同属性招式变为专属超极巨招式 */
+            if (mon.vol.gmax && GMAXMOVE[mon.id] && mv.t === GMAXMOVE[mon.id].t) {
+              const gm = GMAXMOVE[mon.id];
+              useMv = { k: 'maxmv', n: gm.n, p: maxPower({ ...mv, p: effectiveP }), a: null, c: mv.c, t: mv.t, maxfx: { ...gm.fx, dot: gm.dot } };
+            } else {
+              useMv = { k: 'maxmv', n: MAXMV[mv.t] || '极巨攻击', p: maxPower({ ...mv, p: effectiveP }), a: null, c: mv.c, t: mv.t, maxfx: MAXFX[mv.t] };
+            }
           }
         }
         // ★ 太晶化招式修正：太晶爆发变异晶属性、按较高攻击项决定物特；威力<60的招式提升至60
@@ -7063,6 +7212,11 @@ return ev;
         mon.vol.lastMove = mvk;   // ★ 记录本回合招式（供巨力锤等noRepeat招式判定）
         // 挑衅
         if (mon.vol.taunt && mon.vol.taunt > 0 && useMv.c === 'X') { await say(`${mon.vol.illusionName || mon.name} 受到挑衅，无法使用变化招式！`); return; }
+        /* ★ 超极巨液金熔击（Torment）：不能连续使用相同招式 */
+        if (mon.vol.gmaxTorment && mon.vol.lastMove === mvk && mvk !== 'struggle') {
+          await say(`${mon.vol.illusionName || mon.name} 受到液金熔击的影响，无法连续使用相同的招式！`);
+          return;
+        }
         // 突击背心
         if (mon.item === 'assaultvest' && useMv.c === 'X') { await say('突击背心挡住了变化招式！'); return; }
         // ★ 讲究系列锁招：锁定第一个成功进入执行的招式（挣扎不锁；换下/拍落/戏法时解锁）
@@ -7470,14 +7624,55 @@ return ev;
           await say(`${foe.name} 吃了文柚果，回复了HP！`);
           this.addLog(`↳ ${foe.name} 文柚果回复 +${h} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
         }
-        // ★ 极巨招式固有效果：仅在真正造成伤害时触发（天气/场地不受击倒影响）
+        // ★ 极巨/超极巨招式固有效果：仅在真正造成伤害时触发
         if (mv.maxfx && dmg > 0) {
           const f = mv.maxfx;
           if (f.up) await this.changeStat(mon, f.up, 1, mon);
-          if (f.drop && foe.hp > 0) await this.changeStat(foe, f.drop, -1, mon);
-          /* ★ 同种天气/场地已存在时不触发：不重置持续时间，仅提示 */
+          if (f.drop) await this.changeStat(foe, f.drop, -(f.dropN || 1), mon);
           if (f.weather) await this.setWeather(f.weather, mon);
           if (f.terrain) await this.setTerrain(f.terrain, mon);
+          /* ★ 超极巨DOT：地狱灭焰/水炮轰坠/灰飞鞭灭/岩石喷发 */
+          if (f.dot && foe.hp > 0 && !foe.types.includes(f.dot)) {
+            const dotSide = this.sideOf(foe);
+            this.gmaxDot = { type: f.dot, turns: 4, side: dotSide, name: mv.n };
+            await say(`${dotSide === 'e' ? '对方' : '己方'}场地上留下了${mv.n}的持续伤害！`);
+          }
+          /* ★ 超极巨极光旋律：5回合极光幕 */
+          if (f.auroraveil) { const s = this.sideOf(mon); this.auroraveil[s] = f.auroraveil; await say('极光幕笼罩了己方场地！'); }
+          /* ★ 超极巨钢之残香：撒撒菱 */
+          if (f.hazard === 'spikes') { const ts = this.foeSide(side); if (this.haz[ts].spikes < 3) { this.haz[ts].spikes++; await say('撒菱散落在对方场地上！'); } }
+          else if (f.hazard === 'sr') { const ts = this.foeSide(side); if (!this.haz[ts].sr) { this.haz[ts].sr = 1; await say('隐形岩散落在对方场地上！'); } }
+          else if (f.hazard === 'steelsr') { const ts = this.foeSide(side); if (!this.haz[ts].sr) { this.haz[ts].sr = 'steel'; await say('钢属性的隐形岩散落在对方场地上！'); } }
+          /* ★ 超极巨旋风袭卷：清除双方场地陷阱和光墙 */
+          if (f.clearscreens) { this.auroraveil = { p: 0, e: 0 }; await say('所有的光墙和极光幕被吹散了！'); }
+          if (f.clearhaz) { this.haz = { p: { sr: 0, spikes: 0, tspikes: 0 }, e: { sr: 0, spikes: 0, tspikes: 0 } }; await say('所有的场地陷阱被吹散了！'); }
+          /* ★ 超极巨万雷轰顶/热情拥抱/天降雷嗔/异毒电场/睡魔降临/淘金潮/臭气冲天：状态类 */
+          if (f.sec && foe.hp > 0) {
+            if (f.sec === 'par') await this.inflictStatus(foe, 'par', mon, 'electric');
+            else if (f.sec === 'attract') { if (!foe.vol.attract) { foe.vol.attract = mon; await say(`${foe.name} 着迷了！`); } }
+            else if (f.sec === 'psn') await this.inflictStatus(foe, 'psn', mon, 'poison');
+            else if (f.sec === 'psn_par') await this.inflictStatus(foe, pick(['psn', 'par']), mon, 'poison');
+            else if (f.sec === 'tri') await this.inflictStatus(foe, pick(['burn', 'par', 'psn']), mon, 'poison');
+            else if (f.sec === 'confuse') { if (!foe.vol.confuse) { foe.vol.confuse = rnd(2, 4); await say(`${foe.name} 混乱了！`); } }
+            else if (f.sec === 'drowsy') { if (!foe.has('insomnia') && !foe.has('vitalspirit') && !foe.status) { foe.vol.drowsy = true; await say(`${foe.name} 变得昏昏欲睡了！`); } }
+          }
+          /* ★ 超极巨幻影幽魂：踩影（禁止替换） */
+          if (f.trap && foe.hp > 0 && !foe.has('shadowtagx')) { foe.vol.gmaxTrap = true; await say(`${foe.name} 被超极巨幻影幽魂困住了！`); }
+          /* ★ 超极巨会心一击：会心率提升 */
+          if (f.critUp) { mon.vol.gmaxCrit = true; await say(`${mon.name} 的会心率大幅提升了！`); }
+          /* ★ 超极巨资源再生：恢复树果 */
+          if (f.berry && !mon.item) { mon.item = 'sitrus'; await say(`${mon.name} 的资源再生发动了！文柚果恢复了！`); }
+          /* ★ 超极巨劣化衰变：减少对手最后使用招式的PP */
+          if (f.ppDrain && foe.moves.length) { const lm = foe.moves.find(x => x.k === foe.vol.lastMove); if (lm) { lm.pp = Math.max(0, lm.pp - f.ppDrain); await say(`${foe.name} 的PP被削减了！`); } }
+          /* ★ 超极巨液金熔击：禁止对手连续使用相同招式 */
+          if (f.torment) { foe.vol.gmaxTorment = true; await say(`${foe.name} 被液金困住了，无法连续使用相同招式！`); }
+          /* ★ 超极巨夺命一击：无视保护 */
+          if (f.bypassProtect) await say('超极巨夺命一击无视一切保护！');
+          /* ★ 超极巨幸福圆满/甜之苹果：回复己方HP或治愈异常 */
+          if (f.healTeam) { const h = Math.floor(mon.baseMax / 6); mon.hp = Math.min(mon.maxhp, mon.hp + h); await say(`${mon.name} 回复了HP！`); }
+          if (f.healStatus) { mon.status = null; mon.sleepT = 0; mon.toxicN = 0; await say(`${mon.name} 的异常状态被治愈了！`); }
+          /* ★ 超极巨百火焚野/沙尘漫天：部分束缚 */
+          if (f.partialTrap && foe.hp > 0) { foe.vol.binding = 4; await say(`${foe.name} 被束缚住了！`); }
         }
         // 解冻（火属性伤害）
         if (mv.t === 'fire' && foe.status === 'frz') { foe.status = null; await say(`${foe.name} 解冻了！`); }
@@ -7544,7 +7739,7 @@ return ev;
         if (mv.eruption) { mv = { ...mv, p: Math.max(1, Math.floor(150 * mon.hp / mon.maxhp)) }; }
         const mb = mon.has('moldbreaker');
         // 会心
-        let cs = (mv.crit ? 1 : 0) + (mv.alwaysCrit ? 2 : 0) + (mon.has('superluck') ? 1 : 0) + (mon.item === 'scopelens' ? 1 : 0);
+        let cs = (mv.crit ? 1 : 0) + (mv.alwaysCrit ? 2 : 0) + (mon.has('superluck') ? 1 : 0) + (mon.item === 'scopelens' ? 1 : 0) + (mon.vol.gmaxCrit ? 2 : 0);
         const crit = mv.alwaysCrit || (mon.has('merciless') && (foe.status === 'psn' || foe.status === 'tox')) || (!foe.has('shellarmor') && !foe.has('battlearmor') && Math.random() < [1 / 24, 1 / 8, 1 / 2, 1][Math.min(cs, 3)]);
         let A = mon.effStat(atkK, this), D = foe.effStat(defK, this);
         if (foe.has('unaware') && !crit) { A = mon.st[atkK]; }
@@ -7575,7 +7770,7 @@ return ev;
         if (this.wxActive() === 'delta' && foe.types.includes('flying') && ['rock', 'electric', 'ice'].includes(mv.t)) {
           eff /= 2;
         }
-        if (mv.freezedry && foe.types.includes('water')) eff *= 2;
+        if (mv.freezedry && foe.types.includes('water')) eff *= 4;  // ★ 冷冻干燥：冰→水改为2倍（原0.5倍）
         if ((mv.t === 'normal' || mv.t === 'fighting') && foe.types.includes('ghost') && mon.has('scrappy')) eff = 1;
         if (mv.se2 && eff > 1) eff *= 2;
         if (mv.dyna2x && foe.dyn) eff *= 2;
@@ -7670,6 +7865,8 @@ return ev;
         if (!mb && foe.has('waterbubble') && mv.t === 'fire') dmg = Math.floor(dmg * .5);
         /* ★ 草之毛皮：青草场地时防御×1.5（等效于受到伤害÷1.5） */
         if (!mb && foe.has('grasspelt') && this.terrain === 'grassy' && mv.c === 'P') dmg = Math.floor(dmg * 2 / 3);
+        /* ★ 极光幕（超极巨极光旋律）：所有伤害减半 */
+        if (this.auroraveil[this.sideOf(foe)] > 0) dmg = Math.floor(dmg * .5);
         // ★ 白色烟雾：同恒净之躯（已在 changeStat 中处理）
         // 会心倍率
         if (crit) dmg = Math.floor(dmg * (mon.has('sniper') ? 2.25 : 1.5));
@@ -8041,6 +8238,8 @@ return ev;
           /* ★ 全能变身：标记已交换下场，下次出场时触发英雄形态 */
           if (old.has('zerotohero')) old.vol.wasSwitchedOut = true;
           old.vol.choiceLock = null; old.vol.lock = null; old.vol.charge = null; old.vol.recharge = false; old.vol.protect = false; old.vol.flinch = false; old.vol.confuse = 0; old.vol.proteanUsed = false; old.vol.disabled = null; old.vol.lastMove = null;
+          /* ★ 超极巨效果离场清除：被G-Max Phantom困住的、被Torment的、束缚的 */
+          old.vol.gmaxTrap = false; old.vol.gmaxTorment = false; old.vol.gmaxCrit = false; old.vol.binding = 0;
           /* ★ 极巨化离场即解除（HP按比例折算）；Mega进化与太晶化本场战斗内永久保留 */
           if (old.dyn) {
             const pct = old.hp / old.maxhp;
@@ -8198,17 +8397,38 @@ return ev;
           }
           if (m.hp <= 0 && !m.fainted) { await this.handleKO(this.foeSide(side), this.foeOf(m), m); if (this.over) return; }
         }
-        // 天气/场地/空间倒计时（★德尔塔气流不随回合衰减，仅随携带者离场/倒下消散）
+        // 天气/场地/空间倒计时
         if (this.wx && this.wx !== 'delta') { this.wxT--; if (this.wxT <= 0) { this.wx = null; await say('天气恢复了正常。'); } }
         if (this.terrain) { this.terrainT--; if (this.terrainT <= 0) { this.terrain = null; await say('场地恢复了原状。'); } }
         if (this.trickT > 0) { this.trickT--; if (this.trickT === 0) await say('戏法空间解除了。'); }
-        // 混乱/挑衅倒计时 + ★畏缩只在当回合生效，回合结束统一清除
+        /* ★ 超极巨DOT倒计时和伤害 */
+        if (this.gmaxDot) {
+          this.gmaxDot.turns--;
+          const dotM = this.gmaxDot.side === 'p' ? this.P() : this.E();
+          if (dotM && dotM.alive() && !dotM.types.includes(this.gmaxDot.type)) {
+            const dd = Math.max(1, Math.floor(dotM.maxhp / 6));
+            dotM.hp = Math.max(0, dotM.hp - dd);
+            await say(`${dotM.name} 受到了${this.gmaxDot.name || '超极巨' + TNAME[this.gmaxDot.type]}的持续伤害！`);
+            this.addLog(`↳ ${dotM.name} 超极巨DOT -${dd} HP`);
+            BUI.dmgPop(this.gmaxDot.side, `-${dd}`, TCOL[this.gmaxDot.type]);
+          }
+          if (this.gmaxDot.turns <= 0) { this.gmaxDot = null; await say('超极巨的持续伤害消散了…'); }
+        }
+        /* ★ 极光幕倒计时 */
+        if (this.auroraveil.p > 0) { this.auroraveil.p--; if (this.auroraveil.p === 0) await say('己方的极光幕消散了…'); }
+        if (this.auroraveil.e > 0) { this.auroraveil.e--; if (this.auroraveil.e === 0) await say('对手的极光幕消散了…'); }
+        // 混乱/挑衅/束缚/昏睡倒计时
         for (const m of [this.P(), this.E()]) {
           if (!m) continue;
           m.vol.flinch = false; m.vol.switchedInThisTurn = false;
           if (m.vol.confuse > 0) { m.vol.confuse--; if (m.vol.confuse === 0) await say(`${m.name} 的混乱解除了。`); }
           if (m.vol.taunt > 0) m.vol.taunt--;
           if (m.vol.disabled) { m.vol.disabled.turns--; if (m.vol.disabled.turns <= 0) { await say(`${m.name} 的招式封印解除了！`); m.vol.disabled = null; } }
+          /* ★ 昏睡（超极巨睡魔降临）：回合末睡着 */
+          if (m.vol.drowsy && !m.status) { m.status = 'sleep'; m.sleepT = 2; m.vol.drowsy = false; await say(`${m.name} 昏昏沉沉地睡着了！`); }
+          /* ★ 束缚（超极巨百火焚野/沙尘漫天）：回合末扣血 */
+          if (m.vol.binding && m.vol.binding > 0) { m.vol.binding--; const bd = Math.floor(m.maxhp / 8); m.hp = Math.max(0, m.hp - bd); await say(`${m.name} 被束缚伤害了！`); }
+          /* ★ 超极巨幻影幽魂的封锁在换下时解除（不做回合衰减） */
         }
         BUI.refresh(this);
         // 低HP提示音
@@ -8230,6 +8450,9 @@ return ev;
           if (d.c !== 'X') {
             const sim = this.calcDmg(m, foe, { ...d, k: mv.k });
             let dmg = sim.dmg;
+            /* ★ 属性免疫：完全无效的招式，AI不应使用 */
+            if (sim.eff === 0) { s = -80; }
+            else {
             if (d.multi) dmg *= (d.multi[0] + d.multi[1]) / 2;
             if (d.eruption) dmg = Math.floor(dmg * m.hpPct());
             s = dmg >= foe.hp ? 100 : dmg / foe.maxhp * 60;
@@ -8238,6 +8461,7 @@ return ev;
             if (d.recoil && m.hpPct() < .3) s -= 8;
             if (d.self && d.self.n < 0) s -= 6;
             if (m.hpPct() < .35 && d.p < 50) s -= 5;
+            }
           } else {
             if (d.heal || d.rest) { s = m.hpPct() < .55 ? 30 : -20; if (m.hpPct() > .85) s = -25; }
             else if (d.setSt) {
@@ -9093,7 +9317,7 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
     <div style="text-align:center"><span class="px" style="font-size:8px;color:#999">#${String(sp.id).padStart(4, '0')}</span>
     <div class="disp" style="font-size:24px">${sp.n}</div>
     <div style="margin:4px 0">${sp.t.split('/').map(tyBadge).join(' ')}</div>
-    <div style="font-size:11px;color:#888;font-weight:700">第 ${genOf(sp.id)} 世代 · 总和 ${bst(sp)}${sp.leg ? ' · 传说' : ''}${MEGA[sp.id] ? ' · 可Mega' : ''}${GMAXLIST.has(sp.id) ? ' · 可极巨' : ''}</div></div>
+    <div style="font-size:11px;color:#888;font-weight:700">第 ${genOf(sp.id)} 世代 · 总和 ${bst(sp)}${sp.leg ? ' · 传说' : ''}${MEGA[sp.id] ? ' · 可Mega' : ''}${GMAXLIST.has(sp.id) ? ` · 可超极巨（${GMAXMOVE[sp.id]?.n || ''}）` : ''}</div></div>
     ${sp.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:900;color:#777;font-size:11px">${names[i]}</span><span class="px" style="font-size:8px;width:26px;text-align:right">${v}</span><div class="bar"><div class="fill" style="width:${Math.min(100, v / 1.8)}%;background:${v >= 100 ? '#3ecf6c' : v >= 70 ? '#8bc34a' : v >= 45 ? '#f2c230' : '#ef4444'}"></div></div></div>`).join('')}
     <div style="margin-top:8px;font-size:12px"><b>特性：</b>${sp.ab.map(a => AB[a]?.n || a).join(' / ')}</div>
         <div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}</span>`).join('')}</div>`);
@@ -9301,7 +9525,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
         playerTeam.forEach((cfg, i) => {
           const s = el('div', 'teamSlot'); s.style.cursor = 'pointer';
           const img = new Image(); setSprite(img, cfg.sp.id); s.appendChild(img);
-          s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${cfg.sp.n}</b> <span style="font-size:10px;color:#888">Lv${cfg.lvl} · ${cfg.nature.n} · ${cfg.ability ? AB[cfg.ability]?.n : ''} · 晶${TNAME[cfg.tera]}</span><div style="font-size:10px;color:#666">${cfg.moves.map(k => MV[k].n).join(' / ')}</div></div>`);
+          s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${cfg.sp.n}</b> <span style="font-size:10px;color:#888">Lv${cfg.lvl} · ${cfg.nature.n} · ${cfg.ability ? AB[cfg.ability]?.n : ''} · 晶${TNAME[cfg.tera]}${cfg.gmax ? ' · ⬡超极巨' : ''}</span><div style="font-size:10px;color:#666">${cfg.moves.map(k => MV[k].n).join(' / ')}</div></div>`);
           const x = el('button', 'btn tiny', '✕'); x.onclick = e => { e.stopPropagation(); playerTeam.splice(i, 1); renderTeam(); render(); }; s.appendChild(x);
           s.onclick = () => openMonConfig(playerTeam, i, renderTeam);
           t.appendChild(s);
@@ -9337,7 +9561,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
               if (team.length >= 6) { toast('最多6只！'); AU.no(); return; }
               if (team.find(t => t.sp.id === sp.id)) { toast('已在队伍中'); AU.no(); return; }
               AU.ok();
-              team.push({ sp, lvl, nature: NATURES[0], ev: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, ability: sp.ab[0], moves: sp.mv.slice(0, 4), tera: pick(TYP), item: null });
+              team.push({ sp, lvl, nature: NATURES[0], ev: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, ability: sp.ab[0], moves: sp.mv.slice(0, 4), tera: pick(TYP), item: null, gmax: GMAXLIST.has(sp.id) });
               renderTeam();
             };
             grid.appendChild(c);
@@ -9367,7 +9591,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       }
       $('#freeGo').onclick = async () => {
         if (!playerTeam.length) { toast('请先选择我方宝可梦！'); AU.no(); return; }
-        const player = playerTeam.map(cfg => new P(cfg.sp.id, cfg.lvl, { iv: 30, nature: cfg.nature, ev: cfg.ev, ability: cfg.ability, moves: cfg.moves, tera: cfg.tera, item: cfg.item }));
+        const player = playerTeam.map(cfg => { const p = new P(cfg.sp.id, cfg.lvl, { iv: 30, nature: cfg.nature, ev: cfg.ev, ability: cfg.ability, moves: cfg.moves, tera: cfg.tera, item: cfg.item }); if (cfg.gmax && GMAXLIST.has(cfg.sp.id)) p.vol.canGmax = true; return p; });
         let enemy;
         if (enemyMode === 'random') {
           enemy = shuffle(SP.filter(s => !s.leg)).slice(0, Math.min(6, Math.max(1, playerTeam.length))).map(sp => new P(sp.id, lvl, { iv: 28 }));
@@ -9426,6 +9650,15 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       TYP.forEach(t => { const o = el('option', '', TNAME[t]); o.value = t; if (t === cfg.tera) o.selected = true; teraSel.appendChild(o); });
       teraSel.onchange = () => { cfg.tera = teraSel.value; AU.cursor(); };
       teraRow.appendChild(teraSel); box.appendChild(teraRow);
+      // 超极巨化（仅G-Max宝可梦可配置）
+      if (GMAXLIST.has(sp.id)) {
+        const gmaxRow = el('div', 'setRow');
+        gmaxRow.innerHTML = '<div><b>超极巨化</b><div style="font-size:11px;color:#888;font-weight:400">' + (GMAXMOVE[sp.id]?.n || '') + '</div></div>';
+        const gmaxBtn = el('button', 'btn small' + (cfg.gmax ? ' blue' : ''), cfg.gmax ? '已开启' : '已关闭');
+        gmaxBtn.style.cssText = 'margin-left:auto';
+        gmaxBtn.onclick = () => { cfg.gmax = !cfg.gmax; gmaxBtn.textContent = cfg.gmax ? '已开启' : '已关闭'; gmaxBtn.classList.toggle('blue', cfg.gmax); AU.cursor(); };
+        gmaxRow.appendChild(gmaxBtn); box.appendChild(gmaxRow);
+      }
       // 对战点数
       box.appendChild(el('h3', 'disp', '对战点数（总和≤66，单项≤32）'));
       const evKeys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'], evNames = ['HP', '攻击', '防御', '特攻', '特防', '速度'];
@@ -9604,6 +9837,16 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
     /* ============ 技能图鉴 ============ */
     function buildMoveDex() {
       const allMv = Object.values(MV);
+      /* ★ 添加极巨/超极巨招式（虚拟条目） */
+      for (const [t, n] of Object.entries(MAXMV)) {
+        const cat = MV[Object.keys(MV).find(k => MV[k].t === t && MV[k].c !== 'X')]?.c || 'P';
+        allMv.push({ k: 'maxmv-' + t, n, t, c: cat, p: 0, a: null, pp: 1, maxmv: true, desc: maxFxDesc(MAXFX[t]) });
+      }
+      for (const [id, gm] of Object.entries(GMAXMOVE)) {
+        const sp = SPDB[+id];
+        const cat = MV[Object.keys(MV).find(k => MV[k].t === gm.t && MV[k].c !== 'X')]?.c || 'S';
+        allMv.push({ k: 'gmax-' + id, n: gm.n + (sp ? '（' + sp.n + '）' : ''), t: gm.t, c: cat, p: 0, a: null, pp: 1, gmax: true, desc: gmaxFxDesc(gm.fx) });
+      }
       $('#mvTotal').textContent = '收录 ' + allMv.length + ' 个招式';
       $('#mvCount').textContent = allMv.length + ' 个';
       const grid = $('#mvGrid'), search = $('#mvSearch'), tySel = $('#mvType'), catSel = $('#mvCat'), detail = $('#mvDetail');
@@ -9646,8 +9889,9 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
 
       function showMvDetail(mv) {
         detail.classList.remove('hidden');
-        const mons = SP.filter(s => s.mv.includes(mv.k));
-        const desc = moveDesc(mv.k);
+        const mons = mv.maxmv || mv.gmax ? [] : SP.filter(s => s.mv.includes(mv.k));
+        const desc = mv.desc || moveDesc(mv.k);
+        const pwrInfo = mv.maxmv || mv.gmax ? '（随原招式威力变化）' : (mv.p ?? '—');
         detail.innerHTML = `
 <div class="mvDetailTop">
 ${tyBadge(mv.t)}
@@ -9656,18 +9900,18 @@ ${tyBadge(mv.t)}
 </div>
 <div style="font-size:11px;color:#999;font-weight:700">内部ID：${mv.k}</div>
 <div class="mvDetailStats">
-<div class="mvStatBox"><div class="lbl">威力</div><div class="val">${mv.p ?? '—'}</div></div>
+<div class="mvStatBox"><div class="lbl">威力</div><div class="val">${pwrInfo}</div></div>
 <div class="mvStatBox"><div class="lbl">命中</div><div class="val">${mv.a ?? '必中'}</div></div>
 <div class="mvStatBox"><div class="lbl">PP</div><div class="val">${mv.pp}</div></div>
 <div class="mvStatBox"><div class="lbl">优先级</div><div class="val">${mv.pri ? (mv.pri > 0 ? '+' : '') + mv.pri : '0'}</div></div>
 <div class="mvStatBox"><div class="lbl">分类</div><div class="val" style="color:${CATC[mv.c]}">${CATN[mv.c]}</div></div>
-<div class="mvStatBox"><div class="lbl">可学宝可梦</div><div class="val">${mons.length}种</div></div>
+<div class="mvStatBox"><div class="lbl">可学宝可梦</div><div class="val">${mv.gmax ? '专属' : mons.length + '种'}</div></div>
 </div>
 ${desc ? `<div class="mvDetailDesc">📖 ${desc}</div>` : ''}
-<div style="font-weight:900;font-size:14px;margin-top:14px;margin-bottom:8px">可学会此招式的宝可梦（${mons.length}种）：</div>
+${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-top:14px;margin-bottom:8px">可学会此招式的宝可梦（${mons.length}种）：</div>
 <div class="mvMonList">${mons.length ? mons.slice(0, 60).map(sp => {
           return `<span class="mvMonChip" data-id="${sp.id}"><img src="${SPRBASE}${sp.id}.png" onerror="this.src='${SPRBASE}0.png'">${sp.n}</span>`;
-        }).join('') + (mons.length > 60 ? `<span style="font-size:11px;color:#999;font-weight:700">…等${mons.length}种</span>` : '') : '<span style="color:#999;font-size:12px">暂无</span>'}</div>`;
+        }).join('') + (mons.length > 60 ? `<span style="font-size:11px;color:#999;font-weight:700">…等${mons.length}种</span>` : '') : '<span style="color:#999;font-size:12px">暂无</span>'}</div>`}`;
         detail.querySelectorAll('.mvMonChip').forEach(chip => {
           chip.onclick = () => { const sp = SPDB[+chip.dataset.id]; if (sp) { AU.ok(); dexDetail(sp); show('#dex'); buildDex(); } };
         });
@@ -9749,7 +9993,8 @@ ${desc ? `<div class="mvDetailDesc">📖 ${desc}</div>` : ''}
           this.usedForm.p = true; this.doMega('p', Pm, idx); await sleep(700);
         } else if (pa.dyn && this.rules.dyna && !this.usedForm.p && !Pm.dyn && !Pm.mega) {
           this.usedForm.p = true; Pm.dyn = true; Pm.dynT = 3; Pm.recalc(); Pm.hp *= 2;
-          AU.dyna(); await say(`极巨化！${Pm.name} 的体型变得巨大了！HP翻倍！`); BUI.refresh(this);
+          if (Pm.vol.canGmax !== undefined ? Pm.vol.canGmax : (GMAXLIST.has(Pm.id) && Math.random() < 0.7)) Pm.vol.gmax = true;
+          AU.dyna(); await say(`极巨化！${Pm.name} 的体型变得巨大了！HP翻倍！${Pm.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
         } else if (pa.tera && this.rules.tera && !this.usedForm.p && !Pm.tera) {
           this.usedForm.p = true; Pm.tera = true; Pm.types = [Pm.teraType];
           AU.tera(); BUI.sparkle('p'); await say(`太晶化！${Pm.name} 变成了${TNAME[Pm.teraType]}属性！`); BUI.refresh(this);
@@ -9761,7 +10006,8 @@ ${desc ? `<div class="mvDetailDesc">📖 ${desc}</div>` : ''}
           this.usedForm.e = true; this.doMega('e', E, ea.megaIdx || 0); await sleep(700);
         } else if (ea.dyn && this.rules.dyna && !this.usedForm.e && !E.dyn && !E.mega) {
           this.usedForm.e = true; E.dyn = true; E.dynT = 3; E.recalc(); E.hp *= 2;
-          AU.dyna(); await say(`极巨化！${E.name} 的体型变得巨大了！`); BUI.refresh(this);
+          if (E.vol.canGmax !== undefined ? E.vol.canGmax : (GMAXLIST.has(E.id) && Math.random() < 0.7)) E.vol.gmax = true;
+          AU.dyna(); await say(`极巨化！${E.name} 的体型变得巨大了！${E.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
         } else if (ea.tera && this.rules.tera && !this.usedForm.e && !E.tera) {
           this.usedForm.e = true; E.tera = true; E.types = [E.teraType];
           AU.tera(); BUI.sparkle('e'); await say(`太晶化！${E.name} 变成了${TNAME[E.teraType]}属性！`); BUI.refresh(this);
@@ -9785,6 +10031,51 @@ ${desc ? `<div class="mvDetailDesc">📖 ${desc}</div>` : ''}
     $('#bSetBtn').onclick = () => { AU.cursor(); openSettings(); };
     /* ============ 宝可梦详情页 ============ */
     const STNAME = { burn: '灼伤', par: '麻痹', psn: '中毒', tox: '剧毒', sleep: '睡眠', frz: '冰冻', confuse: '混乱' };
+    function maxFxDesc(fx) {
+      if (!fx) return '极巨招式，威力取决于原招式';
+      const parts = [];
+      if (fx.up) parts.push('提升己方全体' + STN[fx.up]);
+      if (fx.drop) parts.push('降低对手全体' + STN[fx.drop]);
+      if (fx.weather) parts.push('天气变为' + { sun: '大晴天', rain: '下雨', sand: '沙暴', hail: '冰雹' }[fx.weather]);
+      if (fx.terrain) parts.push('场地变为' + TERRNAME[fx.terrain]);
+      return parts.join('，');
+    }
+    function gmaxFxDesc(fx) {
+      /* ★ 优先使用GMAXMOVE中预写的desc */
+      for (const [id, gm] of Object.entries(GMAXMOVE)) {
+        if (gm.fx === fx) return gm.desc || '';
+      }
+      /* 回退：根据fx标签生成描述 */
+      const parts = [];
+      if (fx.dot) parts.push('对非' + TNAME[fx.dot] + '属性的对手附加持续伤害（每回合1/6HP，4回合）');
+      if (fx.auroraveil) parts.push('5回合内所有伤害减半（极光幕）');
+      if (fx.trap) parts.push('踩影效果，对手无法替换');
+      if (fx.critUp) parts.push('会心率大幅提升');
+      if (fx.drop) { let d = STN[fx.drop]; parts.push('降低对手' + d + (fx.dropN || '1') + '级'); }
+      if (fx.up) parts.push('提升自身' + STN[fx.up]);
+      if (fx.weather) parts.push('变为' + { sun: '大晴天', rain: '下雨', sand: '沙暴', hail: '冰雹' }[fx.weather]);
+      if (fx.terrain) parts.push('变为' + TERRNAME[fx.terrain]);
+      if (fx.sec === 'par') parts.push('使对手麻痹');
+      if (fx.sec === 'psn') parts.push('使对手中毒');
+      if (fx.sec === 'psn_par') parts.push('使对手随机中毒或麻痹');
+      if (fx.sec === 'tri') parts.push('使对手随机陷入麻痹/灼伤/中毒');
+      if (fx.sec === 'confuse') parts.push('使对手混乱');
+      if (fx.sec === 'attract') parts.push('使对手着迷');
+      if (fx.sec === 'drowsy') parts.push('使对手瞌睡（回合末睡着）');
+      if (fx.hazard === 'sr') parts.push('在对手场地撒下隐形岩');
+      if (fx.hazard === 'spikes') parts.push('在对手场地撒下撒菱');
+      if (fx.hazard === 'steelsr') parts.push('在对手场地撒下钢属性隐形岩');
+      if (fx.clearscreens) parts.push('清除双方光墙和极光幕');
+      if (fx.clearhaz) parts.push('清除双方场地陷阱');
+      if (fx.berry) parts.push('恢复已消耗的树果');
+      if (fx.ppDrain) parts.push('减少对手PP');
+      if (fx.torment) parts.push('禁止对手连续使用相同招式');
+      if (fx.bypassProtect) parts.push('无视保护类招式');
+      if (fx.healTeam) parts.push('回复自身HP');
+      if (fx.healStatus) parts.push('治愈自身异常状态');
+      if (fx.partialTrap) parts.push('束缚对手持续造成伤害');
+      return parts.length ? parts.join('，') : '超极巨招式';
+    }
     function moveDesc(k) {
       const d = MV[k]; if (!d) return '';
       const p = [];
@@ -9894,7 +10185,7 @@ ${desc ? `<div class="mvDetailDesc">📖 ${desc}</div>` : ''}
       ${m.status ? `<span class="abchip" style="color:#c22e28;border-color:#e08a8a;background:#ffe8e8">${STNAME[m.status] || m.status}</span>` : ''}
       ${m.vol.confuse > 0 ? `<span class="abchip" style="color:#e0912b;border-color:#f0c060;background:#fff3d8">混乱（剩余${m.vol.confuse}回合）</span>` : ''}
 ${m.mega ? (m.mega.formTag ? `<span class="abchip" style="color:#c07a2a;border-color:#e0c060;background:linear-gradient(90deg,#fff2e0,#ffe9c0,#fff8e8)">★ ${m.mega.formTag}</span>` : '<span class="abchip" style="color:#b3188d;border-color:#e08ac2;background:linear-gradient(90deg,#ffe0f5,#f0e0ff,#e0f0ff);animation:rainbowChip 3s linear infinite">◆ Mega进化</span>') : ''}
-${m.dyn ? '<span class="abchip" style="color:#d21f3c;border-color:#f08a9a;background:#ffe0e5">极巨化中</span>' : ''}
+${m.dyn ? (m.vol.gmax ? '<span class="abchip" style="color:#c07a2a;border-color:#f0b860;background:linear-gradient(180deg,#fff2e0,#ffe0b0)">⬡ 超极巨化</span>' : '<span class="abchip" style="color:#d21f3c;border-color:#f08a9a;background:#ffe0e5">极巨化中</span>') : (GMAXLIST.has(m.id) ? '<span class="abchip" style="opacity:.5;border-style:dashed;color:#c07a2a">可超极巨</span>' : '')}
 ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;background:linear-gradient(135deg,#e0fbff,#d0f0ff,#e8e0ff)">⬡ 太晶化·${TNAME[m.teraType]}</span>` : ''}
       ${m.id === 778 ? (m.disguiseUsed ? '<span class="abchip" style="color:#999;border-color:#ccc;background:#f0f0f0;text-decoration:line-through">画皮已破</span>' : '<span class="abchip" style="color:#9b6fd8;border-color:#c8a0e8;background:#f5ecff">画皮未触发</span>') : ''}
     </div>
@@ -9935,10 +10226,26 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
         moveWrap.innerHTML = '';
         moveList.slice(page * PER, page * PER + PER).forEach(mv => {
           const d = MV[mv.k];
-          const c = el('div', 'dMove'); c.style.borderLeftColor = TCOL[d.t];
-          c.innerHTML = `<div class="dmTop">${tyBadge(d.t)}<b>${d.n}</b><span class="dmCat">${d.c === 'P' ? '物理' : d.c === 'S' ? '特殊' : '变化'}</span></div>
-        <div class="dmNums">威力 ${d.p ?? '—'} · 命中 ${d.a ?? '—'} · PP ${mv.pp}/${mv.maxpp}${d.pri ? ` · 先制 ${d.pri > 0 ? '+' : ''}${d.pri}` : ''}</div>
-        <div class="dmDesc">${moveDesc(mv.k)}</div>`;
+          /* ★ 极巨化/超极巨化招式显示 */
+          let showN = d.n, showT = d.t, showC = d.c, showP = d.p, showA = d.a, showDesc = moveDesc(mv.k);
+          if (m.dyn && d.c !== 'X') {
+            const maxP = maxPower(d);
+            if (m.vol.gmax && GMAXMOVE[m.id] && d.t === GMAXMOVE[m.id].t) {
+              const gm = GMAXMOVE[m.id];
+              showN = gm.n; showP = maxP; showA = null;
+              showDesc = gmaxFxDesc(gm.fx);
+            } else {
+              showN = MAXMV[d.t] || '极巨攻击'; showP = maxP; showA = null;
+              showDesc = maxFxDesc(MAXFX[d.t]);
+            }
+          } else if (m.dyn && d.c === 'X') {
+            showN = '极巨防壁'; showP = null; showA = null; showC = 'X';
+            showDesc = '极巨招式 · 完全守住所有攻击';
+          }
+          const c = el('div', 'dMove'); c.style.borderLeftColor = TCOL[showT];
+          c.innerHTML = `<div class="dmTop">${tyBadge(showT)}<b>${showN}</b><span class="dmCat">${showC === 'P' ? '物理' : showC === 'S' ? '特殊' : '变化'}</span></div>
+        <div class="dmNums">${showP != null ? '威力 ' + showP + ' · ' : ''}命中 ${showA ?? '必中'} · PP ${mv.pp}/${mv.maxpp}${d.pri ? ` · 先制 ${d.pri > 0 ? '+' : ''}${d.pri}` : ''}</div>
+        <div class="dmDesc">${showDesc}</div>`;
           moveWrap.appendChild(c);
         });
         pager.innerHTML = '';
