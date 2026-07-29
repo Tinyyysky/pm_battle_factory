@@ -7252,8 +7252,8 @@ SP.forEach(s => {
     const FORMSPRITE = { wellspringmask:10273, hearthflamemask:10274, cornerstonemask:10275, school:10127, busted:10143 };
     /* ★ 超极巨招式（G-Max）：超极巨化的宝可梦使用对应属性的G-Max招式替代普通极巨招式 */
 const GMAXMOVE = {
-      3:  { t: 'grass',   n: '超极巨灰飞鞭灭', fx: { terrain: 'grassy' }, dot: 'grass',
-            desc: '在对手周围降下灰飞鞭，攻击后4回合内每回合对草属性以外的宝可梦造成最大HP 1/6的伤害，同时变为青草场地' },
+       3:  { t: 'grass',   n: '超极巨灰飞鞭灭', fx: {}, dot: 'grass',
+             desc: '在对手周围降下灰飞鞭，攻击后4回合内每回合对草属性以外的宝可梦造成最大HP 1/6的伤害' },
       6:  { t: 'fire',    n: '超极巨地狱灭焰', fx: {}, dot: 'fire',
             desc: '在对手周围燃起地狱之火，攻击后4回合内每回合对火属性以外的宝可梦造成最大HP 1/6的伤害' },
       9:  { t: 'water',   n: '超极巨水炮轰坠', fx: {}, dot: 'water',
@@ -8098,7 +8098,7 @@ return ev;
           m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true;
           m.vol.illusion = null; m.vol.illusionName = null;
           m.vol.wasSwitchedOut = false; m.vol.heroForm = false;
-          if (keepCanGmax) m.vol.canGmax = true;
+          if (keepCanGmax !== undefined) m.vol.canGmax = keepCanGmax;
           m.recalc();
           m.hp = Math.min(m.hp, m.maxhp);
           m.xpGot = false;
@@ -8171,7 +8171,7 @@ return ev;
           m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true;
           m.vol.illusion = null; m.vol.illusionName = null;
           m.vol.wasSwitchedOut = false; m.vol.heroForm = false;
-          if (keepCanGmax2) m.vol.canGmax = true;
+          if (keepCanGmax2 !== undefined) m.vol.canGmax = keepCanGmax2;
           m.recalc();
           m.hp = Math.min(m.hp, m.maxhp);
         });
@@ -8621,7 +8621,8 @@ return ev;
                 }
               }
               if (wantDyn || m.dyn) {
-                const willGmax = m.vol.gmax || (wantDyn && (m.vol.canGmax !== undefined ? m.vol.canGmax : GMAXLIST.has(m.id)));
+                const canGmax = m._userGmax !== undefined ? m._userGmax : (m.vol.canGmax !== undefined ? m.vol.canGmax : (GMAXLIST.has(m.id) ? undefined : false));
+                const willGmax = m.vol.gmax || (wantDyn && (canGmax !== false ? (canGmax || GMAXLIST.has(m.id)) : false));
                 /* ★ G-Max：只有同属性招式才变为专属超极巨招式 */
                 const isGmaxType = willGmax && GMAXMOVE[m.id] && (showT || d.t) === GMAXMOVE[m.id].t;
                 if (isGmaxType) nm = GMAXMOVE[m.id].n;
@@ -11870,7 +11871,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       }
       $('#freeGo').onclick = async () => {
         if (!playerTeam.length) { toast('请先选择我方宝可梦！'); AU.no(); return; }
-        const player = playerTeam.map(cfg => { const p = new P(cfg.sp.id, cfg.lvl, { iv: 30, nature: cfg.nature, ev: cfg.ev, ability: cfg.ability, moves: cfg.moves, tera: cfg.tera, item: cfg.item }); if (cfg.gmax && GMAXLIST.has(cfg.sp.id)) p.vol.canGmax = true; return p; });
+        const player = playerTeam.map(cfg => { const p = new P(cfg.sp.id, cfg.lvl, { iv: 30, nature: cfg.nature, ev: cfg.ev, ability: cfg.ability, moves: cfg.moves, tera: cfg.tera, item: cfg.item }); if (GMAXLIST.has(cfg.sp.id)) { p.vol.canGmax = !!cfg.gmax; p._userGmax = !!cfg.gmax; } return p; });
         let enemy;
         if (enemyMode === 'random') {
           enemy = shuffle(SP.filter(s => !s.leg)).slice(0, Math.min(6, Math.max(1, playerTeam.length))).map(sp => new P(sp.id, lvl, { iv: 28 }));
@@ -12298,7 +12299,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
           this.usedForm.p = true; this.doMega('p', Pm, idx); await sleep(700);
         } else if (pa.dyn && this.rules.dyna && !this.usedForm.p && !Pm.dyn && !Pm.mega) {
           this.usedForm.p = true; Pm.dyn = true; Pm.dynT = 3; Pm.recalc(); Pm.hp *= 2;
-          if (Pm.vol.canGmax !== undefined ? Pm.vol.canGmax : (GMAXLIST.has(Pm.id) && Math.random() < 0.7)) Pm.vol.gmax = true;
+          if (Pm._userGmax !== undefined ? Pm._userGmax : (Pm.vol.canGmax !== undefined ? Pm.vol.canGmax : GMAXLIST.has(Pm.id))) Pm.vol.gmax = true;
           AU.dyna(); await say(`极巨化！${Pm.name} 的体型变得巨大了！HP翻倍！${Pm.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
         } else if (pa.tera && this.rules.tera && !this.usedForm.p && !Pm.tera) {
           this.usedForm.p = true; Pm.tera = true;
@@ -12556,7 +12557,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       ${m.status ? `<span class="abchip" style="color:#c22e28;border-color:#e08a8a;background:#ffe8e8">${STNAME[m.status] || m.status}</span>` : ''}
       ${m.vol.confuse > 0 ? `<span class="abchip" style="color:#e0912b;border-color:#f0c060;background:#fff3d8">混乱（剩余${m.vol.confuse}回合）</span>` : ''}
 ${m.mega ? (m.mega.formTag ? `<span class="abchip" style="color:#c07a2a;border-color:#e0c060;background:linear-gradient(90deg,#fff2e0,#ffe9c0,#fff8e8)">★ ${m.mega.formTag}</span>` : '<span class="abchip" style="color:#b3188d;border-color:#e08ac2;background:linear-gradient(90deg,#ffe0f5,#f0e0ff,#e0f0ff);animation:rainbowChip 3s linear infinite">◆ Mega进化</span>') : ''}
-${m.dyn ? (m.vol.gmax ? '<span class="abchip" style="color:#c07a2a;border-color:#f0b860;background:linear-gradient(180deg,#fff2e0,#ffe0b0)">⬡ 超极巨化</span>' : '<span class="abchip" style="color:#d21f3c;border-color:#f08a9a;background:#ffe0e5">极巨化中</span>') : (GMAXLIST.has(m.id) ? '<span class="abchip" style="opacity:.5;border-style:dashed;color:#c07a2a">可超极巨</span>' : '')}
+${m.dyn ? (m.vol.gmax ? '<span class="abchip" style="color:#c07a2a;border-color:#f0b860;background:linear-gradient(180deg,#fff2e0,#ffe0b0)">⬡ 超极巨化</span>' : '<span class="abchip" style="color:#d21f3c;border-color:#f08a9a;background:#ffe0e5">极巨化中</span>') : (GMAXLIST.has(m.id) ? (m._userGmax ? '<span class="abchip" style="color:#c07a2a;border-color:#f0b860">可超极巨</span>' : '<span class="abchip" style="opacity:.5;border-style:dashed;color:#c07a2a">超极巨关</span>') : '')}
 ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;background:linear-gradient(135deg,#e0fbff,#d0f0ff,#e8e0ff)">⬡ 太晶化·${TNAME[m.teraType]}</span>` : ''}
       ${m.id === 778 ? (m.disguiseUsed ? '<span class="abchip" style="color:#999;border-color:#ccc;background:#f0f0f0;text-decoration:line-through">画皮已破</span>' : '<span class="abchip" style="color:#9b6fd8;border-color:#c8a0e8;background:#f5ecff">画皮未触发</span>') : ''}
     </div>
