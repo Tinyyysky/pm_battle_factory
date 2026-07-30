@@ -12811,7 +12811,6 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
           let idx = 0;
           if (Array.isArray(MEGA[Pm.id])) { idx = await dlgChoices('超级进化', Pm.name + ' 可以进化成两种形态，选择哪一种？', MEGA[Pm.id].map(c => c.stone)); }
           this.usedForm.p = true; this.doMega('p', Pm, idx); await sleep(700);
-        } else if (pa.dyn && this.rules.dyna && !this.usedForm.p && !Pm.dyn && !Pm.mega) {
         } else if (pa.dyn && this.rules.dyna && !this.usedForm.p && !Pm.dyn && !(Pm.mega && Pm.mega.stone)) {
           this.usedForm.p = true; Pm.dyn = true; Pm.dynT = 3; Pm.recalc(); Pm.hp *= 2;
           if (Pm._userGmax !== undefined ? Pm._userGmax : (Pm.vol.canGmax !== undefined ? Pm.vol.canGmax : GMAXLIST.has(Pm.id))) Pm.vol.gmax = true;
