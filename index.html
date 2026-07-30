@@ -4671,7 +4671,7 @@
     M('fireblast', '大字爆炎', 'fire', 'S', 110, 85, 5, { sec: { st: 'burn', ch: 10 } }); M('flareblitz', '闪焰冲锋', 'fire', 'P', 120, 100, 15, { ct: 1, recoil: 3, sec: { st: 'burn', ch: 10 } });
     M('firepunch', '火焰拳', 'fire', 'P', 75, 100, 15, { ct: 1, punch: 1, sec: { st: 'burn', ch: 10 } }); M('overheat', '过热', 'fire', 'S', 130, 90, 5, { self: { drop: 'spa', n: -2 } });
     M('willowisp', '鬼火', 'fire', 'X', null, 85, 15, { setSt: 'burn' }); M('sunnyday', '大晴天', 'fire', 'X', null, null, 5, { weather: 'sun' });
-    M('heatwave', '热风', 'fire', 'S', 95, 90, 10, { sec: { st: 'burn', ch: 10 } }); M('lavaplume', '熔岩风暴', 'fire', 'S', 80, 100, 15, { sec: { st: 'burn', ch: 30 } });
+    M('heatwave', '热风', 'fire', 'S', 95, 90, 10, { sec: { st: 'burn', ch: 10 }, wind: 1 }); M('lavaplume', '熔岩风暴', 'fire', 'S', 80, 100, 15, { sec: { st: 'burn', ch: 30 } });
     M('vcreate', 'V热焰', 'fire', 'P', 180, 95, 5, { ct: 1, self: { drop: 'def', n: -1 }, self2: { drop: 'spd', n: -1 }, self3: { drop: 'spe', n: -1 } });
     M('boltstrike', '雷击', 'electric', 'P', 130, 85, 5, { ct: 1, sec: { st: 'par', ch: 20 } }); M('pyroball', '火焰球', 'fire', 'P', 120, 90, 5, { sec: { st: 'burn', ch: 10 }, bullet: 1 });
     M('torchsong', '闪焰高歌', 'fire', 'S', 80, 100, 10, { selfUp: { drop: 'spa', n: 1 } }); M('bitterblade', '悔念剑', 'fire', 'P', 90, 100, 10, { ct: 1, drain: 50 });
@@ -4833,6 +4833,7 @@
     M('scorchingsands','热沙大地','ground','S',70,100,10,{sec:{st:'burn',ch:30}});
     M('junglehealing','丛林治疗','grass','X',null,null,10,{jungleheal:1});
     M('surgingstrikes','水流连打','water','P',25,100,5,{ct:1,multi:[3,3],alwaysCrit:1});
+    M('tripledive','三连钻','water','P',30,95,10,{ct:1,multi:[3,3]});
     M('thundercage','雷电囚笼','electric','S',80,90,15,{partialTrap:1});
     M('dragonenergy','巨龙威能','dragon','S',150,100,5,{eruption:1});
     M('freezingglare','冰冷视线','psychic','S',90,100,10,{sec:{st:'frz',ch:10}});
@@ -4845,7 +4846,7 @@
     M('psyshieldbash','屏障猛攻','psychic','P',70,90,10,{ct:1,selfUp:{drop:'def',n:1}});
     M('powershift','力量转换','normal','X',null,null,10,{powershift:1});
     M('stoneaxe','石斧','rock','P',65,90,15,{ct:1,slicing:1,hazard:'sr'});
-    M('springtidestorm','阳春风暴','fairy','S',100,80,5,{sec:{drop:'atk',n:-1,ch:30}});
+    M('springtidestorm','阳春风暴','fairy','S',100,80,5,{sec:{drop:'atk',n:-1,ch:30},thunder:1,wind:1});
     M('mysticalpower','神秘之力','psychic','S',70,90,10,{selfUp:{drop:'spa',n:1}});
     M('ragingfury','大愤慨','fire','P',120,100,10,{rampage:1});
     M('chloroblast','叶绿爆震','grass','S',150,95,5,{recoil:2});
@@ -4861,9 +4862,9 @@
     M('triplearrows','三连箭','fighting','P',90,100,10,{sec:{flinch:1,ch:30},crit:1});
     M('infernalparade','群魔乱舞','ghost','S',60,100,15,{infernal:1,sec:{st:'burn',ch:30}});
     M('ceaselessedge','秘剑·千重涛','water','P',65,90,10,{ct:1,slicing:1,hazard:'spikes'});
-    M('bleakwindstorm','枯叶风暴','flying','S',100,80,10,{sec:{drop:'spe',n:-1,ch:30}});
-    M('wildboltstorm','鸣雷风暴','electric','S',100,80,10,{sec:{st:'par',ch:20}});
-    M('sandsearstorm','热沙风暴','ground','S',100,80,10,{sec:{st:'burn',ch:20}});
+    M('bleakwindstorm','枯叶风暴','flying','S',100,80,10,{sec:{drop:'spe',n:-1,ch:30},thunder:1,wind:1});
+    M('wildboltstorm','鸣雷风暴','electric','S',100,80,10,{sec:{st:'par',ch:20},thunder:1,wind:1});
+    M('sandsearstorm','热沙风暴','ground','S',100,80,10,{sec:{st:'burn',ch:20},thunder:1,wind:1});
     M('lunarblessing','新月祈祷','psychic','X',null,null,5,{lunar:1});
     M('takeheart','勇气填充','psychic','X',null,null,10,{takeheart:1});
     M('silktrap','线阱','bug','X',null,null,10,{pri:4,protect:1,silk:1});
@@ -5042,7 +5043,7 @@
     A('grasspelt', '草之毛皮', '青草场地时防御×1.5');
     A('emergencyexit', '危险回避', 'HP降至一半以下时自动交换下场');
     A('steelworker', '钢能力者', '钢属性招式威力×1.5');
-    A('rkssystem', 'AR系统', '根据存储碟变换属性（本作简化为始终一般）');
+    A('rkssystem', 'AR系统', '根据存储碟变换属性');
     A('defeatist', '软弱', 'HP降至一半以下时攻击和特攻减半');
     A('mummy', '木乃伊', '被接触攻击时对手特性变为木乃伊');
     A('cheekpouch', '颊囊', '使用树果时额外回复1/3HP');
@@ -5128,7 +5129,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     A('armortail','尾甲','使对手无法使出先制招式');
     A('cudchew','反刍','食用树果后，会在下一回合结束时再食用一次该树果');
     A('gorillatactics','一猩一意','攻击提升50%，但只能使用一开始使用的招式（可与讲究头带叠加）');
-    A('iceface','冰面','冰雹时头部结冰，可抵挡一次物理攻击');
+    A('iceface','结冻头','冰雹时头部结冰，可抵挡一次物理攻击');
     A('hunger','饱了又饿','每回合在饱了/饿了形态间切换（影响专属招式属性）');
     A('desolateland','终结之地','出场时天气变为终结之地（火属性招式无法被水属性抵消）');
     A('primordialsea','始源之海','出场时天气变为始源之海（水属性招式无法被火属性抵消）');
@@ -5146,6 +5147,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     A('powerspot','能量点','同伴的招式威力×1.3（单打中自身招式×1.3）');
     A('transistor','电晶体','电属性招式威力×1.3');
     A('dragonsmaw','龙颚','龙属性招式威力×1.5');
+    A('rockypayload','搬岩','岩石属性招式威力×1.5');
     A('chillingneigh','苍白嘶鸣','击倒对手时攻击提升1级');
     A('grimneigh','漆黑嘶鸣','击倒对手时特攻提升1级');
     A('thermalexchange','热交换','受火属性招式时攻击提升1级，免疫灼伤');
@@ -5369,6 +5371,33 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     I('wellspringmask', '水井面具', '厄诡椪的水井面具。所有招式威力×1.2，属性变为草/水');
     I('hearthflamemask', '火灶面具', '厄诡椪的火灶面具。所有招式威力×1.2，属性变为草/火');
     I('cornerstonemask', '础石面具', '厄诡椪的础石面具。所有招式威力×1.2，属性变为草/岩石');
+    I('smokeball', '烟雾球', '携带后必定能从野生宝可梦那里逃走，在对战中可无视束缚状态逃走');
+    /* ---- 原始回归宝珠 ---- */
+    I('redorb','朱红色宝珠','固拉多专属。携带后出场时原始回归为原始固拉多（火/地面，种族值大幅提升）');
+    I('blueorb','靛蓝色宝珠','盖欧卡专属。携带后出场时原始回归为原始盖欧卡（水，种族值大幅提升）');
+    /* ---- 盖诺赛克特驱动器 ---- */
+    I('burndrive','燃烧驱动器','盖诺赛克特专属。携带后高科技光炮变为火属性');
+    I('chilldrive','冰冻驱动器','盖诺赛克特专属。携带后高科技光炮变为冰属性');
+    I('dousedrive','水流驱动器','盖诺赛克特专属。携带后高科技光炮变为水属性');
+    I('shockdrive','闪电驱动器','盖诺赛克特专属。携带后高科技光炮变为电属性');
+    /* ---- 银伴战兽存储碟 ---- */
+    I('fightingmemory','格斗存储碟','银伴战兽专属。携带后变为格斗属性，多属性攻击变为格斗属性');
+    I('flyingmemory','飞行存储碟','银伴战兽专属。携带后变为飞行属性');
+    I('poisonmemory','毒存储碟','银伴战兽专属。携带后变为毒属性');
+    I('groundmemory','地面存储碟','银伴战兽专属。携带后变为地面属性');
+    I('rockmemory','岩石存储碟','银伴战兽专属。携带后变为岩石属性');
+    I('bugmemory','虫存储碟','银伴战兽专属。携带后变为虫属性');
+    I('ghostmemory','幽灵存储碟','银伴战兽专属。携带后变为幽灵属性');
+    I('steelmemory','钢存储碟','银伴战兽专属。携带后变为钢属性');
+    I('firememory','火存储碟','银伴战兽专属。携带后变为火属性');
+    I('watermemory','水存储碟','银伴战兽专属。携带后变为水属性');
+    I('grassmemory','草存储碟','银伴战兽专属。携带后变为草属性');
+    I('electricmemory','电存储碟','银伴战兽专属。携带后变为电属性');
+    I('psychicmemory','超能存储碟','银伴战兽专属。携带后变为超能力属性');
+    I('icememory','冰存储碟','银伴战兽专属。携带后变为冰属性');
+    I('dragonmemory','龙存储碟','银伴战兽专属。携带后变为龙属性');
+    I('darkmemory','恶存储碟','银伴战兽专属。携带后变为恶属性');
+    I('fairymemory','妖精存储碟','银伴战兽专属。携带后变为妖精属性');
     const PLATES = { flameplate: 'fire', splashplate: 'water', zapplate: 'electric', meadowplate: 'grass', icicleplate: 'ice', fistplate: 'fighting', toxicplate: 'poison', earthplate: 'ground', skyplate: 'flying', mindplate: 'psychic', insectplate: 'bug', stoneplate: 'rock', spookyplate: 'ghost', dracoplate: 'dragon', dreadplate: 'dark', ironplate: 'steel', pixieplate: 'fairy', legendplate: 'legend' };
     const PLATE_KEYS = Object.keys(PLATES);
     /* ★ 传说石板：找克制对方属性的属性，抵抗对方属性的优先 */
@@ -5381,6 +5410,15 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
       const resist = supers.filter(t => foeTypes.every(ft => { const c = TCH[ft]; return !c || !c[t] || c[t] < 1; }));
       return pick(resist.length ? resist : supers);
     }
+    const MEMORYDISC = {
+      fightingmemory:'fighting', flyingmemory:'flying', poisonmemory:'poison',
+      groundmemory:'ground', rockmemory:'rock', bugmemory:'bug',
+      ghostmemory:'ghost', steelmemory:'steel', firememory:'fire',
+      watermemory:'water', grassmemory:'grass', electricmemory:'electric',
+      psychicmemory:'psychic', icememory:'ice', dragonmemory:'dragon',
+      darkmemory:'dark', fairymemory:'fairy'
+    };
+    const DRIVE_TYPE = { burndrive:'fire', chilldrive:'ice', dousedrive:'water', shockdrive:'electric' };
     const TYPEITEM = Object.fromEntries(Object.values(IT).filter(i => i.t).map(i => [i.t, i.k]));
 
     /* ============================================================
@@ -5494,7 +5532,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(472, '天蝎王', 'ground/flying', '75/95/125/45/75/95', 'sandveil/poisonheal', ['earthquake', 'knockoff', 'toxic', 'protect', 'roost', 'uturn']);
     S(473, '象牙猪', 'ice/ground', '110/130/80/70/60/80', 'obliviousx/thickfat', ['earthquake', 'iciclecrash', 'iceshard', 'superpower', 'stoneedge', 'stealthrock']);
     S(474, '多边兽乙型', 'normal', '85/80/70/135/75/90', 'adaptability/download', ['triattack', 'darkpulse', 'icebeam', 'thunderbolt', 'nastyplot', 'recover']);
-    S(479, '洛托姆(清洗)', 'electric/water', '50/65/107/105/107/86', 'levitate/levitate', ['hydropump', 'thunderbolt', 'voltswitch', 'willowisp', 'trick']);
+    S(479, '洛托姆', 'electric/ghost', '50/65/107/105/107/86', 'levitate/levitate', ['thunderbolt', 'shadowball', 'voltswitch', 'willowisp', 'trick', 'thunderwave']);
     S(483, '帝牙卢卡', 'steel/dragon', '100/120/120/150/100/90', 'pressure/pressure', ['roaroftime', 'dragonpulse', 'flashcannon', 'thunder', 'flamethrower', 'icebeam', 'stealthrock'], { leg: 1 });
     S(491, '达克莱伊', 'dark', '70/90/90/135/90/125', 'baddreams/baddreams', ['darkpulse', 'darkvoid', 'focusblast', 'shadowball', 'nastyplot', 'suckerpunch'], { leg: 1 });
     S(493, '阿尔宙斯', 'normal', '120/120/120/120/120/120', 'multitype/multitype', ['judgment', 'extremespeed', 'recover', 'swordsdance', 'earthquake', 'shadowball', 'flamethrower', 'hydropump', 'thunderbolt', 'energyball', 'icebeam', 'focusblast', 'sludgebomb', 'earthpower', 'airslash', 'psychic', 'bugbuzz', 'powergem', 'dragonpulse', 'darkpulse', 'flashcannon', 'moonblast'], { leg: 1 });
@@ -5617,7 +5655,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     /* 9代 */
     S(954, '虫甲圣', 'bug/psychic', '75/50/85/115/100/45', 'synchronize/telepathy', ['lunge', 'knockoff', 'earthpower', 'bugbuzz', 'psychic', 'revivalblessing']);
     S(959, '巨锻匠', 'fairy/steel', '85/75/77/70/105/94', 'moldbreaker/owntempo', ['playrough', 'knockoff', 'stealthrock', 'gigatonhammer', 'swordsdance']);
-    S(962, '下石鸟', 'flying/dark', '70/103/85/60/85/82', 'windrider/unburden', ['bravebird', 'knockoff', 'roost', 'stoneedge', 'rockslide']);
+    S(962, '下石鸟', 'flying/dark', '70/103/85/60/85/82', 'bigpecks/keeneye/rockypayload', ['bravebird', 'knockoff', 'roost', 'stoneedge', 'rockslide', 'powergem', 'rockblast', 'stealthrock', 'uturn']);
 
     /* --- 新增50只宝可梦（第三批） --- */
     /* 1代 */
@@ -6342,7 +6380,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(639,'代拉基翁','rock/fighting','91/129/90/72/90/108','justified/justified',['closecombat','stoneedge','earthquake','swordsdance','stealthrock'],{leg:1});
     S(640,'毕力吉翁','grass/fighting','91/90/72/90/129/108','justified/justified',['closecombat','leafblade','stoneedge','swordsdance','synthesis'],{leg:1});
     S(641,'龙卷云','flying','79/115/70/125/80/111','prankster/defiant',['bleakwindstorm','hurricane','darkpulse','focusblast','nastyplot','tailwind'],{leg:1});
-    S(642,'雷电云','electric/flying','79/115/70/125/80/111','prankster/defiant',['thundercage','thunderbolt','hurricane','focusblast','nastyplot','thunderwave'],{leg:1});
+    S(642,'雷电云','electric/flying','79/115/70/125/80/111','prankster/defiant',['wildboltstorm','thunderbolt','hurricane','focusblast','nastyplot','thunderwave'],{leg:1});
     S(643,'莱希拉姆','dragon/fire','100/120/100/150/120/90','turboblaze/turboblaze',['blueflare','dragonpulse','earthpower','roost','flamethrower'],{leg:1});
     S(644,'捷克罗姆','dragon/electric','100/150/120/120/100/90','teravolt/teravolt',['boltstrike','dragonclaw','fusionbolt','roost','thunderbolt'],{leg:1});
     S(645,'土地云','ground/flying','89/125/90/115/80/101','sandforce/sheerforce',['sandsearstorm','earthquake','stoneedge','uturn','stealthrock','swordsdance'],{leg:1});
@@ -6407,7 +6445,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(886,'多龙奇','dragon/ghost','68/80/50/60/50/102','clearbody/infiltrator/cursedbodyx',['dragondarts','shadowball','uturn','dragondance','flamethrower'],{evo:1});
     S(891,'熊徒弟','fighting','60/90/60/53/50/72','innerfocus/innerfocus',['closecombat','knockoff','swordsdance','machpunch','ironhead'],{evo:1,leg:1});
     S(893,'萨戮德','dark/grass','105/120/105/70/95/105','leafguard/leafguard',['powerwhip','chloroblast','knockoff','closecombat','swordsdance','uturn'],{leg:1});
-    S(894,'雷吉艾勒奇','electric','80/100/50/100/50/200','transistor/transistor',['thunderbolt','thunder','voltswitch','thunderwave','hyperbeam'],{leg:1});
+    S(894,'雷吉艾勒奇','electric','80/100/50/100/50/200','transistor/transistor',['thundercage','thunderbolt','thunder','voltswitch','thunderwave','hyperbeam'],{leg:1});
     S(895,'雷吉铎拉戈','dragon','200/100/50/100/50/80','dragonsmaw/dragonsmaw',['dragonenergy','dragonpulse','outrage','earthquake','hyperbeam','dragonclaw'],{leg:1});
     S(896,'雪暴马','ice','100/145/130/65/110/30','chillingneigh/chillingneigh',['iciclecrash','closecombat','earthquake','swordsdance','highhorsepower'],{leg:1});
     S(897,'灵幽马','ghost','100/65/60/145/80/130','grimneigh/grimneigh',['shadowball','psyshock','drainingkiss','calmmind','nastyplot'],{leg:1});
@@ -6425,7 +6463,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(957,'小锻匠','fairy/steel','50/45/45/35/64/58','moldbreaker/owntempo/pickpocket',['playrough','knockoff','stealthrock','swordsdance','firefang'],{evo:1});
     S(958,'巧锻匠','fairy/steel','65/55/55/45/82/78','moldbreaker/owntempo/pickpocket',['playrough','knockoff','stealthrock','gigatonhammer','swordsdance'],{evo:1});
     S(960,'海地鼠','water','10/55/25/35/25/95','sandveil/waterveil/sandforce',['waterfall','earthquake','knockoff','swordsdance','aquajet'],{evo:1});
-    S(961,'三海地鼠','water','35/100/50/50/70/120','sandveil/waterveil/sandforce',['waterfall','earthquake','knockoff','swordsdance','aquajet']);
+    S(961,'三海地鼠','water','35/100/50/50/70/120','gooey/rattled/sandveil',['tripledive','waterfall','earthquake','knockoff','swordsdance','aquajet','suckerpunch']);
     S(963,'波普海豚','water','70/45/40/45/40/75','waterveil/waterveil',['liquidation','aquajet','knockoff','swordsdance','drainpunch'],{evo:1});
     S(965,'噗隆隆','poison/steel','40/50/60/50/40/60','overcoatx/poisontouch/sturdy',['gunkshot','ironhead','knockoff','swordsdance','poisonjab'],{evo:1});
     S(966,'普隆隆姆','poison/steel','80/119/90/54/67/90','overcoatx/poisontouch/sturdy',['gunkshot','gigatonhammer','knockoff','swordsdance','poisonjab']);
@@ -6471,6 +6509,54 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(1023,'铁头壳','steel/psychic','90/72/100/122/108/98','quarkdrive/quarkdrive',['flashcannon','psychic','thunderbolt','calmmind','stealthrock'],{leg:1});
     S(1024,'太乐巴戈斯','normal','90/65/85/65/85/60','terashift/terashift',['terastarstorm','earthpower','calmmind','recover','thunderbolt'],{leg:1});
     S(1025,'桃歹郎','poison/ghost','88/88/160/88/88/88','toxicchain/toxicchain',['sludgebomb','shadowball','nastyplot','earthpower','darkpulse'],{leg:1});
+    /* ============ 第七批：多形态补全（独立宝可梦） ============ */
+    /* --- 代欧奇希斯形态 --- */
+    S(10031,'代欧奇希斯(攻击)','psychic','50/180/20/180/20/150','pressure/pressure',['psychic','superpower','extremespeed','shadowball','recover','icebeam','thunderbolt'],{leg:1});
+    S(10032,'代欧奇希斯(防御)','psychic','50/70/160/70/160/90','pressure/pressure',['psychic','recover','toxic','stealthrock','knockoff','icebeam','thunderwave'],{leg:1});
+    S(10033,'代欧奇希斯(速度)','psychic','50/95/90/95/90/180','pressure/pressure',['psychic','superpower','extremespeed','shadowball','recover','icebeam','thunderbolt'],{leg:1});
+    /* --- 奈克洛兹玛合体形态 --- */
+    S(10314,'奈克洛兹玛(黄昏之鬃)','psychic/steel','97/157/127/113/109/77','prismarmor/prismarmor',['sunsteelstrike','photongeyser','earthquake','stoneedge','stealthrock','calmmind'],{leg:1});
+    S(10315,'奈克洛兹玛(拂晓之翼)','psychic/ghost','97/113/109/157/127/77','prismarmor/prismarmor',['moongeistbeam','photongeyser','shadowball','earthpower','calmmind','stealthrock'],{leg:1});
+    /* --- 骑拉帝纳起源形态 --- */
+    S(10063,'骑拉帝纳(起源)','ghost/dragon','150/120/100/120/100/90','levitate/levitate',['shadowforce','dragonpulse','earthpower','willowisp','roar','aurasphere'],{leg:1});
+    /* --- 谢米天空形态 --- */
+    S(10064,'谢米(天空)','grass/flying','100/103/75/120/75/127','serenegrace/serenegrace',['seedflare','airslash','earthpower','psychic','synthesis','hurricane'],{leg:1});
+    /* --- 美洛耶塔舞步形态 --- */
+    S(10268,'美洛耶塔(舞步)','normal/fighting','100/128/90/77/77/128','serenegrace/serenegrace',['closecombat','hypervoice','psychic','shadowball','thunderbolt','calmmind'],{leg:1});
+    /* --- 花舞鸟形态 --- */
+    S(10225,'花舞鸟(啪滋)','electric/flying','75/70/70/98/70/93','dancer/dancer',['revelationdance','thunderbolt','airslash','hurricane','roost','calmmind','uturn']);
+    S(10226,'花舞鸟(呼拉)','psychic/flying','75/70/70/98/70/93','dancer/dancer',['revelationdance','psychic','airslash','hurricane','roost','calmmind','uturn']);
+    S(10227,'花舞鸟(轻盈)','ghost/flying','75/70/70/98/70/93','dancer/dancer',['revelationdance','shadowball','airslash','hurricane','roost','calmmind','uturn']);
+    /* --- 洛托姆家电形态 --- */
+    S(10058,'洛托姆(加热)','electric/fire','50/65/107/105/107/86','levitate/levitate',['overheat','thunderbolt','voltswitch','willowisp','trick','thunderwave']);
+    S(10059,'洛托姆(清洗)','electric/water','50/65/107/105/107/86','levitate/levitate',['hydropump','thunderbolt','voltswitch','willowisp','trick','thunderwave']);
+    S(10060,'洛托姆(结冰)','electric/ice','50/65/107/105/107/86','levitate/levitate',['blizzard','thunderbolt','voltswitch','willowisp','trick','thunderwave']);
+    S(10061,'洛托姆(旋转)','electric/flying','50/65/107/105/107/86','levitate/levitate',['airslash','thunderbolt','voltswitch','willowisp','trick','thunderwave']);
+    S(10062,'洛托姆(切割)','electric/grass','50/65/107/105/107/86','levitate/levitate',['leafstorm','thunderbolt','voltswitch','willowisp','trick','thunderwave']);
+    /* --- 三云神灵兽形态 --- */
+    S(10079,'龙卷云(灵兽)','flying','79/100/80/110/90/121','regenerator/regenerator',['bleakwindstorm','hurricane','darkpulse','focusblast','nastyplot','tailwind','uturn'],{leg:1});
+    S(10080,'雷电云(灵兽)','electric/flying','79/105/70/145/80/101','voltabsorb/voltabsorb',['wildboltstorm','thunderbolt','hurricane','focusblast','nastyplot','thunderwave','voltswitch','sludgewave'],{leg:1});
+    S(10081,'土地云(灵兽)','ground/flying','89/145/90/105/80/91','intimidate/intimidate',['earthquake','stoneedge','uturn','stealthrock','swordsdance','knockoff','superpower'],{leg:1});
+    /* --- 眷恋云灵兽形态 --- */
+    S(10418,'眷恋云(灵兽)','fairy/flying','74/115/70/135/80/106','contrary/contrary',['springtidestorm','moonblast','hurricane','earthpower','nastyplot','tailwind'],{leg:1});
+    /* --- 酋雷姆合体形态 --- */
+    S(10082,'酋雷姆(暗黑)','dragon/ice','125/170/100/120/90/95','teravolt/teravolt',['outrage','icebeam','fusionbolt','earthpower','stoneedge','dragonclaw'],{leg:1});
+    S(10083,'酋雷姆(焰白)','dragon/ice','125/120/90/170/100/95','turboblaze/turboblaze',['dracometeor','icebeam','fusionflare','earthpower','focusblast','dragonpulse'],{leg:1});
+    /* --- 胡帕解放形态 --- */
+    S(10188,'胡帕(解放)','psychic/dark','80/160/60/170/130/80','magician/magician',['psychic','darkpulse','focusblast','shadowball','nastyplot','trick','thunderbolt'],{leg:1});
+    /* --- 武道熊师连击流 --- */
+    S(10360,'武道熊师(连击流)','fighting/water','100/130/100/63/60/97','unseenfist/unseenfist',['surgingstrikes','closecombat','aquajet','ironhead','suckerpunch','uturn'],{leg:1});
+    /* --- 蕾冠王骑乘形态 --- */
+    S(10362,'蕾冠王(骑白马)','psychic/ice','100/165/150/85/130/50','asone/asone',['glaciallance','psychic','highhorsepower','swordsdance','earthquake','closecombat'],{leg:1});
+    S(10363,'蕾冠王(骑黑马)','psychic/ghost','100/85/80/165/100/150','asone/asone',['astralbarrage','psychic','shadowball','nastyplot','drainingkiss','calmmind'],{leg:1});
+    /* --- 基格尔德10%形态 --- */
+    S(10340,'基格尔德(10%)','dragon/ground','54/100/71/61/85/115','aurabreak/aurabreak',['thousandarrows','outrage','extremespeed','earthquake','dragondance','irontail'],{leg:1});
+    /* --- 爱管侍(母) --- */
+    S(10355,'爱管侍(母)','psychic/normal','70/55/65/95/105/85','screenCleaner/synchronize/psychicsurge',['psychic','moonblast','thunderbolt','calmmind','thunderwave','dazzlinggleam']);
+    /* --- 南瓜怪人大小形态 --- */
+    S(10126,'南瓜怪人(小)','ghost/grass','55/85/122/58/75/99','pickup/frisk/insomnia',['shadowball','energyball','willowisp','leechseed','trickroom','seedbomb']);
+    S(10127,'南瓜怪人(大)','ghost/grass','75/95/122/58/75/69','pickup/frisk/insomnia',['shadowball','energyball','willowisp','leechseed','trickroom','seedbomb']);
+    S(10128,'南瓜怪人(特大)','ghost/grass','85/100/122/58/75/54','pickup/frisk/insomnia',['shadowball','energyball','willowisp','leechseed','trickroom','seedbomb']);
     /* ============ 地区形态 ============ */
     /* 阿罗拉形态 (ID: 10000+原始ID) */
     S(10019,'小拉达(阿罗拉)','normal/dark','30/56/35/25/35/147','gluttony/hustle/thickfat',['facade','crunch','suckerpunch','uturn','quickattack'],{evo:1});
@@ -6492,7 +6578,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(10103,'椰蛋树(阿罗拉)','grass/dragon','95/105/85/125/75/45','frisk/chlorophyll',['dragonpulse','energyball','leafstorm','sleeppowder','earthquake']);
     S(10105,'嘎啦嘎啦(阿罗拉)','fire/ghost','60/80/110/50/80/45','rockhead/lightningrod/battlearmor',['flareblitz','shadowbone','earthquake','stoneedge','willowisp']);
     /* 伽勒尔形态 (ID: 20000+原始ID) */
-    S(20052,'喵喵(伽勒尔)','steel','50/65/55/40/40/40','pickup/toughclaws/intrepidsword',['ironhead','knockoff','playrough','swordsdance','uturn'],{evo:1});
+    S(20052,'喵喵(伽勒尔)','steel','50/65/55/40/40/40','pickup/toughclaws',['ironhead','knockoff','playrough','swordsdance','uturn'],{evo:1});
     S(20077,'小火马(伽勒尔)','psychic','50/85/55/65/65/90','runaway/pastelveil/anticipation',['psychic','playrough','mysticalfire','calmmind','agility'],{evo:1});
     S(20078,'烈焰马(伽勒尔)','psychic/fairy','65/100/70/80/80/105','runaway/pastelveil/anticipation',['psychic','playrough','mysticalfire','swordsdance','megahorn']);
     S(20079,'呆呆兽(伽勒尔)','psychic','90/65/65/40/40/15','gluttony/owntempo/regenerator',['psychic','shadowball','icebeam','flamethrower','slackoff'],{evo:1});
@@ -7164,7 +7250,22 @@ const THIRD_ABILITY_PATCH = {
     1018:'stalwart', 1019:'sapsipper',
     1020:'protosynthesis', 1021:'protosynthesis',
     1022:'quarkdrive', 1023:'quarkdrive',
-    1024:'terashift', 1025:'toxicchain',
+     1024:'terashift', 1025:'toxicchain',
+     /* ★ 第七批多形态补全 */
+     10031:'pressure', 10032:'pressure', 10033:'pressure',
+     10314:'prismarmor', 10315:'prismarmor',
+     10063:'levitate', 10064:'serenegrace', 10268:'serenegrace',
+     10225:'dancer', 10226:'dancer', 10227:'dancer',
+     10058:'levitate', 10059:'levitate', 10060:'levitate', 10061:'levitate', 10062:'levitate',
+     10079:'regenerator', 10080:'voltabsorb', 10081:'intimidate',
+     10082:'teravolt', 10083:'turboblaze',
+     10188:'magician',
+     10360:'unseenfist',
+     10362:'asone', 10363:'asone',
+     10340:'aurabreak',
+     10355:'psychicsurge',
+     10418:'contrary',
+     10126:'insomnia', 10127:'insomnia', 10128:'insomnia',
 };
 
 for (const [id, add] of Object.entries(THIRD_ABILITY_PATCH)) {
@@ -7187,11 +7288,11 @@ SP.forEach(s => {
 });
     const bst = sp => sp.s.reduce((a, b) => a + b, 0);
     const genOf = id => {
-    if (id >= 10000 && id < 20000) return 7;  // 阿罗拉形态
-    if (id >= 20000 && id < 30000) return 8;  // 伽勒尔形态
-    if (id >= 30000 && id < 40000) return 9;  // 帕底亚形态
-    if (id >= 40000 && id < 50000) return 8;  // 洗翠形态
-    return id <= 151 ? 1 : id <= 251 ? 2 : id <= 386 ? 3 : id <= 493 ? 4 : id <= 649 ? 5 : id <= 721 ? 6 : id <= 809 ? 7 : id <= 898 ? 8 : 9;
+      if (id >= 10000 && id < 20000) return 7;   // 阿罗拉 + 多形态补全
+      if (id >= 20000 && id < 30000) return 8;   // 伽勒尔
+      if (id >= 30000 && id < 40000) return 9;   // 帕底亚
+      if (id >= 40000 && id < 50000) return 8;   // 洗翠
+      return id <= 151 ? 1 : id <= 251 ? 2 : id <= 386 ? 3 : id <= 493 ? 4 : id <= 649 ? 5 : id <= 721 ? 6 : id <= 809 ? 7 : id <= 898 ? 8 : 9;
     };
 
     /* ---- 超级进化表 ---- */
@@ -7245,11 +7346,56 @@ SP.forEach(s => {
       888: { f: 10188, t: 'fairy/steel', s: [92, 170, 115, 80, 115, 148], a: 'intrepidsword', name: '苍响(剑之王)', tag: '剑之王', item: 'rustedsword', stone: '腐朽之剑', formTag: '剑之王形态' },
       889: { f: 10189, t: 'fighting/steel', s: [92, 130, 145, 80, 145, 128], a: 'dauntlessshield', name: '藏玛然特(盾之王)', tag: '盾之王', item: 'rustedshield', stone: '腐朽之盾', formTag: '盾之王形态' },
     };
+    /* ★ 地区形态映射：基形态ID → 地区形态ID列表 */
+    const REGIONAL_FORMS = {
+      /* 阿罗拉 */
+      19:[10019],20:[10020],26:[10026],27:[10027],28:[10028],
+      37:[10037],38:[10038],50:[10050],51:[10051],
+      52:[10052,20052],53:[10053],
+      74:[10074],75:[10075],76:[10076],
+      88:[10088],89:[10089],103:[10103],105:[10105],
+      /* 伽勒尔 */
+      77:[20077],78:[20078],79:[20079],80:[20080],
+      83:[20083],110:[20110],122:[20122],
+      144:[20144],145:[20145],146:[20146],
+      199:[20199],222:[20222],263:[20263],264:[20264],
+      554:[20554],555:[20555],562:[20562],618:[20618],
+      /* 帕底亚 */
+      128:[30128,30129,30130],194:[30194],
+      /* 洗翠 */
+      58:[40058],59:[40059],100:[40100],101:[40101],
+      157:[40157],211:[40211],215:[40215],
+      503:[40503],549:[40549],
+      570:[40077],571:[40078],
+      705:[40705],706:[40706],
+      713:[40571],724:[40724],628:[40628],
+    };
+    /* ★ 多形态补全映射：基形态ID → 形态ID列表（图鉴中跟在基形态后） */
+    const MULTI_FORMS = {
+      386: [10031, 10032, 10033],   // 代欧奇希斯
+      800: [10314, 10315],          // 奈克洛兹玛
+      487: [10063],                 // 骑拉帝纳
+      492: [10064],                 // 谢米
+      648: [10268],                 // 美洛耶塔
+      741: [10225, 10226, 10227],   // 花舞鸟
+      479: [10058, 10059, 10060, 10061, 10062], // 洛托姆
+      641: [10079],                 // 龙卷云
+      642: [10080],                 // 雷电云
+      645: [10081],                 // 土地云
+      646: [10082, 10083],          // 酋雷姆
+      720: [10188],                 // 胡帕
+      892: [10360],                 // 武道熊师
+      898: [10362, 10363],          // 蕾冠王
+      718: [10340],                 // 基格尔德
+      876: [10355],                 // 爱管侍
+      711: [10126, 10127, 10128],   // 南瓜怪人
+      905: [10418],                 // 眷恋云
+    };
     const GMAXLIST = new Set([3, 6, 9, 25, 52, 68, 94, 99, 131, 133, 143, 569, 809, 812, 815, 818, 823, 826, 834, 839, 841, 842, 844, 845, 849, 851, 858, 861, 869, 879, 884, 892]);
     /* 超极巨化精灵图ID */
     const GMAXSPRITE = { 3:10195, 6:10196, 9:10197, 25:10199, 52:10200, 68:10201, 94:10202, 99:10203, 131:10204, 133:10205, 143:10206, 569:10207, 809:10208, 812:10209, 815:10210, 818:10211, 823:10212, 826:10213, 834:10214, 839:10215, 841:10216, 842:10217, 844:10218, 849:10219, 851:10220, 858:10221, 861:10222, 869:10223, 879:10224, 884:10225, 892:10226 };
     /* 厄诡椪面具形态精灵图ID */
-    const FORMSPRITE = { wellspringmask:10273, hearthflamemask:10274, cornerstonemask:10275, school:10127, busted:10143 };
+    const FORMSPRITE = { wellspringmask:10273, hearthflamemask:10274, cornerstonemask:10275, school:10127, busted:10143, noice:10185 };
     /* ★ 超极巨招式（G-Max）：超极巨化的宝可梦使用对应属性的G-Max招式替代普通极巨招式 */
 const GMAXMOVE = {
        3:  { t: 'grass',   n: '超极巨灰飞鞭灭', fx: {}, dot: 'grass',
@@ -7438,9 +7584,10 @@ return ev;
         this.moves = mk.slice(0, 4).map(k => ({ k, pp: MV[k].pp, maxpp: MV[k].pp }));
         this.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
         this.status = null; this.sleepT = 0; this.toxicN = 0;
-        this.vol = {}; if (id === 778) this.vol.disguise = true;
+        this.vol = {}; if (id === 778) this.vol.disguise = true; if (id === 875) this.vol.iceHead = true;
         this.fainted = false; this.xpGot = false;
         this.disguiseUsed = false;   // ★ 画皮本场是否已触发（跨换人保留）
+        this.iceHeadUsed = false;    // ★ 结冻头本场是否已触发（跨换人保留）
       }
       /* ★ 重算能力：当前形态(普通/Mega)种族值 + 个体值 + 对战点数(EV)；极巨化时HP翻倍 */
       recalc() {
@@ -7469,6 +7616,12 @@ return ev;
           if (pt && pt !== 'legend') this.types = [pt];
           else this.types = ['normal'];
         }
+        /* ★ 银伴战兽携带存储碟时变为对应属性 */
+        if (this.id === 773 || this.id === 772) {
+          const mt = MEMORYDISC[this.item];
+          if (mt) this.types = [mt];
+          else this.types = ['normal'];
+        }
         /* ★ 苍响/藏玛然特：携带专属道具时切换属性与名称 */
         if (this.id === 888) {
           if (this.item === 'rustedsword') { this.types = ['fairy', 'steel']; this.name = '苍响(剑之王)'; }
@@ -7491,8 +7644,8 @@ return ev;
           if (ab === 'hugepower' || ab === 'purepower') v *= 2;
           if (this.status === 'burn' && !this.has('guts') && !this.has('waterbubble')) v *= .5;
           if (this.has('guts') && this.status) v *= 1.5;
-          if (this.has('solarpower') && b && b.wxActive() === 'sun') v *= 1.5;
-          if (this.has('orichalcumpulse') && b && b.wx === 'sun') v *= 1.33;
+          if (this.has('solarpower') && b && (b.wxActive() === 'sun' || b.wxActive() === 'desolate')) v *= 1.5;
+          if (this.has('orichalcumpulse') && b && (b.wx === 'sun' || b.wx === 'desolate')) v *= 1.33;
           /* ★ 活力：攻击×1.5 */
           if (this.has('hustle')) v *= 1.5;
           if (this.has('gorillatactics')) v *= 1.5;
@@ -7504,8 +7657,8 @@ return ev;
           if (ab === 'slowstart' && (this.vol.slowStartTurns === undefined || this.vol.slowStartTurns < 5)) v *= .5;
         }
         if (k === 'spa') {
-          if (this.has('solarpower') && b && b.wxActive() === 'sun') v *= 1.5;
-          if (this.has('hadronengine') && b && b.terrain === 'electric') v *= 1.3;   // ★ 强子引擎：电场下特攻×1.3
+          if (this.has('solarpower') && b && (b.wxActive() === 'sun' || b.wxActive() === 'desolate')) v *= 1.5;
+          if (this.has('hadronengine') && b && b.terrain === 'electric') v *= 1.3;
           if (!this.has('klutz') && this.item === 'choicespecs' && !this.dyn) v *= 1.5;
           if (b && b.foeOf(this) && b.foeOf(this).has('vesselofruin') && !b.foeOf(this).fainted) v *= .75;
         }
@@ -7515,8 +7668,8 @@ return ev;
           if (!this.has('klutz') && this.item === 'choicescarf' && !this.dyn) v *= 1.5;
           if (b) {
             const w = b.wxActive();
-            if (w === 'sun' && (ab === 'chlorophyll')) v *= 2;
-            if (w === 'rain' && ab === 'swiftswim') v *= 2;
+            if ((w === 'sun' || w === 'desolate') && ab === 'chlorophyll') v *= 2;
+            if ((w === 'rain' || w === 'primordial') && ab === 'swiftswim') v *= 2;
             if (w === 'sand' && ab === 'sandrush') v *= 2;
             if (b.terrain === 'electric' && ab === 'surgesurfer') v *= 2;
             if (w === 'hail' && ab === 'slushrush') v *= 2;
@@ -7532,8 +7685,8 @@ return ev;
           if (!this.has('klutz') && k === 'spd' && this.item === 'assaultvest') v *= 1.5;
           if (k === 'spd' && b && b.foeOf(this) && b.foeOf(this).has('beadsofruin') && !b.foeOf(this).fainted) v *= .75;
         }
-        // ★ 古代活性（晴天）/夸克充能（电场）：最高项×1.3，速度×1.5（HP除外）
-        if (b && ((ab === 'protosynthesis' && b.wx === 'sun') || (ab === 'quarkdrive' && b.terrain === 'electric'))) {
+        // ★ 古代活性（晴天/终结之地）/夸克充能（电场）：最高项×1.3，速度×1.5（HP除外）
+        if (b && ((ab === 'protosynthesis' && (b.wx === 'sun' || b.wx === 'desolate')) || (ab === 'quarkdrive' && b.terrain === 'electric'))) {
           if (k === this.bestStat()) v *= (k === 'spe' ? 1.5 : 1.3);
         }
         return Math.max(1, Math.floor(v));
@@ -7556,9 +7709,24 @@ return ev;
       20222:10173,20263:10174,20264:10175,20554:10176,20555:10177,20562:10179,20618:10180,
       40058:10229,40059:10230,40100:10231,40101:10232,40157:10233,40211:10234,40215:10235,
       40503:10236,40549:10237,40077:10238,40078:10239,40628:10240,40705:10241,40706:10242,
-      40571:10243,40724:10244,
-      30128:10250,30129:10251,30130:10252,30194:10253
-    };
+       40571:10243,40724:10244,
+       30128:10250,30129:10251,30130:10252,30194:10253,
+       /* 多形态补全 */
+       10031:10001,10032:10002,10033:10003,
+       10314:10155,10315:10156,
+       10063:10007,10064:10006,10268:10018,
+       10225:10123,10226:10124,10227:10125,
+       10058:10008,10059:10009,10060:10010,10061:10011,10062:10012,
+       10079:10019,10080:10020,10081:10021,
+       10082:10022,10083:10023,
+       10188:10086,
+       10360:10191,
+       10362:10193,10363:10194,
+       10340:10181,
+       10355:10186,
+       10418:10249,
+       10126:10027,10127:10028,10128:10029
+     };
     let apiId = id;
     if (!noRegional && REGIONAL_SPRITE[id] !== undefined) { apiId = REGIONAL_SPRITE[id]; }
     /* Mega形态ID直接使用原ID */
@@ -7599,15 +7767,19 @@ return ev;
         if (Pm) { $('#pcard').innerHTML = this.cardHTML(Pm, 'p', b); this.animHp('p', Pm); }
         this.sprites(b);
         /* ★ 场景氛围随天气/场地实时切换（受设置开关控制） */
-        this.scene.classList.remove('wx-sun', 'wx-rain', 'wx-sand', 'wx-hail', 'wx-delta', 'tr-electric', 'tr-grassy', 'tr-psychic', 'tr-misty');
+        this.scene.classList.remove('wx-sun', 'wx-rain', 'wx-sand', 'wx-hail', 'wx-delta', 'wx-desolate', 'wx-primordial', 'tr-electric', 'tr-grassy', 'tr-psychic', 'tr-misty');
         if (CFG.weatherFx) {
-          if (b.wx) this.scene.classList.add('wx-' + b.wx);
+          const sceneWx = { desolate: 'sun', primordial: 'rain' }[b.wx] || b.wx;
+          if (b.wx) this.scene.classList.add('wx-' + sceneWx);
           if (b.terrain) this.scene.classList.add('tr-' + b.terrain);
         }
         // 天气 / 场地 / 戏法空间 / 场地陷阱 实时指示
         const wx = $('#wxchip');
         const chips = [];
-        if (b.wx) chips.push({ sun: '☀ 大晴天', rain: '🌧 下雨', sand: '🌪 沙暴', hail: '🌨 冰雹', delta: '🌪️ 德尔塔气流' }[b.wx] + (b.wx === 'delta' ? '' : `(${b.wxT})`));
+        if (b.wx) {
+          const wxIcons = { sun: '☀ 大晴天', rain: '🌧 下雨', sand: '🌪 沙暴', hail: '🌨 冰雹', delta: '🌪️ 德尔塔气流', desolate: '🌋 终结之地', primordial: '🌊 始源之海' };
+          chips.push(wxIcons[b.wx] + (b.wx === 'delta' || b.wx === 'desolate' || b.wx === 'primordial' ? '' : `(${b.wxT})`));
+        }
         if (b.terrain) chips.push({ electric: '⚡ 电气场地', grassy: '🌿 青草场地', psychic: '🔮 精神场地', misty: '🌫 薄雾场地' }[b.terrain] + `(${b.terrainT})`);
         if (b.trickT > 0) chips.push(`🌀 戏法空间(${b.trickT})`);
         /* ★ 场地陷阱显示 */
@@ -8046,6 +8218,7 @@ return ev;
     /* 踩影 / 磁力 / 沙穴 等禁止替换判定 */
     function trappedReason(m, foe, battle) {
       if (!m || !foe || foe.fainted) return null;
+      if (m.vol.binding > 0 && !m.types.includes('ghost') && !m.has('runaway') && m.item !== 'smokeball') return '束缚';
       if (foe.has('shadowtagx')) return '踩影';
       if (foe.has('magnetpull') && m.types.includes('steel')) return '磁力';
       if (foe.has('arenatrap') && battle.grounded(m)) return '沙穴';
@@ -8095,7 +8268,7 @@ return ev;
           m.status = null; m.sleepT = 0; m.toxicN = 0;
           m.fainted = false;
           const keepCanGmax = m.vol.canGmax;
-          m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true;
+          m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; if (m.id === 875 && !m.iceHeadUsed) m.vol.iceHead = true;
           m.vol.illusion = null; m.vol.illusionName = null;
           m.vol.wasSwitchedOut = false; m.vol.heroForm = false;
           if (keepCanGmax !== undefined) m.vol.canGmax = keepCanGmax;
@@ -8168,7 +8341,7 @@ return ev;
           m.status = null; m.sleepT = 0; m.toxicN = 0;
           m.fainted = false;
           const keepCanGmax2 = m.vol.canGmax;
-          m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true;
+          m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; if (m.id === 875 && !m.iceHeadUsed) m.vol.iceHead = true;
           m.vol.illusion = null; m.vol.illusionName = null;
           m.vol.wasSwitchedOut = false; m.vol.heroForm = false;
           if (keepCanGmax2 !== undefined) m.vol.canGmax = keepCanGmax2;
@@ -8182,7 +8355,7 @@ return ev;
         if (side === 'p') {
           this.pi = idx; const m = this.P();
           const keepSwitched = m.vol?.wasSwitchedOut || false;
-          m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; m.vol.switchedInThisTurn = true; m.vol.wasSwitchedOut = keepSwitched; m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; m.fainted = false;
+          m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; if (m.id === 875 && !m.iceHeadUsed) m.vol.iceHead = true; m.vol.switchedInThisTurn = true; m.vol.wasSwitchedOut = keepSwitched; m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; m.fainted = false;
           if (m._transformed) { m.id = m._originalId; m.sp = m._originalSp; m.name = m._originalName; m.types = m._originalTypes; m.baseTypes = m._originalBaseTypes; m.ability = m._originalAbility; m.baseAbility = m._originalBaseAbility; m.moves = m._originalMoves; m.mega = null; m._transformed = false; m.recalc(); if (m.hp > m.maxhp) m.hp = m.maxhp; }
           /* ★ 幻觉：上场前即设置伪装（显示伪装宝可梦的外观与名称） */
           if (m.has('illusion')) {
@@ -8196,7 +8369,7 @@ return ev;
         } else {
           this.ei = idx; const m = this.E();
           const keepSwitchedE = m.vol?.wasSwitchedOut || false;
-          m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; m.vol.switchedInThisTurn = true; m.vol.wasSwitchedOut = keepSwitchedE; m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; m.fainted = false;
+          m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; if (m.id === 875 && !m.iceHeadUsed) m.vol.iceHead = true; m.vol.switchedInThisTurn = true; m.vol.wasSwitchedOut = keepSwitchedE; m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; m.fainted = false;
           if (m._transformed) { m.id = m._originalId; m.sp = m._originalSp; m.name = m._originalName; m.types = m._originalTypes; m.baseTypes = m._originalBaseTypes; m.ability = m._originalAbility; m.baseAbility = m._originalBaseAbility; m.moves = m._originalMoves; m.mega = null; m._transformed = false; m.recalc(); if (m.hp > m.maxhp) m.hp = m.maxhp; }
           /* ★ 幻觉：上场前即设置伪装（显示伪装宝可梦的外观与名称） */
           if (m.has('illusion')) {
@@ -8254,6 +8427,33 @@ return ev;
           || (ab === 'protosynthesis' && this.wx === 'sun');
         if (willTrigger) showAbilityBanner(m, side);
         const msg = async t => { await say(`${m.name} 的特性发动了！${t}`); };
+        /* ★ 原始回归：固拉多/盖欧卡携带专属宝珠时出场触发 */
+        if (m.id === 383 && m.item === 'redorb' && !m.vol.primal) {
+          m.vol.primal = true;
+          const hpPct = m.hp / m.maxhp;
+          m.mega = { f: 10078, t: 'fire/ground', s: [100,180,160,150,90,90], a: 'desolateland' };
+          m.types = ['fire','ground'];
+          m.recalc(); m.hp = Math.round(m.maxhp * hpPct);
+          m.ability = 'desolateland';
+          AU.mega(); BUI.burst(side);
+          await say(`原始回归！${m.name} 回归了原始形态！`);
+          await this.setWeather('desolate', m);
+          BUI.refresh(this);
+          return;
+        }
+        if (m.id === 382 && m.item === 'blueorb' && !m.vol.primal) {
+          m.vol.primal = true;
+          const hpPct = m.hp / m.maxhp;
+          m.mega = { f: 10077, t: 'water', s: [100,150,90,180,160,90], a: 'primordialsea' };
+          m.types = ['water'];
+          m.recalc(); m.hp = Math.round(m.maxhp * hpPct);
+          m.ability = 'primordialsea';
+          AU.mega(); BUI.burst(side);
+          await say(`原始回归！${m.name} 回归了原始形态！`);
+          await this.setWeather('primordial', m);
+          BUI.refresh(this);
+          return;
+        }
         if (ab === 'intimidate' && foe && foe.alive()) { await msg(''); await this.changeStat(foe, 'atk', -1, m); }
         if (ab === 'drought') { await this.setWeather('sun', m); } if (ab === 'drizzle') { await this.setWeather('rain', m); }
         if (ab === 'sandstream') { await this.setWeather('sand', m); } if (ab === 'snowwarning') { await this.setWeather('hail', m); }
@@ -8422,17 +8622,20 @@ return ev;
         if (ab === 'powerconstruct' && m.hpPct() <= 0.5) { await say(`${m.name} 的群聚变形发动了！变成了完全体形态！`); m.vol.completeForm = true; }
       }
       async setWeather(w, m) {
+        const isPrimal = w === 'desolate' || w === 'primordial';
+        const wxNames = { sun: '大晴天', rain: '下雨', sand: '沙暴', hail: '冰雹', delta: '德尔塔气流', desolate: '终结之地', primordial: '始源之海' };
         // ★ 同种天气已存在：不刷新持续时间，仅提示
-        if (this.wx === w) { await say(`天气已经是${{ sun: '大晴天', rain: '下雨', sand: '沙暴', hail: '冰雹', delta: '德尔塔气流' }[w]}，没有发生变化！`); return; }
-        // ★ 德尔塔气流不能被普通天气覆盖
-        if (this.wx === 'delta' && w !== 'delta') {
-          await say('德尔塔气流笼罩着全场，天气无法改变！');
+        if (this.wx === w) { await say(`天气已经是${wxNames[w]}，没有发生变化！`); return; }
+        // ★ 特殊天气（终结之地/始源之海/德尔塔气流）不能被普通天气覆盖
+        if ((this.wx === 'delta' || this.wx === 'desolate' || this.wx === 'primordial') && !isPrimal && w !== 'delta') {
+          await say(`${wxNames[this.wx]}笼罩着全场，天气无法改变！`);
           return;
         }
-        this.wx = w; this.wxT = w === 'delta' ? 99 : 5;
-        const nm = { sun: '大晴天', rain: '下雨了', sand: '刮起了沙暴', hail: '下起了冰雹', delta: '德尔塔气流笼罩了全场' }[w];
-        await say(`${nm}！`);
-        if (w === 'sun') { for (const mon of [this.P(), this.E()]) { if (mon && mon.alive() && mon.has('protosynthesis') && mon !== m) await say(`${mon.vol.illusionName || mon.name} 的古代活性发动了！${STN[mon.bestStat()]}提升了！`); } }
+        this.wx = w; this.wxT = isPrimal || w === 'delta' ? 99 : 5;
+        const actNm = { sun: '大晴天', rain: '下雨了', sand: '刮起了沙暴', hail: '下起了冰雹', delta: '德尔塔气流笼罩了全场', desolate: '终结之地笼罩了全场！火属性招式的威力提升了！水属性招式已经无效了！', primordial: '始源之海笼罩了全场！水属性招式的威力提升了！火属性招式已经无效了！' }[w];
+        await say(`${actNm}！`);
+        if (w === 'sun' || w === 'desolate') { for (const mon of [this.P(), this.E()]) { if (mon && mon.alive() && mon.has('protosynthesis') && mon !== m) await say(`${mon.vol.illusionName || mon.name} 的古代活性发动了！${STN[mon.bestStat()]}提升了！`); } }
+        if (w === 'rain' || w === 'primordial') { for (const mon of [this.P(), this.E()]) { if (mon && mon.alive() && mon.has('raindish') && mon !== m) await say(`${mon.vol.illusionName || mon.name} 的雨盘回复了HP！`); } }
         BUI.refresh(this);   // ★ 天气变化立即刷新背景特效
       }
       async setTerrain(t, m) {
@@ -9018,6 +9221,14 @@ return ev;
           const mt = maskTypes[mon.item];
           if (mt) useMv = { ...useMv, t: mt };
         }
+        /* ★ 高科技光炮：驱动器改变属性 */
+        if (mvk === 'technoblast' && DRIVE_TYPE[mon.item]) {
+          useMv = { ...useMv, t: DRIVE_TYPE[mon.item] };
+        }
+        /* ★ 多属性攻击：存储碟改变属性 */
+        if (mvk === 'multiattack' && MEMORYDISC[mon.item]) {
+          useMv = { ...useMv, t: MEMORYDISC[mon.item] };
+        }
         // 气象球
         if (useMv.weatherball && this.wx) { useMv = { ...useMv, t: { sun: 'fire', rain: 'water', sand: 'rock', hail: 'ice' }[this.wx], p: 100 }; }
         /* ★ 泡影之咏：声音招式变为水属性 */
@@ -9029,6 +9240,10 @@ return ev;
           if (mon.has('aerilate')) useMv = { ...useMv, t: 'flying' };
           else if (mon.has('pixilate')) useMv = { ...useMv, t: 'fairy' };
           else if (mon.has('refrigerate')) useMv = { ...useMv, t: 'ice' };
+        }
+        /* ★ 觉醒之舞：属性随花舞鸟形态变化 */
+        if (useMv.revelation) {
+          useMv = { ...useMv, t: mon.types[0] };
         }
         const displayName = mon.vol.illusionName || mon.name;
         // ★ 播报使用的招式（对话框 + 对战记录同步显示）
@@ -9131,6 +9346,12 @@ return ev;
           if (r.ko) { koed = true; totalDmg += r.dmg; break; }
           totalDmg += r.dmg;
           if (r.immune) break;
+        }
+        /* ★ 亲子爱（Mega袋兽）：追加一次25%威力的攻击 */
+        if (!koed && mon.has('parentalbond') && connected && foe.alive() && foe.hp > 0) {
+          const r2 = await this.hitOnce(side, mon, foe, { ...useMv, p: Math.max(1, Math.floor(useMv.p * 0.25)) }, act);
+          if (!r2.immune) { connected = true; totalDmg += r2.dmg; if (r2.ko) koed = true; }
+          await say(`亲子爱的追加攻击！`);
         }
         if (hits > 1 && !koed) await say(`击中了 ${hits} 次！`);
         // ★ 吸取/反伤/命玉：只要造成伤害就结算（击倒对手也要付反伤）
@@ -9246,6 +9467,24 @@ return ev;
           await say(`${foe.name} 的幻觉被识破了！变回了原来的样子！`);
           BUI.refresh(this);
         }
+        /* ★ 结冻头：抵挡一次物理攻击 */
+        if (foe.vol.iceHead && mv.c === 'P' && !mon.has('moldbreaker') && !mv.ignAb) {
+          foe.vol.iceHead = false;
+          foe.iceHeadUsed = true;
+          foe.formSprite = FORMSPRITE.noice;
+          this.abBanner(foe);
+          await say(`${foe.name} 的结冻头抵挡了攻击！结冻头碎裂了！`);
+          BUI.dmgPop(side === 'p' ? 'e' : 'p', '抵挡', '#9fe8f5');
+          if (mv.maxfx) {
+            const f = mv.maxfx;
+            if (f.up) await this.changeStat(mon, f.up, 1, mon);
+            if (f.drop && foe.hp > 0) await this.changeStat(foe, f.drop, -1, mon);
+            if (f.weather) await this.setWeather(f.weather, mon);
+            if (f.terrain) await this.setTerrain(f.terrain, mon);
+          }
+          BUI.refresh(this);
+          return { dmg: 0 };
+        }
         // ★ 画皮：完全抵挡一次伤害，破损时反噬自身1/8 HP；极巨招式打在画皮上仍触发天气/场地/能力效果
         // ★ 破格/流星闪冲等无视对手特性的招式可穿透画皮
         if (foe.vol.disguise && !mon.has('moldbreaker') && !mv.ignAb) {
@@ -9279,7 +9518,7 @@ return ev;
         const tgtSpr = side === 'p' ? BUI.espr : BUI.pspr;
         typeVFX(mv.t, side === 'p' ? 'e' : 'p');
         await BUI.anim(tgtSpr, 'hit', 400);
-        AU.hit(); if (r.eff > 1) { AU.superEff(); await say('效果绝佳！'); } else if (r.eff > 0 && r.eff < 1) { AU.notEff(); await say('收效甚微…'); }
+        AU.hit(); if (r.crit) { await say('击中要害！'); } if (r.eff > 1) { AU.superEff(); await say('效果绝佳！'); } else if (r.eff > 0 && r.eff < 1) { AU.notEff(); await say('收效甚微…'); }
         foe.hp = Math.max(0, foe.hp - dmg);
         if (dmg > 0) foe.lastDmgTaken = dmg;
         foe.vol.rage = (foe.vol.rage || 0) + 1;
@@ -9294,10 +9533,10 @@ return ev;
         if (dmg > 0) {
           const pct = Math.max(1, Math.round(dmg / foe.maxhp * 100));
           const leftPct = Math.round(foe.hp / foe.maxhp * 100);
-          this.addLog(`↳ 造成 ${dmg} 点伤害（${pct}% HP）· 对手剩余 ${leftPct}%${r.crit ? ' · 会心一击' : ''}${r.eff > 1 ? ' · 效果绝佳' : (r.eff > 0 && r.eff < 1) ? ' · 收效甚微' : ''}`);
+          this.addLog(`↳ 造成 ${dmg} 点伤害（${pct}% HP）· 对手剩余 ${leftPct}%${r.crit ? ' · 击中要害' : ''}${r.eff > 1 ? ' · 效果绝佳' : (r.eff > 0 && r.eff < 1) ? ' · 收效甚微' : ''}`);
           const popSide = side === 'p' ? 'e' : 'p';
           BUI.dmgPop(popSide, `-${dmg} (${pct}%)`, r.crit ? '#ffd93b' : r.eff > 1 ? '#ff9d6b' : (r.eff > 0 && r.eff < 1) ? '#8fb6e8' : '#ffffff');
-          if (r.crit) setTimeout(() => BUI.dmgPop(popSide, '会心一击!', '#ffd93b'), 170);
+          if (r.crit) setTimeout(() => BUI.dmgPop(popSide, '击中要害!', '#ffd93b'), 170);
         }
         // 接触副作用
         if (mv.ct && !mon.has('magicguard') && !mon.has('longreach')) {
@@ -9467,6 +9706,11 @@ return ev;
             if (mv.sec.drop) { await this.changeStat(foe, mv.sec.drop, mv.sec.n, mon); }
           }
         }
+        /* ★ 束缚类招式 */
+        if (mv.partialTrap && foe.hp > 0 && !foe.vol.binding) {
+          foe.vol.binding = 4 + Math.floor(Math.random() * 2);
+          await say(`${foe.name} 被束缚住了！`);
+        }
         if (mv.selfDropT && foe.hp > 0) { await this.changeStat(foe, mv.selfDropT.drop, mv.selfDropT.n, mon); }
         // 自身能力变化
         for (const key of ['self', 'self2', 'self3', 'selfDn', 'selfDn2']) { if (mv[key]) await this.changeStat(mon, mv[key].drop, mv[key].n, mon); }
@@ -9500,7 +9744,7 @@ return ev;
         // 文柚果
         /* ★ 贪吃鬼：文柚果触发阈值提高到75%；笨拙：道具效果无效 */
         if (foe.item === 'sitrus' && foe.hp > 0 && foe.hpPct() <= (foe.has('gluttony') ? .75 : .5)
-          && !(mon.has('unnerve') || this.foeOf(foe)?.has('unnerve')) && !foe.has('klutz')) {
+          && !(mon.has('unnerve') || mon.has('asone') || this.foeOf(foe)?.has('unnerve') || this.foeOf(foe)?.has('asone')) && !foe.has('klutz')) {
           const eatenBerry = foe.item;
           foe.item = null;
           const h = Math.floor(foe.maxhp / 4);
@@ -9559,7 +9803,7 @@ return ev;
           if (f.healTeam) { const h = Math.floor(mon.baseMax / 6); mon.hp = Math.min(mon.maxhp, mon.hp + h); await say(`${mon.name} 回复了HP！`); }
           if (f.healStatus) { mon.status = null; mon.sleepT = 0; mon.toxicN = 0; await say(`${mon.name} 的异常状态被治愈了！`); }
           /* ★ 超极巨百火焚野/沙尘漫天：部分束缚 */
-          if (f.partialTrap && foe.hp > 0) { foe.vol.binding = 4; await say(`${foe.name} 被束缚住了！`); }
+          if (f.partialTrap && foe.hp > 0) { foe.vol.binding = 4 + Math.floor(Math.random() * 2); await say(`${foe.name} 被束缚住了！`); }
         }
         // 解冻（火属性伤害）
         /* ★ 水蒸气：自身冰冻时解冻 */
@@ -9571,6 +9815,11 @@ return ev;
       async checkImmunity(mon, foe, mv) {
         if (mv.ignAb) return null;
         const t = mv.t;
+        const wx = this.wxActive();
+        /* ★ 终结之地：水属性招式无效 */
+        if (wx === 'desolate' && t === 'water') { await say('终结之地的效果使水属性招式无效了！'); return 'immune'; }
+        /* ★ 始源之海：火属性招式无效 */
+        if (wx === 'primordial' && t === 'fire') { await say('始源之海的效果使火属性招式无效了！'); return 'immune'; }
         if (t === 'ground') {
           if (foe.has('levitate')) { this.abBanner(foe); await say(`${foe.name} 漂浮在空中！`); return 'immune'; }
           if (foe.item === 'airballoon') { await say(`${foe.name} 靠气球浮在空中！`); return 'immune'; }
@@ -9594,7 +9843,7 @@ return ev;
           await say(`${foe.name} 的电气引擎发动了！速度提升了！`);
           return 'absorb';
         }
-        if (t === 'flying' && foe.has('windrider')) {
+        if ((t === 'flying' || mv.wind) && foe.has('windrider')) {
           this.abBanner(foe);
           await this.changeStat(foe, 'atk', 1, foe);
           await say(`${foe.name} 的乘风发动了！攻击提升了！`);
@@ -9696,8 +9945,9 @@ return ev;
         dmg = Math.floor(dmg * eff);
         // 天气
         const wx = this.wxActive();
-        if (wx === 'sun') { if (mv.t === 'fire') dmg = Math.floor(dmg * 1.5); if (mv.t === 'water' && !mv.hydrosteam) dmg = Math.floor(dmg * .5); if (mv.hydrosteam) dmg = Math.floor(dmg * 1.5); }
-        if (wx === 'rain') { if (mv.t === 'water') dmg = Math.floor(dmg * 1.5); if (mv.t === 'fire') dmg = Math.floor(dmg * .5); }
+        if (wx === 'sun' || wx === 'desolate') { if (mv.t === 'fire') dmg = Math.floor(dmg * 1.5); if (mv.t === 'water' && !mv.hydrosteam) dmg = Math.floor(dmg == 0 ? 0 : .5); if (mv.hydrosteam) dmg = Math.floor(dmg * 1.5); }
+        if (wx === 'rain' || wx === 'primordial') { if (mv.t === 'water') dmg = Math.floor(dmg * 1.5); if (mv.t === 'fire') dmg = Math.floor(dmg == 0 ? 0 : .5); }
+
         /* ★ 干燥皮肤：火伤害×1.25 */
         if (foe.has('dryskin') && mv.t === 'fire') dmg = Math.floor(dmg * 1.25);
         /* ★ 电力转换/风力发电：标记触发后电招式×2 */
@@ -9772,6 +10022,8 @@ return ev;
         if (mon.has('transistor') && mv.t === 'electric') dmg = Math.floor(dmg * 1.3);
         /* ★ 龙颚：龙属性招式×1.5 */
         if (mon.has('dragonsmaw') && mv.t === 'dragon') dmg = Math.floor(dmg * 1.5);
+        /* ★ 搬岩：岩石属性招式×1.5 */
+        if (mon.has('rockypayload') && mv.t === 'rock') dmg = Math.floor(dmg * 1.5);
         /* ★ 能量点：同伴的招式威力×1.3（单打中自身招式×1.3） */
         { const ally = this.sideOf(mon) === 'p' ? this.pp.find(x => x !== mon && x.alive()) : this.ep.find(x => x !== mon && x.alive());
         if (mon.has('powerspot') && (!ally || Math.random() < 1)) dmg = Math.floor(dmg * 1.3); }
@@ -10246,8 +10498,8 @@ return ev;
         const word = Math.abs(n) >= 2 ? (n > 0 ? '大幅提升' : '大幅下降') : (n > 0 ? '提升了' : '下降了');
         await say(`${m.name} 的${STN[k]}${word}！`);
         if (n > 0) { AU.statUp(); } else { AU.statDn(); }
-        /* ★ 跟风：对手能力提升时自己也提升 */
-        if (n > 0 && src && src !== m) {
+        /* ★ 跟风：对手能力提升时自己也提升（无论来源） */
+        if (n > 0 && src) {
           const foe = this.foeOf(m);
           if (foe && foe.alive() && foe.has('opportunist') && real > 0) {
             this.abBanner(foe);
@@ -10288,13 +10540,15 @@ return ev;
         BUI.koFx(lSide, lSide === 'p' ? BUI.pspr : BUI.espr);
         await sleep(760);
         await say(`${loser.name} 倒下了！`);
-        /* ★ 德尔塔气流随携带者倒下而消散（同命双倒时双方均已离场，一并检测） */
-        if (this.wx === 'delta') {
+        /* ★ 德尔塔气流/终结之地/始源之海随携带者倒下而消散 */
+        if (this.wx === 'delta' || this.wx === 'desolate' || this.wx === 'primordial') {
           const P = this.P(), E = this.E();
-          const still = (m) => m && m.alive() && m.has('deltastream');
+          const still = (m) => m && m.alive() && ((this.wx === 'delta' && m.has('deltastream')) || (this.wx === 'desolate' && m.has('desolateland')) || (this.wx === 'primordial' && m.has('primordialsea')));
           if (!still(P) && !still(E)) {
+            const names = { delta: '德尔塔气流', desolate: '终结之地', primordial: '始源之海' };
+            const name = names[this.wx];
             this.wx = null; this.wxT = 0;
-            await say('德尔塔气流消散了，天气恢复了正常。');
+            await say(`${name}消散了，天气恢复了正常。`);
             BUI.refresh(this);
           }
         }
@@ -10306,6 +10560,11 @@ return ev;
           if (winner.has('soulheart')) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.name} 的魂之心发动了！`); }
           if (winner.has('chillingneigh')) { this.abBanner(winner); await this.changeStat(winner, 'atk', 1, winner); await say(`${winner.name} 的苍白嘶鸣发动了！`); }
           if (winner.has('grimneigh')) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.name} 的漆黑嘶鸣发动了！`); }
+          /* ★ 人马一体（蕾冠王骑乘形态）：兼具紧张感+苍白嘶鸣/漆黑嘶鸣 */
+          if (winner.has('asone')) {
+            if (winner.id === 10362) { this.abBanner(winner); await this.changeStat(winner, 'atk', 1, winner); await say(`${winner.name} 的人马一体（苍白嘶鸣）发动了！`); }
+            else if (winner.id === 10363) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.name} 的人马一体（漆黑嘶鸣）发动了！`); }
+          }
         }
         const loserSide = this.sideOf(loser);
         /* ★ 化学之力/接球手：继承被击倒同伴的特性 */
@@ -10424,10 +10683,12 @@ return ev;
             BUI.refresh(this);
           }
         }
-        /* ★ 德尔塔气流随携带者离场而消散 */
-        if (old.has('deltastream') && this.wx === 'delta') {
+        /* ★ 德尔塔气流/终结之地/始源之海随携带者离场而消散 */
+        if ((old.has('deltastream') && this.wx === 'delta') || (old.has('desolateland') && this.wx === 'desolate') || (old.has('primordialsea') && this.wx === 'primordial')) {
+          const names = { delta: '德尔塔气流', desolate: '终结之地', primordial: '始源之海' };
+          const name = names[this.wx];
           this.wx = null; this.wxT = 0;
-          await say('德尔塔气流消散了，天气恢复了正常。');
+          await say(`${name}消散了，天气恢复了正常。`);
           BUI.refresh(this);
         }
         await this.sendOut(side, idx, false);
@@ -10446,8 +10707,8 @@ return ev;
           if (wx === 'hail' && !m.has('overcoatx') && !m.types.includes('ice')) {
             if (!m.has('snowcloak') && !m.has('magicguard')) { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); await say(`冰雹袭击了 ${m.name}！`); this.addLog(`↳ ${m.name} 受冰雹伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           }
-          if (m.has('solarpower') && wx === 'sun' && !m.has('magicguard')) { this.abBanner(m); const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); await say(`${m.name} 的太阳之力发动了！`); this.addLog(`↳ ${m.name} 太阳之力 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (m.has('raindish') && wx === 'rain') { this.abBanner(m); const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的雨盘回复了HP！`); this.addLog(`↳ ${m.name} 雨盘回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.has('solarpower') && (wx === 'sun' || wx === 'desolate') && !m.has('magicguard')) { this.abBanner(m); const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); await say(`${m.name} 的太阳之力发动了！`); this.addLog(`↳ ${m.name} 太阳之力 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.has('raindish') && (wx === 'rain' || wx === 'primordial')) { this.abBanner(m); const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的雨盘回复了HP！`); this.addLog(`↳ ${m.name} 雨盘回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           /* ★ 冰冻之躯：冰雹天气时每回合回复1/16HP */
           if (m.has('icebody') && wx === 'hail') { this.abBanner(m); const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的冰冻之躯回复了HP！`); this.addLog(`↳ ${m.name} 冰冻之躯回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           /* ★ 干燥皮肤：晴天扣血，雨天回血 */
@@ -10604,8 +10865,8 @@ return ev;
           if (m.has('berserk') && m.hpPct() <= 0.5 && !m.vol.berserkTriggered) { m.vol.berserkTriggered = true; this.abBanner(m); await this.changeStat(m, 'spa', 1, m); await say(`${m.name} 的怒火冲天发动了！`); }
           /* ★ 愤怒甲壳：HP降至一半以下时攻/特攻/速度+1，防/特防-1 */
           if (m.has('angershell') && m.hpPct() <= 0.5 && !m.vol.angerShellTriggered) { m.vol.angerShellTriggered = true; this.abBanner(m); await this.changeStat(m, 'atk', 1, m); await this.changeStat(m, 'spa', 1, m); await this.changeStat(m, 'spe', 1, m); await this.changeStat(m, 'def', -1, m); await this.changeStat(m, 'spd', -1, m); await say(`${m.name} 的愤怒甲壳发动了！`); }
-          /* ★ 冰面：冰雹时头部结冰 */
-          if (m.has('iceface') && wx === 'hail' && !m.vol.iceHead) { m.vol.iceHead = true; await say(`${m.name} 的冰面在冰雹中恢复了！`); }
+          /* ★ 结冻头：冰雹时头部结冰 */
+          if (m.has('iceface') && wx === 'hail' && !m.vol.iceHead) { m.vol.iceHead = true; m.formSprite = null; BUI.refresh(this); await say(`${m.name} 的结冻头在冰雹中恢复了！`); }
           /* ★ 慢启动回合计数 */
           if (m.has('slowstart')) { if (m.vol.slowStartTurns === undefined) m.vol.slowStartTurns = 0; m.vol.slowStartTurns++; if (m.vol.slowStartTurns >= 5) await say(`${m.name} 终于进入了状态，慢启动解除了！`); }
           /* ★ 跃跃欲逃 / 危险回避：HP≤50%时自动换下 */
@@ -10647,10 +10908,40 @@ return ev;
               }
             }
           }
+          /* ★ 群聚变形（基格尔德）：HP≤50%时变为完全体 */
+          if (m.has('powerconstruct') && !m.fainted && !m.vol.completeForm) {
+            if (m.hpPct() <= 0.5) {
+              m.vol.completeForm = true;
+              const hpPct2 = m.hp / m.maxhp;
+              m.mega = { f: 10120, t: 'dragon/ground', s: [216,100,121,91,95,85], a: 'powerconstruct' };
+              m.recalc(); m.hp = Math.round(m.maxhp * hpPct2);
+              this.abBanner(m);
+              AU.mega(); BUI.burst(this.sideOf(m));
+              await say(`${m.name} 的群聚变形发动了！变成了完全体形态！`);
+              BUI.refresh(this);
+            }
+          }
+          /* ★ 饱了又饿（莫鲁贝可）：每回合切换形态 */
+          if (m.has('hunger') && m.alive()) {
+            m.vol.hangry = !m.vol.hangry;
+          }
+          /* ★ 阴晴不定（飘浮泡泡）：随天气改变属性 */
+          if (m.has('forecast') && m.alive()) {
+            const wxNow = this.wxActive();
+            let newType = 'normal';
+            if (wxNow === 'sun') newType = 'fire';
+            else if (wxNow === 'rain') newType = 'water';
+            else if (wxNow === 'hail') newType = 'ice';
+            if (m.types[0] !== newType) {
+              m.types = [newType];
+              await say(`${m.name} 的阴晴不定发动了！变成了${TNAME[newType]}属性！`);
+              BUI.refresh(this);
+            }
+          }
           if (m.hp <= 0 && !m.fainted) { await this.handleKO(this.foeSide(side), this.foeOf(m), m); if (this.over) return; }
         }
         // 天气/场地/空间倒计时
-        if (this.wx && this.wx !== 'delta') { this.wxT--; if (this.wxT <= 0) { this.wx = null; await say('天气恢复了正常。'); } }
+        if (this.wx && this.wx !== 'delta' && this.wx !== 'desolate' && this.wx !== 'primordial') { this.wxT--; if (this.wxT <= 0) { this.wx = null; await say('天气恢复了正常。'); } }
         if (this.terrain) { this.terrainT--; if (this.terrainT <= 0) { this.terrain = null; await say('场地恢复了原状。'); } }
         if (this.trickT > 0) { this.trickT--; if (this.trickT === 0) await say('戏法空间解除了。'); }
         /* ★ 超极巨DOT倒计时和伤害 */
@@ -10678,8 +10969,13 @@ return ev;
           if (m.vol.disabled) { m.vol.disabled.turns--; if (m.vol.disabled.turns <= 0) { await say(`${m.name} 的招式封印解除了！`); m.vol.disabled = null; } }
           /* ★ 昏睡（超极巨睡魔降临）：回合末睡着 */
           if (m.vol.drowsy && !m.status) { m.status = 'sleep'; m.sleepT = 2; m.vol.drowsy = false; await say(`${m.name} 昏昏沉沉地睡着了！`); }
-          /* ★ 束缚（超极巨百火焚野/沙尘漫天）：回合末扣血 */
-          if (m.vol.binding && m.vol.binding > 0) { m.vol.binding--; const bd = Math.floor(m.maxhp / 8); m.hp = Math.max(0, m.hp - bd); await say(`${m.name} 被束缚伤害了！`); }
+          /* ★ 束缚（捕兽夹/雷电囚笼/熔岩风暴等）：回合末扣血 */
+          if (m.vol.binding && m.vol.binding > 0) {
+            m.vol.binding--;
+            const bd = Math.floor((m.dyn ? m.baseMax : m.maxhp) / 8);
+            m.hp = Math.max(0, m.hp - bd);
+            await say(`${m.name} 被束缚伤害了！`);
+          }
           /* ★ 超极巨幻影幽魂的封锁在换下时解除（不做回合衰减） */
         }
         BUI.refresh(this);
@@ -10852,7 +11148,7 @@ return ev;
       if (GM.storySlot != null && GM.story.started) saveStorySlot(GM.storySlot);
     }
     function newMon(id, lvl, o) { return new P(id, lvl, o || {}); }
-    function healAll(arr) { arr.forEach(m => { m.hp = m.maxhp; m.status = null; m.sleepT = 0; m.toxicN = 0; m.fainted = false; m.vol = {}; if (m.id === 778) m.vol.disguise = true; m.moves.forEach(x => x.pp = x.maxpp); }); }
+    function healAll(arr) { arr.forEach(m => { m.hp = m.maxhp; m.status = null; m.sleepT = 0; m.toxicN = 0; m.fainted = false; m.vol = {}; if (m.id === 778) m.vol.disguise = true; if (m.id === 875) m.vol.iceHead = true; m.iceHeadUsed = false; m.moves.forEach(x => x.pp = x.maxpp); }); }
     /* ============ 对战工厂存档（持久化） ============ */
     function serializeMon(m) { return { id: m.id, lvl: m.lvl, xp: m.xp, iv: m.iv, ev: m.ev, nature: m.nature, item: m.item, tera: m.teraType, ability: m.ability, moves: m.moves.map(x => x.k), shiny: m.shiny, battles: m.battles }; }
     function deserializeMon(d) { return new P(d.id, d.lvl, { iv: d.iv, ev: d.ev, nature: d.nature, item: d.item, tera: d.tera, ability: d.ability, moves: d.moves, shiny: d.shiny, battles: d.battles, xp: d.xp }); }
@@ -10958,6 +11254,13 @@ return ev;
         if (sp.id === 493) {
           return pick(PLATE_KEYS);
         }
+        /* ★ 固拉多/盖欧卡：80%携带专属宝珠 */
+        if (sp.id === 383 && Math.random() < 0.8) return 'redorb';
+        if (sp.id === 382 && Math.random() < 0.8) return 'blueorb';
+        /* ★ 盖诺赛克特：携带随机驱动器 */
+        if (sp.id === 649) return pick(['burndrive','chilldrive','dousedrive','shockdrive']);
+        /* ★ 银伴战兽：携带随机存储碟 */
+        if (sp.id === 773 || sp.id === 772) return pick(Object.keys(MEMORYDISC));
         const r = Math.random();
         const dmgT = moves.map(k => MV[k].t).find(t => TYPEITEM[t]);
         if (r < .25 && dmgT) return TYPEITEM[dmgT];
@@ -11632,6 +11935,24 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       };
       d.appendChild(detBtn);
     }
+    function dexDetailPrimal(sp, types, stats, ability, stone) {
+      const d = $('#dexDetail');
+      const spriteId = sp.id === 383 ? 10078 : 10077;
+      const img = new Image(); setSprite(img, spriteId);
+      img.style.cssText = 'width:96px;height:96px;object-fit:contain;display:block;margin:0 auto;' +
+        (sp.id===383 ? 'filter:brightness(1.3) saturate(1.5) hue-rotate(-10deg)' : 'filter:brightness(1.2) saturate(1.4) hue-rotate(10deg)');
+      d.innerHTML = ''; d.appendChild(img);
+      const names = ['HP','攻击','防御','特攻','特防','速度'];
+      const nm = sp.id===383 ? '原始固拉多' : '原始盖欧卡';
+      d.insertAdjacentHTML('beforeend', `
+      <div style="text-align:center"><span class="px" style="font-size:8px;color:#e3350d">#${String(sp.id).padStart(4,'0')} PRIMAL</span>
+      <div class="disp" style="font-size:22px;color:#e3350d">${nm}</div>
+      <div style="margin:4px 0">${types.split('/').map(tyBadge).join(' ')}</div>
+      <div style="font-size:11px;color:#888;font-weight:700">原始回归 · 总和 ${stats.reduce((a,b)=>a+b,0)}</div></div>
+      ${stats.map((v,i)=>`<div class="statRow"><span style="width:30px;font-weight:900;color:#777;font-size:11px">${names[i]}</span><span class="px" style="font-size:8px;width:26px;text-align:right">${v}</span><div class="bar"><div class="fill" style="width:${Math.min(100,v/1.8)}%;background:${v>=100?'#3ecf6c':v>=70?'#8bc34a':v>=45?'#f2c230':'#ef4444'}"></div></div></div>`).join('')}
+      <div style="margin-top:8px;font-size:12px"><b>特性：</b>${AB[ability]?.n||ability}（${AB[ability]?.d||''}）</div>
+      <div style="margin-top:6px;font-size:11px;color:#e3350d;font-weight:900">专属道具：${stone}（携带后出场时原始回归）</div>`);
+    }
     function buildDex() {
       $('#dexTotal').textContent = '收录 ' + SP.length + ' 种 · 覆盖第1~9世代';
       const genSel = $('#dexGen'), tySel = $('#dexType');
@@ -11640,7 +11961,11 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       const render = () => {
         const q = $('#dexSearch').value.trim(), g = +$('#dexGen').value, ty = $('#dexType').value;
         const grid = $('#dexGrid'); grid.innerHTML = '';
-        SP.filter(sp => (!g || genOf(sp.id) === g) && (!ty || sp.t.includes(ty)) && (!q || sp.n.includes(q) || String(sp.id) === q))
+        /* 收集需隐藏的多形态/地区形态ID列表 */
+        const hideIds = [];
+        for (const k in MULTI_FORMS) hideIds.push(...MULTI_FORMS[k]);
+        for (const k in REGIONAL_FORMS) hideIds.push(...REGIONAL_FORMS[k]);
+        SP.filter(sp => hideIds.indexOf(sp.id) === -1 && (!g || genOf(sp.id) === g) && (!ty || sp.t.includes(ty)) && (!q || sp.n.includes(q) || String(sp.id) === q))
           .sort((a, b) => a.id - b.id)
           .forEach(sp => {
             const c = el('div', 'dexCell');
@@ -11648,6 +11973,36 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
             c.insertAdjacentHTML('beforeend', `<div class="no">#${String(sp.id).padStart(4, '0')}</div><div class="nm">${sp.n}</div>`);
             c.onclick = () => { AU.cursor(); dexDetail(sp); };
             grid.appendChild(c);
+            /* ★ 多形态补全条目（跟在基形态后） */
+            if (MULTI_FORMS[sp.id]) {
+              MULTI_FORMS[sp.id].forEach(fid => {
+                const fsp = SPDB[fid];
+                if (!fsp) return;
+                if (ty && !fsp.t.includes(ty)) return;
+                if (q && !fsp.n.includes(q) && !String(fid).includes(q)) return;
+                const fc = el('div', 'dexCell');
+                fc.style.borderColor = '#d4a017';
+                const fimg = new Image(); setSprite(fimg, fid); fc.appendChild(fimg);
+                fc.insertAdjacentHTML('beforeend', `<div class="no" style="color:#d4a017">#${String(fid).padStart(4, '0')}☆</div><div class="nm" style="color:#d4a017;font-size:10px">${fsp.n}</div>`);
+                fc.onclick = () => { AU.cursor(); dexDetail(fsp); };
+                grid.appendChild(fc);
+              });
+            }
+            /* ★ 地区形态条目（跟在基形态后） */
+            if (REGIONAL_FORMS[sp.id]) {
+              REGIONAL_FORMS[sp.id].forEach(fid => {
+                const fsp = SPDB[fid];
+                if (!fsp) return;
+                if (ty && !fsp.t.includes(ty)) return;
+                if (q && !fsp.n.includes(q) && !String(fid).includes(q)) return;
+                const fc = el('div', 'dexCell');
+                fc.style.borderColor = '#4a8cd4';
+                const fimg = new Image(); setSprite(fimg, fid); fc.appendChild(fimg);
+                fc.insertAdjacentHTML('beforeend', `<div class="no" style="color:#4a8cd4">#${String(fid).padStart(4, '0')}◎</div><div class="nm" style="color:#4a8cd4;font-size:10px">${fsp.n}</div>`);
+                fc.onclick = () => { AU.cursor(); dexDetail(fsp); };
+                grid.appendChild(fc);
+              });
+            }
             /* ★ Mega形态图鉴条目 */
             if (MEGA[sp.id]) {
               const megas = Array.isArray(MEGA[sp.id]) ? MEGA[sp.id] : [MEGA[sp.id]];
@@ -11661,6 +12016,23 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
                 mc.onclick = () => { AU.cursor(); dexDetailMega(sp, cfg, mi); };
                 grid.appendChild(mc);
               });
+            }
+            /* ★ 原始回归图鉴条目 */
+            if (sp.id === 383) {
+              const pc = el('div','dexCell'); pc.style.borderColor='#e3350d';
+              const pimg = new Image(); setSprite(pimg,10078); pimg.style.filter='brightness(1.3) saturate(1.5) hue-rotate(-10deg)';
+              pc.appendChild(pimg);
+              pc.insertAdjacentHTML('beforeend',`<div class="no" style="color:#e3350d">#0383P</div><div class="nm" style="color:#e3350d;font-size:10px">原始固拉多</div>`);
+              pc.onclick = () => { AU.cursor(); dexDetailPrimal(sp,'fire/ground',[100,180,160,150,90,90],'desolateland','朱红色宝珠'); };
+              grid.appendChild(pc);
+            }
+            if (sp.id === 382) {
+              const pc = el('div','dexCell'); pc.style.borderColor='#2a6dd4';
+              const pimg = new Image(); setSprite(pimg,10077); pimg.style.filter='brightness(1.2) saturate(1.4) hue-rotate(10deg)';
+              pc.appendChild(pimg);
+              pc.insertAdjacentHTML('beforeend',`<div class="no" style="color:#2a6dd4">#0382P</div><div class="nm" style="color:#2a6dd4;font-size:10px">原始盖欧卡</div>`);
+              pc.onclick = () => { AU.cursor(); dexDetailPrimal(sp,'water',[100,150,90,180,160,90],'primordialsea','靛蓝色宝珠'); };
+              grid.appendChild(pc);
             }
             /* ★ 道具形态图鉴条目（苍响/藏玛然特） */
             if (FORMS[sp.id]) {
@@ -11827,24 +12199,50 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       const render = () => {
         const q = $('#freeSearch').value.trim(), g = +$('#freeGen').value, ty = $('#freeType').value;
         const grid = $('#freeGrid'); grid.innerHTML = '';
-        SP.filter(sp => (!g || genOf(sp.id) === g) && (!ty || sp.t.includes(ty)) && (!q || sp.n.includes(q) || String(sp.id) === q))
+        const hideIds2 = [];
+        for (const k in MULTI_FORMS) hideIds2.push(...MULTI_FORMS[k]);
+        for (const k in REGIONAL_FORMS) hideIds2.push(...REGIONAL_FORMS[k]);
+        SP.filter(sp => hideIds2.indexOf(sp.id) === -1 && (!g || genOf(sp.id) === g) && (!ty || sp.t.includes(ty)) && (!q || sp.n.includes(q) || String(sp.id) === q))
           .sort((a, b) => a.id - b.id)
           .forEach(sp => {
-            const c = el('div', 'pickCell'); const img = new Image(); setSprite(img, sp.id); c.appendChild(img);
-            c.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${sp.n}</b><br><span style="color:#888;font-size:10px">#${sp.id} ${bst(sp)}</span></div>`);
-            const det = el('button', 'btn tiny', '详情');
-            det.style.cssText = 'flex:none;margin-left:4px';
-            det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(previewMon(sp), null); };
-            c.appendChild(det);
-            c.onclick = () => {
-              const team = editing === 'player' ? playerTeam : enemyTeam;
-              if (team.length >= 6) { toast('最多6只！'); AU.no(); return; }
-              if (team.find(t => t.sp.id === sp.id)) { toast('已在队伍中'); AU.no(); return; }
-              AU.ok();
-              team.push({ sp, lvl, nature: NATURES[0], ev: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, ability: sp.ab[0], moves: sp.mv.slice(0, 4), tera: pick(TYP), item: null, gmax: GMAXLIST.has(sp.id) });
-              renderTeam();
+            const renderPick = (fsp, fid) => {
+              const c = el('div', 'pickCell'); const img = new Image(); setSprite(img, fid); c.appendChild(img);
+              c.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${fsp.n}</b><br><span style="color:#888;font-size:10px">#${fid} ${bst(fsp)}</span></div>`);
+              const det = el('button', 'btn tiny', '详情');
+              det.style.cssText = 'flex:none;margin-left:4px';
+              det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(previewMon(fsp), null); };
+              c.appendChild(det);
+              c.onclick = () => {
+                const team = editing === 'player' ? playerTeam : enemyTeam;
+                if (team.length >= 6) { toast('最多6只！'); AU.no(); return; }
+                if (team.find(t => t.sp.id === fid)) { toast('已在队伍中'); AU.no(); return; }
+                AU.ok();
+                team.push({ sp: fsp, lvl, nature: NATURES[0], ev: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, ability: fsp.ab[0], moves: fsp.mv.slice(0, 4), tera: pick(TYP), item: null, gmax: GMAXLIST.has(fsp.id) });
+                renderTeam();
+              };
+              grid.appendChild(c);
             };
-            grid.appendChild(c);
+            renderPick(sp, sp.id);
+            /* ★ 多形态补全跟在基形态后 */
+            if (MULTI_FORMS[sp.id]) {
+              MULTI_FORMS[sp.id].forEach(fid => {
+                const fsp = SPDB[fid];
+                if (!fsp) return;
+                if (ty && !fsp.t.includes(ty)) return;
+                if (q && !fsp.n.includes(q) && !String(fid).includes(q)) return;
+                renderPick(fsp, fid);
+              });
+            }
+            /* ★ 地区形态跟在基形态后 */
+            if (REGIONAL_FORMS[sp.id]) {
+              REGIONAL_FORMS[sp.id].forEach(fid => {
+                const fsp = SPDB[fid];
+                if (!fsp) return;
+                if (ty && !fsp.t.includes(ty)) return;
+                if (q && !fsp.n.includes(q) && !String(fid).includes(q)) return;
+                renderPick(fsp, fid);
+              });
+            }
           });
       };
       ['input', 'change'].forEach(ev => { $('#freeSearch').addEventListener(ev, render); genSel.addEventListener(ev, render); tySel.addEventListener(ev, render); });
@@ -11874,7 +12272,8 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
         const player = playerTeam.map(cfg => { const p = new P(cfg.sp.id, cfg.lvl, { iv: 30, nature: cfg.nature, ev: cfg.ev, ability: cfg.ability, moves: cfg.moves, tera: cfg.tera, item: cfg.item }); if (GMAXLIST.has(cfg.sp.id)) { p.vol.canGmax = !!cfg.gmax; p._userGmax = !!cfg.gmax; } return p; });
         let enemy;
         if (enemyMode === 'random') {
-          enemy = shuffle(SP.filter(s => !s.leg)).slice(0, Math.min(6, Math.max(1, playerTeam.length))).map(sp => new P(sp.id, lvl, { iv: 28 }));
+          const hideIds3 = []; for (const k in MULTI_FORMS) hideIds3.push(...MULTI_FORMS[k]); for (const k in REGIONAL_FORMS) hideIds3.push(...REGIONAL_FORMS[k]);
+          enemy = shuffle(SP.filter(s => !s.leg && hideIds3.indexOf(s.id) === -1)).slice(0, Math.min(6, Math.max(1, playerTeam.length))).map(sp => new P(sp.id, lvl, { iv: 28 }));
         } else {
           if (!enemyTeam.length) { toast('请先选择对方宝可梦！'); AU.no(); return; }
           enemy = enemyTeam.map(cfg => new P(cfg.sp.id, cfg.lvl, { iv: 30, nature: cfg.nature, ev: cfg.ev, ability: cfg.ability, moves: cfg.moves, tera: cfg.tera, item: cfg.item }));
@@ -12461,6 +12860,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (d.dyna2x) p.push('对极巨化宝可梦伤害×2');
       if (d.se2) p.push('效果绝佳时伤害×2');
       if (d.ragefist) p.push('每受到一次攻击威力+50');
+      if (d.partialTrap) p.push('束缚对手4~5回合，每回合损失1/8最大HP');
       if (d.steal) p.push('夺取对手全部能力提升');
       if (d.parting) p.push('降低对手双攻后替换下场');
       if (d.clearsmog) p.push('重置对手全部能力变化');
