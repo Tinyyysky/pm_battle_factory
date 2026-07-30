@@ -9413,7 +9413,7 @@ return ev;
       abBanner(m) { showAbilityBanner(m, this.sideOf(m)); }
       sideAliveCount(s) { return (s === 'p' ? this.pp : this.ep).filter(m => m.alive()).length; }
       async uturnSwitch(side, mon) {
-        await say(`${mon.vol.illusionName || mon.name} 使用急速折返退场了！`);
+        await say(`${mon.vol.illusionName || mon.name} 要回到队伍里了！`);
         if (side === 'p') { const idx = await this.chooseParty(false); if (idx != null) await this.doSwitch('p', idx); }
         else { const to = this.aiBestSwitch(); if (to > -1) await this.doSwitch('e', to); }
       }
