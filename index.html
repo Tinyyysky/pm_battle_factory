@@ -11433,7 +11433,36 @@ return ev;
         { k: 'eviolite', price: 25 }, { k: 'assaultvest', price: 25 },
       ],
       /* ============ 基础工具 ============ */
-      tier(sp) { const b = bst(sp); if (sp.leg || b >= 570) return 4; if (b >= 510) return 3; if (b >= 430) return 2; return 1; },
+      /* ★ 六档位：一档≥610 / 二档550~609 / 三档500~549 / 四档450~499（含百变怪/勾魂眼/大嘴娃）/ 五档400~449 / 六档<400 */
+      /* ★ 进化奇石提档：三~六档非最终进化型提升一档 */
+      tier(sp) {
+        const b = bst(sp);
+        let t = b >= 610 ? 1 : b >= 550 ? 2 : b >= 500 ? 3 : b >= 450 ? 4 : b >= 400 ? 5 : 6;
+        if (sp.id === 132 || sp.id === 302 || sp.id === 303) t = 4;
+        if (sp.evo && t >= 3) t--;
+        return t;
+      },
+      /* ★ 各轮档位概率（一~六档） */
+      tierProb(round) {
+        const T = {
+          1: [0, 0, 5, 15, 48, 32],
+          2: [0, 0, 12, 22, 47, 19],
+          3: [0, 1, 18, 28, 43, 10],
+          4: [2, 8, 32, 36, 22, 0],
+          5: [3, 14, 36, 35, 12, 0],
+          6: [5, 18, 42, 30, 5, 0],
+          7: [6, 21, 43, 27, 3, 0],
+          8: [8, 23, 43, 25, 1, 0],
+        };
+        return T[Math.min(round, 8)];
+      },
+      rollTier(round) {
+        const prob = this.tierProb(round);
+        const r = Math.random() * 100;
+        let cum = 0;
+        for (let i = 0; i < 6; i++) { cum += prob[i]; if (r < cum) return i + 1; }
+        return 6;
+      },
       lvl(round, i) { return Math.min(100, 48 + (round - 1) * 7 + Math.floor(i / 2)); },
       pickMoves(sp) {
         const dmg = shuffle(sp.mv.filter(k => MV[k].c !== 'X' && k !== 'terablast')), st = shuffle(sp.mv.filter(k => MV[k].c === 'X'));
@@ -11483,19 +11512,11 @@ return ev;
         const moves = this.pickMoves(sp);
         return new P(sp.id, lvl, { moves, item: this.pickItem(sp, moves), iv: 28, tera: pick(TYP), ev: genEV(sp, round || 1, moves) });
       },
-      /* ★ 中阶池：种族值400~509（含勾魂眼/大嘴娃），第3轮起5%概率出现 */
-      midPool() {
-        return shuffle(SP.filter(s => {
-          const b = bst(s);
-          return (b >= 400 && b <= 499 && !s.leg) || s.id === 302 || s.id === 303;
-        }));
-      },
-      drawOne(round, cands) {
-        if (round >= 3 && Math.random() < 0.05) {
-          const mid = this.midPool();
-          if (mid.length) return pick(mid);
-        }
-        return cands.pop() || pick(SP);
+      /* ★ 按档位抽取：先掷档位，再从该档位随机 */
+      drawOne(round) {
+        const t = this.rollTier(round);
+        const pool = SP.filter(s => this.tier(s) === t);
+        return pool.length ? pick(pool) : pick(SP);
       },
       /* ============ 属性专家 ============ */
       expertProb(round, i) {
@@ -11512,22 +11533,18 @@ return ev;
       },
       /* ============ 队伍生成 ============ */
       rentalSets(round) {
-        const minT = round <= 1 ? 1 : round <= 3 ? 2 : 3, maxT = round <= 1 ? 2 : round <= 2 ? 3 : 4;
-        let cands = shuffle(SP.filter(s => { const t = this.tier(s); return t >= minT && t <= maxT; }));
         const sets = [];
         for (let s = 0; s < 3; s++) {
           const set = [];
-          for (let i = 0; i < 3; i++) { const sp = this.drawOne(round, cands); set.push(this.build(sp, this.lvl(round, i), round)); }
+          for (let i = 0; i < 3; i++) { const sp = this.drawOne(round); set.push(this.build(sp, this.lvl(round, i), round)); }
           sets.push(set);
         }
         return sets;
       },
       /* ★ 六选三：生成6个候选宝可梦 */
       pickPool(round) {
-        const minT = round <= 1 ? 1 : round <= 3 ? 2 : 3, maxT = round <= 1 ? 2 : round <= 2 ? 3 : 4;
-        let cands = shuffle(SP.filter(s => { const t = this.tier(s); return t >= minT && t <= maxT; }));
         const pool = [];
-        for (let i = 0; i < 6; i++) { const sp = this.drawOne(round, cands); pool.push(this.build(sp, this.lvl(round, i), round)); }
+        for (let i = 0; i < 6; i++) { const sp = this.drawOne(round); pool.push(this.build(sp, this.lvl(round, i), round)); }
         return pool;
       },
       enemyTeam(round, i, expert) {
@@ -11559,14 +11576,13 @@ return ev;
           return { head: true, champion: ch, team };
         }
         /* 普通场次 */
-        const minT = round <= 1 ? 1 : round <= 3 ? 2 : 3, maxT = round <= 1 ? 2 : round <= 2 ? 3 : 4;
-        let cands = shuffle(SP.filter(s => { const t = this.tier(s); return t >= minT && t <= maxT; }));
         const team = [];
         if (expert && expert.type) {
-          const typed = shuffle(SP.filter(s => s.t.includes(expert.type) && this.tier(s) >= minT && this.tier(s) <= maxT));
+          const t = this.rollTier(round);
+          const typed = shuffle(SP.filter(s => s.t.includes(expert.type) && this.tier(s) === t));
           for (let k = 0; k < Math.min(2, typed.length); k++) { team.push(this.build(typed[k], lvl, round)); }
         }
-        while (team.length < 3) { const sp = this.drawOne(round, cands); team.push(this.build(sp, lvl, round)); }
+        while (team.length < 3) { const sp = this.drawOne(round); team.push(this.build(sp, lvl, round)); }
         return { head: false, team, expert };
       },
       /* ============ UI ============ */
