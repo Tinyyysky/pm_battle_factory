@@ -4519,6 +4519,56 @@
       margin-left: auto
     }
 
+    /* 设置分组（点击展开/收起） */
+    .setGroup {
+      border: 3px solid var(--ink);
+      border-radius: 12px;
+      margin-top: 10px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 3px 0 rgba(20, 16, 40, .25)
+    }
+
+    .setGroupHead {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: linear-gradient(180deg, #fff, #f3ecd6);
+      border: none;
+      cursor: pointer;
+      font-family: 'ZCOOL KuaiLe';
+      font-size: 17px;
+      letter-spacing: 1px;
+      color: var(--ink);
+      text-align: left
+    }
+
+    .setGroupHead:hover {
+      background: linear-gradient(180deg, #fff, #eadfbe)
+    }
+
+    .setGroupHead .sgIcon {
+      color: var(--gold);
+      font-size: 14px;
+      transition: transform .15s
+    }
+
+    .setGroupBody {
+      display: none;
+      padding: 8px 12px 6px;
+      border-top: 2px dashed #d8cfb4
+    }
+
+    .setGroupBody.open {
+      display: block
+    }
+
+    .setGroupBody .setRow:last-child {
+      border-bottom: none
+    }
+
     /* free builder */
     #freeWrap {
       display: grid;
@@ -16118,6 +16168,23 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       r.appendChild(inp);
       return r;
     }
+    /* 设置分组：点击标题展开/收起一组设置项 */
+    function settingsGroup(label, items, open = false) {
+      const g = el('div', 'setGroup');
+      const h = el('button', 'setGroupHead');
+      h.innerHTML = `<span class="sgIcon">${open ? '▾' : '▸'}</span><span class="sgTitle">${label}</span>`;
+      const body = el('div', 'setGroupBody' + (open ? ' open' : ''));
+      items.forEach(it => body.appendChild(it));
+      let isOpen = open;
+      h.onclick = () => {
+        isOpen = !isOpen;
+        h.querySelector('.sgIcon').textContent = isOpen ? '▾' : '▸';
+        body.classList.toggle('open', isOpen);
+        AU.cursor();
+      };
+      g.appendChild(h); g.appendChild(body);
+      return g;
+    }
     /* ============ 对战点数自由分配面板 ============ */
     function openEVAllocation(team) {
       return new Promise(res => {
@@ -16206,33 +16273,42 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       box.appendChild(head);
       let offEsc = null;
       const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); saveCfg(); };
-      box.appendChild(settingsRow('音效', '攻击、命中、状态、菜单等提示音',
-        () => !CFG.muted, v => { CFG.muted = !v; AU.muted = CFG.muted; if (CFG.muted) AU.stopMusic(); }));
-      box.appendChild(settingsSlider('音效音量', '出招/命中/技能音效的音量（0~200%）',
-        () => CFG.sfxVol, v => { CFG.sfxVol = v; }));
-      box.appendChild(settingsRow('背景音乐', '芯片风格循环 BGM',
-        () => CFG.music, v => { CFG.music = v; AU.musOn = v; if (v) { AU.init(); AU.playMusic(AU.cur || 'title'); } else AU.stopMusic(); }));
-      box.appendChild(settingsSlider('背景音乐音量', '背景音乐的音量（0~200%）',
-        () => CFG.musVol, v => { CFG.musVol = v; }));
-      box.appendChild(settingsRow('天气/场地特效', '场景中的雨幕、飞雪、沙暴、光轮、场地光晕与电火花等氛围层',
-        () => CFG.weatherFx, v => {
-          CFG.weatherFx = v;
-          if (!v) $('#bscene').classList.remove('wx-sun', 'wx-rain', 'wx-sand', 'wx-hail', 'tr-electric', 'tr-grassy', 'tr-psychic', 'tr-misty');
-        }));
-      box.appendChild(settingsRow('战斗演出', '濒死柔光闪屏、场景震动、落地尘雾',
-        () => CFG.fxShake, v => { CFG.fxShake = v; }));
-      box.appendChild(settingsRow('华丽特效', '每个技能专属多阶段演出（投射/光束/冲击/残余），以及异常状态、Mega、极巨、太晶的丰富特效。关闭后回到朴素通用特效',
-        () => CFG.fancyFx, v => { CFG.fancyFx = v; }));
-      box.appendChild(settingsRow('精良音效', '每个技能专属实时合成的出招/命中音效。关闭后使用简约通用音效',
-        () => CFG.fancyAudio, v => { CFG.fancyAudio = v; }));
-      box.appendChild(settingsRow('出场动画', '投球→弹跳→爆开→实体化的出场演出',
-        () => CFG.entryAnim, v => { CFG.entryAnim = v; }));
-      box.appendChild(settingsRow('敌方HP百分比', '在敌方信息卡上显示HP百分比',
-        () => CFG.enemyHpPct, v => { CFG.enemyHpPct = v; }));
-      box.appendChild(settingsRow('敌方特性显示', '在敌方信息卡上显示特性名称',
-        () => CFG.enemyAbility, v => { CFG.enemyAbility = v; }));
-      box.appendChild(settingsRow('敌方道具显示', '在敌方信息卡上显示持有道具名称',
-        () => CFG.enemyItem, v => { CFG.enemyItem = v; }));
+      /* ---- 🔊 音频 ---- */
+      box.appendChild(settingsGroup('🔊 音频', [
+        settingsRow('音效', '攻击、命中、状态、菜单等提示音',
+          () => !CFG.muted, v => { CFG.muted = !v; AU.muted = CFG.muted; if (CFG.muted) AU.stopMusic(); }),
+        settingsSlider('音效音量', '出招/命中/技能音效的音量（0~200%）',
+          () => CFG.sfxVol, v => { CFG.sfxVol = v; }),
+        settingsRow('背景音乐', '芯片风格循环 BGM',
+          () => CFG.music, v => { CFG.music = v; AU.musOn = v; if (v) { AU.init(); AU.playMusic(AU.cur || 'title'); } else AU.stopMusic(); }),
+        settingsSlider('背景音乐音量', '背景音乐的音量（0~200%）',
+          () => CFG.musVol, v => { CFG.musVol = v; }),
+        settingsRow('精良音效', '每个技能专属实时合成的出招/命中音效。关闭后使用简约通用音效',
+          () => CFG.fancyAudio, v => { CFG.fancyAudio = v; }),
+      ], true));
+      /* ---- ✨ 画面与演出 ---- */
+      box.appendChild(settingsGroup('✨ 画面与演出', [
+        settingsRow('华丽特效', '每个技能专属多阶段演出（投射/光束/冲击/残余），以及异常状态、Mega、极巨、太晶的丰富特效。关闭后回到朴素通用特效',
+          () => CFG.fancyFx, v => { CFG.fancyFx = v; }),
+        settingsRow('天气/场地特效', '场景中的雨幕、飞雪、沙暴、光轮、场地光晕与电火花等氛围层',
+          () => CFG.weatherFx, v => {
+            CFG.weatherFx = v;
+            if (!v) $('#bscene').classList.remove('wx-sun', 'wx-rain', 'wx-sand', 'wx-hail', 'tr-electric', 'tr-grassy', 'tr-psychic', 'tr-misty');
+          }),
+        settingsRow('战斗演出', '濒死柔光闪屏、场景震动、落地尘雾',
+          () => CFG.fxShake, v => { CFG.fxShake = v; }),
+        settingsRow('出场动画', '投球→弹跳→爆开→实体化的出场演出',
+          () => CFG.entryAnim, v => { CFG.entryAnim = v; }),
+      ]));
+      /* ---- 📋 信息显示 ---- */
+      box.appendChild(settingsGroup('📋 信息显示', [
+        settingsRow('敌方HP百分比', '在敌方信息卡上显示HP百分比',
+          () => CFG.enemyHpPct, v => { CFG.enemyHpPct = v; }),
+        settingsRow('敌方特性显示', '在敌方信息卡上显示特性名称',
+          () => CFG.enemyAbility, v => { CFG.enemyAbility = v; }),
+        settingsRow('敌方道具显示', '在敌方信息卡上显示持有道具名称',
+          () => CFG.enemyItem, v => { CFG.enemyItem = v; }),
+      ]));
       box.insertAdjacentHTML('beforeend', '<div style="font-size:11px;color:#888;padding:10px 4px 2px">设置自动保存。关闭天气/场地特效后，场景顶部的天气/场地文字指示仍会保留，仅移除画面氛围层。</div>');
       const about = el('button', 'btn blue', '📖 关于作者'); about.style.cssText = 'width:100%;margin-top:12px';
       about.onclick = () => { AU.ok(); close(); openAbout(); };
@@ -16268,12 +16344,12 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
   <div style="font-weight:900;font-size:15px;margin-bottom:6px">✍ 作者</div>
   <div style="font-size:14px;color:#555;line-height:1.8;margin-bottom:14px">
     <!-- 作者名 -->
-    （作者名）
+    b站@皮皮灭
   </div>
   <div style="font-weight:900;font-size:15px;margin-bottom:6px">💬 作者的话</div>
   <div style="font-size:13px;color:#666;line-height:1.9;margin-bottom:14px;font-style:italic">
     <!-- 作者的话 -->
-    （作者的话）
+    主要内容是对战工厂捏，剧情模式制作较浅。
   </div>
   <div style="font-weight:900;font-size:15px;margin-bottom:6px">🔗 项目地址</div>
   <div style="font-size:13px;margin-bottom:6px">
