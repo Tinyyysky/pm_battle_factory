@@ -657,7 +657,8 @@
     .bcloud {
       position: absolute;
       background: rgba(255, 255, 255, .85);
-      border-radius: 30px
+      border-radius: 30px;
+      transition: background .8s
     }
 
     .bcloud::before {
@@ -668,7 +669,8 @@
       width: 55%;
       height: 150%;
       left: 15%;
-      top: -60%
+      top: -60%;
+      transition: background .8s
     }
 
     .bc1 {
@@ -713,21 +715,35 @@
       transition: opacity .8s
     }
 
-    /* --- 天空底色随天气切换 --- */
-    #bscene.wx-sun {
-      background: linear-gradient(180deg, #5ec0ff 0%, #cdefff 42%, #b8e0a0 43%, #7cc47f 68%, #57a866 100%)
+    /* --- 天空底色随天气切换（渐变淡入淡出：伪元素覆盖层） --- */
+    #bscene::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .8s
     }
 
-    #bscene.wx-rain {
-      background: linear-gradient(180deg, #37466b 0%, #66799e 42%, #6f9a7c 43%, #4a7a5e 68%, #335c47 100%)
+    #bscene.wx-sun::before {
+      background: linear-gradient(180deg, #5ec0ff 0%, #cdefff 42%, #b8e0a0 43%, #7cc47f 68%, #57a866 100%);
+      opacity: 1
     }
 
-    #bscene.wx-sand {
-      background: linear-gradient(180deg, #c09552 0%, #e0c088 42%, #b8a070 43%, #8f7a50 68%, #6a5838 100%)
+    #bscene.wx-rain::before {
+      background: linear-gradient(180deg, #37466b 0%, #66799e 42%, #6f9a7c 43%, #4a7a5e 68%, #335c47 100%);
+      opacity: 1
     }
 
-    #bscene.wx-hail {
-      background: linear-gradient(180deg, #93aecf 0%, #dceaf8 42%, #c4d6cd 43%, #96aca4 68%, #74908b 100%)
+    #bscene.wx-sand::before {
+      background: linear-gradient(180deg, #c09552 0%, #e0c088 42%, #b8a070 43%, #8f7a50 68%, #6a5838 100%);
+      opacity: 1
+    }
+
+    #bscene.wx-hail::before {
+      background: linear-gradient(180deg, #93aecf 0%, #dceaf8 42%, #c4d6cd 43%, #96aca4 68%, #74908b 100%);
+      opacity: 1
     }
 
     /* --- 太阳状态 --- */
@@ -845,8 +861,9 @@
     }
 
     /* --- 德尔塔气流：灰绿神秘湍流天空 --- */
-    #bscene.wx-delta {
-      background: linear-gradient(180deg, #24403f 0%, #4a6e64 42%, #6e8f7d 43%, #4a6856 68%, #31493d 100%)
+    #bscene.wx-delta::before {
+      background: linear-gradient(180deg, #24403f 0%, #4a6e64 42%, #6e8f7d 43%, #4a6856 68%, #31493d 100%);
+      opacity: 1
     }
 
     /* 太阳被湍流遮蔽：昏暗+模糊+去色 */
@@ -1038,11 +1055,11 @@
       z-index: 9;
       pointer-events: none;
       opacity: 0;
-      background: radial-gradient(circle at 50% 45%, #fff 0%, rgba(255, 90, 90, .85) 45%, rgba(255, 30, 30, .35) 100%)
+      background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, .85) 0%, rgba(255, 170, 170, .4) 45%, rgba(255, 130, 130, .16) 100%)
     }
 
     #koFlash.on {
-      animation: koFlashA .5s ease-out
+      animation: koFlashA .45s ease-out
     }
 
     @keyframes koFlashA {
@@ -1051,7 +1068,7 @@
       }
 
       14% {
-        opacity: .95
+        opacity: .42
       }
 
       100% {
@@ -1103,47 +1120,17 @@
       }
 
       10% {
-        filter: brightness(3.6)
+        filter: brightness(2)
       }
 
       22% {
-        filter: brightness(.55)
-      }
-
-      34% {
-        filter: brightness(2.8)
-      }
-
-      46% {
-        filter: brightness(1)
+        filter: brightness(.9)
       }
 
       100% {
         transform: translateY(115px) rotate(560deg);
         opacity: 0;
-        filter: brightness(.75)
-      }
-    }
-
-    .kostar {
-      position: absolute;
-      color: #ffd93b;
-      font-size: 20px;
-      z-index: 9;
-      pointer-events: none;
-      text-shadow: 0 0 8px #fff, 0 0 3px #b8860b;
-      animation: starBurst 1s ease-out forwards
-    }
-
-    @keyframes starBurst {
-      0% {
-        transform: translate(0, 0) scale(.3) rotate(0);
-        opacity: 1
-      }
-
-      100% {
-        transform: translate(var(--dx, 24px), -64px) scale(1.35) rotate(200deg);
-        opacity: 0
+        filter: brightness(.8)
       }
     }
 
@@ -1970,6 +1957,945 @@
         transform: translateY(-46px) scale(1.4);
         opacity: 0
       }
+    }
+
+    /* ============ 华丽特效库（FX引擎） ============ */
+    .fxp {
+      position: absolute;
+      z-index: 8;
+      pointer-events: none;
+      line-height: 1;
+      text-shadow: 0 0 8px currentColor, 0 0 2px #fff;
+      animation-fill-mode: forwards
+    }
+
+    /* ---- 冲击环 ---- */
+    .fxRing {
+      position: absolute;
+      z-index: 8;
+      width: 80px;
+      height: 80px;
+      border: 5px solid #fff;
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 24px currentColor, inset 0 0 16px currentColor, 0 0 52px -6px currentColor;
+      animation: fxRingB .55s ease-out forwards
+    }
+
+    @keyframes fxRingB {
+      0% {
+        transform: scale(.25);
+        opacity: 1
+      }
+
+      100% {
+        transform: scale(2.6);
+        opacity: 0
+      }
+    }
+
+    .fxRingBig {
+      width: 140px;
+      height: 140px;
+      border-width: 7px;
+      animation: fxRingBigB .65s ease-out forwards
+    }
+
+    @keyframes fxRingBigB {
+      0% {
+        transform: scale(.2);
+        opacity: 1
+      }
+
+      100% {
+        transform: scale(3.6);
+        opacity: 0
+      }
+    }
+
+    /* ---- 投射物（核心+外壳） ---- */
+    .fxProj {
+      position: absolute;
+      z-index: 9;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px currentColor);
+      animation: fxProj .3s ease-in forwards
+    }
+
+    @keyframes fxProj {
+      0% {
+        transform: translate(0, 0) scale(.5);
+        opacity: 1
+      }
+
+      70% {
+        opacity: 1
+      }
+
+      100% {
+        transform: translate(var(--dx), var(--dy)) scale(1.25);
+        opacity: 0
+      }
+    }
+
+    .fxProj.core {
+      width: 9px;
+      height: 9px;
+      margin: 6.5px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff 20%, transparent 70%);
+      filter: none;
+      box-shadow: 0 0 6px #fff
+    }
+
+    .fxProj.bolt {
+      width: 30px;
+      height: 8px;
+      border-radius: 4px;
+      animation: fxProjB .26s ease-in forwards
+    }
+
+    @keyframes fxProjB {
+      0% {
+        transform: translate(0, 0) scaleX(.4);
+        opacity: 1
+      }
+
+      100% {
+        transform: translate(var(--dx), var(--dy)) scaleX(1.4);
+        opacity: 0
+      }
+    }
+
+    /* ---- 光束/能量线 ---- */
+    .fxBeam {
+      position: absolute;
+      z-index: 8;
+      height: 8px;
+      border-radius: 6px;
+      transform-origin: left center;
+      pointer-events: none;
+      filter: drop-shadow(0 0 10px currentColor);
+      animation: fxBeamA .34s ease-out forwards
+    }
+
+    @keyframes fxBeamA {
+      0% {
+        opacity: 0;
+        transform: rotate(var(--rot)) scaleX(.15)
+      }
+
+      18% {
+        opacity: 1
+      }
+
+      70% {
+        opacity: .9
+      }
+
+      100% {
+        opacity: 0;
+        transform: rotate(var(--rot)) scaleX(1)
+      }
+    }
+
+    /* ---- 刀光 ---- */
+    .fxArc {
+      position: absolute;
+      z-index: 8;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      pointer-events: none;
+      border: 6px solid transparent;
+      border-top-color: currentColor;
+      border-left-color: currentColor;
+      filter: drop-shadow(0 0 8px currentColor);
+      animation: fxArcA .34s ease-out forwards
+    }
+
+    @keyframes fxArcA {
+      0% {
+        transform: rotate(0) scale(.4);
+        opacity: 1
+      }
+
+      100% {
+        transform: rotate(120deg) scale(1.35);
+        opacity: 0
+      }
+    }
+
+    /* ---- 上升光带 / 音波环 ---- */
+    .fxWave {
+      position: absolute;
+      z-index: 8;
+      width: 120px;
+      height: 60px;
+      border-radius: 50%;
+      pointer-events: none;
+      border: 4px solid currentColor;
+      border-left-color: transparent;
+      border-right-color: transparent;
+      filter: drop-shadow(0 0 8px currentColor);
+      animation: fxWaveA .5s ease-out forwards
+    }
+
+    @keyframes fxWaveA {
+      0% {
+        transform: scale(.3);
+        opacity: 1
+      }
+
+      100% {
+        transform: scale(1.5);
+        opacity: 0
+      }
+    }
+
+    .fxGust {
+      position: absolute;
+      z-index: 8;
+      width: 130px;
+      height: 7px;
+      border-radius: 5px;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, currentColor, transparent);
+      filter: blur(1px);
+      animation: fxGustA .5s ease-out forwards
+    }
+
+    @keyframes fxGustA {
+      0% {
+        transform: translateX(0) scaleX(.3);
+        opacity: 1
+      }
+
+      100% {
+        transform: translateX(var(--dx)) scaleX(1.4);
+        opacity: 0
+      }
+    }
+
+    /* ---- 全屏闪光（低频：单次淡出） ---- */
+    .fxFlash {
+      position: absolute;
+      inset: 0;
+      z-index: 12;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(255, 255, 255, var(--fo)), rgba(255, 255, 255, calc(var(--fo) * .45)) 55%, transparent 80%);
+      animation: fxFlashA .45s ease-out forwards
+    }
+
+    @keyframes fxFlashA {
+      0% {
+        opacity: 1
+      }
+
+      100% {
+        opacity: 0
+      }
+    }
+
+    /* ---- 场景震动（低频：单次小幅） ---- */
+    .fxShk {
+      animation: fxShkA .34s ease-out
+    }
+
+    @keyframes fxShkA {
+      0%,
+      100% {
+        transform: translate(0, 0)
+      }
+
+      22% {
+        transform: translate(-4px, 2px)
+      }
+
+      48% {
+        transform: translate(3px, -2px)
+      }
+
+      72% {
+        transform: translate(-2px, 1px)
+      }
+    }
+
+    /* ---- 蓄力/能量柱 ---- */
+    .fxPillar {
+      position: absolute;
+      z-index: 7;
+      width: 150px;
+      pointer-events: none;
+      border-radius: 50% 50% 20px 20px;
+      filter: blur(2px);
+      animation: fxPillarA .55s ease-out forwards
+    }
+
+    @keyframes fxPillarA {
+      0% {
+        height: 14px;
+        opacity: 0;
+        transform: translateY(0)
+      }
+
+      30% {
+        opacity: .95
+      }
+
+      100% {
+        height: 300px;
+        opacity: 0;
+        transform: translateY(-300px)
+      }
+    }
+
+    .fxOrb {
+      position: absolute;
+      z-index: 9;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: drop-shadow(0 0 10px currentColor);
+      animation: fxOrbA .7s ease-out forwards
+    }
+
+    @keyframes fxOrbA {
+      0% {
+        transform: scale(.2);
+        opacity: 1
+      }
+
+      100% {
+        transform: scale(2.6);
+        opacity: 0
+      }
+    }
+
+    .fxShard {
+      position: absolute;
+      z-index: 8;
+      pointer-events: none;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      animation: fxShardA .6s ease-out forwards
+    }
+
+    @keyframes fxShardA {
+      0% {
+        transform: translate(0, 0) rotate(0);
+        opacity: 1
+      }
+
+      100% {
+        transform: translate(var(--dx), var(--dy)) rotate(var(--rot));
+        opacity: 0
+      }
+    }
+
+    .fxPrism {
+      position: absolute;
+      z-index: 9;
+      width: 46px;
+      height: 46px;
+      pointer-events: none;
+      background: conic-gradient(from 0deg, #ff6b6b, #ffd93b, #51cf66, #339af0, #845ef7, #ff6b6b);
+      clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+      filter: drop-shadow(0 0 12px rgba(255, 255, 255, .8));
+      animation: fxPrismA .55s ease-out forwards
+    }
+
+    @keyframes fxPrismA {
+      0% {
+        transform: scale(.2) rotate(0);
+        opacity: 1
+      }
+
+      100% {
+        transform: scale(2.4) rotate(60deg);
+        opacity: 0
+      }
+    }
+
+    /* ============ 异常状态持续浮层（低频呼吸式） ============ */
+    .stfx {
+      position: absolute;
+      z-index: 6;
+      pointer-events: none;
+      overflow: visible
+    }
+
+    #estfx {
+      top: 96px;
+      right: 90px;
+      width: 230px;
+      height: 240px
+    }
+
+    #pstfx {
+      bottom: 96px;
+      left: 60px;
+      width: 250px;
+      height: 250px
+    }
+
+    .stfx .flame {
+      position: absolute;
+      bottom: 0;
+      width: 26px;
+      height: 40px;
+      border-radius: 50% 50% 46% 46%;
+      background: radial-gradient(circle at 50% 78%, #ffdf6b 0%, #ff8a2f 48%, rgba(255, 60, 20, .35) 78%);
+      filter: blur(1.5px);
+      animation: stFlame 1.6s ease-in-out infinite alternate
+    }
+
+    @keyframes stFlame {
+      0% {
+        transform: scaleY(.85) rotate(-4deg);
+        opacity: .6
+      }
+
+      100% {
+        transform: scaleY(1.2) rotate(4deg);
+        opacity: .95
+      }
+    }
+
+    .stfx .spark {
+      position: absolute;
+      color: #ffe14a;
+      font-size: 20px;
+      text-shadow: 0 0 8px #ffe14a, 0 0 2px #fff;
+      animation: stSpark 1.1s ease-in-out infinite alternate
+    }
+
+    @keyframes stSpark {
+      0% {
+        opacity: .45;
+        transform: scale(.8)
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1.25)
+      }
+    }
+
+    .stfx .bub {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at 34% 30%, #e9b4ff, #a33ea1);
+      filter: blur(.6px);
+      animation: stBub 1.8s ease-in infinite
+    }
+
+    @keyframes stBub {
+      0% {
+        transform: translateY(0) scale(.7);
+        opacity: 0
+      }
+
+      30% {
+        opacity: .9
+      }
+
+      100% {
+        transform: translateY(-64px) scale(1.1);
+        opacity: 0
+      }
+    }
+
+    .stfx .zzz {
+      position: absolute;
+      color: #fff;
+      font-weight: 900;
+      font-size: 22px;
+      font-family: 'Press Start 2P';
+      text-shadow: 0 0 8px #9fe8f5, 0 0 2px #000;
+      animation: stZzz 2.4s ease-out infinite
+    }
+
+    @keyframes stZzz {
+      0% {
+        transform: translateY(0) scale(.5);
+        opacity: 0
+      }
+
+      22% {
+        opacity: 1
+      }
+
+      100% {
+        transform: translateY(-58px) scale(1.4);
+        opacity: 0
+      }
+    }
+
+    .stfx .iceb {
+      position: absolute;
+      width: 8px;
+      height: 16px;
+      background: linear-gradient(180deg, #d8f6ff, #63c5c2);
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      filter: drop-shadow(0 0 4px #9fe8f5);
+      animation: stIce .9s ease-in infinite
+    }
+
+    @keyframes stIce {
+      0% {
+        transform: translateY(-10px) rotate(0);
+        opacity: 0
+      }
+
+      40% {
+        opacity: 1
+      }
+
+      100% {
+        transform: translateY(60px) rotate(90deg);
+        opacity: 0
+      }
+    }
+
+    .stfx .confS {
+      position: absolute;
+      color: #ffd93b;
+      font-size: 24px;
+      text-shadow: 0 0 8px #ffd93b, 0 0 2px #fff;
+      animation: stConf 2.2s linear infinite
+    }
+
+    @keyframes stConf {
+      0% {
+        transform: rotate(0) scale(.9);
+        opacity: .7
+      }
+
+      50% {
+        opacity: 1
+      }
+
+      100% {
+        transform: rotate(360deg) scale(1.05);
+        opacity: .7
+      }
+    }
+
+    .stfx .heart {
+      position: absolute;
+      color: #ff7ab8;
+      font-size: 22px;
+      text-shadow: 0 0 8px #ff7ab8, 0 0 2px #fff;
+      animation: stHeart 1.9s ease-out infinite
+    }
+
+    @keyframes stHeart {
+      0% {
+        transform: translateY(0) scale(.5);
+        opacity: 0
+      }
+
+      30% {
+        opacity: 1
+      }
+
+      100% {
+        transform: translateY(-44px) scale(1.25);
+        opacity: 0
+      }
+    }
+
+    .stfx .iceBlock {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      width: 176px;
+      height: 176px;
+      background: radial-gradient(circle at 38% 32%, rgba(200, 245, 255, .85), rgba(120, 200, 230, .55) 58%, rgba(60, 130, 170, .4));
+      clip-path: polygon(22% 4%, 78% 4%, 98% 42%, 78% 96%, 22% 96%, 2% 42%);
+      filter: blur(1px);
+      animation: stIceGlow 1.8s ease-in-out infinite alternate
+    }
+
+    @keyframes stIceGlow {
+      0% {
+        opacity: .72
+      }
+
+      100% {
+        opacity: .95
+      }
+    }
+
+    /* ============ 进化演出元素 ============ */
+    .fxMegaOrb {
+      position: absolute;
+      z-index: 9;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle, #fff 30%, var(--c) 60%, transparent 76%);
+      filter: drop-shadow(0 0 8px var(--c));
+      animation: fxMegaOrbA .5s ease-out forwards
+    }
+
+    @keyframes fxMegaOrbA {
+      0% {
+        transform: translate(0, 0) scale(.4);
+        opacity: 1
+      }
+
+      100% {
+        transform: translate(var(--dx), var(--dy)) scale(1.6);
+        opacity: 0
+      }
+    }
+
+    .fxDynaBolt {
+      position: absolute;
+      z-index: 9;
+      width: 10px;
+      pointer-events: none;
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(255, 80, 40, .95), rgba(255, 40, 90, .85));
+      filter: drop-shadow(0 0 10px rgba(255, 60, 60, .9));
+      animation: fxDynaBoltA .5s ease-out forwards
+    }
+
+    @keyframes fxDynaBoltA {
+      0% {
+        height: 0;
+        opacity: .9;
+        transform: translateY(0)
+      }
+
+      100% {
+        height: 240px;
+        opacity: 0;
+        transform: translateY(-240px)
+      }
+    }
+
+    .fxTeraChip {
+      position: absolute;
+      z-index: 9;
+      pointer-events: none;
+      background: linear-gradient(135deg, #fff, var(--c));
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+      filter: drop-shadow(0 0 6px var(--c));
+      animation: fxTeraChipA .55s ease-out forwards
+    }
+
+    @keyframes fxTeraChipA {
+      0% {
+        transform: translate(0, 0) scale(.5) rotate(0);
+        opacity: 1
+      }
+
+      100% {
+        transform: translate(var(--dx), var(--dy)) scale(1.3) rotate(90deg);
+        opacity: 0
+      }
+    }
+
+    /* ============ 华丽特效 2.0：大尺寸球体 / 天际闪电 / 加粗光束 ============ */
+    .fxOrbBig {
+      position: absolute;
+      z-index: 9;
+      pointer-events: none;
+      animation: fxOrbTravel .42s ease-in forwards
+    }
+
+    @keyframes fxOrbTravel {
+      0% {
+        transform: translate(0, 0) scale(.45);
+        opacity: 0
+      }
+
+      14% {
+        opacity: 1
+      }
+
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(1.2);
+        opacity: 0
+      }
+    }
+
+    .fxOrbAura {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: fxOrbPulse .28s ease-in-out infinite alternate
+    }
+
+    @keyframes fxOrbPulse {
+      0% {
+        transform: scale(.9)
+      }
+
+      100% {
+        transform: scale(1.12)
+      }
+    }
+
+    .fxOrbCore {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: fxOrbCorePulse .3s ease-in-out infinite alternate
+    }
+
+    @keyframes fxOrbCorePulse {
+      0% {
+        transform: scale(.94)
+      }
+
+      100% {
+        transform: scale(1.04)
+      }
+    }
+
+    .fxOrbRing {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      transform: translate(-50%, -50%);
+      animation: fxOrbRingA .4s linear infinite;
+      pointer-events: none
+    }
+
+    .fxOrbRing.r2 {
+      animation-direction: reverse;
+      animation-duration: .55s
+    }
+
+    @keyframes fxOrbRingA {
+      to {
+        transform: translate(-50%, -50%) rotate(360deg)
+      }
+    }
+
+    .fxTrail {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(2px);
+      animation: fxTrailA .5s ease-out forwards
+    }
+
+    @keyframes fxTrailA {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: .9
+      }
+
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(.4);
+        opacity: 0
+      }
+    }
+
+    .fxBoltSvg {
+      position: absolute;
+      z-index: 10;
+      pointer-events: none;
+      filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 0 22px currentColor);
+      animation: fxBoltFlicker .55s steps(1, end) forwards
+    }
+
+    @keyframes fxBoltFlicker {
+      0% {
+        opacity: 0;
+        transform: scale(.6)
+      }
+
+      8% {
+        opacity: 1
+      }
+
+      16% {
+        opacity: .2
+      }
+
+      24% {
+        opacity: 1
+      }
+
+      34% {
+        opacity: .3
+      }
+
+      44% {
+        opacity: 1
+      }
+
+      58% {
+        opacity: .9
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.15)
+      }
+    }
+
+    .fxRingBig2 {
+      position: absolute;
+      z-index: 8;
+      width: 130px;
+      height: 130px;
+      border: 8px solid #fff;
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 30px currentColor, inset 0 0 20px currentColor, 0 0 64px -10px currentColor;
+      animation: fxRingBigB2 .6s ease-out forwards
+    }
+
+    @keyframes fxRingBigB2 {
+      0% {
+        transform: scale(.2);
+        opacity: 1
+      }
+
+      100% {
+        transform: scale(2.2);
+        opacity: 0
+      }
+    }
+
+    .fxStarBurst {
+      position: absolute;
+      z-index: 8;
+      pointer-events: none;
+      width: 26px;
+      height: 26px;
+      clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      animation: fxStarBurstA .6s ease-out forwards
+    }
+
+    @keyframes fxStarBurstA {
+      0% {
+        transform: translate(0, 0) scale(.5) rotate(0);
+        opacity: 1
+      }
+
+      100% {
+        transform: translate(var(--dx), var(--dy)) scale(1.4) rotate(120deg);
+        opacity: 0
+      }
+    }
+
+    .fxBeam2 {
+      position: absolute;
+      z-index: 9;
+      height: 18px;
+      border-radius: 12px;
+      transform-origin: left center;
+      pointer-events: none;
+      filter: drop-shadow(0 0 14px currentColor);
+      animation: fxBeam2A .4s ease-out forwards
+    }
+
+    .fxBeam2 .core {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      height: 6px;
+      width: 100%;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, transparent, #fff 30%, #fff 70%, transparent);
+      border-radius: 6px
+    }
+
+    @keyframes fxBeam2A {
+      0% {
+        opacity: 0;
+        transform: rotate(var(--rot)) scaleX(.12)
+      }
+
+      15% {
+        opacity: 1
+      }
+
+      65% {
+        opacity: .95
+      }
+
+      100% {
+        opacity: 0;
+        transform: rotate(var(--rot)) scaleX(1)
+      }
+    }
+
+    /* ---- 极巨专属元素：横向龙卷风 / 巨型拳影 / 放大刀弧 ---- */
+    .fxCone {
+      position: absolute;
+      z-index: 8;
+      pointer-events: none;
+      transform-origin: left center;
+      filter: drop-shadow(0 0 10px currentColor);
+      animation: fxConeA .5s ease-out forwards
+    }
+
+    @keyframes fxConeA {
+      0% {
+        opacity: 0;
+        transform: rotate(var(--rot)) scaleX(.12)
+      }
+
+      20% {
+        opacity: 1
+      }
+
+      100% {
+        opacity: 0;
+        transform: rotate(var(--rot)) scaleX(1)
+      }
+    }
+
+    .fxFist {
+      position: absolute;
+      z-index: 9;
+      pointer-events: none;
+      filter: drop-shadow(0 0 18px currentColor);
+      animation: fxFistA .4s ease-out forwards
+    }
+
+    @keyframes fxFistA {
+      0% {
+        transform: translate(0, 0) scale(.35);
+        opacity: 0
+      }
+
+      20% {
+        opacity: 1
+      }
+
+      60% {
+        transform: translate(var(--dx), var(--dy)) scale(.95);
+        opacity: 1
+      }
+
+      100% {
+        transform: translate(var(--dx), var(--dy)) scale(1.1);
+        opacity: 0
+      }
+    }
+
+    .fxArc.big {
+      width: 150px;
+      height: 150px;
+      border-width: 9px
     }
 
     .dmgpop {
@@ -4440,6 +5366,8 @@
         <div id="pmegaAura" class="megaAura"></div>
         <div class="icard" id="ecard"></div>
         <div class="icard" id="pcard"></div>
+        <div id="estfx" class="stfx"></div>
+        <div id="pstfx" class="stfx"></div>
         <div id="fxlayer" style="position:absolute;inset:0;pointer-events:none;z-index:8"></div>
         <div id="abilityBanner" class="hidden"><img id="abBannerImg" src=""><span id="abBannerName"></span></div>
       </div>
@@ -4521,11 +5449,18 @@
        1. 音频（全部 Web Audio 实时合成）
     ============================================================ */
     const AU = {
-      ctx: null, master: null, mus: null, muted: false, musOn: true, cur: null, timers: [],
+      ctx: null, master: null, sfx: null, mus: null, muted: false, musOn: true, cur: null, timers: [],
       init() {
         if (this.ctx) return; const C = window.AudioContext || window.webkitAudioContext; this.ctx = new C();
         this.master = this.ctx.createGain(); this.master.gain.value = .5; this.master.connect(this.ctx.destination);
+        this.sfx = this.ctx.createGain(); this.sfx.gain.value = 1; this.sfx.connect(this.master);
         this.mus = this.ctx.createGain(); this.mus.gain.value = .22; this.mus.connect(this.master);
+        this.setVol();
+      },
+      /* ★ 应用用户音量设置（音效/背景音乐分开） */
+      setVol() {
+        if (this.sfx) this.sfx.gain.value = CFG.sfxVol ?? 1;
+        if (this.mus) this.mus.gain.value = (CFG.musVol ?? 1) * .22;
       },
       t() { return this.ctx.currentTime; },
       env(g, t0, a, d, v) { g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v, t0 + a); g.gain.exponentialRampToValueAtTime(.0001, t0 + a + d); },
@@ -4533,7 +5468,7 @@
         if (this.muted || !this.ctx) return;
         const t0 = this.t() + when, o = this.ctx.createOscillator(), g = this.ctx.createGain();
         o.type = type; o.frequency.setValueAtTime(f, t0); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, f + slide), t0 + dur);
-        this.env(g, t0, .005, dur, v); o.connect(g); g.connect(dest || this.master); o.start(t0); o.stop(t0 + dur + .05);
+        this.env(g, t0, .005, dur, v); o.connect(g); g.connect(dest || this.sfx); o.start(t0); o.stop(t0 + dur + .05);
       },
       noise(dur, v = .2, when = 0, fc = 1200) {
         if (this.muted || !this.ctx) return;
@@ -4541,7 +5476,7 @@
         for (let i = 0; i < len; i++)d[i] = Math.random() * 2 - 1;
         const s = this.ctx.createBufferSource(), f = this.ctx.createBiquadFilter(), g = this.ctx.createGain();
         s.buffer = buf; f.type = 'lowpass'; f.frequency.value = fc; this.env(g, t0, .005, dur, v);
-        s.connect(f); f.connect(g); g.connect(this.master); s.start(t0);
+        s.connect(f); f.connect(g); g.connect(this.sfx); s.start(t0);
       },
       blip() { this.tone(1400, .03, 'square', .05); },
       cursor() { this.tone(900, .05, 'square', .12); },
@@ -4574,53 +5509,259 @@
         };
         let t = 0; (V[kind] || V.win).forEach(([f, d]) => { if (f) this.tone(f, d * .16, 'square', .16, t); if (f) this.tone(f / 2, d * .16, 'triangle', .14, t); t += d * .16; });
       },
-      /* --- 简易音序器 BGM --- */
+      /* --- 多段落音序器 BGM：A-B-C 分段轮换，告别单句死循环 --- */
       seq: null,
       playMusic(name) {
         if (!this.ctx || this.muted || !this.musOn) return; this.stopMusic();
-        const P = MUSIC[name]; if (!P) return; this.cur = name; let step = 0;
+        const P = MUSIC[name]; if (!P) return; this.cur = name;
+        const secs = P.secs || [{ bars: P.bars || 2, trks: P.trks || [] }];
+        const spb = 60 / P.bpm / 2;
+        const secLoops = P.secLoops || 2;
+        let secIdx = 0, step = 0, loops = 0;
         const tick = () => {
           if (this.cur !== name) return;
-          const spb = 60 / P.bpm / 2;
-          for (const trk of P.trks) {
+          const sec = secs[secIdx];
+          const len = (sec.bars || 2) * 8;
+          for (const trk of sec.trks) {
             const n = trk.notes[step % trk.notes.length];
             if (n && n[0]) this.tone(n[0], spb * (n[1] || 1) * .9, trk.w || 'square', trk.v || .1, 0, 0, this.mus);
           }
-          step++; this.timers.push(setTimeout(tick, spb * 1000));
+          step++;
+          if (step >= len) {
+            step = 0;
+            if (++loops >= secLoops) { loops = 0; secIdx = (secIdx + 1) % secs.length; }
+          }
+          this.timers.push(setTimeout(tick, spb * 1000));
         };
         tick();
       },
       stopMusic() { this.cur = null; this.timers.forEach(clearTimeout); this.timers = []; }
     };
-    const N = { C3: 131, D3: 147, E3: 165, F3: 175, G3: 196, A3: 220, B3: 247, C4: 262, D4: 294, E4: 330, F4: 349, G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988, C6: 1046 };
+    const N = { C2: 65, D2: 73, E2: 82, F2: 87, G2: 98, A2: 110, B2: 123, C3: 131, D3: 147, E3: 165, F3: 175, G3: 196, A3: 220, B3: 247, C4: 262, D4: 294, E4: 330, F4: 349, G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988, C6: 1046 };
     /* ★ 全局画面/声音设置（localStorage 持久化） */
-    const CFG = Object.assign({ muted: false, music: true, weatherFx: true, fxShake: true, entryAnim: true }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
+    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1 }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
     function saveCfg() { localStorage.setItem('pif_cfg', JSON.stringify(CFG)); }
+    /* ============================================================
+       多段落 BGM 曲库（secs 分段轮换，每段内部循环 secLoops 次）
+       风格：对战工厂放克风 · 无限战斗高强度电子
+    ============================================================ */
     const MUSIC = {
       title: {
-        bpm: 132, trks: [
-          { w: 'square', v: .12, notes: [[N.E5, 1], [N.G5, 1], [N.A5, 1], [N.G5, 1], [N.E5, 1], [N.D5, 1], [N.C5, 2], [N.D5, 1], [N.E5, 1], [N.G5, 1], [N.E5, 1], [N.D5, 2], [0, 1], [N.C5, 1], [N.D5, 1], [N.E5, 1], [N.A5, 2], [N.G5, 1], [N.E5, 1], [N.D5, 1], [N.C5, 3]] },
-          { w: 'triangle', v: .2, notes: [[N.C3, 2], [N.G3, 2], [N.A3, 2], [N.E3, 2], [N.F3, 2], [N.C3, 2], [N.G3, 2], [N.C3, 2], [N.A3, 2], [N.E3, 2], [N.F3, 2], [N.G3, 2], [N.C3, 2], [N.G3, 2]] }
+        bpm: 132, secLoops: 2, secs: [
+          { bars: 4, trks: [
+            { w: 'square', v: .1, notes: [
+              [N.E5, 1], [0, 1], [N.G5, 1], [0, 1], [N.A5, 1], [0, 1], [N.G5, 1], [N.E5, 1],
+              [N.D5, 1], [0, 1], [N.E5, 1], [0, 1], [N.C5, 2], [0, 2], [N.D5, 1], [N.E5, 1],
+              [N.G5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1], [N.C5, 2], [0, 1],
+              [N.A5, 2], [N.G5, 1], [N.E5, 1], [N.D5, 1], [N.C5, 2], [0, 1], [0, 1], [0, 1]] },
+            { w: 'triangle', v: .18, notes: [
+              [N.C3, 2], [0, 1], [N.C3, 1], [N.G3, 2], [0, 1], [N.A3, 2], [0, 2], [N.E3, 2],
+              [N.F3, 2], [0, 2], [N.C3, 2], [0, 1], [N.G3, 2], [0, 2], [N.C3, 2], [0, 2],
+              [N.A3, 2], [0, 2], [N.E3, 2], [0, 1], [N.F3, 2], [0, 2], [N.G3, 2], [0, 1],
+              [N.C3, 2], [0, 2], [N.G3, 2], [0, 1], [N.C3, 2], [0, 2], [0, 1], [0, 1]] }
+          ] },
+          { bars: 4, trks: [
+            { w: 'square', v: .1, notes: [
+              [N.A5, 1], [0, 1], [N.G5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [N.C5, 1],
+              [N.D5, 1], [0, 1], [N.E5, 1], [0, 1], [N.G5, 2], [N.E5, 1], [N.D5, 1], [N.C5, 1],
+              [N.E5, 1], [0, 1], [N.G5, 1], [0, 1], [N.A5, 2], [0, 1], [N.G5, 1], [N.E5, 1],
+              [N.D5, 1], [0, 1], [N.C5, 1], [0, 1], [N.D5, 2], [0, 2], [0, 1], [0, 1]] },
+            { w: 'triangle', v: .18, notes: [
+              [N.C3, 2], [0, 1], [N.C3, 1], [N.G3, 2], [0, 2], [N.E3, 2], [0, 1], [N.G3, 2],
+              [N.F3, 2], [0, 1], [N.F3, 1], [N.C3, 2], [0, 2], [N.G3, 2], [0, 1], [N.B3, 2],
+              [N.C3, 2], [0, 2], [N.G3, 2], [0, 1], [N.A3, 2], [0, 2], [N.E3, 2], [0, 1],
+              [N.F3, 2], [0, 2], [N.C3, 2], [0, 1], [N.G3, 2], [0, 2], [0, 1], [0, 1]] }
+          ] }
         ]
       },
       battle: {
-        bpm: 150, trks: [
-          { w: 'square', v: .1, notes: [[N.A4, 1], [N.C5, 1], [N.E5, 1], [N.A5, 1], [N.G5, 1], [N.E5, 1], [N.C5, 1], [N.E5, 1], [N.G4, 1], [N.B4, 1], [N.D5, 1], [N.G5, 1], [N.F5, 1], [N.D5, 1], [N.B4, 1], [N.D5, 1], [N.A4, 1], [N.C5, 1], [N.E5, 1], [N.A5, 1], [N.G5, 2], [N.E5, 1], [N.D5, 1], [N.C5, 2], [0, 2]] },
-          { w: 'sawtooth', v: .08, notes: [[N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [0, 1], [N.F3, 1], [0, 1], [N.F3, 1], [0, 1], [N.E3, 1], [0, 1], [N.G3, 1], [N.B3, 1]] },
-          { w: 'triangle', v: .2, notes: [[N.A3, 2], [N.E3, 2], [N.G3, 2], [N.D3, 2], [N.F3, 2], [N.C3, 2], [N.E3, 2], [N.A3, 2]] }
+        bpm: 146, secLoops: 2, secs: [
+          { bars: 4, trks: [
+            { w: 'square', v: .13, notes: [
+              [N.A3, 1], [0, 1], [0, 1], [N.A3, 1], [N.A3, 1], [0, 1], [0, 1], [N.C4, 1],
+              [0, 1], [N.A3, 1], [0, 1], [0, 1], [N.A3, 1], [0, 1], [N.C4, 1], [N.B3, 1],
+              [0, 1], [N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [N.A3, 1], [N.C4, 1], [0, 1],
+              [N.A3, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.G3, 1], [0, 1]] },
+            { w: 'square', v: .07, notes: [
+              [N.E5, 1], [0, 1], [0, 1], [0, 1], [N.A5, 1], [0, 1], [0, 1], [0, 1],
+              [N.G5, 1], [0, 1], [N.E5, 1], [0, 1], [N.C5, 1], [0, 1], [0, 1], [N.D5, 1],
+              [N.E5, 1], [0, 1], [0, 1], [0, 1], [N.D5, 1], [0, 1], [N.C5, 1], [0, 1],
+              [N.B4, 1], [0, 1], [N.A4, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
+            { w: 'triangle', v: .05, notes: [
+              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.F4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.C4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.E4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
+            { w: 'sawtooth', v: .025, notes: [
+              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1],
+              [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1],
+              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1],
+              [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1]] }
+          ] },
+          { bars: 4, trks: [
+            { w: 'square', v: .13, notes: [
+              [N.F3, 1], [0, 1], [0, 1], [N.F3, 1], [N.F3, 1], [0, 1], [0, 1], [N.G3, 1],
+              [0, 1], [N.F3, 1], [0, 1], [0, 1], [N.F3, 1], [0, 1], [N.G3, 1], [N.A3, 1],
+              [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [N.A3, 1], [0, 1],
+              [N.E3, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
+            { w: 'square', v: .07, notes: [
+              [N.C5, 1], [0, 1], [0, 1], [0, 1], [N.D5, 1], [0, 1], [0, 1], [0, 1],
+              [N.E5, 1], [0, 1], [0, 1], [0, 1], [N.G5, 1], [0, 1], [0, 1], [N.F5, 1],
+              [N.E5, 1], [0, 1], [N.D5, 1], [0, 1], [N.C5, 1], [0, 1], [0, 1], [0, 1],
+              [N.B4, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.A4, 1], [0, 1]] },
+            { w: 'triangle', v: .05, notes: [
+              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.F4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.G4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.E4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] }
+          ] },
+          { bars: 4, trks: [
+            { w: 'square', v: .13, notes: [
+              [N.A3, 1], [0, 1], [0, 1], [N.A3, 1], [N.A3, 1], [0, 1], [0, 1], [N.C4, 1],
+              [0, 1], [N.A3, 1], [0, 1], [0, 1], [N.D4, 1], [0, 1], [N.C4, 1], [N.B3, 1],
+              [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [N.B3, 1], [0, 1],
+              [N.A3, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.A3, 1]] },
+            { w: 'square', v: .07, notes: [
+              [N.E5, 1], [0, 1], [0, 1], [0, 1], [N.C5, 1], [0, 1], [N.D5, 1], [N.E5, 1],
+              [N.G5, 1], [0, 1], [0, 1], [0, 1], [N.E5, 1], [0, 1], [0, 1], [0, 1],
+              [N.F5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1], [0, 1], [0, 1],
+              [N.E5, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
+            { w: 'triangle', v: .05, notes: [
+              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.F4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.G4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
+            { w: 'sawtooth', v: .025, notes: [
+              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1],
+              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1],
+              [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1],
+              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1]] }
+          ] }
+        ]
+      },
+      /* ★ 激烈变奏：Mega / 极巨 / 太晶激活时切入 */
+      battleX: {
+        bpm: 152, secLoops: 3, secs: [
+          { bars: 4, trks: [
+            { w: 'square', v: .14, notes: [
+              [N.A3, 1], [N.A3, 1], [0, 1], [N.A3, 1], [N.A3, 1], [0, 1], [N.A3, 1], [N.C4, 1],
+              [0, 1], [N.A3, 1], [N.C4, 1], [0, 1], [N.A3, 1], [N.B3, 1], [N.C4, 1], [N.D4, 1],
+              [0, 1], [N.A3, 1], [0, 1], [N.A3, 1], [N.A3, 1], [0, 1], [N.C4, 1], [0, 1],
+              [N.A3, 1], [0, 1], [N.C4, 1], [0, 1], [0, 1], [0, 1], [N.G3, 1], [N.B3, 1]] },
+            { w: 'square', v: .08, notes: [
+              [N.E5, 1], [0, 1], [N.A5, 1], [0, 1], [N.G5, 1], [0, 1], [N.E5, 1], [N.D5, 1],
+              [N.E5, 1], [0, 1], [N.G5, 1], [0, 1], [N.A5, 1], [0, 1], [N.G5, 1], [N.E5, 1],
+              [N.D5, 1], [0, 1], [N.E5, 1], [0, 1], [N.F5, 1], [0, 1], [N.E5, 1], [N.D5, 1],
+              [N.C5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1], [N.B4, 1], [0, 1]] },
+            { w: 'sawtooth', v: .05, notes: [
+              [N.C5, 1], [0, 1], [0, 1], [N.C5, 1], [0, 1], [N.C5, 1], [0, 1], [N.E5, 1],
+              [0, 1], [N.C5, 1], [0, 1], [N.C5, 1], [0, 1], [N.E5, 1], [0, 1], [N.F5, 1],
+              [0, 1], [N.C5, 1], [0, 1], [N.C5, 1], [0, 1], [N.E5, 1], [0, 1], [N.C5, 1],
+              [0, 1], [N.B4, 1], [0, 1], [N.C5, 1], [0, 1], [N.D5, 1], [0, 1], [0, 1]] },
+            { w: 'triangle', v: .05, notes: [
+              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.F4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.C4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.E4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
+            { w: 'sawtooth', v: .03, notes: [
+              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1],
+              [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1],
+              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1],
+              [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [N.C6, 1]] }
+          ] },
+          { bars: 4, trks: [
+            { w: 'square', v: .14, notes: [
+              [N.F3, 1], [N.F3, 1], [0, 1], [N.F3, 1], [N.F3, 1], [0, 1], [N.F3, 1], [N.G3, 1],
+              [0, 1], [N.F3, 1], [0, 1], [N.F3, 1], [N.F3, 1], [0, 1], [N.G3, 1], [N.A3, 1],
+              [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [N.G3, 1], [0, 1], [N.A3, 1], [0, 1],
+              [N.E3, 1], [N.E3, 1], [0, 1], [N.E3, 1], [0, 1], [N.G3, 1], [0, 1], [0, 1]] },
+            { w: 'square', v: .08, notes: [
+              [N.C5, 1], [0, 1], [N.D5, 1], [0, 1], [N.E5, 1], [0, 1], [N.G5, 1], [0, 1],
+              [N.A5, 1], [0, 1], [N.G5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [N.C5, 1],
+              [N.E5, 1], [0, 1], [N.G5, 1], [0, 1], [N.F5, 1], [0, 1], [N.E5, 1], [N.D5, 1],
+              [N.C5, 1], [0, 1], [N.B4, 1], [0, 1], [N.A4, 1], [0, 1], [0, 1], [0, 1]] },
+            { w: 'triangle', v: .05, notes: [
+              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.F4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.G4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.E4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] }
+          ] }
         ]
       },
       factory: {
-        bpm: 118, trks: [
-          { w: 'triangle', v: .16, notes: [[N.D4, 1], [N.F4, 1], [N.A4, 1], [N.D5, 1], [N.C5, 1], [N.A4, 1], [N.F4, 1], [N.A4, 1], [N.E4, 1], [N.G4, 1], [N.B4, 1], [N.E5, 1], [N.D5, 1], [N.B4, 1], [N.G4, 1], [N.B4, 1]] },
-          { w: 'square', v: .07, notes: [[N.D5, 2], [0, 2], [N.C5, 2], [0, 2], [N.B4, 2], [0, 2], [N.A4, 2], [0, 2]] },
-          { w: 'triangle', v: .18, notes: [[N.D3, 2], [N.A3, 2], [N.E3, 2], [N.B3, 2], [N.F3, 2], [N.C3, 2], [N.G3, 2], [N.D3, 2]] }
+        bpm: 118, secLoops: 2, secs: [
+          { bars: 4, trks: [
+            { w: 'triangle', v: .15, notes: [
+              [N.D3, 1], [0, 1], [N.D3, 1], [0, 1], [N.D3, 1], [0, 1], [N.A3, 1], [0, 1],
+              [N.D3, 1], [0, 1], [N.D3, 1], [0, 1], [N.F3, 1], [0, 1], [N.E3, 1], [0, 1],
+              [N.G3, 1], [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [0, 1], [N.D3, 1], [0, 1],
+              [N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [0, 1], [0, 1]] },
+            { w: 'square', v: .07, notes: [
+              [N.D5, 1], [0, 1], [N.F5, 1], [0, 1], [N.A5, 1], [0, 1], [N.G5, 1], [N.F5, 1],
+              [N.D5, 1], [0, 1], [N.F5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1],
+              [N.G5, 1], [0, 1], [N.B4, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1],
+              [N.C5, 1], [0, 1], [N.E5, 1], [0, 1], [N.A5, 1], [0, 1], [0, 1], [0, 1]] },
+            { w: 'triangle', v: .06, notes: [
+              [N.D4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.B3, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.G3, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.A3, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] }
+          ] },
+          { bars: 4, trks: [
+            { w: 'triangle', v: .15, notes: [
+              [N.B2, 1], [0, 1], [N.B2, 1], [0, 1], [N.B2, 1], [0, 1], [N.F3, 1], [0, 1],
+              [N.B2, 1], [0, 1], [N.B2, 1], [0, 1], [N.G3, 1], [0, 1], [N.A3, 1], [0, 1],
+              [N.E3, 1], [0, 1], [N.E3, 1], [0, 1], [N.E3, 1], [0, 1], [N.B2, 1], [0, 1],
+              [N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [N.G3, 1], [N.F3, 1]] },
+            { w: 'square', v: .07, notes: [
+              [N.D5, 1], [0, 1], [N.B4, 1], [0, 1], [N.D5, 1], [0, 1], [N.F5, 1], [0, 1],
+              [N.G5, 1], [0, 1], [N.F5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1],
+              [N.C5, 1], [0, 1], [N.E5, 1], [0, 1], [N.G5, 1], [0, 1], [N.A5, 1], [0, 1],
+              [N.G5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [N.C5, 1], [N.B4, 1], [0, 1]] },
+            { w: 'triangle', v: .06, notes: [
+              [N.G4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.E4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.C4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
+              [N.D4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] }
+          ] }
         ]
       },
       story: {
-        bpm: 104, trks: [
-          { w: 'triangle', v: .15, notes: [[N.G4, 1], [N.B4, 1], [N.D5, 1], [N.G5, 2], [N.F5, 1], [N.D5, 1], [N.B4, 2], [N.A4, 1], [N.C5, 1], [N.E5, 1], [N.A5, 2], [N.G5, 1], [N.E5, 1], [N.C5, 2]] },
-          { w: 'square', v: .06, notes: [[N.G5, 2], [0, 2], [N.E5, 2], [0, 2], [N.F5, 2], [0, 2], [N.D5, 2], [0, 2]] }
+        bpm: 104, secLoops: 2, secs: [
+          { bars: 4, trks: [
+            { w: 'triangle', v: .15, notes: [
+              [N.G4, 1], [N.B4, 1], [N.D5, 1], [0, 1], [N.G5, 2], [N.F5, 1], [N.D5, 1], [N.B4, 1],
+              [N.A4, 1], [N.C5, 1], [N.E5, 1], [0, 1], [N.A5, 2], [N.G5, 1], [N.E5, 1], [N.C5, 1],
+              [N.D5, 1], [N.F5, 1], [N.A5, 1], [0, 1], [N.G5, 2], [N.E5, 1], [N.C5, 1], [0, 1],
+              [N.G4, 1], [N.B4, 1], [N.D5, 1], [N.G5, 1], [N.D5, 1], [N.B4, 1], [N.G4, 1], [0, 1]] },
+            { w: 'square', v: .06, notes: [
+              [0, 1], [0, 1], [0, 1], [N.G5, 1], [0, 2], [0, 1], [N.E5, 1], [0, 1],
+              [0, 1], [0, 1], [0, 1], [N.F5, 1], [0, 2], [0, 1], [N.D5, 1], [0, 1],
+              [0, 1], [0, 1], [0, 1], [N.A5, 1], [0, 2], [0, 1], [N.G5, 1], [0, 1],
+              [0, 1], [0, 1], [0, 1], [N.B4, 1], [0, 1], [0, 1], [N.D5, 1], [0, 1]] },
+            { w: 'triangle', v: .16, notes: [
+              [N.C3, 2], [0, 1], [N.C3, 1], [N.G3, 2], [0, 1], [N.A3, 2], [0, 2], [N.E3, 2],
+              [N.F3, 2], [0, 2], [N.C3, 2], [0, 1], [N.G3, 2], [0, 2], [N.C3, 2], [0, 2],
+              [N.A3, 2], [0, 2], [N.E3, 2], [0, 1], [N.F3, 2], [0, 2], [N.G3, 2], [0, 1],
+              [N.C3, 2], [0, 2], [N.G3, 2], [0, 1], [N.C3, 2], [0, 2], [0, 1], [0, 1]] }
+          ] },
+          { bars: 4, trks: [
+            { w: 'triangle', v: .15, notes: [
+              [N.G4, 1], [N.B4, 1], [N.D5, 1], [0, 1], [N.G5, 2], [N.F5, 1], [N.D5, 1], [N.B4, 1],
+              [N.A4, 1], [N.C5, 1], [N.E5, 1], [0, 1], [N.A5, 2], [N.G5, 1], [N.E5, 1], [N.C5, 1],
+              [N.B4, 1], [N.D5, 1], [N.F5, 1], [0, 1], [N.E5, 2], [N.D5, 1], [N.C5, 1], [N.B4, 1],
+              [N.G4, 1], [N.A4, 1], [N.B4, 1], [N.C5, 1], [N.D5, 1], [N.G4, 1], [N.G4, 1], [0, 1]] },
+            { w: 'square', v: .06, notes: [
+              [0, 1], [0, 1], [0, 1], [N.G5, 1], [0, 2], [0, 1], [N.E5, 1], [0, 1],
+              [0, 1], [0, 1], [0, 1], [N.F5, 1], [0, 2], [0, 1], [N.D5, 1], [0, 1],
+              [0, 1], [0, 1], [0, 1], [N.B4, 1], [0, 1], [0, 1], [N.D5, 1], [0, 1],
+              [0, 1], [0, 1], [0, 1], [N.G5, 1], [0, 2], [0, 1], [0, 1], [0, 1]] },
+            { w: 'triangle', v: .16, notes: [
+              [N.C3, 2], [0, 1], [N.C3, 1], [N.G3, 2], [0, 1], [N.A3, 2], [0, 2], [N.E3, 2],
+              [N.F3, 2], [0, 2], [N.C3, 2], [0, 1], [N.G3, 2], [0, 2], [N.C3, 2], [0, 2],
+              [N.A3, 2], [0, 2], [N.E3, 2], [0, 1], [N.F3, 2], [0, 2], [N.G3, 2], [0, 1],
+              [N.C3, 2], [0, 2], [N.G3, 2], [0, 1], [N.C3, 2], [0, 2], [0, 1], [0, 1]] }
+          ] }
         ]
       }
     };
@@ -5732,7 +6873,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(839, '巨炭山', 'rock/fire', '110/80/120/80/90/30', 'steamengine/flashfire', ['flamethrower', 'stoneedge', 'stealthrock', 'willowisp', 'earthpower', 'flashcannon']);
     S(862, '堵拦熊', 'dark/normal', '93/90/101/60/81/95', 'reckless/guts', ['doubleedge', 'knockoff', 'closecombat', 'firepunch', 'icepunch', 'suckerpunch']);
     /* 9代 */
-    S(920, '烈腿蝗', 'bug/fighting', '57/125/90/50/60/85', 'swarm/scrappy', ['xscissor', 'closecombat', 'stoneedge', 'swordsdance', 'knockoff', 'uturn']);
+    S(920, '烈腿蝗', 'bug/dark', '57/125/90/50/60/85', 'swarm/scrappy', ['xscissor', 'closecombat', 'stoneedge', 'swordsdance', 'knockoff', 'uturn']);
     S(973, '缠红鹤', 'fighting/flying', '82/115/75/75/65/90', 'scrappy/defiant', ['closecombat', 'bravebird', 'stoneedge', 'swordsdance', 'roost', 'uturn']);
 
     /* --- 新增100只宝可梦（第四批，优先最终进化型） --- */
@@ -5821,7 +6962,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     /* 7代 ×10 */
     S(735,'猫鼬探长','normal','88/110/60/55/60/45','intimidate/strongjaw',['facade','crunch','earthquake','suckerpunch','swordsdance','firefang']);
     S(752,'滴蛛霸','water/bug','68/70/92/50/132/42','waterabsorb/swiftswim',['liquidation','lunge','knockoff','swordsdance','aquajet','leechseed']);
-    S(754,'兰螳花','grass','70/105/90/80/90/45','leafguard/contrary',['leafblade','knockoff','swordsdance','synthesis','xscissor','poisonjab']);
+    S(754,'兰螳花','grass','70/105/90/80/90/45','leafguard/contrary',['leafblade','knockoff','swordsdance','synthesis','xscissor','poisonjab','superpower']);
     S(760,'穿着熊','normal/fighting','120/125/80/55/60/60','klutz/unnerve',['doubleedge','closecombat','knockoff','earthquake','swordsdance','drainpunch']);
     S(768,'具甲武者','bug/water','75/125/140/60/90/40','emergencyexit/emergencyexit',['liquidation','lunge','knockoff','swordsdance','aquajet','leechseed']);
     S(773,'银伴战兽','normal','95/95/95/95/95/59','rkssystem/rkssystem',['multiattack','doubleedge','crunch','swordsdance','uturn','flamethrower','icebeam']);
@@ -6473,7 +7614,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(902,'幽尾玄鱼','water/ghost','120/112/65/80/75/78','swiftswim/adaptability/moldbreaker',['waterfall','shadowclaw','crunch','aquajet','swordsdance','lastrespects']);
     S(903,'大狃拉','fighting/poison','80/130/60/40/80/120','pressure/unburden/pickpocket',['closecombat','poisonjab','knockoff','swordsdance','direclaw']);
     S(904,'万针鱼','dark/poison','65/115/95/65/65/85','poisonpoint/swiftswim/intimidate',['waterfall','poisonjab','swordsdance','aquajet','crunch']);
-    S(905,'眷恋云','fairy/flying','74/115/70/135/80/106','healer/contrary',['springtidestorm','moonblast','hurricane','earthpower','nastyplot','tailwind'],{leg:1});
+    S(905,'眷恋云','fairy/flying','74/115/70/135/80/106','healer/contrary',['springtidestorm','moonblast','hurricane','earthpower','nastyplot','tailwind','superpower'],{leg:1});
     S(947,'怖纳噬草','grass/ghost','55/115/70/80/70/90','windrider/infiltrator',['powerwhip','shadowclaw','knockoff','swordsdance','willowisp']);
     S(949,'陆地水母','ground/grass','40/40/35/50/100/70','myceliummight/myceliummight',['earthpower','gigadrain','energyball','stealthrock','toxic']);
     S(955,'超能艳鸵','psychic','95/60/60/101/60/105','opportunist/frisk/speedboost',['psychic','shadowball','calmmind','psyshock','dazzlinggleam']);
@@ -6555,7 +7696,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(10080,'雷电云(灵兽)','electric/flying','79/105/70/145/80/101','voltabsorb/voltabsorb',['wildboltstorm','thunderbolt','hurricane','focusblast','nastyplot','thunderwave','voltswitch','sludgewave'],{leg:1});
     S(10081,'土地云(灵兽)','ground/flying','89/145/90/105/80/91','intimidate/intimidate',['earthquake','stoneedge','uturn','stealthrock','swordsdance','knockoff','superpower'],{leg:1});
     /* --- 眷恋云灵兽形态 --- */
-    S(10418,'眷恋云(灵兽)','fairy/flying','74/115/70/135/80/106','contrary/contrary',['springtidestorm','moonblast','hurricane','earthpower','nastyplot','tailwind'],{leg:1});
+    S(10418,'眷恋云(灵兽)','fairy/flying','74/115/70/135/80/106','overcoatx/overcoatx',['springtidestorm','moonblast','hurricane','earthpower','nastyplot','tailwind'],{leg:1});
     /* --- 酋雷姆合体形态 --- */
     S(10082,'酋雷姆(暗黑)','dragon/ice','125/170/100/120/90/95','teravolt/teravolt',['outrage','icebeam','fusionbolt','earthpower','stoneedge','dragonclaw'],{leg:1});
     S(10083,'酋雷姆(焰白)','dragon/ice','125/120/90/170/100/95','turboblaze/turboblaze',['dracometeor','icebeam','fusionflare','earthpower','focusblast','dragonpulse'],{leg:1});
@@ -6579,7 +7720,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(10127,'南瓜怪人(大)','ghost/grass','75/95/122/58/75/69','pickup/frisk/insomnia',['shadowball','energyball','willowisp','leechseed','trickroom','seedbomb']);
     S(10128,'南瓜怪人(特大)','ghost/grass','85/100/122/58/75/54','pickup/frisk/insomnia',['shadowball','energyball','willowisp','leechseed','trickroom','seedbomb']);
     /* --- 花叶蒂永恒之花 --- */
-    S(10163,'花叶蒂(永恒之花)','fairy','74/65/67/125/128/92','levitate/levitate',['lightofruin','moonblast','psychic','shadowball','calmmind','dazzlinggleam','energyball'],{leg:1});
+    S(10163,'花叶蒂(永恒之花)','fairy','74/65/67/125/128/92','fairyaura/fairyaura',['lightofruin','moonblast','psychic','shadowball','calmmind','dazzlinggleam','energyball'],{leg:1});
     /* ============ 地区形态 ============ */
     /* 阿罗拉形态 (ID: 10000+原始ID) */
     S(10019,'小拉达(阿罗拉)','normal/dark','30/56/35/25/35/147','gluttony/hustle/thickfat',['facade','crunch','suckerpunch','uturn','quickattack'],{evo:1});
@@ -7384,7 +8525,7 @@ SP.forEach(s => {
         655: { f: 10518, t: 'fire/psychic', s: [75,69,72,159,125,134], a: 'levitate', stone: '妖火红狐石' },
         658: { f: 10519, t: 'water/dark', s: [72,125,77,133,81,142], a: 'protean', stone: '甲贺忍蛙石' },
         668: { f: 10520, t: 'fire/normal', s: [86,88,92,129,86,126], a: 'firemane', stone: '火炎狮石' },
-        670: { f: 10521, t: 'fairy', s: [74,85,87,155,148,102], a: 'fairyaura', stone: '花叶蒂石' },
+        10163: { f: 10521, t: 'fairy', s: [74,85,87,155,148,102], a: 'fairyaura', stone: '花叶蒂石' },
         687: { f: 10522, t: 'dark/psychic', s: [86,102,88,98,120,88], a: 'contrary', stone: '乌贼王石' },
         689: { f: 10523, t: 'rock/fighting', s: [72,140,130,64,106,88], a: 'toughclaws', stone: '龟足巨铠石' },
         691: { f: 10524, t: 'poison/dragon', s: [65,85,105,132,163,44], a: 'regenerator', stone: '毒藻龙石' },
@@ -7744,6 +8885,8 @@ return ev;
             if (w === 'sand' && ab === 'sandrush') v *= 2;
             if (b.terrain === 'electric' && ab === 'surgesurfer') v *= 2;
             if (w === 'hail' && ab === 'slushrush') v *= 2;
+            /* ★ 顺风：单方场地状态，存在时该方速度×2 */
+            if (b.tailwind && b.tailwind[b.sideOf(this)] > 0) v *= 2;
           }
           /* ★ 慢启动：出场后5回合内速度减半 */
           if (ab === 'slowstart' && (this.vol.slowStartTurns === undefined || this.vol.slowStartTurns < 5)) v *= .5;
@@ -7768,7 +8911,12 @@ return ev;
        5. 素材（PokéAPI 精灵图，多级回退）
     ============================================================ */
     // const SPRBASE='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
-    const SPRBASE = 'https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/';
+    /* ★ 多域名兜底：jsDelivr + GitHub raw + Showdown，任一源故障自动轮换 */
+    const SPRBASES = [
+      'https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/',
+      'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/',
+      'https://play.pokemonshowdown.com/sprites/'
+    ];
     function spriteURLs(id, back, noRegional) {
     /* 地区形态ID映射到PokeAPI精灵图路径 */
     const REGIONAL_SPRITE = {
@@ -7809,22 +8957,51 @@ return ev;
       Object.values(MEGA).flat().forEach(v => { if (v && v.f) megaIds.add(v.f); });
       if (megaIds.has(id)) { apiId = id; }
     }
-    if (back) return [
-    SPRBASE + 'other/showdown/back/' + apiId + '.gif',
-    SPRBASE + 'versions/generation-v/black-white/animated/back/' + apiId + '.gif',
-    SPRBASE + 'versions/generation-v/black-white/back/' + apiId + '.png',
-    SPRBASE + 'back/' + apiId + '.png'
-    ];
-    return [
-    SPRBASE + 'other/showdown/' + apiId + '.gif',
-    SPRBASE + 'versions/generation-v/black-white/animated/' + apiId + '.gif',
-    SPRBASE + apiId + '.png',
-    SPRBASE + 'other/official-artwork/' + apiId + '.png'
-    ];
+    const urls = [];
+    for (const base of SPRBASES) {
+      if (base.includes('pokemonshowdown')) {
+        urls.push(base + (back ? 'ani-back/' : 'ani/') + apiId + '.gif');
+        urls.push(base + (back ? 'gen5-back/' : 'gen5/') + apiId + '.png');
+      } else if (back) {
+        urls.push(base + 'other/showdown/back/' + apiId + '.gif');
+        urls.push(base + 'versions/generation-v/black-white/animated/back/' + apiId + '.gif');
+        urls.push(base + 'versions/generation-v/black-white/back/' + apiId + '.png');
+        urls.push(base + 'back/' + apiId + '.png');
+      } else {
+        urls.push(base + 'other/showdown/' + apiId + '.gif');
+        urls.push(base + 'versions/generation-v/black-white/animated/' + apiId + '.gif');
+        urls.push(base + apiId + '.png');
+        urls.push(base + 'other/official-artwork/' + apiId + '.png');
+      }
     }
+    return urls;
+    }
+    /* ★ 精灵图加载：逐源尝试 + 7秒超时换源，避免单源故障导致图片空白 */
     function setSprite(img, id, back, noRegional) {
-      img._urls = spriteURLs(id, back, noRegional); img._ui = 0; img.src = img._urls[0];
-      img.onerror = () => { img._ui++; if (img._ui < img._urls.length) img.src = img._urls[img._ui]; else img.onerror = null; };
+      img._urls = spriteURLs(id, back, noRegional);
+      img._ui = 0;
+      const advance = () => {
+        clearTimeout(img._t);
+        if (img._ui >= img._urls.length) { img.onerror = null; return; }
+        img.src = img._urls[img._ui++];
+        img._t = setTimeout(advance, 7000);
+      };
+      img.onload = () => { clearTimeout(img._t); };
+      img.onerror = advance;
+      advance();
+    }
+    /* ★ 预加载清单：后台预取一批宝可梦的正背面精灵图（含Mega形态），开战时提前命中缓存 */
+    function preloadSprites(monList) {
+      try {
+        const ids = new Set();
+        (monList || []).forEach(m => {
+          if (!m) return;
+          ids.add(m.id);
+          const mc = MEGA[m.id];
+          if (mc) { const c = Array.isArray(mc) ? mc[0] : mc; if (c && c.f) ids.add(c.f); }
+        });
+        ids.forEach(id => { new Image().src = spriteURLs(id, false)[0]; new Image().src = spriteURLs(id, true)[0]; });
+      } catch (e) { /* 预加载失败不影响战斗 */ }
     }
     function miniSprite(id) { const i = new Image(); i.width = 48; i.height = 48; setSprite(i, id); return i; }
 
@@ -7869,8 +9046,12 @@ return ev;
         /* ★ 极光幕显示 */
         if (b.auroraveil.p > 0) chips.push(`🌈 己方·极光幕(${b.auroraveil.p})`);
         if (b.auroraveil.e > 0) chips.push(`🌈 对手·极光幕(${b.auroraveil.e})`);
+        /* ★ 顺风显示（单方） */
+        if (b.tailwind.p > 0) chips.push(`💨 己方·顺风(${b.tailwind.p})`);
+        if (b.tailwind.e > 0) chips.push(`💨 对手·顺风(${b.tailwind.e})`);
         if (chips.length) { wx.textContent = chips.join('  '); wx.classList.add('on'); }
         else wx.classList.remove('on');
+        FX.syncStatusFx(b);
       },
       cardHTML(m, side, b) {
         const displayName = m.vol.illusionName || m.name;
@@ -8067,21 +9248,30 @@ return ev;
       koFx(side, spr) {
         AU.faint();
         if (CFG.fxShake) {
-          /* 白红闪屏 */
+          /* 柔化闪屏 */
           const fl = $('#koFlash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
           /* 场景震动 */
           const sc = $('#bscene'); sc.classList.remove('shake'); void sc.offsetWidth; sc.classList.add('shake');
           setTimeout(() => sc.classList.remove('shake'), 500);
-          /* 金星迸溅 */
-          for (let i = 0; i < 7; i++) {
-            const s = el('div', 'kostar', '✦');
-            const x = side === 'e' ? rnd(150, 310) : rnd(100, 270), y = side === 'e' ? rnd(90, 210) : rnd(250, 390);
-            if (side === 'e') s.style.right = x + 'px'; else s.style.left = x + 'px';
-            s.style.top = y + 'px';
-            s.style.setProperty('--dx', rnd(-46, 46) + 'px');
-            s.style.animationDelay = (i * 0.055) + 's';
-            $('#fxlayer').appendChild(s); setTimeout(() => s.remove(), 1300);
-          }
+          /* 落地尘雾（替代金星迸溅） */
+          setTimeout(() => {
+            const layer = $('#fxlayer');
+            const sr = spr.getBoundingClientRect(), lr = layer.getBoundingClientRect();
+            const fx = sr.left - lr.left + sr.width / 2, fy = sr.top - lr.top + sr.height;
+            for (let i = 0; i < 7; i++) {
+              const d = el('div', 'fxp');
+              d.textContent = '●';
+              d.style.color = pick(['#d8c9a0', '#c9b48a', '#b09a72']);
+              d.style.fontSize = rnd(10, 17) + 'px';
+              d.style.left = (fx + rnd(-20, 20) - 5) + 'px';
+              d.style.top = (fy - 6) + 'px';
+              d.style.setProperty('--dx', rnd(-26, 26) + 'px');
+              d.style.setProperty('--dy', rnd(-34, -8) + 'px');
+              d.style.animation = `fxRise ${rnd(5, 8) / 10}s ease-out ${i * 0.05}s forwards`;
+              layer.appendChild(d);
+              setTimeout(() => d.remove(), 1300);
+            }
+          }, 600);
         }
         /* 旋转坠落（极巨化体型先还原，太晶装饰收起，投影淡出） */
         $('#' + (side === 'e' ? 'eshadow' : 'pshadow')).classList.add('gone');
@@ -8247,6 +9437,1066 @@ return ev;
         setTimeout(() => p.remove(), 1500);
       }
     }
+    /* ============ 华丽特效引擎（FX） ============
+       仅作用于 #fxlayer，非阻塞时序，不影响战斗节奏。
+       克制原则：每招最多1次全屏闪光（透明度≤0.22）、最多1次场景震动（≤4px），持续浮层用低频呼吸动画。 */
+    function _stHtml(cls, side, n) {
+      let s = '';
+      const w = side === 'e' ? 200 : 220, h = side === 'e' ? 196 : 206;
+      const charMap = { spark: '⚡', zzz: 'Z', confS: '★', heart: '♥', flame: '', bub: '', iceb: '' };
+      const ch = charMap[cls] || '';
+      for (let i = 0; i < n; i++) {
+        const x = rnd(6, w), y = rnd(10, h);
+        if (cls === 'flame') {
+          const sz = rnd(18, 30);
+          s += `<i class="flame" style="left:${x}px;bottom:${rnd(2, 42)}px;width:${sz}px;height:${Math.round(sz * 1.4)}px;animation-delay:${rnd(0, 16) / 10}s"></i>`;
+        } else if (cls === 'iceb') {
+          s += `<i class="iceb" style="left:${x}px;top:${rnd(2, 26)}px;animation-delay:${rnd(0, 12) / 10}s"></i>`;
+        } else if (cls === 'bub') {
+          s += `<i class="bub" style="left:${x}px;bottom:${rnd(0, 40)}px;width:${rnd(8, 16)}px;height:${rnd(8, 16)}px;animation-delay:${rnd(0, 18) / 10}s"></i>`;
+        } else {
+          s += `<i class="${cls}" style="left:${x}px;top:${y}px;font-size:${rnd(12, 24)}px;animation-delay:${rnd(0, 20) / 10}s">${ch}</i>`;
+        }
+      }
+      return s;
+    }
+    /* ============ 精良音效引擎（SND）============
+       专属技能音效：由 token 描述符拼装，实时 Web Audio 合成。
+       CFG.fancyAudio 控制：开启走专属音效，关闭由调用方回退简约通用音效。 */
+    const SND = {
+      on() { return CFG.fancyAudio !== false; },
+      _noiseSweep(dur, v, fc0, fc1) {
+        if (AU.muted || !AU.ctx) return;
+        const t0 = AU.t(), len = AU.ctx.sampleRate * dur;
+        const buf = AU.ctx.createBuffer(1, len, AU.ctx.sampleRate), d = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+        const s = AU.ctx.createBufferSource(), f = AU.ctx.createBiquadFilter(), g = AU.ctx.createGain();
+        s.buffer = buf; f.type = 'lowpass';
+        f.frequency.setValueAtTime(fc0, t0); f.frequency.exponentialRampToValueAtTime(Math.max(50, fc1), t0 + dur);
+        AU.env(g, t0, .01, dur, v); s.connect(f); f.connect(g); g.connect(AU.sfx); s.start(t0);
+      },
+      _tokens: {
+        zap() { AU.tone(1500, .06, 'square', .13, 0, -700); AU.tone(280, .05, 'square', .09, .02, 420); },
+        boom() { AU.tone(120, .32, 'sawtooth', .2, 0, -55); AU.noise(.22, .22, 0, 600); },
+        boom2() { AU.tone(70, .4, 'sawtooth', .26, 0, -30); AU.tone(220, .2, 'square', .12, 0, -120); AU.noise(.3, .3, 0, 420); },
+        thud() { AU.tone(100, .2, 'sine', .26, 0, -45); },
+        swish() { AU.noise(.15, .15, 0, 3200); },
+        whoosh() { SND._noiseSweep(.3, .16, 500, 2600); },
+        rush() { SND._noiseSweep(.24, .2, 2600, 500); },
+        hiss() { AU.noise(.5, .14, 0, 5200); },
+        shard() { AU.tone(2300, .09, 'triangle', .12, 0, -520); AU.tone(1800, .08, 'square', .08, .04, -400); },
+        chime() { AU.tone(1600, .12, 'sine', .14, 0, 220); AU.tone(2400, .1, 'sine', .09, .04, 320); },
+        shimmer() { [2000, 2500, 3000].forEach((f, i) => AU.tone(f, .09, 'sine', .1, i * .04, 200)); },
+        clang() { AU.tone(880, .18, 'square', .14, 0, -300); AU.tone(660, .14, 'square', .1, .03, -200); AU.noise(.12, .12, 0, 3200); },
+        clunk() { AU.tone(180, .14, 'square', .18, 0, -80); AU.noise(.1, .14, 0, 900); },
+        roar() { AU.tone(160, .3, 'sawtooth', .18, 0, -40); AU.tone(320, .26, 'sawtooth', .12, 0, -100); AU.noise(.18, .12, 0, 700); },
+        growl() { AU.tone(120, .26, 'sawtooth', .2, 0, -50); AU.noise(.16, .12, 0, 400); },
+        wail() { AU.tone(900, .3, 'sine', .16, 0, -600); AU.tone(700, .28, 'sine', .12, .03, -450); },
+        pulse() { AU.tone(500, .12, 'sine', .16, 0, -250); AU.tone(380, .1, 'sine', .12, .07, -180); },
+        buzz() { AU.tone(220, .22, 'sawtooth', .12, 0, 60); AU.tone(440, .2, 'square', .08, 0, 120); },
+        horn() { AU.tone(330, .24, 'square', .16, 0, 120); AU.tone(495, .2, 'square', .1, .02, 180); },
+        splat() { AU.noise(.18, .22, 0, 420); AU.tone(140, .14, 'sine', .16, 0, -60); },
+        bubble() { [620, 760, 560].forEach((f, i) => AU.tone(f, .05, 'sine', .1, i * .05, 300)); },
+        crackle() { for (let i = 0; i < 5; i++) AU.noise(.05, .1, i * .03, 2400); },
+        rumble() { AU.tone(60, .4, 'sine', .26, 0, -20); AU.noise(.35, .18, 0, 250); },
+        blast() { AU.noise(.3, .28, 0, 900); AU.tone(150, .35, 'sawtooth', .2, 0, -80); },
+        dive() { AU.tone(600, .25, 'sawtooth', .16, 0, -500); },
+        laser() { AU.tone(1400, .18, 'square', .12, 0, -800); AU.noise(.16, .1, 0, 4200); },
+        beam() { AU.tone(900, .2, 'sawtooth', .14, 0, -500); AU.tone(500, .22, 'square', .1, 0, -300); },
+        charge() { SND._noiseSweep(.35, .13, 300, 1500); AU.tone(300, .32, 'sine', .12, 0, 500); },
+        snip() { AU.noise(.1, .16, 0, 4200); AU.tone(700, .05, 'square', .1, 0, -400); },
+        gurgle() { [180, 220, 160].forEach((f, i) => AU.tone(f, .12, 'sine', .14, i * .07, 40)); },
+        squeak() { AU.tone(1400, .08, 'sine', .14, 0, 500); },
+        pop() { AU.tone(900, .06, 'square', .12, 0, -300); },
+        splash() { AU.noise(.2, .2, 0, 1400); AU.tone(200, .15, 'sine', .14, 0, -80); },
+        rise() { AU.tone(400, .1, 'square', .12, 0, 300); AU.tone(600, .12, 'square', .1, .05, 300); AU.tone(820, .12, 'square', .09, .1, 300); },
+        fall() { AU.tone(500, .1, 'square', .12, 0, -300); AU.tone(360, .12, 'square', .1, .05, -300); AU.tone(240, .12, 'square', .09, .1, -300); },
+        heal() { [523, 659, 784, 1046].forEach((f, i) => AU.tone(f, .1, 'triangle', .15, i * .07)); },
+        shield() { AU.tone(900, .15, 'sine', .18, 0, 200); AU.tone(1250, .2, 'sine', .13, .07, 300); },
+        mega() { for (let i = 0; i < 8; i++) AU.tone(500 + i * 180, .09, 'sawtooth', .1, i * .05); AU.tone(1800, .5, 'triangle', .18, .42, -400); AU.tone(2400, .35, 'sine', .1, .5, 300); },
+        dyna() { AU.tone(55, .6, 'sawtooth', .3, 0, 50); AU.noise(.5, .22, .05, 350); for (let i = 0; i < 5; i++) AU.tone(140 + i * 70, .14, 'square', .12, .18 + i * .09, 120); },
+        tera() { [1200, 1600, 2000, 2400, 2000, 2600].forEach((f, i) => AU.tone(f, .12, 'sine', .13, i * .07, 200)); AU.tone(3200, .4, 'sine', .12, .45, -600); }
+      },
+      play(tokens) {
+        if (!this.on() || typeof tokens !== 'string') return;
+        const list = tokens.split(/[\s,]+/).filter(Boolean);
+        for (const tk of list) if (this._tokens[tk]) this._tokens[tk]();
+      }
+    };
+    function hexA(hex, a) {
+      const h = hex.replace('#', '');
+      return `rgba(${parseInt(h.slice(0, 2), 16)},${parseInt(h.slice(2, 4), 16)},${parseInt(h.slice(4, 6), 16)},${a})`;
+    }
+    const FX = {
+      on() { return CFG.fancyFx !== false; },
+      layer() { return $('#fxlayer'); },
+      center(side) {
+        const spr = side === 'e' ? $('#espr') : $('#pspr'), layer = this.layer();
+        if (!spr || !layer) return { x: 220, y: 180 };
+        const sr = spr.getBoundingClientRect(), lr = layer.getBoundingClientRect();
+        return { x: sr.left - lr.left + sr.width / 2, y: sr.top - lr.top + sr.height / 2 };
+      },
+      feet(side) {
+        const spr = side === 'e' ? $('#espr') : $('#pspr'), layer = this.layer();
+        if (!spr || !layer) return { x: 220, y: 320 };
+        const sr = spr.getBoundingClientRect(), lr = layer.getBoundingClientRect();
+        return { x: sr.left - lr.left + sr.width / 2, y: sr.top - lr.top + sr.height };
+      },
+      _shaking: false,
+      /* 低频场景震动：单次、≤4px */
+      shake(power, dur) {
+        if (!this.on() || this._shaking) return;
+        const sc = $('#bscene'); if (!sc) return;
+        this._shaking = true;
+        sc.classList.remove('fxShk'); void sc.offsetWidth; sc.classList.add('fxShk');
+        setTimeout(() => { sc.classList.remove('fxShk'); this._shaking = false; }, dur || 360);
+      },
+      /* 低频全屏闪光：单次淡出 */
+      flash(opacity, dur) {
+        if (!this.on()) return;
+        const d = el('div', 'fxFlash');
+        d.style.setProperty('--fo', opacity || .16);
+        this.layer().appendChild(d);
+        setTimeout(() => d.remove(), (dur || 450) + 80);
+      },
+      p(opts) {
+        const d = el('div', 'fxp ' + (opts.cls || ''));
+        if (opts.char) d.textContent = opts.char;
+        if (opts.c) d.style.color = opts.c;
+        if (opts.bg) d.style.background = opts.bg;
+        const w = opts.w || 10, h = opts.h || 10;
+        d.style.left = (opts.x - w / 2) + 'px';
+        d.style.top = (opts.y - h / 2) + 'px';
+        if (opts.dx) d.style.setProperty('--dx', opts.dx + 'px');
+        if (opts.dy) d.style.setProperty('--dy', opts.dy + 'px');
+        if (opts.rot) d.style.setProperty('--rot', opts.rot + 'deg');
+        if (opts.an) d.style.animation = `${opts.an} ${opts.dur || .5}s ${opts.ease || 'ease-out'} ${opts.delay || 0}s forwards`;
+        this.layer().appendChild(d);
+        if (opts.center !== false) { d.style.left = (opts.x - d.offsetWidth / 2) + 'px'; d.style.top = (opts.y - d.offsetHeight / 2) + 'px'; }
+        setTimeout(() => d.remove(), (opts.dur || .5) * 1000 + (opts.delay || 0) * 1000 + 220);
+        return d;
+      },
+      /* ---- 目标命中爆发 ---- */
+      impact(side, cfg) {
+        const ft = this.feet(side);
+        const cx = ft.x, cy = ft.y - (cfg.big ? 110 : 70);
+        this.p({ cls: cfg.big ? 'fxRing fxRingBig2' : 'fxRing', x: cx, y: cy, c: cfg.c, an: cfg.big ? 'fxRingBigB2' : 'fxRingB', dur: cfg.big ? .65 : .55 });
+        if (cfg.big) this.p({ cls: 'fxRing', x: cx, y: cy, c: cfg.c2 || cfg.c, an: 'fxRingB', dur: .5, delay: .12 });
+        const n = cfg.big ? 40 : 26;
+        const chars = cfg.chars || ['◆', '✦', '●', '✧'];
+        for (let i = 0; i < n; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const dist = rnd(30, cfg.big ? 120 : 76);
+          const ddx = Math.cos(a) * dist, ddy = Math.sin(a) * dist - (cfg.big ? 44 : 24);
+          const shard = i % 4 === 0;
+          this.p({
+            cls: shard ? 'fxShard' : 'fxp',
+            x: cx, y: cy, char: shard ? '' : pick(chars),
+            c: i % 3 ? cfg.c : (cfg.c2 || cfg.c),
+            bg: shard ? `linear-gradient(135deg, #fff, ${cfg.c})` : null,
+            fs: rnd(14, cfg.big ? 36 : 30),
+            dx: ddx, dy: ddy, rot: rnd(0, 220),
+            an: shard ? 'fxShardA' : (i % 2 ? 'fxBurst' : 'fxSplash'),
+            dur: rnd(4, 9) / 10
+          });
+        }
+        /* 星芒四射 */
+        const sn = cfg.big ? 8 : 5;
+        for (let i = 0; i < sn; i++) {
+          const a = i / sn * Math.PI * 2 + rnd(-.15, .15);
+          this.p({ cls: 'fxStarBurst', x: cx, y: cy, bg: `linear-gradient(135deg, #fff, ${cfg.c})`, dx: Math.cos(a) * (cfg.big ? 130 : 84), dy: Math.sin(a) * (cfg.big ? 130 : 84), an: 'fxStarBurstA', dur: .6, delay: i * .02 });
+        }
+        if (cfg.arc) this.slash(side, cfg);
+      },
+      /* ---- 大号能量球（多层：光晕+核心+轨道环） ---- */
+      orbBig(x, y, dx, dy, c, c2, size, o) {
+        o = o || {};
+        const w = el('div', 'fxOrbBig');
+        w.style.width = size + 'px'; w.style.height = size + 'px';
+        w.style.left = (x - size / 2) + 'px'; w.style.top = (y - size / 2) + 'px';
+        w.style.setProperty('--tx', dx + 'px'); w.style.setProperty('--ty', dy + 'px');
+        w.style.animationDuration = (o.dur || .42) + 's';
+        const aura = el('div', 'fxOrbAura');
+        aura.style.left = -(size * .55) + 'px'; aura.style.top = -(size * .55) + 'px';
+        aura.style.width = size * 2.1 + 'px'; aura.style.height = size * 2.1 + 'px';
+        aura.style.background = `radial-gradient(circle, ${hexA(c, .5)} 0%, ${hexA(c, .16)} 45%, transparent 70%)`;
+        const core = el('div', 'fxOrbCore');
+        core.style.background = o.coreBg || `radial-gradient(circle at 34% 28%, #fff 0%, ${c} 45%, ${c2} 78%, #000 112%)`;
+        core.style.boxShadow = `0 0 ${size * .55}px ${hexA(c, .9)}, 0 0 ${size}px ${hexA(c2, .5)}`;
+        w.appendChild(aura); w.appendChild(core);
+        const ringN = o.ringN != null ? o.ringN : 2;
+        const ringCol = o.ringColor || c2;
+        for (let i = 0; i < ringN; i++) {
+          const r = el('div', 'fxOrbRing' + (i ? ' r2' : ''));
+          const rs = size * (i ? 1.38 : 1.12);
+          r.style.width = rs + 'px'; r.style.height = rs + 'px';
+          r.style.borderTopColor = ringCol; r.style.borderRightColor = ringCol;
+          r.style.borderWidth = (i ? 3 : 4) + 'px';
+          w.appendChild(r);
+        }
+        this.layer().appendChild(w);
+        setTimeout(() => w.remove(), (o.dur || .42) * 1000 + 260);
+        return w;
+      },
+      /* ---- 天际闪电（SVG 锯齿形） ---- */
+      boltStrike(x, y, c) {
+        const NS = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(NS, 'svg');
+        const id = 'fxblur' + (this._blurId = (this._blurId || 0) + 1);
+        svg.setAttribute('class', 'fxBoltSvg');
+        svg.style.left = (x - 80) + 'px'; svg.style.top = (y - 440) + 'px';
+        svg.style.color = c;
+        svg.setAttribute('width', '160'); svg.setAttribute('height', '470');
+        svg.setAttribute('viewBox', '0 0 160 470');
+        svg.innerHTML = `<defs><filter id="${id}"><feGaussianBlur stdDeviation="6"/></filter></defs>
+          <path d="M80 0 L44 150 L92 160 L36 320 L86 336 L30 470" fill="none" stroke="${c}" stroke-width="18" stroke-linejoin="round" filter="url(#${id})"/>
+          <path d="M80 0 L44 150 L92 160 L36 320 L86 336 L30 470" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+          <path d="M92 160 L140 220 L112 240 L150 300" fill="none" stroke="${c}" stroke-width="10" stroke-linejoin="round" filter="url(#${id})"/>
+          <path d="M92 160 L140 220 L112 240 L150 300" fill="none" stroke="#fff" stroke-width="3.5" stroke-linejoin="round"/>`;
+        this.layer().appendChild(svg);
+        setTimeout(() => svg.remove(), 700);
+      },
+      /* ---- 极巨招式专属演出（按属性定制，华丽且贴合招式意象） ---- */
+      dynaProj(type, side, foeSide, cfg) {
+        const A = this.center(side), B = this.center(foeSide);
+        const dx = B.x - A.x, dy = B.y - A.y;
+        const c = cfg.c, c2 = cfg.c2 || '#fff';
+        const len = Math.max(60, Math.hypot(dx, dy));
+        const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+        const ft = this.feet(foeSide);
+        SND.play(cfg.launch);
+        switch (type) {
+          case 'flying': /* 极巨飞冲：横贯的龙卷风 */
+            {
+              const cone = el('div', 'fxCone');
+              cone.style.left = A.x + 'px'; cone.style.top = (A.y - 30) + 'px';
+              cone.style.width = len + 'px'; cone.style.height = '60px';
+              cone.style.color = c2;
+              cone.style.background = `linear-gradient(180deg, transparent, ${hexA(c2, .35)} 28%, ${hexA(c2, .8)} 50%, ${hexA(c2, .35)} 72%, transparent)`;
+              cone.style.clipPath = 'polygon(0 38%, 5% 20%, 35% 12%, 60% 24%, 100% 36%, 100% 64%, 60% 76%, 35% 88%, 5% 80%, 0 62%)';
+              cone.style.setProperty('--rot', ang + 'deg');
+              this.layer().appendChild(cone); setTimeout(() => cone.remove(), 600);
+              for (let i = 0; i < 6; i++) this.p({ cls: 'fxWave', x: A.x + dx * (i / 6), y: A.y + dy * (i / 6), c: i % 2 ? c2 : '#fff', an: 'fxWaveA', dur: .5, delay: i * .05 });
+              this.gust(foeSide, { c: c2 });
+              for (let i = 0; i < 8; i++) this.p({ cls: 'fxp', x: B.x + rnd(-44, 44), y: B.y + rnd(-34, 34), char: '〜', c: c2, fs: rnd(16, 30), dx: rnd(-50, 50), dy: rnd(-64, -10), an: 'fxRise', dur: rnd(5, 8) / 10, delay: i * .05 });
+              break;
+            }
+          case 'fighting': /* 极巨拳斗：巨型能量拳砸落 */
+            {
+              const fist = el('div', 'fxFist');
+              fist.style.width = '110px'; fist.style.height = '120px';
+              fist.style.left = (A.x - 55) + 'px'; fist.style.top = (A.y - 60) + 'px';
+              fist.style.color = c2;
+              fist.style.background = `radial-gradient(circle at 40% 30%, ${c2} 0%, ${c} 55%, #7a2a1a 100%)`;
+              fist.style.setProperty('--dx', dx + 'px'); fist.style.setProperty('--dy', dy + 'px');
+              for (let i = 0; i < 3; i++) {
+                const kn = el('div');
+                kn.style.cssText = `position:absolute;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 40% 35%, #fff 10%, ${c2} 60%, ${c} 100%);top:${14 + i * 24}px;right:${8 + i * 4}px`;
+                fist.appendChild(kn);
+              }
+              this.layer().appendChild(fist); setTimeout(() => fist.remove(), 700);
+              this.p({ cls: 'fxGust', x: A.x, y: A.y, c: '#fff', an: 'fxGustA', dur: .4, dx: dx * .5, dy: dy * .5 });
+              break;
+            }
+          case 'electric': /* 极巨闪电：多道天际闪电 */
+            this.boltStrike(B.x, B.y, c);
+            setTimeout(() => this.boltStrike(B.x + rnd(-40, 40), B.y, c), 90);
+            setTimeout(() => this.boltStrike(B.x + rnd(-20, 20), B.y, c2), 180);
+            break;
+          case 'fire': /* 极巨火爆：巨型火球 + 火柱喷涌 */
+            this.orbBig(A.x, A.y, dx, dy, c, c2, 110, { dur: .4, ringN: 2, ringColor: c2, coreBg: `radial-gradient(circle at 36% 28%, #fff8c0 0%, ${c} 50%, ${c2} 82%, #7a1a00 100%)` });
+            for (let i = 0; i < 5; i++) setTimeout(() => this.p({ cls: 'fxPillar', x: ft.x + rnd(-60, 60), y: ft.y - 14, w: 60, c: '#ff5f2f', an: 'fxPillarA', dur: .6, delay: rnd(0, 6) / 10, bg: 'linear-gradient(180deg, rgba(255,140,40,.95), rgba(255,40,20,.7) 60%, transparent)' }), 200 + i * 60);
+            break;
+          case 'water': /* 极巨水流：水柱喷涌 */
+            for (let i = 0; i < 6; i++) setTimeout(() => this.p({ cls: 'fxPillar', x: ft.x + rnd(-60, 60), y: ft.y - 14, w: 50, c: '#4f9df7', an: 'fxPillarA', dur: .6, delay: rnd(0, 5) / 10, bg: 'linear-gradient(180deg, rgba(120,190,255,.95), rgba(60,120,230,.7) 60%, transparent)' }), 150 + i * 50);
+            for (let i = 0; i < 8; i++) this.p({ cls: 'fxp', x: B.x + rnd(-70, 70), y: B.y - rnd(30, 160), char: '~', c: '#7fc0ff', fs: rnd(12, 18), dx: rnd(-16, 16), dy: rnd(120, 170), an: 'fxFall', dur: rnd(5, 8) / 10, delay: i * .05 });
+            break;
+          case 'grass': /* 极巨草原：巨根/藤蔓破土 */
+            this.slash(foeSide, { c, c2 });
+            this.slash(foeSide, { c: c2, c2: c });
+            for (let i = 0; i < 8; i++) setTimeout(() => {
+              this.p({ cls: 'fxArc big', x: B.x + rnd(-60, 60), y: B.y + rnd(-40, 40), c: pick([c, c2]), an: 'fxArcA', dur: .4, delay: rnd(0, 5) / 10, rot: rnd(0, 180) });
+            }, i * 40);
+            this.extraFx('leaves', foeSide, { c, c2 });
+            break;
+          case 'ice': /* 极巨冰霜：巨型冰晶坠落 + 暴风雪 */
+            for (let i = 0; i < 8; i++) setTimeout(() => this.p({ cls: 'fxShard', x: B.x + rnd(-40, 40), y: B.y - rnd(40, 200), c: '#fff', bg: `linear-gradient(135deg,#fff,${c})`, dx: rnd(-46, 46), dy: rnd(120, 190), rot: rnd(0, 240), an: 'fxShardA', dur: rnd(5, 8) / 10 }), i * 40);
+            this.extraFx('mist', foeSide, { c, c2: '#fff' });
+            break;
+          case 'poison': /* 极巨酸毒：毒浪冲击 */
+            this.p({ cls: 'fxProj', x: A.x, y: A.y, c, dx, dy, an: 'fxProj', dur: .4, bg: `radial-gradient(circle, #e8b8ff 0%, ${c} 55%, transparent 78%)` });
+            for (let i = 0; i < 3; i++) this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: pick([c, '#8a2fa3']), an: 'fxRingBigB', dur: .6, delay: i * .12 });
+            this.extraFx('bub', foeSide, { c, c2: '#e8b8ff' });
+            break;
+          case 'ground': /* 极巨大地：大地崩裂 */
+            this.shake(4, 420);
+            for (let i = 0; i < 8; i++) setTimeout(() => {
+              this.p({ cls: 'fxShard', x: ft.x + rnd(-70, 70), y: ft.y, c: pick([c, '#8a6a3c']), bg: `linear-gradient(135deg,#fff,${c})`, dx: rnd(-80, 80), dy: rnd(-100, -30), rot: rnd(0, 240), an: 'fxShardA', dur: rnd(5, 8) / 10 });
+            }, i * 40);
+            this.extraFx('dust', foeSide, { c });
+            break;
+          case 'rock': /* 极巨岩石：巨岩坠落 */
+            for (let i = 0; i < 7; i++) setTimeout(() => {
+              this.p({ cls: 'fxShard', x: B.x + rnd(-60, 60), y: B.y - rnd(60, 220), c: pick([c, '#8a6a3c', c2]), bg: `linear-gradient(135deg,#fff,${c})`, dx: rnd(-56, 56), dy: rnd(130, 200), rot: rnd(0, 240), an: 'fxShardA', dur: rnd(5, 8) / 10 });
+            }, i * 45);
+            this.extraFx('dust', foeSide, { c });
+            break;
+          case 'ghost': /* 极巨幽魂：巨型幽灵环 + 鬼影 */
+            for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: A.x + rnd(-20, 20), y: A.y + rnd(-20, 20), char: pick(['◉', '✧', '●']), c: pick([c, '#c0a8e8']), fs: rnd(20, 34), dx: dx * .9 + rnd(-30, 30), dy: dy * .9 + rnd(-20, 20), an: 'fxProj', dur: .4, delay: i * .05 });
+            for (let i = 0; i < 3; i++) this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: pick([c, '#c0a8e8']), an: 'fxRingBigB', dur: .6, delay: i * .14 });
+            break;
+          case 'dragon': /* 极巨龙骑：龙气冲击 */
+            this.beam2(side, foeSide, cfg);
+            for (let i = 0; i < 8; i++) this.p({ cls: 'fxp', x: A.x + len * (i / 8), y: A.y + rnd(-10, 10), char: '◆', c: pick([c, c2]), fs: rnd(18, 30), dx: rnd(-20, 20), dy: rnd(-20, 20), an: 'fxBurst', dur: .5, delay: i * .05 });
+            break;
+          case 'dark': /* 极巨恶霸：暗黑领域 */
+            for (let i = 0; i < 2; i++) this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c, an: 'fxRingBigB', dur: .6, delay: i * .14 });
+            for (let i = 0; i < 8; i++) this.p({ cls: 'fxp', x: B.x + rnd(-50, 50), y: B.y + rnd(-40, 40), char: '●', c: pick([c, c2]), fs: rnd(18, 30), dx: rnd(-40, 40), dy: rnd(-60, -8), an: 'fxBubble', dur: rnd(7, 11) / 10, delay: i * .06 });
+            this.extraFx('ghost', foeSide, { c, c2 });
+            break;
+          case 'steel': /* 极巨钢铁：钢柱轰落 */
+            for (let i = 0; i < 6; i++) setTimeout(() => {
+              this.p({ cls: 'fxProj bolt', x: B.x + rnd(-70, 70), y: B.y - 200, c: c2, dx: rnd(-6, 6), dy: 180, an: 'fxProjB', dur: .28, bg: `linear-gradient(180deg, #fff, ${c})` });
+            }, i * 40);
+            this.extraFx('metal', foeSide, { c, c2: '#fff' });
+            break;
+          case 'fairy': /* 极巨妖精：星落 */
+            for (let i = 0; i < 10; i++) setTimeout(() => {
+              this.p({ cls: 'fxStarBurst', x: B.x + rnd(-70, 70), y: B.y - rnd(40, 200), bg: `linear-gradient(135deg,#fff,${c})`, dx: rnd(-30, 30), dy: rnd(110, 180), an: 'fxStarBurstA', dur: rnd(6, 9) / 10 });
+            }, i * 45);
+            this.extraFx('flower', foeSide, { c, c2 });
+            break;
+          case 'psychic': /* 极巨超能：念力冲击波 */
+            for (let i = 0; i < 3; i++) this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: pick([c, c2, '#c8a0e8']), an: 'fxRingBigB', dur: .6, delay: i * .12 });
+            for (let i = 0; i < 8; i++) this.p({ cls: 'fxp', x: B.x + rnd(-46, 46), y: B.y + rnd(-40, 40), char: '◎', c: pick([c, c2]), fs: rnd(18, 32), dx: rnd(-40, 40), dy: rnd(-64, -10), an: 'fxRise', dur: rnd(6, 9) / 10, delay: i * .06 });
+            break;
+          case 'bug': /* 极巨虫蛊：虫群袭卷 */
+            for (let i = 0; i < 14; i++) this.p({ cls: 'fxp', x: A.x + rnd(-20, 20), y: A.y + rnd(-20, 20), char: pick(['✦', '❧', '●']), c: pick([c, c2]), fs: rnd(16, 26), dx: dx * .9 + rnd(-26, 26), dy: dy * .9 + rnd(-20, 20), an: 'fxProj', dur: .42, delay: i * .03 });
+            break;
+          case 'normal': /* 极巨攻击：冲击力场 */
+            this.p({ cls: 'fxProj', x: A.x, y: A.y, c: c2, dx, dy, an: 'fxProj', dur: .38, bg: `radial-gradient(circle, #fff 0%, ${c} 50%, transparent 80%)` });
+            for (let i = 0; i < 3; i++) this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: pick([c, c2]), an: 'fxRingBigB', dur: .6, delay: i * .12 });
+            break;
+          default:
+            this.orbBig(A.x, A.y, dx, dy, c, c2, 92, { dur: .4 });
+        }
+      },
+      /* ---- 投射物 / 光束 ---- */
+      projectile(fromSide, toSide, cfg) {
+        const A = this.center(fromSide), B = this.center(toSide);
+        const dx = B.x - A.x, dy = B.y - A.y;
+        const c = cfg.c, c2 = cfg.c2 || '#fff';
+        const size = cfg.size || (cfg.big ? 92 : 64);
+        const dur = cfg.dur || .42;
+        const p = cfg.proj;
+        if (p === 'shadow') {
+          /* 暗影球：暗核 + 反向旋转紫环 */
+          this.orbBig(A.x, A.y, dx, dy, '#2a1a40', '#a06fd8', size, {
+            dur, ringN: 2, ringColor: '#b06fd8',
+            coreBg: 'radial-gradient(circle at 36% 30%, #7a4fc0 0%, #2a1a40 52%, #100820 100%)'
+          });
+          for (let i = 0; i < 5; i++) this.p({ cls: 'fxp', x: A.x + rnd(-30, 30), y: A.y + rnd(-24, 24), char: '◉', c: '#b06fd8', fs: rnd(12, 20), dx: dx * .9 + rnd(-14, 14), dy: dy * .9 + rnd(-10, 10), an: 'fxProj', dur: dur, delay: i * .03 });
+        } else if (p === 'flame') {
+          /* 火球 + 拖尾 */
+          this.orbBig(A.x, A.y, dx, dy, c, c2, size, { dur, ringN: 2, ringColor: c2, coreBg: `radial-gradient(circle at 36% 30%, #fff8c0 0%, ${c} 50%, ${c2} 82%, #7a1a00 100%)` });
+          for (let i = 1; i <= 7; i++) {
+            const t = el('div', 'fxTrail');
+            const s2 = size * (0.6 - i * 0.055);
+            t.style.width = s2 + 'px'; t.style.height = s2 + 'px';
+            t.style.left = (A.x - size / 2 + rnd(-4, 4)) + 'px'; t.style.top = (A.y - size / 2 + rnd(-4, 4)) + 'px';
+            t.style.background = `radial-gradient(circle, ${c2} 0%, ${c} 55%, transparent 78%)`;
+            t.style.setProperty('--tx', dx * (1 - i * .16) + rnd(-8, 8) + 'px');
+            t.style.setProperty('--ty', dy * (1 - i * .16) + rnd(-6, 6) + 'px');
+            t.style.animationDelay = (i * .045) + 's';
+            this.layer().appendChild(t);
+            setTimeout(() => t.remove(), 800);
+          }
+        } else if (p === 'bolt') {
+          /* 电球：电弧环绕 */
+          this.orbBig(A.x, A.y, dx, dy, c, c2, size, { dur, ringN: 2, ringColor: c2, coreBg: `radial-gradient(circle at 34% 28%, #fff 0%, ${c} 48%, ${c2} 82%, #4a3a00 100%)` });
+          for (let i = 0; i < 4; i++) {
+            setTimeout(() => {
+              const s = this.center(fromSide);
+              this.p({ cls: 'fxProj bolt', x: s.x + rnd(-22, 22), y: s.y + rnd(-22, 22), c: c2, dx: (B.x - s.x) * .85 + rnd(-26, 26), dy: (B.y - s.y) * .85 + rnd(-20, 20), an: 'fxProjB', dur: dur * .8, bg: `linear-gradient(90deg, #fff8c0, ${c})` });
+            }, i * 40);
+          }
+        } else if (p === 'shard') {
+          /* 锐利碎片群 */
+          for (let i = 0; i < 6; i++) {
+            setTimeout(() => {
+              const s = this.center(fromSide);
+              this.p({ cls: 'fxShard', x: s.x + rnd(-12, 12), y: s.y + rnd(-12, 12), c: i % 2 ? c2 : c, bg: `linear-gradient(135deg,#fff,${c})`, dx: (B.x - s.x) * .92 + rnd(-26, 26), dy: (B.y - s.y) * .92 + rnd(-22, 22), rot: rnd(0, 240), an: 'fxShardA', dur });
+            }, i * 30);
+          }
+          this.orbBig(A.x, A.y, dx, dy, c, c2, size * .6, { dur, ringN: 1, ringColor: c2 });
+        } else if (p === 'leaf') {
+          /* 叶球 + 飞叶 */
+          this.orbBig(A.x, A.y, dx, dy, c, c2, size, { dur, ringN: 1, ringColor: c2 });
+          for (let i = 0; i < 5; i++) this.p({ cls: 'fxp', x: A.x + rnd(-26, 26), y: A.y + rnd(-20, 20), char: pick(['❧', '✿']), c: pick([c, c2]), fs: rnd(14, 22), dx: dx * .85 + rnd(-20, 20), dy: dy * .85 + rnd(-14, 14), an: 'fxFall', dur, delay: i * .04 });
+        } else if (p === 'beam') {
+          this.beam2(fromSide, toSide, cfg);
+        } else {
+          this.orbBig(A.x, A.y, dx, dy, c, c2, size, { dur });
+        }
+      },
+      beam2(fromSide, toSide, cfg) {
+        const A = this.center(fromSide), B = this.center(toSide);
+        const dx = B.x - A.x, dy = B.y - A.y;
+        const len = Math.max(60, Math.hypot(dx, dy));
+        const ang = Math.atan2(dy, dx) * 180 / Math.PI;
+        const d = el('div', 'fxBeam2');
+        d.style.left = A.x + 'px'; d.style.top = (A.y - 9) + 'px';
+        d.style.width = len + 'px';
+        d.style.color = cfg.c;
+        d.style.background = `linear-gradient(90deg, transparent, ${cfg.c} 16%, ${cfg.c} 84%, transparent)`;
+        d.style.setProperty('--rot', ang + 'deg');
+        d.appendChild(el('div', 'core'));
+        this.layer().appendChild(d);
+        for (let i = 0; i < 10; i++) setTimeout(() => {
+          this.p({ cls: 'fxp', x: A.x + len * Math.random() * .9, y: A.y + rnd(-8, 8), char: '✦', c: i % 2 ? cfg.c : (cfg.c2 || '#fff'), fs: rnd(10, 16), dx: rnd(-16, 16), dy: rnd(-22, 22), an: 'fxBurst', dur: .5 });
+        }, i * 28);
+        setTimeout(() => d.remove(), 520);
+      },
+      slash(side, cfg) {
+        const B = this.center(side);
+        this.p({ cls: 'fxArc', x: B.x, y: B.y, c: cfg.c, an: 'fxArcA', dur: .34, rot: rnd(0, 90) });
+        this.p({ cls: 'fxArc', x: B.x + rnd(-8, 8), y: B.y + rnd(-8, 8), c: cfg.c2 || cfg.c, an: 'fxArcA', dur: .34, delay: .06, rot: rnd(0, 90) + 50 });
+      },
+      gust(side, cfg) {
+        const B = this.center(side);
+        for (let i = 0; i < 3; i++) this.p({ cls: 'fxGust', x: B.x + rnd(-44, 44), y: B.y + rnd(-20, 20), c: cfg.c, an: 'fxGustA', dur: .5, dx: rnd(-70, 70), delay: i * .08 });
+      },
+      wave(side, cfg) {
+        const B = this.center(side);
+        for (let i = 0; i < 3; i++) this.p({ cls: 'fxWave', x: B.x, y: B.y, c: cfg.c, an: 'fxWaveA', dur: .5, delay: i * .12 });
+      },
+      /* ---- 附加/残余效果 ---- */
+      extraFx(kind, side, cfg) {
+        const B = this.center(side), ft = this.feet(side);
+        switch (kind) {
+          case 'ember':
+            for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: B.x + rnd(-42, 42), y: B.y + rnd(-30, 30), char: '❋', c: pick([cfg.c, cfg.c2 || cfg.c, '#ffd23b']), fs: rnd(10, 18), dx: rnd(-22, 22), dy: rnd(-52, -14), an: 'fxRise', dur: rnd(6, 10) / 10, delay: i * .06 });
+            break;
+          case 'spark':
+            for (let i = 0; i < 8; i++) this.p({ cls: 'fxp', x: B.x + rnd(-34, 34), y: B.y + rnd(-34, 34), char: '⚡', c: pick(['#ffe14a', '#fff8c0']), fs: rnd(12, 20), dx: rnd(-42, 42), dy: rnd(-42, 10), an: 'fxBurst', dur: .5, delay: i * .05 });
+            break;
+          case 'mist':
+            for (let i = 0; i < 8; i++) this.p({ cls: 'fxp', x: B.x + rnd(-36, 36), y: B.y + rnd(-26, 26), char: '❄', c: cfg.c2 || '#fff', fs: rnd(11, 18), dx: rnd(-26, 26), dy: rnd(-48, -10), an: 'fxRise', dur: rnd(6, 10) / 10, delay: i * .06 });
+            break;
+          case 'dust':
+            for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: ft.x + rnd(-48, 48), y: ft.y, char: pick(['●', '▲']), c: pick(['#c9a94e', '#b0a060', '#8a6a3c']), fs: rnd(12, 22), dx: rnd(-50, 50), dy: rnd(-36, -4), an: 'fxRise', dur: rnd(5, 9) / 10, delay: i * .05 });
+            break;
+          case 'leaves':
+            for (let i = 0; i < 12; i++) this.p({ cls: 'fxp', x: B.x + rnd(-46, 46), y: B.y + rnd(-30, 30), char: pick(['❧', '✿', '❋']), c: pick(['#7ac74c', '#d8f5b0', '#4f9d3f']), fs: rnd(12, 22), dx: rnd(-46, 46), dy: rnd(-44, -6), an: 'fxFall', dur: rnd(6, 10) / 10, delay: i * .05 });
+            break;
+          case 'rain':
+            for (let i = 0; i < 14; i++) this.p({ cls: 'fxp', x: B.x + rnd(-80, 80), y: B.y - rnd(0, 160), char: '~', c: '#7fc0ff', fs: rnd(10, 16), dx: rnd(-16, 16), dy: rnd(120, 180), an: 'fxFall', dur: rnd(5, 8) / 10, delay: i * .05 });
+            break;
+          case 'bub':
+            for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: B.x + rnd(-40, 40), y: ft.y, char: '●', c: pick(['#b56fd8', '#e8b8ff']), fs: rnd(10, 18), dx: rnd(-20, 20), dy: rnd(-66, -20), an: 'fxBubble', dur: rnd(6, 10) / 10, delay: i * .06 });
+            break;
+          case 'ghost':
+            for (let i = 0; i < 8; i++) this.p({ cls: 'fxp', x: B.x + rnd(-40, 40), y: B.y + rnd(-30, 30), char: pick(['◉', '✧', '●']), c: pick(['#9070c8', '#c0a8e8']), fs: rnd(16, 28), dx: rnd(-24, 24), dy: rnd(-56, -8), an: 'fxBubble', dur: rnd(7, 11) / 10, delay: i * .07 });
+            break;
+          case 'psychic':
+            for (let i = 0; i < 3; i++) this.wave(side, { c: pick(['#ff7ab8', '#c8a0e8', '#9fe8f5']) });
+            for (let i = 0; i < 8; i++) this.p({ cls: 'fxp', x: B.x + rnd(-36, 36), y: B.y + rnd(-36, 36), char: '◎', c: pick(['#ff7ab8', '#ffd0e8']), fs: rnd(14, 24), dx: rnd(-30, 30), dy: rnd(-56, -10), an: 'fxRise', dur: rnd(6, 9) / 10, delay: i * .06 });
+            break;
+          case 'dragon':
+            this.wave(side, { c: cfg.c });
+            for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: B.x + rnd(-44, 44), y: B.y + rnd(-30, 30), char: pick(['◆', '✦', '❋']), c: pick([cfg.c, cfg.c2 || cfg.c]), fs: rnd(14, 26), dx: rnd(-50, 50), dy: rnd(-50, -6), an: 'fxRise', dur: rnd(6, 10) / 10, delay: i * .05 });
+            break;
+          case 'metal':
+            for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: B.x + rnd(-40, 40), y: B.y + rnd(-30, 30), char: pick(['■', '✦', '◆']), c: pick(['#c8d0e0', '#ffffff', '#8fa3bd']), fs: rnd(12, 22), dx: rnd(-50, 50), dy: rnd(-46, -6), an: 'fxFall', dur: rnd(5, 8) / 10, delay: i * .05 });
+            break;
+          case 'arc':
+            this.slash(side, cfg);
+            break;
+          case 'sound':
+            this.wave(side, cfg);
+            break;
+          case 'nova':
+            this.shake(4, 400);
+            for (let i = 0; i < 2; i++) this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: cfg.c2 || cfg.c, an: 'fxRingBigB', dur: .6, delay: i * .16 });
+            break;
+          case 'bolt':
+            this.boltStrike(B.x, B.y, cfg.c || '#ffe14a');
+            for (let i = 0; i < 8; i++) this.p({ cls: 'fxp', x: B.x + rnd(-46, 46), y: B.y + rnd(-30, 30), char: '⚡', c: pick(['#ffe14a', '#fff8c0']), fs: rnd(14, 24), dx: rnd(-50, 50), dy: rnd(-50, 10), an: 'fxBurst', dur: .5, delay: i * .04 });
+            this.p({ cls: 'fxRing', x: B.x, y: B.y, c: '#ffe14a', an: 'fxRingB', dur: .5, delay: .05 });
+            break;
+          case 'ice':
+            for (let i = 0; i < 8; i++) this.p({ cls: 'fxShard', x: B.x + rnd(-40, 40), y: B.y + rnd(-40, 40), c: '#9fe8f5', bg: `linear-gradient(135deg,#fff,${cfg.c || '#9fe8f5'})`, dx: rnd(-52, 52), dy: rnd(-46, 8), rot: rnd(0, 220), an: 'fxShardA', dur: rnd(5, 8) / 10, delay: i * .05 });
+            break;
+          case 'flower':
+            for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: B.x + rnd(-46, 46), y: B.y + rnd(-34, 34), char: pick(['✿', '❋', '✦']), c: pick(['#ff9ac8', '#ffd0e8', '#fff']), fs: rnd(14, 26), dx: rnd(-40, 40), dy: rnd(-54, -8), an: 'fxBubble', dur: rnd(6, 10) / 10, delay: i * .06 });
+            break;
+          case 'gust':
+            this.gust(side, cfg);
+            break;
+        }
+      },
+      /* ---- 按招式 flag 自动增强 ---- */
+      archFx(mv, side, foeSide, cfg) {
+        const B = this.center(foeSide);
+        if (mv.slicing) this.slash(foeSide, cfg);
+        if (mv.sound) this.wave(foeSide, cfg);
+        if (mv.wind) this.gust(foeSide, cfg);
+        if (mv.punch) this.p({ cls: 'fxGust', x: B.x + rnd(-20, 20), y: B.y, c: '#fff', an: 'fxGustA', dur: .4, dx: rnd(-40, 40), delay: .05 });
+        if (mv.bite) this.slash(foeSide, { c: cfg.c, c2: '#fff' });
+        if (mv.multi) for (let i = 0; i < 3; i++) this.p({ cls: 'fxRing', x: B.x + rnd(-22, 22), y: B.y + rnd(-22, 22), c: cfg.c2 || cfg.c, an: 'fxRingB', dur: .45, delay: .14 + i * .1 });
+        if (mv.drain) {
+          const A = this.center(side);
+          for (let i = 0; i < 10; i++) setTimeout(() => {
+            const s = this.center(foeSide);
+            this.p({ cls: 'fxProj', x: s.x + rnd(-26, 26), y: s.y + rnd(-26, 26), c: '#ff5f7f', dx: A.x - s.x, dy: A.y - s.y, an: 'fxProj', dur: .5, bg: 'radial-gradient(circle,#ffd0d8,#ff5f7f 60%,transparent 80%)' });
+          }, rnd(80, 320));
+        }
+        if (mv.recoil || mv.crash) this.shake(2, 280);
+        if (mv.gyro || mv.seismic) { this.shake(3, 340); this.extraFx('dust', foeSide, { c: cfg.c }); }
+        if (mv.selfko) { this.shake(4, 400); for (let i = 0; i < 2; i++) this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: cfg.c, an: 'fxRingBigB', dur: .6, delay: i * .14 }); }
+        if (mv.thunder) this.extraFx('bolt', foeSide, cfg);
+      },
+      /* ---- 蓄力吸能 ---- */
+      chargeFx(side, t) {
+        if (!this.on()) return;
+        const B = this.center(side);
+        const c = (TYPEFANCY[t] && TYPEFANCY[t].c) || '#fff';
+        for (let i = 0; i < 10; i++) setTimeout(() => {
+          const a = Math.random() * Math.PI * 2, d = rnd(56, 100);
+          this.p({ cls: 'fxMegaOrb', x: B.x + Math.cos(a) * d, y: B.y + Math.sin(a) * d, c, dx: -Math.cos(a) * d, dy: -Math.sin(a) * d, an: 'fxMegaOrbA', dur: .45 });
+        }, i * 28);
+        this.p({ cls: 'fxRing', x: B.x, y: B.y, c, an: 'fxRingB', dur: .5 });
+      },
+      /* ---- 攻击演出（普通/极巨/超极巨通吃） ---- */
+      attack(side, mon, foe, mv) {
+        if (!this.on()) { typeVFX(mv.t, side === 'p' ? 'e' : 'p'); return; }
+        const foeSide = side === 'p' ? 'e' : 'p';
+        let cfg;
+        if (mv.k === 'maxmv') {
+          if (mon.vol.gmax && GMAXMOVE[mon.id] && GMAXMOVE[mon.id].t === mv.t) {
+            cfg = Object.assign({}, TYPEFANCY[mv.t] || TYPEFANCY.normal, DYNAFX[mv.t] || {}, GMAXFX[mon.id] || {}, { big: 1, flash: 1, shake: 1, snd: (GMAXFX[mon.id] && GMAXFX[mon.id].snd) || 'boom2' });
+          } else {
+            cfg = Object.assign({}, TYPEFANCY[mv.t] || TYPEFANCY.normal, DYNAFX[mv.t] || {}, { big: 1, flash: 1, shake: 1 }, { snd: ((TYPEFANCY[mv.t] && TYPEFANCY[mv.t].snd) || 'boom') + ' boom2' });
+          }
+        } else {
+          cfg = Object.assign({}, TYPEFANCY[mv.t] || TYPEFANCY.normal, MOVEFX[mv.k] || {});
+          if (!cfg.snd) cfg.snd = 'boom';
+        }
+        const seq = async () => {
+          if (mv.charge && mv.k !== 'maxmv') this.chargeFx(side, mv.t);
+          await sleep(mv.charge ? 180 : 40);
+          if (mv.k === 'maxmv') this.dynaProj(mv.t, side, foeSide, cfg);
+          else if (cfg.proj !== 'none' && !mv.thunder) { this.projectile(side, foeSide, cfg); SND.play(cfg.launch); }
+          await sleep(mv.k === 'maxmv' ? 360 : cfg.proj === 'beam' ? 150 : cfg.proj === 'none' ? 70 : (mv.thunder ? 80 : 380));
+          this.impact(foeSide, cfg);
+          SND.play(cfg.snd);
+          if (mv.t === 'stellar') this.p({ cls: 'fxPrism', x: this.center(foeSide).x, y: this.center(foeSide).y, an: 'fxPrismA', dur: .55 });
+          if (cfg.flash) this.flash(cfg.fo || .16);
+          if (cfg.shake) this.shake(3, 360);
+          this.archFx(mv, side, foeSide, cfg);
+          if (cfg.extra) cfg.extra.forEach(k => this.extraFx(k, foeSide, cfg));
+        };
+        seq();
+      },
+      /* ---- 变化招式演出 ---- */
+      status(side, mv) {
+        if (!this.on()) { statusVFX(side); return; }
+        const B = this.center(side);
+        let c = '#ffe9a8', c2 = '#ffffff', bad = false, down = false;
+        if (mv.setSt || mv.setDrop || mv.taunt || mv.partialTrap || mv.hazard || mv.powder || mv.leechseed || mv.yawn) { c = '#b56fd8'; c2 = '#e8b8ff'; bad = true; }
+        else if (mv.selfDn || mv.selfDn2 || mv.selfDropT) { c = '#5aa0ff'; c2 = '#a8d0ff'; down = true; }
+        for (let i = 0; i < 3; i++) this.p({ cls: 'fxRing', x: B.x, y: B.y, c, an: 'fxRingB', dur: .5, delay: i * .12 });
+        const chars = bad ? ['❋', '●', '✧'] : down ? ['▲', '▼', '●'] : ['✧', '✦', '★'];
+        for (let i = 0; i < 16; i++) this.p({ cls: 'fxp', x: B.x + rnd(-48, 48), y: B.y + rnd(-42, 42), char: pick(chars), c: i % 3 ? c : c2, fs: rnd(12, 24), dx: rnd(-30, 30), dy: rnd(-58, -8), an: 'fxBubble', dur: rnd(6, 10) / 10, delay: i * .05 });
+        if (mv.heal || mv.rest) for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: B.x + rnd(-52, 52), y: B.y + rnd(-52, 52), char: '✦', c: '#7fdb8a', fs: rnd(12, 20), dx: rnd(-22, 22), dy: rnd(-42, 10), an: 'fxRise', dur: rnd(6, 9) / 10, delay: i * .08 });
+        if (mv.weather) { this.flash(.12, 480); this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: { sun: '#ffd23b', rain: '#4f9df7', sand: '#c9a94e', hail: '#9fe8f5' }[mv.weather] || c, an: 'fxRingBigB', dur: .6 }); }
+        if (mv.terrain) { this.flash(.1, 460); this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: { electric: '#ffe14a', grassy: '#7ac74c', psychic: '#ff7ab8', misty: '#9fe8f5' }[mv.terrain] || '#7ac74c', an: 'fxRingBigB', dur: .6 }); }
+        SND.play(mv.weather ? 'boom' : mv.terrain ? 'pulse boom' : (mv.heal || mv.rest) ? 'heal' : bad ? 'wail' : down ? 'fall' : 'rise');
+      },
+      /* ---- 守住/极巨防壁 ---- */
+      protect(side, mv) {
+        if (!this.on()) { statusVFX(side); return; }
+        const B = this.center(side);
+        const c = mv.maxguard ? '#ffb347' : (mv.ks ? '#fff3c4' : '#9fe8ff');
+        this.p({ cls: 'fxRing', x: B.x, y: B.y, c, an: 'fxRingB', dur: .5 });
+        this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c, an: 'fxRingBigB', dur: .55, delay: .08 });
+        for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: B.x + rnd(-60, 60), y: B.y + rnd(-50, 50), char: '◇', c: i % 2 ? c : '#fff', fs: rnd(12, 22), dx: rnd(-20, 20), dy: rnd(-44, -6), an: 'fxRise', dur: rnd(6, 9) / 10, delay: i * .05 });
+        if (mv.maxguard) this.flash(.12, 420);
+        SND.play(mv.maxguard ? 'shield boom' : 'shield');
+      },
+      /* ---- 持续扣血特效（灼伤/中毒/剧毒/盐腌/黑色污泥/超极巨DOT） ---- */
+      dotFx(side, kind) {
+        if (!this.on()) return;
+        const B = this.center(side);
+        const colors = { burn: '#ff7a2f', fire: '#ff5f2f', psn: '#b56fd8', tox: '#8a2fa3', sludge: '#b56fd8', salt: '#e8e8f0', grass: '#7ac74c', water: '#4f9df7', rock: '#b0a060', binding: '#9fe8f5' };
+        const c = colors[kind] || '#fff';
+        const cfg = { c, c2: '#fff' };
+        if (kind === 'burn' || kind === 'fire') this.extraFx('ember', side, cfg);
+        else if (kind === 'psn' || kind === 'tox' || kind === 'sludge') this.extraFx('bub', side, { c, c2: '#e8b8ff' });
+        else if (kind === 'salt') this.extraFx('metal', side, { c, c2: '#fff' });
+        else if (kind === 'grass') this.extraFx('leaves', side, { c, c2: '#d8f5b0' });
+        else if (kind === 'water') this.extraFx('bub', side, { c, c2: '#a8e0ff' });
+        else if (kind === 'rock') this.extraFx('dust', side, { c, c2: '#e0d09a' });
+        else if (kind === 'binding') for (let i = 0; i < 3; i++) this.wave(side, { c: '#9fe8f5' });
+        this.p({ cls: 'fxRing', x: B.x, y: B.y, c, an: 'fxRingB', dur: .4 });
+      },
+      /* ---- 超极巨 DOT 专属演出（按技能名匹配，华丽且对应招式意象） ---- */
+      gmaxDotFx(name, type, side) {
+        if (!this.on()) return;
+        const B = this.center(side);
+        const N = name || '';
+        if (N.includes('地狱灭焰') || N.includes('百火焚野')) {
+          /* 火凤凰冲击：炽热凤凰俯冲 + 双翼烈焰 + 火环爆 */
+          SND.play('blast');
+          this.p({ cls: 'fxProj', x: B.x, y: B.y - 260, c: '#ffd23b', dx: rnd(-10, 10), dy: 240, an: 'fxProj', dur: .34, bg: 'radial-gradient(circle,#fff8c0 0%,#ff7a2f 45%,transparent 78%)' });
+          this.p({ cls: 'fxProj', x: B.x - 8, y: B.y - 250, c: '#ff7a2f', dx: rnd(-8, 8), dy: 226, an: 'fxProj', dur: .3, bg: 'radial-gradient(circle,#fff 12%,transparent 70%)' });
+          for (let i = 1; i <= 6; i++) setTimeout(() => {
+            this.p({ cls: 'fxp', x: B.x + rnd(-14, 14), y: B.y - 250 + (230 * i / 6), char: '❋', c: pick(['#ff7a2f', '#ffd23b']), fs: rnd(16, 28), dx: rnd(-10, 10), dy: rnd(-8, 8), an: 'fxBurst', dur: .4 });
+          }, i * 46);
+          for (let i = 0; i < 12; i++) {
+            const dir = i % 2 ? 1 : -1;
+            setTimeout(() => this.p({ cls: 'fxp', x: B.x + dir * rnd(20, 90), y: B.y + rnd(-10, 30), char: '❋', c: pick(['#ff7a2f', '#ffd23b', '#ff3d1f']), fs: rnd(18, 32), dx: dir * rnd(30, 70), dy: rnd(-72, -40), an: 'fxRise', dur: rnd(6, 9) / 10 }), 250 + i * 40);
+          }
+          setTimeout(() => {
+            this.p({ cls: 'fxRing', x: B.x, y: B.y, c: '#ff5f2f', an: 'fxRingB', dur: .5 });
+            this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: '#ffd23b', an: 'fxRingBigB', dur: .55, delay: .08 });
+          }, 300);
+          this.flash(.15, 430);
+          this.extraFx('ember', side, { c: '#ff5f2f', c2: '#ffd23b' });
+        } else if (N.includes('水炮轰坠') || N.includes('狙击神射')) {
+          /* 水炮轰坠：天际水柱连环轰落 + 溅射环 + 气泡 */
+          SND.play('splash');
+          for (let i = 0; i < 5; i++) setTimeout(() => {
+            this.p({ cls: 'fxProj bolt', x: B.x + rnd(-40, 40), y: B.y - 220, c: '#a8e0ff', dx: rnd(-6, 6), dy: 200, an: 'fxProjB', dur: .3, bg: 'linear-gradient(180deg,#fff,#4f9df7)' });
+          }, i * 60);
+          for (let i = 0; i < 8; i++) setTimeout(() => {
+            this.p({ cls: 'fxp', x: B.x + rnd(-50, 50), y: B.y - rnd(40, 160), char: '~', c: '#7fc0ff', fs: rnd(12, 18), dx: rnd(-16, 16), dy: rnd(110, 160), an: 'fxFall', dur: rnd(5, 8) / 10 });
+          }, i * 40);
+          setTimeout(() => {
+            this.p({ cls: 'fxRing', x: B.x, y: B.y, c: '#3f8fe0', an: 'fxRingB', dur: .5 });
+            this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: '#a8e0ff', an: 'fxRingBigB', dur: .55, delay: .1 });
+          }, 300);
+          this.extraFx('bub', side, { c: '#4f9df7', c2: '#a8e0ff' });
+        } else if (N.includes('灰飞鞭灭') || N.includes('鼓擂狂打')) {
+          /* 灰飞鞭灭：草绿鞭影交错 + 飞灰落叶 */
+          SND.play('swish');
+          this.slash(side, { c: '#7ac74c', c2: '#d8f5b0' });
+          this.slash(side, { c: '#d8f5b0', c2: '#7ac74c' });
+          for (let i = 0; i < 12; i++) this.p({ cls: 'fxp', x: B.x + rnd(-48, 48), y: B.y + rnd(-32, 32), char: pick(['❧', '✿', '✦']), c: pick(['#7ac74c', '#d8f5b0', '#8a6a3c']), fs: rnd(14, 24), dx: rnd(-48, 48), dy: rnd(-46, -6), an: 'fxFall', dur: rnd(6, 10) / 10, delay: i * .05 });
+          this.p({ cls: 'fxRing', x: B.x, y: B.y, c: '#7ac74c', an: 'fxRingB', dur: .5 });
+          this.p({ cls: 'fxRing', x: B.x, y: B.y, c: '#d8f5b0', an: 'fxRingB', dur: .5, delay: .1 });
+        } else if (N.includes('岩石喷发')) {
+          /* 岩石喷发：碎石迸射 + 尘爆 + 岩环 */
+          SND.play('rumble');
+          for (let i = 0; i < 8; i++) setTimeout(() => {
+            this.p({ cls: 'fxShard', x: B.x + rnd(-30, 30), y: B.y, c: pick(['#b0a060', '#8a6a3c', '#e0d09a']), bg: 'linear-gradient(135deg,#fff,#b0a060)', dx: rnd(-72, 72), dy: rnd(-92, -30), rot: rnd(0, 240), an: 'fxShardA', dur: rnd(5, 8) / 10 });
+          }, i * 40);
+          this.extraFx('dust', side, { c: '#b0a060' });
+          this.p({ cls: 'fxRing', x: B.x, y: B.y, c: '#b0a060', an: 'fxRingB', dur: .5 });
+          this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: '#e0d09a', an: 'fxRingBigB', dur: .55, delay: .1 });
+        } else if (N.includes('破阵火球')) {
+          /* 破阵火球：巨大火球砸落 + 火爆 */
+          SND.play('blast');
+          this.p({ cls: 'fxProj', x: B.x, y: B.y - 230, c: '#ff5f2f', dx: rnd(-8, 8), dy: 210, an: 'fxProj', dur: .32, bg: 'radial-gradient(circle,#fff8c0 0%,#ff7a2f 50%,transparent 80%)' });
+          setTimeout(() => {
+            this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: '#ff5f2f', an: 'fxRingBigB', dur: .55 });
+            this.p({ cls: 'fxRing', x: B.x, y: B.y, c: '#ffd23b', an: 'fxRingB', dur: .5, delay: .06 });
+          }, 300);
+          this.extraFx('ember', side, { c: '#ff5f2f', c2: '#ffd23b' });
+        } else {
+          this.dotFx(side, type);
+        }
+      },
+      /* ---- 异常状态入场特效 ---- */
+      inflict(side, st) {
+        if (!this.on()) return;
+        const B = this.center(side);
+        const map = {
+          burn: { c: '#ff7a2f', char: '❋', an: 'fxRise' },
+          par: { c: '#ffe14a', char: '⚡', an: 'fxBurst' },
+          psn: { c: '#b56fd8', char: '●', an: 'fxBubble' },
+          tox: { c: '#8a2fa3', char: '❋', an: 'fxBubble' },
+          sleep: { c: '#9fe8f5', char: 'Z', an: 'fxRise' },
+          frz: { c: '#63c5c2', char: '❄', an: 'fxFall' },
+          confuse: { c: '#ffd93b', char: '★', an: 'fxBurst' },
+          attract: { c: '#ff7ab8', char: '♥', an: 'fxBubble' }
+        };
+        const cfg = map[st]; if (!cfg) return;
+        for (let i = 0; i < 12; i++) this.p({ cls: 'fxp', x: B.x + rnd(-40, 40), y: B.y + rnd(-30, 30), char: cfg.char, c: cfg.c, fs: rnd(14, 26), dx: rnd(-30, 30), dy: rnd(-50, -6), an: cfg.an, dur: rnd(5, 9) / 10, delay: i * .04 });
+        const smap = { burn: 'crackle blast', par: 'zap', psn: 'bubble', tox: 'gurgle', sleep: 'chime squeak', frz: 'shard', confuse: 'pulse', attract: 'squeak' };
+        if (smap[st]) SND.play(smap[st]);
+      },
+      /* ---- 持续状态浮层同步 ---- */
+      syncStatusFx(b) {
+        if (!this.on()) { this.clearSt(); return; }
+        this.setSt('e', b.E());
+        this.setSt('p', b.P());
+      },
+      clearSt() {
+        ['e', 'p'].forEach(s => { const l = $(s === 'e' ? '#estfx' : '#pstfx'); if (l) l.innerHTML = ''; });
+      },
+      setSt(side, m) {
+        const l = $(side === 'e' ? '#estfx' : '#pstfx');
+        if (!l) return;
+        let html = '';
+        if (m && m.alive()) {
+          const S = m.status;
+          if (S === 'burn') html += _stHtml('flame', side, 5);
+          if (S === 'par') html += _stHtml('spark', side, 6);
+          if (S === 'psn') html += _stHtml('bub', side, 6);
+          if (S === 'tox') html += _stHtml('bub', side, 8);
+          if (S === 'sleep') html += _stHtml('zzz', side, 3);
+          if (S === 'frz') html += _stHtml('iceb', side, 5) + '<i class="iceBlock" style="left:6px;top:8px"></i>';
+          if (m.vol && m.vol.confuse > 0) html += _stHtml('confS', side, 3);
+          if (m.vol && m.vol.attract) html += _stHtml('heart', side, 3);
+        }
+        if (l._sig !== html) { l._sig = html; l.innerHTML = html; }
+      },
+      /* ---- 形态转换演出（基格尔德群聚 / 弱丁鱼鱼群 / 画皮破碎） ---- */
+      transform(side, kind) {
+        if (!this.on()) return;
+        const B = this.center(side);
+        const ft = this.feet(side);
+        if (kind === 'power') {
+          /* 群聚变形：细胞粒子汇聚 → 低闪 → 爆发环 */
+          SND.play('mega');
+          const colors = ['#4caf7d', '#2fbf8f', '#8af0d0', '#ffffff'];
+          for (let i = 0; i < 22; i++) setTimeout(() => {
+            const a = Math.random() * Math.PI * 2, d = rnd(130, 230);
+            this.p({ cls: 'fxTeraChip', x: B.x + Math.cos(a) * d, y: B.y + Math.sin(a) * d, c: pick(colors), dx: -Math.cos(a) * d, dy: -Math.sin(a) * d, an: 'fxTeraChipA', dur: .5 });
+          }, i * 18);
+          setTimeout(() => this.flash(.16, 420), 420);
+          setTimeout(() => { for (let i = 0; i < 3; i++) this.p({ cls: 'fxRing', x: B.x, y: B.y, c: pick(colors), an: 'fxRingB', dur: .5, delay: i * .12 }); }, 440);
+          setTimeout(() => { for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: B.x + rnd(-40, 40), y: B.y + rnd(-30, 30), char: '✦', c: pick(colors), fs: rnd(14, 26), dx: rnd(-40, 40), dy: rnd(-60, -10), an: 'fxRise', dur: rnd(6, 9) / 10, delay: i * .05 }); }, 460);
+        } else if (kind === 'school') {
+          /* 鱼群成形：水流粒子汇聚 → 溅射环 → 气泡 */
+          SND.play('splash');
+          for (let i = 0; i < 20; i++) setTimeout(() => {
+            const a = Math.random() * Math.PI * 2, d = rnd(120, 220);
+            this.p({ cls: 'fxp', x: B.x + Math.cos(a) * d, y: B.y + Math.sin(a) * d, char: pick(['❋', '●', '〜']), c: pick(['#4f9df7', '#a8e0ff', '#ffffff']), fs: rnd(14, 24), dx: -Math.cos(a) * d, dy: -Math.sin(a) * d, an: 'fxProj', dur: .5 });
+          }, i * 16);
+          setTimeout(() => { for (let i = 0; i < 2; i++) this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: '#4f9df7', an: 'fxRingBigB', dur: .6, delay: i * .14 }); }, 360);
+          setTimeout(() => this.extraFx('bub', side, { c: '#4f9df7', c2: '#a8e0ff' }), 380);
+        } else if (kind === 'schoolOut') {
+          /* 鱼群解散：水泡四散 + 水环 */
+          SND.play('splash');
+          for (let i = 0; i < 12; i++) this.p({ cls: 'fxp', x: B.x + rnd(-30, 30), y: B.y + rnd(-30, 30), char: '●', c: pick(['#4f9df7', '#a8e0ff']), fs: rnd(12, 22), dx: rnd(-70, 70), dy: rnd(-40, 60), an: 'fxSplash', dur: rnd(5, 8) / 10, delay: i * .05 });
+          this.p({ cls: 'fxRing', x: B.x, y: B.y, c: '#4f9df7', an: 'fxRingB', dur: .5 });
+        } else if (kind === 'disguise') {
+          /* 画皮破碎：表皮崩解 + 碎片四溅 + 裂纹闪 */
+          SND.play('shard');
+          for (let i = 0; i < 14; i++) this.p({ cls: 'fxShard', x: B.x + rnd(-30, 30), y: B.y + rnd(-30, 30), c: pick(['#ffd93b', '#fff', '#f5d0a0']), bg: 'linear-gradient(135deg,#fff,#ffd93b)', dx: rnd(-80, 80), dy: rnd(-70, 30), rot: rnd(0, 240), an: 'fxShardA', dur: rnd(5, 9) / 10, delay: i * .04 });
+          for (let i = 0; i < 8; i++) this.p({ cls: 'fxStarBurst', x: B.x + rnd(-20, 20), y: B.y + rnd(-20, 20), bg: 'linear-gradient(135deg,#fff,#ffd93b)', dx: rnd(-100, 100), dy: rnd(-80, 40), an: 'fxStarBurstA', dur: .6, delay: i * .04 });
+          this.p({ cls: 'fxRing', x: B.x, y: B.y, c: '#ffd93b', an: 'fxRingB', dur: .5 });
+          this.flash(.14, 400);
+        }
+      },
+      /* ---- Mega / 极巨 / 太晶 进化演出（各限1次低闪+1次低震） ---- */
+      mega(side) {
+        if (!this.on()) return;
+        SND.play('mega');
+        const B = this.center(side);
+        const colors = ['#ff6b6b', '#ffd93b', '#51cf66', '#339af0', '#845ef7', '#ff7ab8'];
+        for (let i = 0; i < 18; i++) setTimeout(() => {
+          const a = Math.random() * Math.PI * 2, d = rnd(120, 220);
+          this.p({ cls: 'fxMegaOrb', x: B.x + Math.cos(a) * d, y: B.y + Math.sin(a) * d, c: pick(colors), dx: -Math.cos(a) * d, dy: -Math.sin(a) * d, an: 'fxMegaOrbA', dur: .5 });
+        }, i * 26);
+        setTimeout(() => this.flash(.16, 420), 500);
+        setTimeout(() => { for (let i = 0; i < 3; i++) this.p({ cls: 'fxRing', x: B.x, y: B.y, c: pick(colors), an: 'fxRingB', dur: .5, delay: i * .14 }); }, 520);
+        setTimeout(() => { for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; this.p({ cls: 'fxMegaOrb', x: B.x + Math.cos(a) * 90, y: B.y + Math.sin(a) * 90, c: pick(colors), dx: -Math.cos(a) * 50, dy: -Math.sin(a) * 50, an: 'fxMegaOrbA', dur: .5, delay: i * .05 }); } }, 680);
+      },
+      dyna(side) {
+        if (!this.on()) return;
+        SND.play('dyna');
+        const ft = this.feet(side);
+        this.p({ cls: 'fxPillar', x: ft.x, y: ft.y - 14, w: 150, c: '#ff3d3d', an: 'fxPillarA', dur: .55, bg: 'linear-gradient(180deg, rgba(255,90,50,.95), rgba(255,40,90,.6) 60%, transparent)' });
+        for (let i = 0; i < 5; i++) setTimeout(() => {
+          this.p({ cls: 'fxDynaBolt', x: ft.x + rnd(-90, 90), y: ft.y, w: 10, c: '#ff5f5f', an: 'fxDynaBoltA', dur: .5, delay: rnd(0, 8) / 10 });
+        }, i * 60);
+        setTimeout(() => this.flash(.15, 450), 180);
+        setTimeout(() => this.shake(3, 360), 220);
+        setTimeout(() => { for (let i = 0; i < 2; i++) this.p({ cls: 'fxRing fxRingBig', x: ft.x, y: ft.y - 40, c: '#ff3d3d', an: 'fxRingBigB', dur: .6, delay: i * .2 }); }, 320);
+      },
+      tera(side, type) {
+        if (!this.on()) return;
+        SND.play('tera');
+        const B = this.center(side);
+        const c = (TYPEVFX[type] && TYPEVFX[type].c) || '#7fe3ff';
+        for (let i = 0; i < 14; i++) setTimeout(() => {
+          const a = Math.random() * Math.PI * 2, d = rnd(120, 210);
+          this.p({ cls: 'fxTeraChip', x: B.x + Math.cos(a) * d, y: B.y + Math.sin(a) * d, c, dx: -Math.cos(a) * d, dy: -Math.sin(a) * d, an: 'fxTeraChipA', dur: .55 });
+        }, i * 24);
+        setTimeout(() => this.flash(.14, 430), 480);
+        setTimeout(() => this.p({ cls: 'fxPrism', x: B.x, y: B.y, an: 'fxPrismA', dur: .55 }), 520);
+        setTimeout(() => { for (let i = 0; i < 2; i++) this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c, an: 'fxRingBigB', dur: .6, delay: i * .18 }); }, 560);
+        setTimeout(() => { for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; this.p({ cls: 'fxTeraChip', x: B.x + Math.cos(a) * 70, y: B.y + Math.sin(a) * 70, c, dx: -Math.cos(a) * 40, dy: -Math.sin(a) * 40 - 20, an: 'fxTeraChipA', dur: .6, delay: i * .06 }); } }, 700);
+      }
+    };
+    /* ============ 属性华丽基线（兜底） ============ */
+    const TYPEFANCY = {
+      normal: {  c: '#d8d8c0', c2: '#ffffff', proj: 'orb', chars: ['●', '✦', '●'], launch: 'swish', snd: 'boom' },
+      fire: {  c: '#ff7a2f', c2: '#ffd23b', proj: 'flame', chars: ['▲', '❋', '✦'], launch: 'whoosh', snd: 'blast' },
+      water: {  c: '#4f9df7', c2: '#a8e0ff', proj: 'orb', chars: ['●', '❋', '❄'], launch: 'whoosh', snd: 'splash' },
+      electric: {  c: '#ffe14a', c2: '#fff8c0', proj: 'bolt', chars: ['⚡', '✦'], launch: 'zap', snd: 'zap' },
+      grass: {  c: '#7ac74c', c2: '#d8f5b0', proj: 'leaf', chars: ['❧', '✦', '❋'], launch: 'swish', snd: 'swish' },
+      ice: {  c: '#9fe8f5', c2: '#ffffff', proj: 'shard', chars: ['❄', '◆', '✧'], launch: 'shard', snd: 'shard' },
+      fighting: {  c: '#e05545', c2: '#ffc26b', proj: 'none', chars: ['✦', '▲', '●'], launch: 'whoosh', snd: 'thud' },
+      poison: {  c: '#b56fd8', c2: '#e8b8ff', proj: 'orb', chars: ['●', '❋'], launch: 'whoosh', snd: 'bubble' },
+      ground: {  c: '#c9a94e', c2: '#f0dc9a', proj: 'shard', chars: ['▲', '■', '●'], launch: 'swish', snd: 'rumble' },
+      flying: {  c: '#c8b8f0', c2: '#f0e8ff', proj: 'orb', chars: ['〜', '✦', '●'], launch: 'whoosh', snd: 'rush' },
+      psychic: {  c: '#ff7ab8', c2: '#ffd0e8', proj: 'orb', chars: ['◎', '✦', '✧'], launch: 'pulse', snd: 'pulse' },
+      bug: {  c: '#b8d84a', c2: '#e8f5b0', proj: 'shard', chars: ['✦', '❧'], launch: 'swish', snd: 'buzz' },
+      rock: {  c: '#b0a060', c2: '#e0d09a', proj: 'shard', chars: ['■', '▲', '●'], launch: 'swish', snd: 'clunk' },
+      ghost: {  c: '#9070c8', c2: '#d0b8f8', proj: 'orb', chars: ['◉', '✧'], launch: 'wail', snd: 'wail' },
+      dragon: {  c: '#8060f0', c2: '#c0b0ff', proj: 'orb', chars: ['◆', '✦', '❋'], launch: 'roar', snd: 'roar' },
+      dark: {  c: '#8a6058', c2: '#c8a098', proj: 'orb', chars: ['●', '✧'], launch: 'wail', snd: 'growl' },
+      steel: {  c: '#c8d0e0', c2: '#ffffff', proj: 'shard', chars: ['✦', '■', '◆'], launch: 'swish', snd: 'clang' },
+      fairy: {  c: '#ff9ac8', c2: '#ffe0f0', proj: 'orb', chars: ['✿', '✦', '✧'], launch: 'shimmer', snd: 'chime' },
+      stellar: {  c: '#ffffff', c2: '#ffd93b', proj: 'orb', chars: ['✦', '✧', '❋'], launch: 'shimmer', snd: 'chime boom' }
+    };
+    /* ============ 极巨招式华丽基线（按属性） ============ */
+    const DYNAFX = {
+      normal: { c: '#ff9a5c', c2: '#ffd23b', proj: 'orb' },
+      fire: { c: '#ff5f2f', c2: '#ffd23b', proj: 'flame' },
+      water: { c: '#3f8fe0', c2: '#a8e0ff', proj: 'orb' },
+      electric: { c: '#ffe14a', c2: '#fff8c0', proj: 'none', extra: ['bolt'] },
+      grass: { c: '#7ac74c', c2: '#d8f5b0', proj: 'shard' },
+      ice: { c: '#9fe8f5', c2: '#ffffff', proj: 'shard' },
+      fighting: { c: '#ff8a5c', c2: '#ffd23b', proj: 'none' },
+      poison: { c: '#b56fd8', c2: '#e8b8ff', proj: 'orb' },
+      ground: { c: '#c9a94e', c2: '#f0dc9a', proj: 'shard' },
+      flying: { c: '#c8b8f0', c2: '#ffffff', proj: 'orb' },
+      psychic: { c: '#ff7ab8', c2: '#ffd0e8', proj: 'orb' },
+      bug: { c: '#b8d84a', c2: '#e8f5b0', proj: 'shard' },
+      rock: { c: '#b0a060', c2: '#e0d09a', proj: 'shard' },
+      ghost: { c: '#9070c8', c2: '#d0b8f8', proj: 'orb' },
+      dragon: { c: '#8060f0', c2: '#c0b0ff', proj: 'orb' },
+      dark: { c: '#8a6058', c2: '#c8a098', proj: 'orb' },
+      steel: { c: '#c8d0e0', c2: '#ffffff', proj: 'shard' },
+      fairy: { c: '#ff9ac8', c2: '#ffe0f0', proj: 'orb' },
+      stellar: { c: '#ffffff', c2: '#ffd93b', proj: 'shard' }
+    };
+    /* ============ 超极巨招式专属演出（按物种id） ============ */
+    const GMAXFX = {
+      3: {  c: '#7ac74c', c2: '#d8f5b0', proj: 'flame', extra: ['leaves', 'rain'], snd: 'swish boom2' },
+      6: {  c: '#ff5f2f', c2: '#ffd23b', proj: 'flame', extra: ['ember', 'nova'], snd: 'blast boom2' },
+      9: {  c: '#3f8fe0', c2: '#a8e0ff', proj: 'beam', extra: ['rain', 'bub'], snd: 'splash boom2' },
+      25: {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', extra: ['bolt', 'spark'], snd: 'zap boom2' },
+      52: {  c: '#ffd23b', c2: '#ffffff', proj: 'shard', extra: ['spark', 'nova'], snd: 'chime boom2' },
+      68: {  c: '#ff8a3d', c2: '#ffd23b', proj: 'none', extra: ['arc', 'dust'], snd: 'roar boom2' },
+      94: {  c: '#9070c8', c2: '#d0b8f8', proj: 'none', extra: ['ghost', 'arc'], snd: 'wail boom2' },
+      99: {  c: '#4f9df7', c2: '#a8e0ff', proj: 'orb', extra: ['bub', 'rain'], snd: 'gurgle boom2' },
+      131: {  c: '#9fe8f5', c2: '#ffffff', proj: 'none', extra: ['mist', 'ice', 'nova'], snd: 'hiss shard boom2' },
+      133: {  c: '#ff9ac8', c2: '#ffffff', proj: 'none', extra: ['flower'], snd: 'chime boom2' },
+      143: {  c: '#c8a098', c2: '#ffd23b', proj: 'none', extra: ['dust', 'nova'], snd: 'thud boom2' },
+      569: {  c: '#8a5fc0', c2: '#b56fd8', proj: 'beam', extra: ['bub'], snd: 'gurgle boom2' },
+      809: {  c: '#c8d0e0', c2: '#ffffff', proj: 'flame', extra: ['metal', 'ember'], snd: 'clang blast boom2' },
+      812: {  c: '#7ac74c', c2: '#d8f5b0', proj: 'none', extra: ['leaves', 'dust', 'arc'], snd: 'thud boom2' },
+      815: {  c: '#ff5f2f', c2: '#ffd23b', proj: 'flame', extra: ['ember', 'nova'], snd: 'blast boom2' },
+      818: {  c: '#3f8fe0', c2: '#a8e0ff', proj: 'beam', extra: ['rain'], snd: 'laser splash boom2' },
+      823: {  c: '#c8b8f0', c2: '#ffffff', proj: 'none', extra: ['gust', 'nova'], snd: 'rush boom2' },
+      826: {  c: '#ff7ab8', c2: '#ffd0e8', proj: 'none', extra: ['psychic', 'bolt'], snd: 'pulse boom2' },
+      834: {  c: '#4f9df7', c2: '#b0a060', proj: 'shard', extra: ['rain', 'dust'], snd: 'splash clunk boom2' },
+      839: {  c: '#b0a060', c2: '#e0d09a', proj: 'shard', extra: ['dust', 'ember'], snd: 'rumble clunk boom2' },
+      841: {  c: '#7ac74c', c2: '#ffd23b', proj: 'orb', extra: ['leaves', 'bub'], snd: 'splat boom2' },
+      842: {  c: '#ff9ac8', c2: '#ffffff', proj: 'none', extra: ['flower', 'mist'], snd: 'heal shimmer boom2' },
+      844: {  c: '#c9a94e', c2: '#f0dc9a', proj: 'none', extra: ['dust', 'gust'], snd: 'rumble rush boom2' },
+      845: {  c: '#c8b8f0', c2: '#8a5fc0', proj: 'shard', extra: ['gust', 'bub'], snd: 'snip boom2' },
+      849: {  c: '#ffe14a', c2: '#b56fd8', proj: 'none', extra: ['bolt', 'bub'], snd: 'zap bubble boom2' },
+      851: {  c: '#ff3d1f', c2: '#ffd23b', proj: 'flame', extra: ['ember', 'nova'], snd: 'blast boom2 rumble' },
+      858: {  c: '#ffd23b', c2: '#ffffff', proj: 'none', extra: ['bolt', 'flower'], snd: 'boom2 zap chime' },
+      861: {  c: '#8a5fc0', c2: '#9070c8', proj: 'none', extra: ['ghost', 'mist'], snd: 'wail hiss boom2' },
+      869: {  c: '#ff9ac8', c2: '#ffffff', proj: 'none', extra: ['flower', 'nova'], snd: 'heal chime boom2' },
+      879: {  c: '#c8d0e0', c2: '#ffd23b', proj: 'none', extra: ['metal', 'dust'], snd: 'clang boom2' },
+      884: {  c: '#8a5fc0', c2: '#9fe8f5', proj: 'beam', extra: ['ghost', 'mist'], snd: 'beam wail boom2' },
+      892: {  c: '#e05545', c2: '#ffd23b', proj: 'none', extra: ['arc', 'nova', 'dust'], snd: 'thud roar boom2' }
+    };
+    /* ============ 标志性技能专属演出 ============ */
+    const MOVEFX = {
+      /* normal */
+      'hyperbeam': {  c: '#ffd23b', c2: '#fff6c0', proj: 'beam', big: 1, flash: 1, shake: 1, extra: ['nova'], snd: 'charge boom2' },
+      'gigaimpact': {  c: '#ffffff', c2: '#ffd23b', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['nova', 'dust'], snd: 'charge thud boom2' },
+      'doubleedge': {  c: '#d8d8c0', c2: '#ffffff', proj: 'none', big: 1, shake: 1, extra: ['dust'], snd: 'thud boom' },
+      'bodyslam': {  c: '#d8d8c0', c2: '#ffffff', proj: 'none', shake: 1, extra: ['dust'], snd: 'thud' },
+      'hypervoice': {  c: '#d8d8c0', c2: '#ffffff', proj: 'none', extra: ['sound'], snd: 'horn' },
+      'boomburst': {  c: '#ffffff', c2: '#ffd23b', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['sound', 'nova'], snd: 'boom2 blast' },
+      'quickattack': {  c: '#ffffff', c2: '#d8d8c0', proj: 'none', extra: ['gust'], snd: 'rush' },
+      'extremespeed': {  c: '#ffffff', c2: '#9fe8f5', proj: 'none', extra: ['gust', 'arc'], snd: 'rush dive' },
+      'triattack': {  c: '#ff7ab8', c2: '#9fe8f5', proj: 'orb', extra: ['spark'], snd: 'pop zap shard' },
+      'swift': {  c: '#ffffff', c2: '#ffd23b', proj: 'none', extra: ['arc', 'spark'], snd: 'swish chime' },
+      'judgment': {  c: '#ffffff', c2: '#ffd23b', proj: 'beam', big: 1, flash: 1, extra: ['nova'], snd: 'beam boom2' },
+      'selfdestruct': {  c: '#ffffff', c2: '#ffd23b', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['nova', 'dust'], snd: 'boom2 blast rumble' },
+      'explosion': {  c: '#ffffff', c2: '#ff9a2f', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['nova', 'dust'], snd: 'boom2 blast rumble' },
+      /* fire */
+      'ember': {  c: '#ff7a2f', c2: '#ffd23b', proj: 'flame', extra: ['ember'], snd: 'crackle' },
+      'flamethrower': {  c: '#ff7a2f', c2: '#ffd23b', proj: 'beam', extra: ['ember'], snd: 'hiss blast' },
+      'fireblast': {  c: '#ff5f2f', c2: '#ffd23b', proj: 'flame', big: 1, flash: 1, extra: ['ember', 'nova'], snd: 'boom2 blast' },
+      'overheat': {  c: '#ff5f2f', c2: '#ffd23b', proj: 'flame', big: 1, flash: 1, extra: ['ember'], snd: 'boom2 blast' },
+      'eruption': {  c: '#ff3d1f', c2: '#ffd23b', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['ember', 'nova'], snd: 'rumble boom2 blast' },
+      'heatwave': {  c: '#ff8a3d', c2: '#ffd23b', proj: 'none', big: 1, extra: ['ember'], snd: 'rush blast' },
+      'flareblitz': {  c: '#ff5f2f', c2: '#ffd23b', proj: 'none', big: 1, flash: 1, extra: ['ember', 'nova'], snd: 'rush boom2 blast' },
+      'firepunch': {  c: '#ff7a2f', c2: '#ffd23b', proj: 'none', extra: ['ember'], snd: 'thud blast' },
+      'sacredfire': {  c: '#ff9a2f', c2: '#ffffff', proj: 'none', big: 1, flash: 1, extra: ['ember'], snd: 'blast chime' },
+      'blueflare': {  c: '#6fa8ff', c2: '#ffd23b', proj: 'beam', extra: ['ember'], snd: 'beam blast' },
+      'inferno': {  c: '#ff5f2f', c2: '#ffd23b', proj: 'flame', extra: ['ember'], snd: 'blast boom' },
+      'lavaplume': {  c: '#ff5f2f', c2: '#ffd23b', proj: 'none', big: 1, extra: ['ember', 'dust'], snd: 'rumble blast' },
+      /* water */
+      'watergun': {  c: '#4f9df7', c2: '#a8e0ff', proj: 'orb', extra: ['bub'], snd: 'splash' },
+      'hydropump': {  c: '#3f8fe0', c2: '#a8e0ff', proj: 'beam', big: 1, extra: ['rain'], snd: 'hiss splash' },
+      'surf': {  c: '#3f8fe0', c2: '#a8e0ff', proj: 'none', big: 1, shake: 1, extra: ['rain', 'bub'], snd: 'rumble splash' },
+      'aquajet': {  c: '#4f9df7', c2: '#a8e0ff', proj: 'none', extra: ['gust'], snd: 'rush splash' },
+      'waterfall': {  c: '#3f8fe0', c2: '#ffffff', proj: 'none', shake: 1, extra: ['rain'], snd: 'splash thud' },
+      'scald': {  c: '#ff9a5c', c2: '#a8e0ff', proj: 'orb', extra: ['mist'], snd: 'hiss bubble' },
+      'liquidation': {  c: '#3f8fe0', c2: '#a8e0ff', proj: 'orb', extra: ['bub'], snd: 'splash boom' },
+      'bubblebeam': {  c: '#4f9df7', c2: '#a8e0ff', proj: 'orb', extra: ['bub'], snd: 'bubble splash' },
+      'originpulse': {  c: '#3f8fe0', c2: '#a8e0ff', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['rain', 'nova'], snd: 'boom2 splash rumble' },
+      'whirlpool': {  c: '#3f8fe0', c2: '#a8e0ff', proj: 'none', extra: ['bub'], snd: 'rush gurgle' },
+      'steameruption': {  c: '#ff9a5c', c2: '#a8e0ff', proj: 'flame', big: 1, flash: 1, extra: ['mist', 'ember'], snd: 'hiss blast' },
+      'waterpulse': {  c: '#4f9df7', c2: '#a8e0ff', proj: 'orb', extra: ['bub', 'sound'], snd: 'pulse splash' },
+      /* electric */
+      'thunderbolt': {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', extra: ['bolt', 'spark'], snd: 'zap zap boom' },
+      'thunder': {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['bolt', 'spark'], snd: 'boom2 zap zap' },
+      'thunderpunch': {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', extra: ['spark'], snd: 'zap thud' },
+      'volttackle': {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', big: 1, flash: 1, extra: ['spark', 'bolt'], snd: 'zap boom2 blast' },
+      'wildcharge': {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', extra: ['spark'], snd: 'zap boom' },
+      'discharge': {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', big: 1, extra: ['spark'], snd: 'zap zap' },
+      'electroball': {  c: '#ffe14a', c2: '#fff8c0', proj: 'bolt', extra: ['spark'], snd: 'zap pop' },
+      'boltstrike': {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['bolt', 'spark'], snd: 'boom2 zap zap' },
+      'risingvoltage': {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', extra: ['bolt'], snd: 'zap zap' },
+      'zingzap': {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', extra: ['spark'], snd: 'zap thud' },
+      'plasmafists': {  c: '#ffe14a', c2: '#fff8c0', proj: 'none', big: 1, flash: 1, extra: ['spark', 'bolt'], snd: 'zap boom2' },
+      /* grass */
+      'vinewhip': {  c: '#7ac74c', c2: '#d8f5b0', proj: 'shard', extra: ['leaves'], snd: 'snip swish' },
+      'razorleaf': {  c: '#7ac74c', c2: '#d8f5b0', proj: 'none', extra: ['leaves', 'arc'], snd: 'swish snip' },
+      'solarbeam': {  c: '#b8f06a', c2: '#ffffff', proj: 'beam', big: 1, flash: 1, extra: ['leaves'], snd: 'charge beam boom2' },
+      'gigadrain': {  c: '#7ac74c', c2: '#d8f5b0', proj: 'leaf', extra: ['leaves'], snd: 'whoosh bubble' },
+      'energyball': {  c: '#7ac74c', c2: '#d8f5b0', proj: 'leaf', big: 1, extra: ['leaves'], snd: 'pop swish' },
+      'leafblade': {  c: '#7ac74c', c2: '#d8f5b0', proj: 'none', extra: ['leaves', 'arc'], snd: 'swish snip' },
+      'petaldance': {  c: '#ff9ac8', c2: '#d8f5b0', proj: 'none', extra: ['flower'], snd: 'chime swish' },
+      'woodhammer': {  c: '#4f9d3f', c2: '#d8f5b0', proj: 'none', big: 1, shake: 1, extra: ['leaves', 'dust'], snd: 'thud boom rumble' },
+      'seedbomb': {  c: '#7ac74c', c2: '#d8f5b0', proj: 'orb', extra: ['leaves'], snd: 'pop thud' },
+      'powerwhip': {  c: '#7ac74c', c2: '#d8f5b0', proj: 'none', extra: ['leaves', 'arc'], snd: 'snip swish boom' },
+      'icebeam': {  c: '#9fe8f5', c2: '#ffffff', proj: 'beam', extra: ['mist'], snd: 'laser shard' },
+      'blizzard': {  c: '#9fe8f5', c2: '#ffffff', proj: 'none', big: 1, extra: ['mist', 'ice'], snd: 'hiss rush shard' },
+      'icepunch': {  c: '#9fe8f5', c2: '#ffffff', proj: 'none', extra: ['ice'], snd: 'shard thud' },
+      'iciclecrash': {  c: '#9fe8f5', c2: '#ffffff', proj: 'shard', big: 1, extra: ['ice'], snd: 'shard boom' },
+      'freezedry': {  c: '#9fe8f5', c2: '#ffffff', proj: 'shard', extra: ['mist'], snd: 'laser hiss' },
+      'aurorabeam': {  c: '#9fe8f5', c2: '#ffffff', proj: 'beam', snd: 'beam chime' },
+      'avalanche': {  c: '#9fe8f5', c2: '#ffffff', proj: 'shard', big: 1, shake: 1, extra: ['ice'], snd: 'rumble shard boom' },
+      'icehammer': {  c: '#9fe8f5', c2: '#ffffff', proj: 'none', big: 1, shake: 1, extra: ['ice', 'dust'], snd: 'thud shard boom' },
+      /* fighting */
+      'closecombat': {  c: '#e05545', c2: '#ffc26b', proj: 'none', big: 1, extra: ['arc', 'dust'], snd: 'thud thud boom' },
+      'focusblast': {  c: '#ffb14a', c2: '#fff8e0', proj: 'orb', big: 1, flash: 1, extra: ['nova'], snd: 'whoosh boom2' },
+      'machpunch': {  c: '#ffc26b', c2: '#ffffff', proj: 'none', extra: ['gust'], snd: 'rush thud' },
+      'aurasphere': {  c: '#4f9df7', c2: '#a8e0ff', proj: 'orb', big: 1, snd: 'whoosh pulse' },
+      'drainpunch': {  c: '#ff8a6b', c2: '#ffc26b', proj: 'none', extra: ['arc'], snd: 'thud whoosh' },
+      'highjumpkick': {  c: '#e05545', c2: '#ffc26b', proj: 'none', shake: 1, extra: ['dust'], snd: 'dive thud' },
+      'dynamicpunch': {  c: '#e05545', c2: '#ffc26b', proj: 'none', flash: 1, extra: ['nova'], snd: 'whoosh boom' },
+      'superpower': {  c: '#e05545', c2: '#ffc26b', proj: 'none', big: 1, shake: 1, extra: ['dust'], snd: 'roar boom2' },
+      'skyuppercut': {  c: '#e05545', c2: '#ffc26b', proj: 'none', extra: ['gust'], snd: 'dive whoosh' },
+      'vacuumwave': {  c: '#c8b8f0', c2: '#ffffff', proj: 'orb', snd: 'rush' },
+      'secretsword': {  c: '#ff8a6b', c2: '#ffffff', proj: 'shard', extra: ['arc'], snd: 'swish snip' },
+      'focuspunch': {  c: '#ff8a6b', c2: '#ffffff', proj: 'none', big: 1, flash: 1, extra: ['nova', 'dust'], snd: 'charge thud boom2' },
+      /* poison */
+      'sludgebomb': {  c: '#b56fd8', c2: '#e8b8ff', proj: 'orb', extra: ['bub'], snd: 'splat bubble' },
+      'sludgewave': {  c: '#8a5fc0', c2: '#b56fd8', proj: 'none', big: 1, extra: ['bub'], snd: 'gurgle splash' },
+      'poisonjab': {  c: '#b56fd8', c2: '#e8b8ff', proj: 'none', extra: ['bub', 'arc'], snd: 'splat thud' },
+      'crosspoison': {  c: '#b56fd8', c2: '#e8b8ff', proj: 'none', extra: ['arc', 'bub'], snd: 'splat snip' },
+      'gunkshot': {  c: '#8a5fc0', c2: '#b56fd8', proj: 'orb', big: 1, extra: ['bub'], snd: 'splat boom2' },
+      /* ground */
+      'earthquake': {  c: '#c9a94e', c2: '#f0dc9a', proj: 'none', big: 1, shake: 1, extra: ['dust'], snd: 'rumble boom' },
+      'earthpower': {  c: '#c9a94e', c2: '#f0dc9a', proj: 'orb', extra: ['dust', 'mist'], snd: 'rumble pulse' },
+      'dig': {  c: '#c9a94e', c2: '#f0dc9a', proj: 'none', extra: ['dust'], snd: 'whoosh rumble' },
+      'fissure': {  c: '#8a6a3c', c2: '#c9a94e', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['dust'], snd: 'rumble boom2 blast' },
+      'magnitude': {  c: '#c9a94e', c2: '#f0dc9a', proj: 'none', big: 1, shake: 1, extra: ['dust'], snd: 'rumble boom' },
+      'mudbomb': {  c: '#c9a94e', c2: '#8a6a3c', proj: 'orb', extra: ['dust'], snd: 'splat thud' },
+      'scorchingsands': {  c: '#e0912b', c2: '#f0dc9a', proj: 'orb', extra: ['dust'], snd: 'hiss rumble' },
+      'thousandarrows': {  c: '#c9a94e', c2: '#f0dc9a', proj: 'shard', big: 1, extra: ['dust'], snd: 'swish boom' },
+      /* flying */
+      'aerialace': {  c: '#ffffff', c2: '#c8b8f0', proj: 'none', extra: ['gust', 'arc'], snd: 'rush swish' },
+      'bravebird': {  c: '#ff8a5c', c2: '#ffffff', proj: 'none', big: 1, shake: 1, extra: ['gust', 'dust'], snd: 'dive rush boom' },
+      'drillpeck': {  c: '#c8b8f0', c2: '#ffffff', proj: 'none', extra: ['arc', 'gust'], snd: 'rush snip' },
+      'hurricane': {  c: '#8fc0ff', c2: '#c8b8f0', proj: 'none', big: 1, extra: ['gust'], snd: 'rush roar' },
+      'skyattack': {  c: '#ffffff', c2: '#c8b8f0', proj: 'none', big: 1, extra: ['gust', 'arc'], snd: 'charge rush boom2' },
+      'airslash': {  c: '#c8b8f0', c2: '#ffffff', proj: 'none', extra: ['arc'], snd: 'rush swish' },
+      'drillrun': {  c: '#c9a94e', c2: '#f0dc9a', proj: 'none', extra: ['dust', 'arc'], snd: 'rush rumble' },
+      /* psychic */
+      'psychic': {  c: '#ff7ab8', c2: '#ffd0e8', proj: 'orb', extra: ['psychic'], snd: 'pulse wail' },
+      'psyshock': {  c: '#ff7ab8', c2: '#ffd0e8', proj: 'shard', extra: ['psychic'], snd: 'shard pulse' },
+      'futuresight': {  c: '#c8a0e8', c2: '#ffd0e8', proj: 'none', extra: ['psychic'], snd: 'wail chime' },
+      'zenheadbutt': {  c: '#ff9ac8', c2: '#ffffff', proj: 'none', extra: ['psychic', 'arc'], snd: 'pulse thud' },
+      'psychicnoise': {  c: '#ff7ab8', c2: '#ffd0e8', proj: 'orb', extra: ['sound'], snd: 'buzz pulse' },
+      'expandingforce': {  c: '#c8a0e8', c2: '#ffd0e8', proj: 'none', extra: ['psychic'], snd: 'pulse boom' },
+      'photongeyser': {  c: '#ffffff', c2: '#ffd93b', proj: 'beam', big: 1, flash: 1, extra: ['psychic', 'nova'], snd: 'charge beam boom2' },
+      'prismaticlaser': {  c: '#ff7ab8', c2: '#9fe8f5', proj: 'beam', big: 1, flash: 1, extra: ['nova'], snd: 'beam chime boom2' },
+      /* bug */
+      'megahorn': {  c: '#b8d84a', c2: '#ffffff', proj: 'none', big: 1, extra: ['arc', 'dust'], snd: 'horn thud' },
+      'xscissor': {  c: '#b8d84a', c2: '#e8f5b0', proj: 'none', extra: ['arc'], snd: 'snip swish' },
+      'bugbuzz': {  c: '#b8d84a', c2: '#e8f5b0', proj: 'none', extra: ['sound'], snd: 'buzz' },
+      'signalbeam': {  c: '#b8d84a', c2: '#ffffff', proj: 'beam', snd: 'beam buzz' },
+      'lunge': {  c: '#b8d84a', c2: '#e8f5b0', proj: 'none', extra: ['arc'], snd: 'thud swish' },
+      'uturn': {  c: '#b8d84a', c2: '#e8f5b0', proj: 'none', extra: ['gust'], snd: 'rush whoosh' },
+      'leechlife': {  c: '#b8d84a', c2: '#e8f5b0', proj: 'orb', snd: 'whoosh bubble' },
+      'firstimpression': {  c: '#b8d84a', c2: '#ffffff', proj: 'none', flash: 1, extra: ['arc', 'gust'], snd: 'charge rush boom' },
+      /* rock */
+      'stoneedge': {  c: '#b0a060', c2: '#e0d09a', proj: 'shard', big: 1, extra: ['dust'], snd: 'shard clunk' },
+      'rockslide': {  c: '#b0a060', c2: '#e0d09a', proj: 'none', big: 1, shake: 1, extra: ['dust'], snd: 'rumble clunk' },
+      'rockblast': {  c: '#b0a060', c2: '#e0d09a', proj: 'shard', extra: ['dust'], snd: 'clunk clunk' },
+      'powergem': {  c: '#ff8ac8', c2: '#ffffff', proj: 'shard', extra: ['spark'], snd: 'shard chime' },
+      'ancientpower': {  c: '#b0a060', c2: '#ffffff', proj: 'shard', extra: ['dust', 'mist'], snd: 'clunk pulse' },
+      'headsmash': {  c: '#b0a060', c2: '#ffffff', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['dust', 'nova'], snd: 'thud boom2 blast' },
+      /* ghost */
+      'shadowball': {  c: '#6b3fa0', c2: '#b06fd8', proj: 'shadow', big: 1, extra: ['ghost'], snd: 'wail whoosh boom' },
+      'shadowclaw': {  c: '#9070c8', c2: '#d0b8f8', proj: 'none', extra: ['ghost', 'arc'], snd: 'wail snip' },
+      'shadowpunch': {  c: '#9070c8', c2: '#d0b8f8', proj: 'none', extra: ['ghost'], snd: 'wail thud' },
+      'phantomforce': {  c: '#9070c8', c2: '#d0b8f8', proj: 'none', big: 1, extra: ['ghost'], snd: 'wail dive boom' },
+      'poltergeist': {  c: '#9070c8', c2: '#d0b8f8', proj: 'shard', extra: ['ghost'], snd: 'clunk wail' },
+      'hex': {  c: '#9070c8', c2: '#d0b8f8', proj: 'orb', extra: ['ghost'], snd: 'wail pulse' },
+      'astralbarrage': {  c: '#9070c8', c2: '#d0b8f8', proj: 'shard', big: 1, flash: 1, extra: ['ghost', 'nova'], snd: 'wail shard boom2' },
+      /* dragon */
+      'dragonclaw': {  c: '#8060f0', c2: '#c0b0ff', proj: 'none', extra: ['dragon', 'arc'], snd: 'roar snip' },
+      'dragonpulse': {  c: '#8060f0', c2: '#c0b0ff', proj: 'orb', extra: ['dragon'], snd: 'roar beam' },
+      'dracometeor': {  c: '#8060f0', c2: '#ffd0e8', proj: 'shard', big: 1, flash: 1, shake: 1, extra: ['dragon', 'nova'], snd: 'roar boom2 shard' },
+      'outrage': {  c: '#8060f0', c2: '#c0b0ff', proj: 'none', big: 1, shake: 1, extra: ['dragon'], snd: 'roar boom' },
+      'dragonascent': {  c: '#8060f0', c2: '#ffffff', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['dragon', 'gust', 'nova'], snd: 'roar dive boom2' },
+      'dragonbreath': {  c: '#8060f0', c2: '#c0b0ff', proj: 'flame', snd: 'roar hiss' },
+      'coreenforcer': {  c: '#a040ff', c2: '#ffffff', proj: 'beam', big: 1, flash: 1, extra: ['dragon'], snd: 'beam roar boom2' },
+      'roaroftime': {  c: '#8060f0', c2: '#ffffff', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['dragon', 'nova'], snd: 'roar wail boom2' },
+      'spacialrend': {  c: '#8060f0', c2: '#c0b0ff', proj: 'beam', big: 1, flash: 1, extra: ['dragon'], snd: 'roar beam snip' },
+      /* dark */
+      'darkpulse': {  c: '#8a6058', c2: '#c8a098', proj: 'beam', extra: ['ghost'], snd: 'growl pulse' },
+      'crunch': {  c: '#8a6058', c2: '#c8a098', proj: 'none', extra: ['arc'], snd: 'growl snip thud' },
+      'nightslash': {  c: '#8a6058', c2: '#c8a098', proj: 'none', extra: ['arc'], snd: 'growl snip' },
+      'knockoff': {  c: '#8a6058', c2: '#c8a098', proj: 'none', extra: ['dust'], snd: 'growl thud' },
+      'suckerpunch': {  c: '#8a6058', c2: '#c8a098', proj: 'none', extra: ['ghost', 'gust'], snd: 'wail rush' },
+      'foulplay': {  c: '#8a6058', c2: '#c8a098', proj: 'none', extra: ['ghost', 'arc'], snd: 'growl swish' },
+      'throatchop': {  c: '#8a6058', c2: '#c8a098', proj: 'none', extra: ['arc'], snd: 'snip growl' },
+      'lashout': {  c: '#8a6058', c2: '#c8a098', proj: 'none', extra: ['arc', 'ghost'], snd: 'growl boom' },
+      'wickedblow': {  c: '#8a6058', c2: '#ffffff', proj: 'none', big: 1, flash: 1, extra: ['arc', 'ghost'], snd: 'wail boom2' },
+      /* steel */
+      'ironhead': {  c: '#c8d0e0', c2: '#ffffff', proj: 'orb', extra: ['metal'], snd: 'clang thud' },
+      'flashcannon': {  c: '#8fa3bd', c2: '#ffffff', proj: 'beam', extra: ['metal', 'spark'], snd: 'laser clang' },
+      'meteormash': {  c: '#c8d0e0', c2: '#ffffff', proj: 'shard', big: 1, flash: 1, extra: ['metal', 'nova'], snd: 'clang boom2' },
+      'bulletpunch': {  c: '#c8d0e0', c2: '#ffffff', proj: 'none', extra: ['metal', 'gust'], snd: 'clang rush' },
+      'steelwing': {  c: '#c8d0e0', c2: '#ffffff', proj: 'none', extra: ['metal', 'arc'], snd: 'clang snip' },
+      'gyroball': {  c: '#c8d0e0', c2: '#ffffff', proj: 'orb', extra: ['metal'], snd: 'whoosh clang' },
+      'irontail': {  c: '#c8d0e0', c2: '#ffffff', proj: 'none', extra: ['metal', 'arc'], snd: 'clang snip' },
+      'ironheadcrash': { c: '#c8d0e0', c2: '#ffffff', proj: 'none', big: 1, shake: 1, extra: ['metal', 'dust'] },
+      'behemothblade': {  c: '#c8d0e0', c2: '#ffffff', proj: 'beam', big: 1, flash: 1, extra: ['metal'], snd: 'beam clang boom2' },
+      'behemothbash': {  c: '#c8d0e0', c2: '#ffffff', proj: 'none', big: 1, flash: 1, extra: ['metal', 'nova'], snd: 'clang boom2 thud' },
+      /* fairy */
+      'moonblast': {  c: '#ff9ac8', c2: '#fff', proj: 'orb', big: 1, extra: ['flower'], snd: 'chime boom' },
+      'dazzlinggleam': {  c: '#ffd0e8', c2: '#ffffff', proj: 'none', flash: 1, extra: ['flower'], snd: 'shimmer chime' },
+      'playrough': {  c: '#ff9ac8', c2: '#ffd0e8', proj: 'none', shake: 1, extra: ['flower', 'arc'], snd: 'chime thud squeak' },
+      'drainingkiss': {  c: '#ff9ac8', c2: '#ffd0e8', proj: 'orb', extra: ['flower'], snd: 'chime bubble' },
+      'disarmingvoice': {  c: '#ff9ac8', c2: '#ffd0e8', proj: 'none', extra: ['sound'], snd: 'chime buzz' },
+      'sparklyswirl': {  c: '#ffd0e8', c2: '#ffffff', proj: 'orb', extra: ['flower', 'mist'], snd: 'shimmer rush' },
+      'mistyexplosion': {  c: '#ffd0e8', c2: '#ffffff', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['flower', 'nova'], snd: 'boom2 chime shimmer' },
+      /* tera / misc */
+      'terablast': {  c: '#ffffff', c2: '#ffd23b', proj: 'orb', extra: ['spark'], snd: 'zap chime' },
+      'terastarstorm': {  c: '#ffffff', c2: '#ffd23b', proj: 'shard', big: 1, flash: 1, extra: ['nova'], snd: 'shimmer shard boom2' },
+      'tackle': {  c: '#d8d8c0', c2: '#ffffff', proj: 'none', snd: 'thud' }
+    };
     /* 剧情对话框 */
     function dlg(speaker, text, spriteId) {
       return new Promise(async res => {
@@ -8311,6 +10561,7 @@ return ev;
         this.haz = { p: { sr: 0, spikes: 0, tspikes: 0 }, e: { sr: 0, spikes: 0, tspikes: 0 } };
         this.gmaxDot = null;
         this.auroraveil = { p: 0, e: 0 };   // 极光幕（超极巨极光旋律）
+        this.tailwind = { p: 0, e: 0 };     // 顺风：单方场地状态，存在时该方速度×2
         this.usedForm = { p: false, e: false };
         this.aiSwitches = o.aiSwitches ?? 1;
         this.caught = null; this.participants = new Set(); this.log = []; this.pendingSwitches = [];
@@ -8329,6 +10580,8 @@ return ev;
       /* ---------- 主流程 ---------- */
       async start() {
         AU.playMusic('battle');
+        this.musicBase = 'battle';
+        preloadSprites([...this.pp, ...this.ep]);
         this.log = [];
         LOGFN = t => this.addLog(t);
         $('#logOv').classList.remove('on');
@@ -9253,6 +11506,7 @@ return ev;
           const skipCharge = (this.wxActive() === 'sun') || (mon.has('megasol')) || (mv.k === 'electroshot' && this.wxActive() === 'rain');
           if (!skipCharge) {
             mon.vol.charge = mvk;
+            FX.chargeFx(side, mv.t);
             await say(`${mon.vol.illusionName || mon.name} 吸收了光能！`);
             if (mvObj && mvk !== 'struggle') { let cost = foe.has('pressure') ? 2 : 1; mvObj.pp = Math.max(0, mvObj.pp - cost); }
             return;
@@ -9375,7 +11629,7 @@ return ev;
           /* ★ 连续使用保护：第1次100%，第2次1/3，第3次1/9…即 (1/3)^(n-1) */
           const prob = Math.pow(1 / 3, chain - 1);
           if (Math.random() > prob) { mon.vol.protect = false; await say(`${mon.vol.illusionName || mon.name} 的保护失败了！`); }
-          else { mon.vol.protect = true; mon.vol.ks = useMv.ks; mon.vol.bb = useMv.bb; mon.vol.burnprot = useMv.burning; mon.vol.maxguard = !!useMv.maxguard; AU.protect(); statusVFX(side); await say(`${mon.vol.illusionName || mon.name} ${useMv.maxguard ? '用极巨防壁' : '保护'}了自己！`); }
+          else { mon.vol.protect = true; mon.vol.ks = useMv.ks; mon.vol.bb = useMv.bb; mon.vol.burnprot = useMv.burning; mon.vol.maxguard = !!useMv.maxguard; if (!CFG.fancyAudio) AU.protect(); FX.protect(side, useMv); await say(`${mon.vol.illusionName || mon.name} ${useMv.maxguard ? '用极巨防壁' : '保护'}了自己！`); }
           if (useMv.ks && mon.has('stancechange')) mon.vol.shield = true;
           return;
         }
@@ -9497,6 +11751,14 @@ return ev;
       foeSide(s) { return s === 'p' ? 'e' : 'p'; }
       abBanner(m) { showAbilityBanner(m, this.sideOf(m)); }
       sideAliveCount(s) { return (s === 'p' ? this.pp : this.ep).filter(m => m.alive()).length; }
+      /* ★ 随形态切换 BGM：Mega/极巨/太晶激活→激烈变奏；极巨结束/换人→切回常规 */
+      syncBattleMusic() {
+        if (!this.musicBase || AU.muted || !AU.musOn) return;
+        const P = this.P(), E = this.E();
+        const hot = (P && (P.mega || P.tera || P.dyn)) || (E && (E.mega || E.tera || E.dyn));
+        const target = hot ? this.musicBase + 'X' : this.musicBase;
+        if (AU.cur !== target && MUSIC[target]) AU.playMusic(target);
+      }
       async uturnSwitch(side, mon) {
         await say(`${mon.vol.illusionName || mon.name} 要回到队伍里了！`);
         if (side === 'p') { const idx = await this.chooseParty(false); if (idx != null) await this.doSwitch('p', idx); }
@@ -9586,6 +11848,7 @@ return ev;
           foe.vol.disguise = false; this.abBanner(foe);
           foe.disguiseUsed = true;   // ★ 本场已触发，换人后不再恢复
           foe.formSprite = FORMSPRITE.busted;
+          FX.transform(side === 'p' ? 'e' : 'p', 'disguise');
           await say(`${foe.name} 的画皮抵挡了攻击！`);
           BUI.dmgPop(side === 'p' ? 'e' : 'p', '抵挡', '#ffd93b');
           if (!foe.has('magicguard')) {
@@ -9611,9 +11874,9 @@ return ev;
         }
         // 动画 + ★属性攻击特效（与受击动画同步）
         const tgtSpr = side === 'p' ? BUI.espr : BUI.pspr;
-        typeVFX(mv.t, side === 'p' ? 'e' : 'p');
+        FX.attack(side, mon, foe, mv);
         await BUI.anim(tgtSpr, 'hit', 400);
-        AU.hit(); if (r.crit) { await say('击中要害！'); } if (r.eff > 1) { AU.superEff(); await say('效果绝佳！'); } else if (r.eff > 0 && r.eff < 1) { AU.notEff(); await say('收效甚微…'); }
+        if (!CFG.fancyAudio) AU.hit(); if (r.crit) { await say('击中要害！'); } if (r.eff > 1) { AU.superEff(); await say('效果绝佳！'); } else if (r.eff > 0 && r.eff < 1) { AU.notEff(); await say('收效甚微…'); }
         foe.hp = Math.max(0, foe.hp - dmg);
         if (dmg > 0) foe.lastDmgTaken = dmg;
         foe.vol.rage = (foe.vol.rage || 0) + 1;
@@ -10240,7 +12503,7 @@ return ev;
         /* ★ 变化招式共用特效：作用于招式目标（减益/异常/场地技→对手，强化/回复→自身） */
         const mySide = this.sideOf(mon);
         const onFoe = !!(mv.setSt || mv.setDrop || mv.taunt || mv.leechseed || mv.trick || mv.parting || mv.clearsmog || mv.hazard);
-        statusVFX(onFoe ? (mySide === 'p' ? 'e' : 'p') : mySide);
+        FX.status(onFoe ? (mySide === 'p' ? 'e' : 'p') : mySide, mv);
         const k = mv.k;
         if (mv.weather) { await this.setWeather({ sun: 'sun', rain: 'rain' }[mv.weather] || mv.weather, mon); return; }
         /* ★ 冷笑话：天气变为冰雹，随后自身替换下场 */
@@ -10447,7 +12710,8 @@ return ev;
           await say(`${mon.name} 清除了对手场上的陷阱和屏障！`); return;
         }
         if (mv.tailwind) {
-          mon.vol.tailwind = 4; await say(`${mon.name} 召唤了顺风！速度提升了！`); return;
+          if (this.tailwind[side] > 0) { await say('顺风已经在这边刮起了！'); return; }
+          this.tailwind[side] = 4; await say(`${mon.name} 召唤了顺风！己方速度翻倍！`); return;
         }
         if (mv.encore) {
           const lastK = foe.vol.lastMove;
@@ -10578,7 +12842,7 @@ return ev;
           await say(`${m.name} 的我行我素发动了！不会陷入混乱！`);
           return false;
         }
-        if (st === 'confuse') { if (m.vol.confuse > 0) return false; m.vol.confuse = rnd(2, 4); await say(`${m.name} 混乱了！`); AU.status(); return true; }
+        if (st === 'confuse') { if (m.vol.confuse > 0) return false; m.vol.confuse = rnd(2, 4); await say(`${m.name} 混乱了！`); if (!CFG.fancyAudio) AU.status(); FX.inflict(this.sideOf(m), 'confuse'); return true; }
         /* ★ 属性免疫（绝对，与来源招式属性无关） */
         if (st === 'burn' && m.types.includes('fire')) { await say(`${m.name} 是火属性，不会灼伤！`); return false; }
         /* ★ 水泡：不会灼伤 */
@@ -10601,7 +12865,9 @@ return ev;
         if (st === 'par' && m.has('limber')) { await say(`${m.name} 的柔软特性发动了！`); return false; }
         if ((st === 'psn' || st === 'tox') && (m.has('immunity') || m.has('purifyingsalt'))) { await say(`${m.name} 的特性让它无法中毒！`); return false; }
         if (st === 'sleep' && (m.has('insomnia') || m.has('vitalspirit'))) { await say(`${m.name} 的特性让它无法入睡！`); return false; }
-        m.status = st; AU.status();
+        m.status = st;
+        if (!CFG.fancyAudio) AU.status();
+        FX.inflict(this.sideOf(m), st);
         const nm = { burn: '被灼伤了', par: '麻痹了', psn: '中毒了', tox: '中了剧毒', sleep: '睡着了', frz: '被冻住了' }[st];
         await say(`${m.name} ${nm}！`);
         /* ★ 毒傀儡：使对手中毒/剧毒时，对手陷入混乱 */
@@ -10881,6 +13147,7 @@ return ev;
           BUI.refresh(this);
         }
         await this.sendOut(side, idx, false);
+        this.syncBattleMusic();
       }
       /* ---------- 回合结束 ---------- */
       async endTurn() {
@@ -10930,6 +13197,8 @@ return ev;
             if (src.alive() && this.foeOf(src) === m) {
               const d = Math.max(1, Math.floor(B / 8));
               m.hp = Math.max(0, m.hp - d);
+              FX.dotFx(side, 'grass');
+              BUI.dmgPop(side, `-${d}`, '#7ac74c');
               /* ★ 污泥浆：被寄生种子吸取时，吸取方本应回复的HP改为受到同等伤害 */
               if (m.has('liquidooze')) {
                 this.abBanner(m);
@@ -10954,19 +13223,19 @@ return ev;
           // 盐腌
           if (m.vol.salt && m.hp > 0) {
             const d = Math.max(1, Math.floor(B / (['water', 'steel'].includes(m.types[0]) ? 4 : 8)));
-            m.hp = Math.max(0, m.hp - d); await say(`盐腌正在侵蚀 ${m.name}！`); this.addLog(`↳ ${m.name} 盐腌伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`);
+            m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'salt'); BUI.dmgPop(side, `-${d}`, '#e8e8f0'); await say(`盐腌正在侵蚀 ${m.name}！`); this.addLog(`↳ ${m.name} 盐腌伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`);
           }
           // 异常状态
-          if (m.status === 'burn') { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); await say(`${m.name} 被灼伤伤害了！`); this.addLog(`↳ ${m.name} 灼伤伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (m.status === 'psn') { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); await say(`${m.name} 受到了毒素伤害！`); this.addLog(`↳ ${m.name} 中毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (m.status === 'tox') { m.toxicN++; const d = Math.floor(B * m.toxicN / 16); m.hp = Math.max(0, m.hp - d); await say(`${m.name} 受到了剧毒伤害！`); this.addLog(`↳ ${m.name} 剧毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.status === 'burn') { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'burn'); BUI.dmgPop(side, `-${d}`, '#ff7a2f'); await say(`${m.name} 被灼伤伤害了！`); this.addLog(`↳ ${m.name} 灼伤伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.status === 'psn') { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'psn'); BUI.dmgPop(side, `-${d}`, '#b56fd8'); await say(`${m.name} 受到了毒素伤害！`); this.addLog(`↳ ${m.name} 中毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.status === 'tox') { m.toxicN++; const d = Math.floor(B * m.toxicN / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'tox'); BUI.dmgPop(side, `-${d}`, '#8a2fa3'); await say(`${m.name} 受到了剧毒伤害！`); this.addLog(`↳ ${m.name} 剧毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           if (m.has('poisonheal') && (m.status === 'psn' || m.status === 'tox')) { this.abBanner(m); const h = Math.floor(B / 8); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的毒疗发动了，回复了HP！`); this.addLog(`↳ ${m.name} 毒疗回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           // 道具回复
           /* ★ 笨拙：道具回复效果无效 */
           if (!m.has('klutz') && m.item === 'leftovers') { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.name} 吃剩的东西回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           if (!m.has('klutz') && m.item === 'blacksludge') {
             if (m.types.includes('poison')) { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.name} 黑色污泥回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-            else if (!m.has('magicguard')) { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); this.addLog(`↳ ${m.name} 黑色污泥伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+            else if (!m.has('magicguard')) { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'sludge'); BUI.dmgPop(side, `-${d}`, '#b56fd8'); this.addLog(`↳ ${m.name} 黑色污泥伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           }
           /* ★ 火焰宝珠/剧毒宝珠：回合末附加异常状态 */
           if (!m.has('klutz') && m.item === 'flameorb' && !m.status && !m.has('magicguard')) { await this.inflictStatus(m, 'burn', null, 'fire'); }
@@ -11022,6 +13291,7 @@ return ev;
               m.hp = Math.max(1, Math.round(m.maxhp * pct));
               await say(`${m.name} 的极巨化解除了！HP按比例还原。`);
               BUI.refresh(this);
+              this.syncBattleMusic();
             }
           }
           /* ★ 鱼群（弱丁鱼）：HP>25%时鱼群形态，否则单独形态 */
@@ -11031,11 +13301,13 @@ return ev;
               m.mega = { f: FORMSPRITE.school, t: 'water', s: [45,140,130,140,135,30], a: 'schooling' };
               m.recalc();
               this.abBanner(m);
+              FX.transform(this.sideOf(m), 'school');
               await say(`${m.name} 的鱼群特性发动了！变成了鱼群形态！`);
             } else if (m.hpPct() <= 0.25 && m.vol.schoolForm) {
               m.vol.schoolForm = false;
               m.mega = null;
               m.recalc();
+              FX.transform(this.sideOf(m), 'schoolOut');
               await say(`${m.name} 的鱼群解散了，变回了单独形态！`);
             }
           }
@@ -11056,8 +13328,9 @@ return ev;
             }
           }
           /* ---- 第六批回合末特性 ---- */
-          /* ★ 怒火冲天：HP降至一半以下时特攻提升 */
-          if (m.has('berserk') && m.hpPct() <= 0.5 && !m.vol.berserkTriggered) { m.vol.berserkTriggered = true; this.abBanner(m); await this.changeStat(m, 'spa', 1, m); await say(`${m.name} 的怒火冲天发动了！`); }
+          /* ★ 怒火冲天：HP降至一半以下时特攻提升（可反复触发：回血过半后再降血会再次发动） */
+          if (m.has('berserk') && m.hpPct() <= 0.5 && m.vol.berserkUp !== false) { m.vol.berserkUp = false; this.abBanner(m); await this.changeStat(m, 'spa', 1, m); await say(`${m.name} 的怒火冲天发动了！`); }
+          if (m.has('berserk') && m.hpPct() > 0.5) m.vol.berserkUp = true;
           /* ★ 愤怒甲壳：HP降至一半以下时攻/特攻/速度+1，防/特防-1 */
           if (m.has('angershell') && m.hpPct() <= 0.5 && !m.vol.angerShellTriggered) { m.vol.angerShellTriggered = true; this.abBanner(m); await this.changeStat(m, 'atk', 1, m); await this.changeStat(m, 'spa', 1, m); await this.changeStat(m, 'spe', 1, m); await this.changeStat(m, 'def', -1, m); await this.changeStat(m, 'spd', -1, m); await say(`${m.name} 的愤怒甲壳发动了！`); }
           /* ★ 结冻头：冰雹时头部结冰 */
@@ -11112,7 +13385,7 @@ return ev;
               m.mega = { f: 10120, t: 'dragon/ground', s: [216,100,121,91,95,85], a: 'powerconstruct' };
               m.recalc(); m.hp = Math.min(m.maxhp, m.hp + healAmt);
               this.abBanner(m);
-              AU.mega(); BUI.burst(this.sideOf(m));
+              AU.mega(); BUI.burst(this.sideOf(m)); FX.transform(this.sideOf(m), 'power');
               await say(`${m.name} 的群聚变形发动了！变成了完全体形态！`);
               BUI.refresh(this);
             }
@@ -11147,6 +13420,7 @@ return ev;
           if (dotM && dotM.alive() && !dotM.types.includes(this.gmaxDot.type)) {
             const dd = Math.max(1, Math.floor(dotM.maxhp / 6));
             dotM.hp = Math.max(0, dotM.hp - dd);
+            FX.gmaxDotFx(this.gmaxDot.name, this.gmaxDot.type, this.gmaxDot.side);
             await say(`${dotM.name} 受到了${this.gmaxDot.name || '超极巨' + TNAME[this.gmaxDot.type]}的持续伤害！`);
             this.addLog(`↳ ${dotM.name} 超极巨DOT -${dd} HP`);
             BUI.dmgPop(this.gmaxDot.side, `-${dd}`, TCOL[this.gmaxDot.type]);
@@ -11156,6 +13430,9 @@ return ev;
         /* ★ 极光幕倒计时 */
         if (this.auroraveil.p > 0) { this.auroraveil.p--; if (this.auroraveil.p === 0) await say('己方的极光幕消散了…'); }
         if (this.auroraveil.e > 0) { this.auroraveil.e--; if (this.auroraveil.e === 0) await say('对手的极光幕消散了…'); }
+        /* ★ 顺风倒计时（单方） */
+        if (this.tailwind.p > 0) { this.tailwind.p--; if (this.tailwind.p === 0) await say('己方的顺风停了…'); }
+        if (this.tailwind.e > 0) { this.tailwind.e--; if (this.tailwind.e === 0) await say('对手的顺风停了…'); }
         // 混乱/挑衅/束缚/昏睡倒计时
         for (const m of [this.P(), this.E()]) {
           if (!m) continue;
@@ -11173,6 +13450,8 @@ return ev;
             m.vol.binding--;
             const bd = Math.floor((m.dyn ? m.baseMax : m.maxhp) / 8);
             m.hp = Math.max(0, m.hp - bd);
+            FX.dotFx(this.sideOf(m), 'binding');
+            BUI.dmgPop(this.sideOf(m), `-${bd}`, '#9fe8f5');
             await say(`${m.name} 被束缚伤害了！`);
           }
           /* ★ 超极巨幻影幽魂的封锁在换下时解除（不做回合衰减） */
@@ -11257,7 +13536,7 @@ return ev;
         m.mega = cfg; m.types = cfg.t.split('/');
         m.recalc();
         m.ability = cfg.a;
-        AU.mega(); BUI.burst(side);
+        if (!CFG.fancyAudio) AU.mega(); BUI.burst(side); FX.mega(side);
         await say(`超级进化！${m.name} 进化成了 Mega${m.name.replace(/\(.+\)/, '')}！`);
         await this.switchInAbility(m);  // ★ 变更后的特性立即发动（雷电兽→威吓立刻降攻、喷火龙Y→日照立刻开晴天、胡地→复制等）
         BUI.refresh(this);
@@ -12137,7 +14416,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
     /* ★ 道具形态图鉴详情（苍响/藏玛然特） */
     function dexDetailForm(sp, cfg) {
       const d = $('#dexDetail');
-      const img = new Image(); setSprite(img, cfg.f); img._urls.push(SPRBASE + sp.id + '.png');
+      const img = new Image(); setSprite(img, cfg.f); img._urls.push(SPRBASES[0] + sp.id + '.png');
       img.style.width = '96px'; img.style.height = '96px'; img.style.objectFit = 'contain'; img.style.display = 'block'; img.style.margin = '0 auto';
       d.innerHTML = ''; d.appendChild(img);
       const names = ['HP', '攻击', '防御', '特攻', '特防', '速度'];
@@ -12265,7 +14544,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
               if ((!ty || cfg.t.includes(ty)) && (!q || cfg.name.includes(q) || String(sp.id) === q || cfg.stone.includes(q))) {
                 const fc = el('div', 'dexCell');
                 fc.style.borderColor = '#c07a2a';
-                const fimg = new Image(); setSprite(fimg, cfg.f, false, true); fimg._urls.push(SPRBASE + sp.id + '.png');
+                const fimg = new Image(); setSprite(fimg, cfg.f, false, true); fimg._urls.push(SPRBASES[0] + sp.id + '.png');
                 fc.appendChild(fimg);
                 fc.insertAdjacentHTML('beforeend', `<div class="no" style="color:#c07a2a">#${String(sp.id).padStart(4, '0')}★</div><div class="nm" style="color:#c07a2a;font-size:10px">${cfg.tag}</div>`);
                 fc.onclick = () => { AU.cursor(); dexDetailForm(sp, cfg); };
@@ -12738,7 +15017,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
           else if (item.type === 'form') { chip.style.borderColor = '#c07a2a'; chip.style.background = '#fff6e8'; }
           const img = new Image(); img.width = 28; img.height = 28; img.style.objectFit = 'contain';
           setSprite(img, item.imgId);
-          if (item.type === 'form') img._urls.push(SPRBASE + item.sp.id + '.png');
+          if (item.type === 'form') img._urls.push(SPRBASES[0] + item.sp.id + '.png');
           chip.appendChild(img);
           const nm = document.createElement('span');
           nm.textContent = item.name;
@@ -12837,7 +15116,7 @@ ${tyBadge(mv.t)}
 ${desc ? `<div class="mvDetailDesc">📖 ${desc}</div>` : ''}
 ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-top:14px;margin-bottom:8px">可学会此招式的宝可梦（${mons.length}种）：</div>
 <div class="mvMonList">${mons.length ? mons.slice(0, 60).map(sp => {
-          return `<span class="mvMonChip" data-id="${sp.id}"><img src="${SPRBASE}${sp.id}.png" onerror="this.src='${SPRBASE}0.png'">${sp.n}</span>`;
+          return `<span class="mvMonChip" data-id="${sp.id}"><img src="${SPRBASES[0]}${sp.id}.png" onerror="this.src='${SPRBASES[0]}0.png'">${sp.n}</span>`;
         }).join('') + (mons.length > 60 ? `<span style="font-size:11px;color:#999;font-weight:700">…等${mons.length}种</span>` : '') : '<span style="color:#999;font-size:12px">暂无</span>'}</div>`}`;
         const box = el('div', '');
         box.innerHTML = html;
@@ -12911,6 +15190,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
     Battle.prototype.execActions = async function (pa, ea) {
       /* ★ Mega/极巨/太晶：优先级仅次于换人，在双方出招之前先行结算 */
       await this.resolveForms(pa, ea);
+      this.syncBattleMusic();
       return _origExec.call(this, pa, ea);
     };
     Battle.prototype.resolveForms = async function (pa, ea) {
@@ -12924,7 +15204,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
         } else if (pa.dyn && this.rules.dyna && !this.usedForm.p && !Pm.dyn && !(Pm.mega && Pm.mega.stone) && ![888, 889, 890].includes(Pm.id)) {
           this.usedForm.p = true; Pm.dyn = true; Pm.dynT = 3; Pm.recalc(); Pm.hp *= 2;
           if (Pm._userGmax !== undefined ? Pm._userGmax : (Pm.vol.canGmax !== undefined ? Pm.vol.canGmax : GMAXLIST.has(Pm.id))) Pm.vol.gmax = true;
-          AU.dyna(); await say(`极巨化！${Pm.name} 的体型变得巨大了！HP翻倍！${Pm.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
+          if (!CFG.fancyAudio) AU.dyna(); FX.dyna('p'); await say(`极巨化！${Pm.name} 的体型变得巨大了！HP翻倍！${Pm.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
         } else if (pa.tera && this.rules.tera && !this.usedForm.p && !Pm.tera) {
           this.usedForm.p = true; Pm.tera = true;
           if (Pm.teraType === 'stellar') {
@@ -12953,7 +15233,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
             else { await this.changeStat(Pm, 'spe', 1, Pm); }
             await say(`${Pm.name} 的面影辉映发动了！`);
           }
-          AU.tera(); BUI.sparkle('p'); await say(`太晶化！${Pm.name} 变成了${TNAME[Pm.teraType]}属性！`); BUI.refresh(this);
+          if (!CFG.fancyAudio) AU.tera(); BUI.sparkle('p'); FX.tera('p', Pm.teraType); await say(`太晶化！${Pm.name} 变成了${TNAME[Pm.teraType]}属性！`); BUI.refresh(this);
         }
       };
       const doE = async () => {
@@ -12963,7 +15243,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
         } else if (ea.dyn && this.rules.dyna && !this.usedForm.e && !E.dyn && !(E.mega && E.mega.stone) && ![888, 889, 890].includes(E.id)) {
           this.usedForm.e = true; E.dyn = true; E.dynT = 3; E.recalc(); E.hp *= 2;
           if (E.vol.canGmax !== undefined ? E.vol.canGmax : (GMAXLIST.has(E.id) && Math.random() < 0.7)) E.vol.gmax = true;
-          AU.dyna(); await say(`极巨化！${E.name} 的体型变得巨大了！${E.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
+          if (!CFG.fancyAudio) AU.dyna(); FX.dyna('e'); await say(`极巨化！${E.name} 的体型变得巨大了！${E.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
         } else if (ea.tera && this.rules.tera && !this.usedForm.e && !E.tera) {
           this.usedForm.e = true; E.tera = true;
           if (E.teraType === 'stellar') {
@@ -12991,7 +15271,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
             else { await this.changeStat(E, 'spe', 1, E); }
             await say(`${E.name} 的面影辉映发动了！`);
           }
-          AU.tera(); BUI.sparkle('e'); await say(`太晶化！${E.name} 变成了${TNAME[E.teraType]}属性！`); BUI.refresh(this);
+          if (!CFG.fancyAudio) AU.tera(); BUI.sparkle('e'); FX.tera('e', E.teraType); await say(`太晶化！${E.name} 变成了${TNAME[E.teraType]}属性！`); BUI.refresh(this);
         }
       };
       const pHas = pa.type === 'move' && Pm && !Pm.fainted && (pa.mega || pa.dyn || pa.tera);
@@ -13300,6 +15580,24 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       r.appendChild(b);
       return r;
     }
+    /* 音量滑块设置项：min~max，默认0~2（可调至200%） */
+    function settingsSlider(label, desc, get, set, min = 0, max = 2, step = .05) {
+      const r = el('div', 'setRow');
+      r.innerHTML = `<div><b>${label}</b><div style="font-size:11px;color:#888;font-weight:400">${desc}</div><div class="volVal" style="font-size:12px;color:#2a6dd4;font-weight:900;margin-top:2px">${Math.round(get() * 100)}%</div></div>`;
+      const inp = el('input');
+      inp.type = 'range';
+      inp.min = min; inp.max = max; inp.step = step;
+      inp.value = get();
+      inp.style.cssText = 'width:100%;margin-top:6px;accent-color:#e040fb';
+      inp.oninput = () => {
+        const v = parseFloat(inp.value);
+        set(v);
+        const vv = r.querySelector('.volVal'); if (vv) vv.textContent = Math.round(v * 100) + '%';
+        AU.setVol();
+      };
+      r.appendChild(inp);
+      return r;
+    }
     /* ============ 对战点数自由分配面板 ============ */
     function openEVAllocation(team) {
       return new Promise(res => {
@@ -13390,15 +15688,23 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); saveCfg(); };
       box.appendChild(settingsRow('音效', '攻击、命中、状态、菜单等提示音',
         () => !CFG.muted, v => { CFG.muted = !v; AU.muted = CFG.muted; if (CFG.muted) AU.stopMusic(); }));
+      box.appendChild(settingsSlider('音效音量', '出招/命中/技能音效的音量（0~200%）',
+        () => CFG.sfxVol, v => { CFG.sfxVol = v; }));
       box.appendChild(settingsRow('背景音乐', '芯片风格循环 BGM',
         () => CFG.music, v => { CFG.music = v; AU.musOn = v; if (v) { AU.init(); AU.playMusic(AU.cur || 'title'); } else AU.stopMusic(); }));
+      box.appendChild(settingsSlider('背景音乐音量', '背景音乐的音量（0~200%）',
+        () => CFG.musVol, v => { CFG.musVol = v; }));
       box.appendChild(settingsRow('天气/场地特效', '场景中的雨幕、飞雪、沙暴、光轮、场地光晕与电火花等氛围层',
         () => CFG.weatherFx, v => {
           CFG.weatherFx = v;
           if (!v) $('#bscene').classList.remove('wx-sun', 'wx-rain', 'wx-sand', 'wx-hail', 'tr-electric', 'tr-grassy', 'tr-psychic', 'tr-misty');
         }));
-      box.appendChild(settingsRow('战斗演出', '濒死白红闪屏、场景震动、金星迸溅',
+      box.appendChild(settingsRow('战斗演出', '濒死柔光闪屏、场景震动、落地尘雾',
         () => CFG.fxShake, v => { CFG.fxShake = v; }));
+      box.appendChild(settingsRow('华丽特效', '每个技能专属多阶段演出（投射/光束/冲击/残余），以及异常状态、Mega、极巨、太晶的丰富特效。关闭后回到朴素通用特效',
+        () => CFG.fancyFx, v => { CFG.fancyFx = v; }));
+      box.appendChild(settingsRow('精良音效', '每个技能专属实时合成的出招/命中音效。关闭后使用简约通用音效',
+        () => CFG.fancyAudio, v => { CFG.fancyAudio = v; }));
       box.appendChild(settingsRow('出场动画', '投球→弹跳→爆开→实体化的出场演出',
         () => CFG.entryAnim, v => { CFG.entryAnim = v; }));
       box.appendChild(settingsRow('敌方HP百分比', '在敌方信息卡上显示HP百分比',
