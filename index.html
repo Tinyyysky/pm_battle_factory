@@ -9991,7 +9991,7 @@ return ev;
         if (mv.bodypress) atkK = 'def';
         if (mv.foulplay) atkK = 'atk';
         if (mv.seismic) { return { dmg: mon.lvl, eff: effMult(mv.t, foe.types), crit: false }; }
-        if (mv.naturesmad || mv.ruination) { return { dmg: Math.max(1, Math.floor(foe.hp * .5)), eff: effMult(mv.t, foe.types), crit: false }; }
+        if (mv.naturesmad || mv.ruination || mv.superfang) { return { dmg: Math.max(1, Math.floor(foe.hp * .5)), eff: effMult(mv.t, foe.types), crit: false }; }
         if (mv.ragefist) { mv = { ...mv, p: 50 + 50 * (mon.vol.rage || 0) }; }
         if (mv.gyro) { const p = Math.min(150, Math.floor(25 * foe.effStat('spe', this) / Math.max(1, mon.effStat('spe', this)))); mv = { ...mv, p }; }
         /* ★ 喷火/潮旋类：威力随当前HP比例变化 */
@@ -11853,7 +11853,7 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b styl
               GM.fac.bp -= reviveCost; GM.fac.revives++;
               AU.heal(); healAll(GM.fac.party);
               saveFac(); this.ui();
-              await dlg('广播', '复活成功！已消耗 \' + reviveCost + \' BP（累计复活 ' + GM.fac.revives + ' 次）。继续挑战第 ' + (GM.fac.win + 1) + ' 场！', 132);
+              await dlg('广播', `复活成功！已消耗 ${reviveCost} BP（累计复活 ${GM.fac.revives} 次）。继续挑战第 ${GM.fac.win + 1} 场！`, 132);
               this.lobby();
               return;
             }
