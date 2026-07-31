@@ -3354,6 +3354,10 @@
       right: 0;
       margin: 0 auto;
       width: max-content;
+      max-width: calc(100% - 560px);
+      white-space: normal;
+      text-align: center;
+      line-height: 1.7;
       z-index: 7;
       font-size: 12px;
       font-weight: 900;
@@ -3943,10 +3947,23 @@
       display: flex;
       gap: 10px;
       padding: 10px;
-      background: linear-gradient(180deg, #241f47, #171330);
+      background-image: linear-gradient(180deg, #241f47, #171330), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%23ffffff'%20fill-opacity='0.2'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      background-size: auto, 64px 64px;
       border-top: 4px solid #0c0920;
       position: relative;
-      z-index: 20
+      z-index: 20;
+      animation: buiBallDrift 12s linear infinite
+    }
+
+    /* 底部精灵球线稿循环漂移 */
+    @keyframes buiBallDrift {
+      from {
+        background-position: 0 0, 0 0
+      }
+
+      to {
+        background-position: 0 0, 64px 64px
+      }
     }
 
     #msgpanel {
@@ -4116,13 +4133,15 @@
       padding: 0 2px
     }
 
+    /* 极巨化（红橙） */
     .dynToggle {
       font-size: 12px;
       font-weight: 900;
       padding: 5px 10px;
       border-radius: 8px;
       border: 2px solid var(--ink);
-      background: #efe7cf;
+      background: linear-gradient(180deg, #ffe9dc, #ffd0bd);
+      color: #b3301a;
       box-shadow: 0 3px 0 var(--ink)
     }
 
@@ -4131,17 +4150,31 @@
       color: #fff
     }
 
+    /* Mega（紫） */
+    .dynToggle.mega {
+      background: linear-gradient(180deg, #efe2ff, #dcc6f8);
+      color: #6a1fb0
+    }
+
     .dynToggle.mega.on {
       background: linear-gradient(90deg, #e040fb, #7c4dff)
+    }
+
+    /* 太晶（青绿） */
+    .dynToggle.tera {
+      background: linear-gradient(180deg, #dff8f0, #c4ecdc);
+      color: #0a7d6a
     }
 
     .dynToggle.tera.on {
       background: linear-gradient(90deg, #00d4ff, #7bffb0)
     }
 
+    /* 超极巨（金） */
     .dynToggle.gmax {
       border: 2px solid #c07a2a;
-      color: #c07a2a
+      color: #c07a2a;
+      background: linear-gradient(180deg, #fff3d0, #f5dfa0)
     }
 
     .dynToggle.gmax.on {
@@ -5030,6 +5063,266 @@
       /* 轮次大字缩小一点，避免竖屏过宽 */
       .roundBig {
         font-size: 28px !important;
+      }
+
+      /* ---- 战斗界面移动端修复：固定底部栏高度 + 精灵/平台缩放，防止底部栏变化导致精灵上移重叠 ---- */
+      #bui {
+        height: 240px !important;
+        min-height: 240px !important;
+        max-height: 240px !important;
+        flex: none !important;
+        overflow: hidden !important;
+      }
+
+      #msgpanel {
+        flex: none !important;
+      }
+
+      #menuMain,
+      #menuMoves {
+        min-height: 0 !important;
+        flex: 1 !important;
+      }
+
+      /* 主菜单按钮撑满整块，避免底部露出深色空区（黑幕） */
+      .bmenu {
+        grid-template-rows: 1fr 1fr !important;
+      }
+
+      /* 招式格与形态按钮：紧凑排版，无需滚动即完整显示（仅在非 hidden 时 flex） */
+      #menuMoves:not(.hidden) {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        overflow-y: auto !important;
+      }
+
+      /* 极巨化/太晶化/Mega 按钮：一行排满 */
+      #formCol {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        min-width: 0 !important;
+        gap: 4px !important;
+      }
+
+      #formCol .btn,
+      #formCol .dynToggle {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        padding: 5px 3px !important;
+        font-size: 11px !important;
+        white-space: nowrap !important;
+      }
+
+      /* 返回按钮放大，便于点击 */
+      #formCol .backBtn {
+        min-width: 64px !important;
+        flex: none !important;
+        padding: 6px 8px !important;
+        font-size: 12px !important;
+      }
+
+      #formHint {
+        font-size: 8px !important;
+        line-height: 1.3 !important;
+        padding: 0 !important;
+        white-space: nowrap !important;
+      }
+
+      /* 招式格：2×2 撑满剩余空间，按钮尺寸有保证 */
+      #moveGrid {
+        flex: 1 !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-rows: 1fr 1fr !important;
+        gap: 5px !important;
+        min-height: 0 !important;
+      }
+
+      .moveBtn {
+        padding: 3px 6px !important;
+        justify-content: center !important;
+      }
+
+      .moveBtn .mn {
+        font-size: 13px !important;
+        line-height: 1.1 !important;
+      }
+
+      .moveBtn .mn.long {
+        font-size: 9px !important;
+      }
+
+      .moveBtn .mi {
+        font-size: 9px !important;
+      }
+
+      .moveBtn .pp {
+        font-size: 5px !important;
+      }
+
+      /* 精灵缩放与重新定位（竖屏窄屏，双方靠角落、互不遮挡） */
+      #espr {
+        width: 96px !important;
+        height: 96px !important;
+        top: 114px !important;
+        right: 92px !important;
+      }
+
+      #pspr {
+        width: 124px !important;
+        height: 124px !important;
+        bottom: 112px !important;
+        left: 66px !important;
+      }
+
+      #eshadow {
+        width: 84px !important;
+        height: 20px !important;
+        top: 208px !important;
+        right: 106px !important;
+      }
+
+      #pshadow {
+        width: 100px !important;
+        height: 22px !important;
+        bottom: 98px !important;
+        left: 80px !important;
+      }
+
+      /* 平台同步缩小并贴靠精灵脚底 */
+      .plat.e {
+        width: 180px !important;
+        height: 46px !important;
+        top: 206px !important;
+        right: 78px !important;
+      }
+
+      .plat.p {
+        width: 210px !important;
+        height: 58px !important;
+        bottom: 96px !important;
+        left: 48px !important;
+      }
+
+      #espr.dyn {
+        width: 175px !important;
+        height: 175px !important;
+        top: 62px !important;
+        right: 58px !important;
+      }
+
+      #pspr.dyn {
+        width: 185px !important;
+        height: 185px !important;
+        bottom: 86px !important;
+        left: 42px !important;
+      }
+
+      #eshadow.dyn {
+        width: 150px !important;
+        right: 76px !important;
+      }
+
+      #pshadow.dyn {
+        width: 160px !important;
+        left: 58px !important;
+      }
+
+      /* 状态/天气条：居中限宽自动换行，避免遮挡角落的信息卡 */
+      #wxchip {
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        width: auto !important;
+        max-width: calc(100% - 250px) !important;
+        white-space: normal !important;
+        text-align: center !important;
+        line-height: 1.8 !important;
+      }
+    }
+
+    /* 竖屏极短屏（小手机/横屏手机）：进一步缩小精灵与底部栏 */
+    @media (max-height: 560px) and (max-width: 900px) {
+      #espr {
+        width: 78px !important;
+        height: 78px !important;
+        top: 92px !important;
+        right: 78px !important;
+      }
+
+      #pspr {
+        width: 102px !important;
+        height: 102px !important;
+        bottom: 86px !important;
+        left: 50px !important;
+      }
+
+      #eshadow {
+        width: 68px !important;
+        top: 168px !important;
+        right: 90px !important;
+      }
+
+      #pshadow {
+        width: 82px !important;
+        bottom: 74px !important;
+        left: 62px !important;
+      }
+
+      .plat.e {
+        width: 150px !important;
+        height: 40px !important;
+        top: 166px !important;
+        right: 66px !important;
+      }
+
+      .plat.p {
+        width: 180px !important;
+        height: 50px !important;
+        bottom: 70px !important;
+        left: 34px !important;
+      }
+
+      #espr.dyn {
+        width: 130px !important;
+        height: 130px !important;
+        top: 54px !important;
+      }
+
+      #pspr.dyn {
+        width: 140px !important;
+        height: 140px !important;
+        bottom: 66px !important;
+      }
+
+      #bui {
+        height: 200px !important;
+        min-height: 200px !important;
+        max-height: 200px !important;
+      }
+
+      /* 极短屏：招式格更紧凑，主菜单按钮同样撑满 */
+      .bmenu {
+        grid-template-rows: 1fr 1fr !important;
+      }
+
+      #formCol .btn,
+      #formCol .dynToggle {
+        padding: 4px 2px !important;
+        font-size: 10px !important;
+      }
+
+      .moveBtn {
+        padding: 2px 4px !important;
+      }
+
+      .moveBtn .mn {
+        font-size: 12px !important;
+      }
+
+      .moveBtn .mi {
+        font-size: 8px !important;
       }
     }
 
@@ -9279,7 +9572,7 @@ return ev;
         img.src = img._urls[img._ui++];
         img._t = setTimeout(advance, 7000);
       };
-      img.onload = () => { clearTimeout(img._t); };
+      img.onload = () => { clearTimeout(img._t); if (img._side && window.BUI && BUI.fitSprite) BUI.fitSprite(img._side); };
       img.onerror = advance;
       advance();
     }
@@ -9391,8 +9684,42 @@ return ev;
       loadSprite(side, m) {
         const spr = side === 'p' ? this.pspr : this.espr;
         const fid = m.mega ? m.mega.f : (m.vol?.illusion || m.id);
+        spr._side = side;
         if (spr._cur !== fid + '' + m.dyn) { setSprite(spr, fid, side === 'p'); spr._cur = fid + '' + m.dyn; }
         spr.classList.toggle('shiny', m.shiny);
+      },
+      /* ★ 按精灵图原生尺寸等比缩放：小体型宝可梦不再被撑满盒子而显得巨大；
+         脚底始终贴住平台线；缩放后同步太晶宝石位置 */
+      fitSprite(side) {
+        const spr = side === 'p' ? this.pspr : this.espr;
+        if (!spr || !spr.naturalWidth || !spr.naturalHeight) return;
+        if (spr.classList.contains('dyn')) return;
+        let refW = 150, refH = 150, refTop = 0;
+        try {
+          const clone = spr.cloneNode(false);
+          clone.id = side === 'p' ? 'pspr' : 'espr';
+          ['width', 'height', 'top'].forEach(k => clone.style.removeProperty(k));
+          document.body.appendChild(clone);
+          const cs = getComputedStyle(clone);
+          refW = parseFloat(cs.width) || 150; refH = parseFloat(cs.height) || 150;
+          refTop = parseFloat(cs.top) || 0;
+          document.body.removeChild(clone);
+        } catch (e) { /* 克隆读取失败时使用默认盒 */ }
+        const nw = spr.naturalWidth, nh = spr.naturalHeight;
+        const s = Math.min(1, Math.max(refW, refH) / Math.max(nw, nh));
+        const w = Math.max(24, Math.round(nw * s)), h = Math.max(24, Math.round(nh * s));
+        spr.style.width = w + 'px'; spr.style.height = h + 'px';
+        if (side === 'e') spr.style.top = (refTop + refH - h) + 'px';
+        this.teraPos(side);
+      },
+      /* ★ 太晶宝石悬浮在精灵头顶，随精灵实际尺寸定位 */
+      teraPos(side) {
+        const spr = side === 'p' ? this.pspr : this.espr, gem = $(side === 'p' ? '#ptera' : '#etera');
+        if (!spr || !gem || gem.classList.contains('hidden')) return;
+        const sr = spr.getBoundingClientRect(), lr = $('#fxlayer').getBoundingClientRect();
+        gem.style.top = (sr.top - lr.top - 38) + 'px';
+        gem.style.left = (sr.left - lr.left + sr.width / 2 - 17) + 'px';
+        gem.style.right = ''; gem.style.bottom = '';
       },
       /* ★ 出场动画：投球→弹跳→爆开→实体化+星屑；野生宝可梦直接滑入 */
       async entryAnim(side, m, isWild) {
@@ -9424,10 +9751,15 @@ return ev;
           return;
         }
         spr.style.transition = '';         // 恢复过渡（后续显隐由出场动画接管）
-        const x = 190, y = side === 'p' ? 150 : 268;
+        /* ★ 竖屏/移动端：落点跟随缩放后的精灵位置（桌面沿用原坐标） */
+        const mmq = (q) => !!window.matchMedia && matchMedia(q).matches;
+        const isShort = mmq('(max-height: 560px) and (max-width: 900px)');
+        const isM = mmq('(max-width: 768px), (orientation: portrait)');
+        const bx = side === 'p' ? (isShort ? 101 : isM ? 128 : 190) : (isShort ? 117 : isM ? 140 : 190);
+        const by = side === 'p' ? (isShort ? 86 : isM ? 112 : 150) : (isShort ? 170 : isM ? 208 : 268);
         const ball = el('div', 'entryBall ' + (side === 'p' ? 'arcP' : 'arcE'));
-        if (side === 'p') { ball.style.left = x + 'px'; ball.style.bottom = y + 'px'; }
-        else { ball.style.right = x + 'px'; ball.style.top = y + 'px'; }
+        if (side === 'p') { ball.style.left = bx + 'px'; ball.style.bottom = by + 'px'; }
+        else { ball.style.right = bx + 'px'; ball.style.top = by + 'px'; }
         layer.appendChild(ball);
         AU.ball();
         await sleep(660);
@@ -9436,8 +9768,8 @@ return ev;
         await sleep(410);
         /* 开球白光 */
         const burst = el('div', 'ballBurst');
-        if (side === 'p') { burst.style.left = (x - 24) + 'px'; burst.style.bottom = (y - 24) + 'px'; }
-        else { burst.style.right = (x - 24) + 'px'; burst.style.top = (y - 24) + 'px'; }
+        if (side === 'p') { burst.style.left = (bx - 24) + 'px'; burst.style.bottom = (by - 24) + 'px'; }
+        else { burst.style.right = (bx - 24) + 'px'; burst.style.top = (by - 24) + 'px'; }
         layer.appendChild(burst);
         ball.remove();
         AU.ok();
@@ -9447,8 +9779,8 @@ return ev;
         for (let i = 0; i < 9; i++) {
           const s = el('div', 'entrySpark', '✦');
           s.style.color = i % 3 ? '#ffe9a8' : '#fff';
-          if (side === 'p') { s.style.left = rnd(90, 300) + 'px'; s.style.top = rnd(350, 570) + 'px'; }
-          else { s.style.right = rnd(110, 320) + 'px'; s.style.top = rnd(80, 290) + 'px'; }
+          if (side === 'p') { s.style.left = rnd(bx - 60, bx + 60) + 'px'; s.style.bottom = rnd(by - 10, by + 110) + 'px'; }
+          else { s.style.right = rnd(bx - 60, bx + 60) + 'px'; s.style.top = rnd(by - 70, by + 30) + 'px'; }
           s.style.fontSize = rnd(13, 24) + 'px';
           s.style.setProperty('--dx', rnd(-50, 50) + 'px');
           s.style.setProperty('--dy', rnd(-64, -12) + 'px');
@@ -9497,14 +9829,14 @@ return ev;
         const E = b.E(), Pm = b.P();
         if (E && !E.fainted) {
           const eid = E.vol.illusion || E.id;
-          const eForm = E.formSprite || (E.dyn && GMAXSPRITE[E.id] ? GMAXSPRITE[E.id] : null) || (FORMS[E.id] && E.item === FORMS[E.id].item ? FORMS[E.id].f : null); const fid = E.mega ? E.mega.f : (eForm || eid); if (this.espr._cur !== fid + '' + E.dyn) { setSprite(this.espr, fid, false, !!(E.mega || eForm)); this.espr._cur = fid + '' + E.dyn; } this.espr.classList.toggle('dyn', E.dyn); this.espr.classList.toggle('shiny', E.shiny); this.espr.style.opacity = 1;
-          $('#etera').classList.toggle('hidden', !E.tera); if (E.tera) { $('#etera').style.top = '70px'; $('#etera').style.right = '195px'; $('#etera').classList.toggle('stellar', E.teraType === 'stellar'); }
+          const eForm = E.formSprite || (E.dyn && GMAXSPRITE[E.id] ? GMAXSPRITE[E.id] : null) || (FORMS[E.id] && E.item === FORMS[E.id].item ? FORMS[E.id].f : null); const fid = E.mega ? E.mega.f : (eForm || eid); this.espr._side = 'e'; if (this.espr._cur !== fid + '' + E.dyn) { setSprite(this.espr, fid, false, !!(E.mega || eForm)); this.espr._cur = fid + '' + E.dyn; } this.espr.classList.toggle('dyn', E.dyn); this.espr.classList.toggle('shiny', E.shiny); this.espr.style.opacity = 1;
+          $('#etera').classList.toggle('hidden', !E.tera); if (E.tera) { this.teraPos('e'); $('#etera').classList.toggle('stellar', E.teraType === 'stellar'); }
         }
         else if (E && E.fainted) { this.espr.classList.add('faint'); }
         if (Pm && !Pm.fainted) {
           const pid = Pm.vol.illusion || Pm.id;
-          const pForm = Pm.formSprite || (Pm.dyn && GMAXSPRITE[Pm.id] ? GMAXSPRITE[Pm.id] : null) || (FORMS[Pm.id] && Pm.item === FORMS[Pm.id].item ? FORMS[Pm.id].f : null); const fid = Pm.mega ? Pm.mega.f : (pForm || pid); if (this.pspr._cur !== fid + '' + Pm.dyn) { setSprite(this.pspr, fid, true, !!(Pm.mega || pForm)); this.pspr._cur = fid + '' + Pm.dyn; } this.pspr.classList.toggle('dyn', Pm.dyn); this.pspr.classList.toggle('shiny', Pm.shiny); this.pspr.style.opacity = 1;
-          $('#ptera').classList.toggle('hidden', !Pm.tera); if (Pm.tera) { $('#ptera').style.bottom = '300px'; $('#ptera').style.left = '185px'; $('#ptera').classList.toggle('stellar', Pm.teraType === 'stellar'); }
+          const pForm = Pm.formSprite || (Pm.dyn && GMAXSPRITE[Pm.id] ? GMAXSPRITE[Pm.id] : null) || (FORMS[Pm.id] && Pm.item === FORMS[Pm.id].item ? FORMS[Pm.id].f : null); const fid = Pm.mega ? Pm.mega.f : (pForm || pid); this.pspr._side = 'p'; if (this.pspr._cur !== fid + '' + Pm.dyn) { setSprite(this.pspr, fid, true, !!(Pm.mega || pForm)); this.pspr._cur = fid + '' + Pm.dyn; } this.pspr.classList.toggle('dyn', Pm.dyn); this.pspr.classList.toggle('shiny', Pm.shiny); this.pspr.style.opacity = 1;
+          $('#ptera').classList.toggle('hidden', !Pm.tera); if (Pm.tera) { this.teraPos('p'); $('#ptera').classList.toggle('stellar', Pm.teraType === 'stellar'); }
         }
         else if (Pm && Pm.fainted) { this.pspr.classList.add('faint'); }
         /* ★ 太晶化水晶质感 & Mega彩虹纹理 */
@@ -9820,6 +10152,14 @@ return ev;
       const h = hex.replace('#', '');
       return `rgba(${parseInt(h.slice(0, 2), 16)},${parseInt(h.slice(2, 4), 16)},${parseInt(h.slice(4, 6), 16)},${a})`;
     }
+    /* ★ 旋转/缩放窗口后清掉内联尺寸，按当前 CSS 重新做原生等比缩放 */
+    window.addEventListener('resize', () => {
+      [BUI.espr, BUI.pspr].forEach(spr => {
+        if (!spr) return;
+        spr.style.width = ''; spr.style.height = ''; spr.style.top = '';
+        BUI.fitSprite(spr === BUI.espr ? 'e' : 'p');
+      });
+    });
     const FX = {
       on() { return CFG.fancyFx !== false; },
       layer() { return $('#fxlayer'); },
