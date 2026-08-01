@@ -6847,6 +6847,7 @@
     A('superluck', '超幸运', '会心一击率提高'); A('sniper', '狙击手', '会心一击伤害更高');
     A('aerilate', '飞行皮肤', '一般属性招式变为飞行属性且×1.2'); A('pixilate', '妖精皮肤', '一般属性招式变为妖精属性且×1.2');
     A('protean', '变幻自如', '首次出招时变为该招式属性'); A('libero', '自由者', '首次出招时变为该招式属性');
+    A('battlebond', '牵绊变身', '击败对手后，自己的攻击、特攻和速度提升1级');
     A('prankster', '恶作剧之心', '变化招式优先+1'); A('galewings', '疾风之翼', '满HP时飞行招式优先+1');
     A('queenmajesty', '女王的威严', '不受先制招式影响'); A('unseenfist', '无形拳', '接触招式可无视保护');
     A('truant', '懒惰', '每两回合休息一次'); A('innerfocus', '精神力', '不会畏缩'); A('insomnia', '不眠', '不会睡着'); A('vitalspirit', '干劲', '不会睡着');
@@ -7485,7 +7486,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(635, '三首恶龙', 'dark/dragon', '92/105/90/125/90/98', 'levitate/levitate', ['darkpulse', 'dracometeor', 'flamethrower', 'flashcannon', 'earthpower', 'roost', 'nastyplot']);
     S(637, '火神蛾', 'bug/fire', '85/60/65/135/105/100', 'flamebody/swarm', ['bugbuzz', 'flamethrower', 'gigadrain', 'quiverdance', 'roost', 'hurricane']);
     /* --- 第6世代 --- */
-    S(658, '甲贺忍蛙', 'water/dark', '72/95/67/103/71/122', 'torrent/protean', ['hydropump', 'darkpulse', 'icebeam', 'watershuriken', 'uturn', 'gunkshot', 'spikes']);
+    S(658, '甲贺忍蛙', 'water/dark', '72/95/67/103/71/122', 'torrent/protean/battlebond', ['hydropump', 'darkpulse', 'icebeam', 'watershuriken', 'uturn', 'gunkshot', 'spikes']);
     S(663, '烈箭鹰', 'fire/flying', '78/81/71/74/69/126', 'flamebody/galewings', ['bravebird', 'flareblitz', 'roost', 'swordsdance', 'uturn']);
     S(681, '坚盾剑怪', 'steel/ghost', '60/50/140/50/140/60', 'stancechange/stancechange', ['kingshield', 'shadowball', 'flashcannon', 'sacredsword', 'swordsdance', 'shadowsneak']);
     S(693, '钢炮臂虾', 'water', '71/73/88/120/89/59', 'megalauncher/megalauncher', ['waterpulse', 'aurasphere', 'darkpulse', 'dragonpulse', 'icebeam']);
@@ -12138,6 +12139,7 @@ return ev;
       'shadowclaw': {  c: '#9070c8', c2: '#d0b8f8', proj: 'none', extra: ['ghost', 'arc'], snd: 'wail snip' },
       'shadowpunch': {  c: '#9070c8', c2: '#d0b8f8', proj: 'none', extra: ['ghost'], snd: 'wail thud' },
       'phantomforce': {  c: '#9070c8', c2: '#d0b8f8', proj: 'none', big: 1, extra: ['ghost'], snd: 'wail dive boom' },
+      'shadowforce': {  c: '#9070c8', c2: '#d0b8f8', proj: 'none', big: 1, extra: ['ghost'], snd: 'wail dive boom' },
       'poltergeist': {  c: '#9070c8', c2: '#d0b8f8', proj: 'shard', extra: ['ghost'], snd: 'clunk wail' },
       'hex': {  c: '#9070c8', c2: '#d0b8f8', proj: 'orb', extra: ['ghost'], snd: 'wail pulse' },
       'astralbarrage': {  c: '#9070c8', c2: '#d0b8f8', proj: 'shard', big: 1, flash: 1, extra: ['ghost', 'nova'], snd: 'wail shard boom2' },
@@ -12349,6 +12351,7 @@ return ev;
         AU.stopMusic();
         /* ★ 战斗结束后：重置双方所有宝可梦的临时状态（形态/异常/能力等级/濒死等） */
         [...this.pp, ...this.ep].forEach(m => {
+          const hadBooster = m.vol.booster;
           m.mega = null; m.dyn = false; m.dynT = 0; m.tera = false;
           m.types = m.baseTypes.slice();
           m.ability = m.baseAbility;
@@ -12360,6 +12363,8 @@ return ev;
           m.vol.illusion = null; m.vol.illusionName = null;
           m.vol.wasSwitchedOut = false; m.vol.heroForm = false;
           if (keepCanGmax2 !== undefined) m.vol.canGmax = keepCanGmax2;
+          /* ★ 驱劲能量：消耗后在本场战斗结束时还原 */
+          if (hadBooster && !m.item) m.item = 'boosterenergy';
           m.recalc();
           m.hp = Math.min(m.hp, m.maxhp);
         });
@@ -13170,6 +13175,8 @@ return ev;
         if (mon.has('truant')) { if (mon.vol.loaf) { mon.vol.loaf = false; await say(`${mon.vol.illusionName || mon.name} 正在偷懒！`); return; } mon.vol.loaf = true; }
         // 蓄力招式
         if (mon.vol.charge) { const ck = mon.vol.charge; mon.vol.charge = null; mon.vol.justCharged = true; moveSel = { k: ck }; await say(`${mon.vol.illusionName || mon.name} 释放了积蓄的能量！`); }
+        /* ★ 暗影潜袭：第二回合从暗影中现身并发动攻击 */
+        else if (mon.vol.shadowCharge) { const sk = mon.vol.shadowCharge; mon.vol.shadowCharge = null; mon.vol.justCharged = true; moveSel = { k: sk }; await say(`${mon.vol.illusionName || mon.name} 从暗影中现身，发动了攻击！`); }
         else if (mon.vol.recharge) { mon.vol.recharge = false; await say(`${mon.vol.illusionName || mon.name} 必须休息一回合！`); return; }
         // 锁定（逆鳞）
         if (mon.vol.lock) moveSel = { k: mon.vol.lock.k };
@@ -13261,6 +13268,13 @@ return ev;
             return;
           }
           if (mv.k === 'electroshot' && this.wxActive() === 'rain') { await this.changeStat(mon, 'spa', 1, mon); }
+        }
+        /* ★ 暗影潜袭：第一回合从场上消失（期间不会被任何招式命中），第二回合发动攻击（可贯穿保护） */
+        if (mv.shadowforce && !mon.vol.justCharged && !mon.dyn) {
+          mon.vol.shadowCharge = mvk;
+          await say(`${mon.vol.illusionName || mon.name} 的暗影潜袭发动了！身影消失在场上！`);
+          if (mvObj && mvk !== 'struggle') { let cost = foe.has('pressure') ? 2 : 1; mvObj.pp = Math.max(0, mvObj.pp - cost); }
+          return;
         }
         mon.vol.justCharged = false;
         if (!foe || foe.fainted) { return; }
@@ -13396,6 +13410,14 @@ return ev;
         mon.vol.protect = false; mon.vol.pchain = 0; mon.vol.maxguard = false;
         // 同命
         if (useMv.destiny) { mon.vol.destiny = true; await say(`${mon.vol.illusionName || mon.name} 正在瞄准同命！`); return; }
+        // ★ 暗影潜袭消失中：目标不在场上，攻击招式与针对对手的招式全部落空
+        if (foe.vol.shadowCharge) {
+          const targetsFoe = useMv.c !== 'X' || useMv.setSt || useMv.setDrop || useMv.taunt || useMv.leechseed || useMv.trick || useMv.parting || useMv.clearsmog || useMv.hazard || useMv.powder || useMv.yawn || useMv.encore || useMv.partialTrap || useMv.octolock;
+          if (targetsFoe) {
+            await say(`${foe.vol.illusionName || foe.name} 的身影消失了，招式落空了！`);
+            return;
+          }
+        }
         // 变化招式执行
         if (useMv.c === 'X') { await this.statusMove(side, mon, foe, useMv, act); return; }
         // ---- 攻击招式 ----
@@ -13594,10 +13616,10 @@ return ev;
         // 保护
         let protectPierce = false, fullPierce = false;
         if (foe.vol.protect) {
-          /* ★ 强力钻：可穿透保护造成全额伤害（无法穿透极巨防壁） */
-          if (mv.hyperdrill && !foe.vol.maxguard) {
+          /* ★ 强力钻/暗影潜袭：可穿透保护造成全额伤害（无法穿透极巨防壁） */
+          if ((mv.hyperdrill || mv.shadowforce) && !foe.vol.maxguard) {
             fullPierce = true;
-            await say(`${foe.name} 的保护被强力钻贯穿了！`);
+            await say(`${foe.name} 的保护被${mv.n}贯穿了！`);
           }
           /* ★ 无形拳/贯穿钻：接触招式可穿透保护（无法穿透极巨防壁），造成1/4伤害 */
           else if ((mon.has('unseenfist') || mon.has('piercingdrill')) && mv.ct && !foe.vol.maxguard) {
@@ -14888,6 +14910,14 @@ return ev;
           if (winner.has('soulheart')) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.name} 的魂之心发动了！`); }
           if (winner.has('chillingneigh')) { this.abBanner(winner); await this.changeStat(winner, 'atk', 1, winner); await say(`${winner.name} 的苍白嘶鸣发动了！`); }
           if (winner.has('grimneigh')) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.name} 的漆黑嘶鸣发动了！`); }
+          /* ★ 牵绊变身：击败对手后物攻/特攻/速度各提升1级 */
+          if (winner.has('battlebond')) {
+            this.abBanner(winner);
+            await this.changeStat(winner, 'atk', 1, winner);
+            await this.changeStat(winner, 'spa', 1, winner);
+            await this.changeStat(winner, 'spe', 1, winner);
+            await say(`${winner.name} 的牵绊变身发动了！攻击、特攻和速度提升了！`);
+          }
           /* ★ 人马一体（蕾冠王骑乘形态）：兼具紧张感+苍白嘶鸣/漆黑嘶鸣 */
           if (winner.has('asone')) {
             if (winner.id === 10362) { this.abBanner(winner); await this.changeStat(winner, 'atk', 1, winner); await say(`${winner.name} 的人马一体（苍白嘶鸣）发动了！`); }
@@ -14999,7 +15029,7 @@ return ev;
           if (old.has('naturalcure')) { this.abBanner(old); old.status = null; old.sleepT = 0; old.toxicN = 0; }
           /* ★ 全能变身：标记已交换下场，下次出场时触发英雄形态 */
           if (old.has('zerotohero')) old.vol.wasSwitchedOut = true;
-          old.vol.choiceLock = null; old.vol.lock = null; old.vol.charge = null; old.vol.recharge = false; old.vol.protect = false; old.vol.flinch = false; old.vol.confuse = 0; if (old.vol.proteanUsed) old.types = old.baseTypes.slice(); old.vol.proteanUsed = false; old.vol.disabled = null; old.vol.lastMove = null;
+          old.vol.choiceLock = null; old.vol.lock = null; old.vol.charge = null; old.vol.shadowCharge = null; old.vol.recharge = false; old.vol.protect = false; old.vol.flinch = false; old.vol.confuse = 0; if (old.vol.proteanUsed) old.types = old.baseTypes.slice(); old.vol.proteanUsed = false; old.vol.disabled = null; old.vol.lastMove = null;
           /* ★ 超极巨效果离场清除：被G-Max Phantom困住的、被Torment的、束缚的 */
           old.vol.gmaxTrap = false; old.vol.gmaxTorment = false; old.vol.gmaxCrit = false; old.vol.binding = 0;
           /* ★ 极巨化离场即解除（HP按比例折算）；Mega进化与太晶化本场战斗内永久保留 */
@@ -15398,6 +15428,7 @@ return ev;
         const m = this.E();
         if (m.vol.lock) return { type: 'move', move: { k: m.vol.lock.k } };
         if (m.vol.charge) return { type: 'move', move: { k: m.vol.charge } };
+        if (m.vol.shadowCharge) return { type: 'move', move: { k: m.vol.shadowCharge } };
         /* ★ AI换人作为本回合行动（同样消耗回合） */
         if (this.aiSwitches > 0 && this.ep.filter(x => x.alive()).length > 1 && this.aiWantsSwitch() && !trappedReason(m, this.P(), this)) {
           const to = this.aiBestSwitch();
@@ -15405,12 +15436,12 @@ return ev;
         }
         const mv = this.aiScore().best;
         const act = { type: 'move', move: { k: mv } };
-        /* ★ 形态决策只打标，统一由 resolveForms 在出招前结算；三种互斥，一场一次 */
-        if (!this.wild && !this.usedForm.e) {
+        /* ★ 形态决策只打标，统一由 resolveForms 在出招前结算；三种互斥，一场一次（Mega大师除外：Mega无次数限制） */
+        if (!this.wild && (this.rules.megaMaster || !this.usedForm.e)) {
           const d = MV[mv];
           if (this.rules.dyna && !m.dyn && !(m.mega && m.mega.stone) && ![888, 889, 890].includes(m.id) && d.c !== 'X' && m.hpPct() > .5 && Math.random() < .3) { act.dyn = true; }
-          else if (this.rules.tera && !m.tera && Math.random() < .25) { act.tera = true; }
-          else if (this.rules.mega && MEGA[m.id] && !m.dyn && !(m.mega && m.mega.stone) && (m.id !== 718 || m.vol.completeForm) && Math.random() < .5) { act.mega = true; act.megaIdx = 0; }
+          else if (this.rules.tera && !this.rules.megaMaster && !m.tera && Math.random() < .25) { act.tera = true; }
+          else if (this.rules.mega && MEGA[m.id] && !m.dyn && !(m.mega && m.mega.stone) && (m.id !== 718 || m.vol.completeForm) && (this.rules.megaMaster || Math.random() < .5)) { act.mega = true; act.megaIdx = 0; }
         }
         return act;
       }
@@ -15800,6 +15831,23 @@ return ev;
         while (team.length < 3) { const sp = this.drawOne(round); team.push(this.build(sp, lvl, round)); }
         return { head: false, team, expert };
       },
+      /* ============ Mega进化大师 ============ */
+      /* ★ 全部宝可梦均可Mega，无次数限制；属性大师至少两只同属性，全能大师不限 */
+      megaMasterTeam(round, i, type) {
+        const lvl = this.lvl(round, i);
+        const pool = SP.filter(s => MEGA[s.id]);
+        const team = [];
+        if (type) {
+          let same = pool.filter(s => s.t.includes(type));
+          if (same.length >= 2) {
+            const t1 = pick(same);
+            const t2 = pick(same.filter(s => s.id !== t1.id));
+            team.push(this.build(t1, lvl, round), this.build(t2, lvl, round));
+          }
+        }
+        while (team.length < 3) { team.push(this.build(pick(pool), lvl, round)); }
+        return team;
+      },
       /* ============ 冠军级图鉴 ============ */
       /* 全部冠军列表（含隐藏冠军·灭天），未遇见的不展示信息 */
       championList() {
@@ -16067,31 +16115,41 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b styl
       /* ============ 匹配对战 ============ */
       async match() {
         const i = GM.fac.win;
+        /* ★ Mega进化大师：第3轮起、非第7场的对局中，5%概率出现（属性大师/全能大师） */
+        const megaMaster = (GM.fac.round >= 3 && i !== 6 && Math.random() < 0.05)
+          ? { type: Math.random() < 0.5 ? pick(TYP) : null, name: '' } : null;
+        if (megaMaster) megaMaster.name = megaMaster.type ? TNAME[megaMaster.type] + '属性Mega大师' : '全能Mega大师';
         /* ★ 决定本场对手类型 */
         const expert = GM.fac.nextExpert || this.rollExpert(GM.fac.round, i);
         GM.fac.nextExpert = null;
-        const et = this.enemyTeam(GM.fac.round, i, expert);
+        const et = megaMaster
+          ? { head: false, master: true, name: megaMaster.name, team: this.megaMasterTeam(GM.fac.round, i, megaMaster.type) }
+          : this.enemyTeam(GM.fac.round, i, expert);
         healAll(GM.fac.party);
         if (et.head) {
           const ch = et.champion;
-          this.unlockChampion(ch.name);
           await fadeTo('#battle');
           await dlg(ch.name, ch.lines.start, ch.sprite);
           await fadeTo('#factory');
         }
-        /* ★ 极巨化：每局50%概率可用 */
-        const canDyna = Math.random() < 0.30;
+        if (et.master) {
+          await dlg('广播', `Mega进化大师「${et.name}」出现了！他可以使用无限制的Mega进化！本局对战中无法使用极巨化！`, 132);
+        }
+        /* ★ 极巨化：每局30%概率可用（Mega进化大师对局禁用） */
+        const canDyna = !et.master && Math.random() < 0.30;
         if (canDyna) {
           await dlg('广播', '本局对战中，可以使用极巨化！', 132);
         }
         const r = await startBattle({
           player: GM.fac.party, enemy: et.team,
-          trainer: et.head ? et.champion.name : (expert.type ? expert.name : '工厂训练家'),
-          rules: { mega: true, dyna: canDyna, tera: true, switch: true, items: false, run: false, capture: false },
+          trainer: et.head ? et.champion.name : et.master ? et.name : (expert.type ? expert.name : '工厂训练家'),
+          rules: { mega: true, dyna: canDyna, tera: true, switch: true, items: false, run: false, capture: false, megaMaster: !!et.master },
           ai: 1 + GM.fac.round * 0.3, aiSwitches: 1
         });
         if (r.result === 'win') {
           GM.fac.win++; GM.fac.bp += GM.fac.round;
+          /* ★ 冠军图鉴：战胜冠军后点亮 */
+          if (et.head) this.unlockChampion(et.champion.name);
           [...r.battle.participants].forEach(m => { if (GM.fac.party.includes(m)) m.battles = (m.battles || 0) + 1; });
           const streak = (GM.fac.round - 1) * 7 + GM.fac.win;
           if (streak > GM.fac.best) { GM.fac.best = streak; localStorage.setItem('pif_best', streak); }
@@ -17241,8 +17299,8 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       };
       const doE = async () => {
         if (ea.type !== 'move' || !E || E.fainted) return;
-        if (ea.mega && this.rules.mega && MEGA[E.id] && !this.usedForm.e && !E.dyn && !(E.mega && E.mega.stone) && (E.id !== 718 || E.vol.completeForm)) {
-          this.usedForm.e = true; this.doMega('e', E, ea.megaIdx || 0); await sleep(700);
+        if (ea.mega && this.rules.mega && MEGA[E.id] && (this.rules.megaMaster || !this.usedForm.e) && !E.dyn && !(E.mega && E.mega.stone) && (E.id !== 718 || E.vol.completeForm)) {
+          if (!this.rules.megaMaster) this.usedForm.e = true; this.doMega('e', E, ea.megaIdx || 0); await sleep(700);
         } else if (ea.dyn && this.rules.dyna && !this.usedForm.e && !E.dyn && !(E.mega && E.mega.stone) && ![888, 889, 890].includes(E.id)) {
           this.usedForm.e = true; E.dyn = true; E.dynT = 3; E.recalc(); E.hp *= 2;
           if (E.vol.canGmax !== undefined ? E.vol.canGmax : (GMAXLIST.has(E.id) && Math.random() < 0.7)) E.vol.gmax = true;
@@ -17375,6 +17433,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (d.uturn) p.push('攻击后替换下场');
       if (d.dyna2x) p.push('对极巨化宝可梦伤害×2');
       if (d.hyperdrill) p.push('可无视保护类招式造成全额伤害（无法穿透极巨防壁）');
+      if (d.shadowforce) p.push('第一回合从场上消失（期间不会被招式命中），第二回合发动攻击，可贯穿保护');
       if (d.boltbeak) p.push('对手本回合尚未行动时威力翻倍');
       if (d.triplearrows) p.push('50%几率降低对手防御1级');
       if (d.chillyreception) p.push('天气变为冰雹，随后自身替换下场');
