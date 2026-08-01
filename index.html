@@ -10730,8 +10730,8 @@ return ev;
           const v = m.stages[k];
           return `<span class="stg ${v > 0 ? 'up' : 'dn'}${changed ? ' anim' : ''}">${SN[k]}${v > 0 ? '▲' : '▼'}${Math.abs(v)}</span>`;
         }).join('');
-        /* ★ 古代活性/夸克充能：独立芯片显示（不属于能力等级） */
-        const protoActive = (m.has('protosynthesis') && b && b.wx === 'sun') || (m.has('quarkdrive') && b && b.terrain === 'electric');
+        /* ★ 古代活性/夸克充能：独立芯片显示（不属于能力等级；含驱劲能量启动） */
+        const protoActive = !!m.vol.booster || (m.has('protosynthesis') && b && b.wx === 'sun') || (m.has('quarkdrive') && b && b.terrain === 'electric');
         const protoChip = protoActive ? `<span class="stg up" style="background:#fff3c4;color:#c07a2a;border-color:#f2c230">⚡${AB[m.ability]?.n || ''} ${STN[m.bestStat()]}↑</span>` : '';
         const stgrow = (stgs || protoChip) ? `<div class="stgrow">${protoChip}${stgs}</div>` : '';
         return `<div class="row1"><span class="nm">${displayName}${m.shiny ? ' ✦' : ''}</span><span class="lv">${m.lvl}</span>${stch}${gmaxChips}${confCh}${tags}</div>
@@ -13819,8 +13819,8 @@ return ev;
             BUI.dmgPop(this.sideOf(mon), `-${gd}`, '#ff9d8a');
           }
         }
-        // ★ 顺手牵羊：被接触招式击中时偷走对手道具（自身无道具时）
-        if (mv.ct && foe.has('pickpocket') && !foe.item && mon.item && foe.hp > 0 && !mon.has('stickyhold')) {
+        // ★ 顺手牵羊：被接触招式击中时偷走对手道具（自身无道具时；石板无法被偷走）
+        if (mv.ct && foe.has('pickpocket') && !foe.item && mon.item && foe.hp > 0 && !mon.has('stickyhold') && !(mon.id === 493 && PLATES[mon.item])) {
           const stolen = mon.item; mon.item = null; foe.item = stolen; this.abBanner(foe);
           await say(`${foe.name} 的顺手牵羊发动了！偷走了${mon.vol.illusionName || mon.name}的${IT[stolen].n}！`);
         }
@@ -13924,8 +13924,8 @@ return ev;
           this.abBanner(foe);
           await this.changeStat(foe, 'def', 1, foe);
         }
-        // ★ 魔术师：攻击命中时偷走对手道具
-        if (dmg > 0 && mon.has('magician') && !mon.item && foe.item && foe.hp > 0) {
+        // ★ 魔术师：攻击命中时偷走对手道具（石板无法被偷走）
+        if (dmg > 0 && mon.has('magician') && !mon.item && foe.item && foe.hp > 0 && !(foe.id === 493 && PLATES[foe.item])) {
           const stolen = foe.item; foe.item = null; mon.item = stolen;
           this.abBanner(mon);
           await say(`${mon.vol.illusionName || mon.name} 的魔术师发动了！偷走了${foe.name}的${IT[stolen].n}！`);
@@ -13934,7 +13934,7 @@ return ev;
         if (r.eff > 1 && foe.item === 'weaknesspolicy' && !foe.fainted && !foe.has('klutz')) {
           foe.item = null;
           await this.changeStat(foe, 'atk', 2, foe);
-          await this.changeStat(foe, 'spa', 2, foe);
+          await this.changeStat(foe, 'spa', 2, foe, true);
           await say(`${foe.name} 的弱点保险发动了！`);
         }
         // 气球破裂
@@ -13979,6 +13979,10 @@ return ev;
             await say(`${foe.name} 的黏着发动了！道具无法被拍落！`);
           }
           else if (foe.item === 'rustedsword' || foe.item === 'rustedshield') {
+            await say(`${foe.name} 的${IT[foe.item].n}无法被拍落！`);
+          }
+          /* ★ 阿尔宙斯携带石板：石板无法被拍落 */
+          else if (foe.id === 493 && PLATES[foe.item]) {
             await say(`${foe.name} 的${IT[foe.item].n}无法被拍落！`);
           } else {
             await say(`${foe.name} 的${IT[foe.item].n}被拍落了！`); foe.item = null; foe.vol.choiceLock = null;
@@ -14484,6 +14488,10 @@ return ev;
           if (mon.item === 'rustedsword' || mon.item === 'rustedshield' || foe.item === 'rustedsword' || foe.item === 'rustedshield') {
             await say('专属道具无法被交换！戏法失败了！'); return;
           }
+          /* ★ 阿尔宙斯携带石板：石板无法被交换/移除 */
+          if ((mon.id === 493 && PLATES[mon.item]) || (foe.id === 493 && PLATES[foe.item])) {
+            await say('石板道具无法被交换！戏法失败了！'); return;
+          }
           /* ★ 黏着：道具无法被交换 */
           if (mon.has('stickyhold') || foe.has('stickyhold')) {
             this.abBanner(mon.has('stickyhold') ? mon : foe);
@@ -14511,7 +14519,7 @@ return ev;
           await say(stole ? `${mon.vol.illusionName || mon.name} 偷走了对手的能力提升！` : '对手没有能力提升…'); AU.statUp(); return;
         }
         if (mv.parting) {
-          await this.changeStat(foe, 'atk', -1, mon); await this.changeStat(foe, 'spa', -1, mon);
+          await this.changeStat(foe, 'atk', -1, mon); await this.changeStat(foe, 'spa', -1, mon, true);
           if (this.sideAliveCount(side) > 1) await this.uturnSwitch(side, mon); return;
         }
         /* ---- 第六批招式效果 ---- */
@@ -14539,7 +14547,7 @@ return ev;
           mon.vol.stockpile = (mon.vol.stockpile || 0) + 1;
           mon.vol.stockDef = (mon.vol.stockDef || 0) + 1;
           mon.vol.stockSpd = (mon.vol.stockSpd || 0) + 1;
-          await this.changeStat(mon, 'def', 1, mon); await this.changeStat(mon, 'spd', 1, mon);
+          await this.changeStat(mon, 'def', 1, mon); await this.changeStat(mon, 'spd', 1, mon, true);
           await say(`${mon.name} 积蓄了力量！(${mon.vol.stockpile}/3)`); return;
         }
         if (mv.swallow) {
@@ -14584,7 +14592,7 @@ return ev;
           await say(`${foe.name} 被吼走了！`); return;
         }
         if (mv.memento) {
-          await this.changeStat(foe, 'atk', -2, mon); await this.changeStat(foe, 'spa', -2, mon);
+          await this.changeStat(foe, 'atk', -2, mon); await this.changeStat(foe, 'spa', -2, mon, true);
           mon.hp = 0; mon.fainted = true; await say(`${mon.name} 使用了临别礼物！`);
           await this.handleKO(this.sideOf(foe) === 'p' ? 'e' : 'p', foe, mon);
           BUI.refresh(this); return;
@@ -14741,7 +14749,7 @@ return ev;
         /* ★ 勇气填充：特攻+1，特防+1，治愈自身异常 */
         if (mv.takeheart) {
           await this.changeStat(mon, 'spa', 1, mon);
-          await this.changeStat(mon, 'spd', 1, mon);
+          await this.changeStat(mon, 'spd', 1, mon, true);
           if (mon.status) { mon.status = null; mon.sleepT = 0; mon.toxicN = 0; await say(`${mon.name} 的异常状态被治愈了！`); }
         }
         /* ★ 魂舞烈音爆：消耗1/3最大HP，全能力+1 */
@@ -14827,7 +14835,7 @@ return ev;
         return true;
       }
       /* ---------- 能力变化 ---------- */
-      async changeStat(m, k, n, src) {
+      async changeStat(m, k, n, src, silent) {
         if (n === 0) return;
         let orig = n;
         // ★ 单纯：能力变化幅度翻倍
@@ -14858,7 +14866,8 @@ return ev;
         }
         const word = Math.abs(n) >= 2 ? (n > 0 ? '大幅提升' : '大幅下降') : (n > 0 ? '提升了' : '下降了');
         await say(`${m.name} 的${STN[k]}${word}！`);
-        if (n > 0) { AU.statUp(); } else { AU.statDn(); }
+        /* ★ silent：多项能力同时变化时只在第一项播放音效，避免重复 */
+        if (!silent) { if (n > 0) { AU.statUp(); } else { AU.statDn(); } }
         /* ★ 跟风：对手能力提升时自己也提升（无论来源） */
         if (n > 0 && src) {
           const foe = this.foeOf(m);
@@ -14957,8 +14966,8 @@ return ev;
           if (winner.has('battlebond')) {
             this.abBanner(winner);
             await this.changeStat(winner, 'atk', 1, winner);
-            await this.changeStat(winner, 'spa', 1, winner);
-            await this.changeStat(winner, 'spe', 1, winner);
+            await this.changeStat(winner, 'spa', 1, winner, true);
+            await this.changeStat(winner, 'spe', 1, winner, true);
             await say(`${winner.name} 的牵绊变身发动了！攻击、特攻和速度提升了！`);
           }
           /* ★ 人马一体（蕾冠王骑乘形态）：兼具紧张感+苍白嘶鸣/漆黑嘶鸣 */
@@ -15751,7 +15760,7 @@ return ev;
         if (Math.random() < 0.2) { if (out.length >= 4) out[3] = 'terablast'; else out.push('terablast'); }
         return out.slice(0, 4);
       },
-      pickItem(sp, moves) {
+      pickItem(sp, moves, ability) {
         /* ★ 苍响/藏玛然特：80%携带专属道具（剑之王/盾之王），20%百战勇者 */
         if (sp.id === 888) {
           if (Math.random() < 0.8) return 'rustedsword';
@@ -15772,13 +15781,13 @@ return ev;
         if (sp.id === 649) return pick(['burndrive','chilldrive','dousedrive','shockdrive']);
         /* ★ 银伴战兽：携带随机存储碟 */
         if (sp.id === 773 || sp.id === 772) return pick(Object.keys(MEMORYDISC));
-        /* ★ 毅力特性宝可梦：可能携带火焰宝珠（火属性则携带剧毒宝珠） */
-        if (sp.ab.includes('guts')) {
+        /* ★ 毅力特性：实际特性为毅力才可能携带火焰宝珠（火属性则携带剧毒宝珠） */
+        if (ability === 'guts') {
           if (sp.t.includes('fire')) { if (Math.random() < 0.3) return 'toxicorb'; }
           else if (Math.random() < 0.5) return 'flameorb';
         }
-        /* ★ 毒疗/中毒激升：携带剧毒宝珠 */
-        if ((sp.ab.includes('poisonheal') || sp.ab.includes('toxicboost')) && Math.random() < 0.5) return 'toxicorb';
+        /* ★ 毒疗/中毒激升：只有实际特性为该特性的宝可梦才携带剧毒宝珠（特性池里有不等于就是） */
+        if ((ability === 'poisonheal' || ability === 'toxicboost') && Math.random() < 0.5) return 'toxicorb';
         /* ★ 心之水滴：拉帝亚斯/拉帝欧斯 50% */
         if ((sp.id === 380 || sp.id === 381) && Math.random() < 0.5) return 'souldew';
         /* ★ 专属宝珠：帝牙卢卡/帕路奇亚/骑拉帝纳 30% */
@@ -15810,7 +15819,9 @@ return ev;
       },
       build(sp, lvl, round) {
         const moves = this.pickMoves(sp);
-        return new P(sp.id, lvl, { moves, item: this.pickItem(sp, moves), iv: 28, tera: pick(TYP), ev: genEV(sp, round || 1, moves) });
+        /* ★ 先确定实际特性再抽道具，确保毒疗/中毒激升宝可梦才携带剧毒宝珠 */
+        const ability = pick(sp.ab);
+        return new P(sp.id, lvl, { moves, ability, item: this.pickItem(sp, moves, ability), iv: 28, tera: pick(TYP), ev: genEV(sp, round || 1, moves) });
       },
       /* ★ 按档位抽取：先掷档位，再从该档位随机 */
       drawOne(round) {
@@ -15826,7 +15837,8 @@ return ev;
       rollExpert(round, i) {
         const p = this.expertProb(round, i);
         if (Math.random() < p) {
-          const t = pick(TYP);
+          /* ★ 星晶不是对战属性，不生成星晶属性专家 */
+          const t = pick(TYP.filter(x => x !== 'stellar'));
           return { type: t, name: TNAME[t] + '属性专家' };
         }
         return { type: null, name: '全能高手' };
@@ -15855,7 +15867,7 @@ return ev;
           /* ★ 第三轮固定达拉原始阵容 */
           if (round === 3) {
             return {
-              head: true, champion: { name: '达拉', sprite: 275, lines: { start: '呵呵呵……又见面了。让我和我的宝可梦来检验一下你的实力吧！', lose: '这就是工厂的极限吗……' } },
+              head: true, champion: { name: '达拉', sprite: 275, lines: { start: '让我和我的宝可梦来检验一下你的实力吧！', lose: '这就是工厂的极限吗……' } },
               team: [this.build(SPDB[275], lvl + 4, round), this.build(SPDB[303], lvl + 4, round), this.build(SPDB[214], lvl + 4, round)]
             };
           }
