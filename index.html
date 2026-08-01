@@ -2447,7 +2447,8 @@
     /* ============ 异常状态持续浮层（低频呼吸式） ============ */
     .stfx {
       position: absolute;
-      z-index: 6;
+      /* ★ 异常状态特效在宝可梦信息卡片（.icard z-index:6）下层，精灵（z-index:4）上层 */
+      z-index: 5;
       pointer-events: none;
       overflow: visible
     }
@@ -7157,6 +7158,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
 
     M('seedflare','种子闪光','grass','S',120,85,5,{sec:{drop:'spd',n:-2,ch:40}});
     M('shadowforce','暗影潜袭','ghost','P',120,100,5,{ct:1,shadowforce:1});
+    M('meteorbeam','流星光束','rock','S',120,90,10,{charge:1,meteorbeam:1});
     M('roaroftime','时光咆哮','dragon','S',150,90,5,{recharge:1});
     M('spacialrend','亚空裂斩','dragon','S',100,95,5,{crit:1});
     M('magmastorm','熔岩风暴','fire','S',100,75,5,{partialTrap:1});
@@ -7272,6 +7274,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     I('bigroot', '大根茎', '吸取HP类招式的回复量×1.3');
     I('throatspray', '爽喉喷雾', '使用声音招式后特攻+1（消耗）');
     I('boosterenergy', '驱劲能量', '消耗后发动古代活性/夸克充能');
+    I('powerherb', '强力香草', '携带后使用蓄力招式时立刻完成蓄力并攻击；使用后消耗，战斗结束后还原');
     I('loadeddice', '机变骰子', '连续攻击招式必定命中4~5次（三旋击/鼠数儿除外）');
     I('blunderpolicy', '打空保险', '招式未命中时速度+2（消耗）');
     I('potion', '药水', '回复20HP'); I('superpotion', '高级药水', '回复60HP'); I('hyperpotion', '厉害药水', '回复120HP'); I('maxpotion', '全满药', 'HP完全回复');
@@ -7506,7 +7509,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(778, '谜拟丘', 'ghost/fairy', '55/90/80/50/105/96', 'disguise/disguise', ['playrough', 'shadowclaw', 'swordsdance', 'spiritbreak', 'drainpunch', 'shadowsneak']);
     S(784, '杖尾鳞甲龙', 'dragon/fighting', '75/110/125/100/105/85', 'bulletproof/overcoatx', ['clangoroussoul', 'closecombat', 'clangingscales', 'flamethrower', 'flashcannon', 'bulkup']);
     S(791, '索尔迦雷欧', 'psychic/steel', '137/137/107/113/89/97', 'fullmetalbody/fullmetalbody', ['sunsteelstrike', 'zenheadbutt', 'flareblitz', 'earthquake', 'stoneedge'], { leg: 1 });
-    S(792, '露奈雅拉', 'psychic/ghost', '137/113/89/137/107/97', 'shadowshield/shadowshield', ['moongeistbeam', 'psyshock', 'focusblast', 'icebeam', 'roost', 'moonblast', 'thunderbolt'], { leg: 1 });
+    S(792, '露奈雅拉', 'psychic/ghost', '137/113/89/137/107/97', 'shadowshield/shadowshield', ['moongeistbeam', 'psyshock', 'focusblast', 'icebeam', 'roost', 'moonblast', 'thunderbolt', 'meteorbeam'], { leg: 1 });
     S(798, '纸御剑', 'grass/steel', '59/181/131/59/31/109', 'beastboost/beastboost', ['leafblade', 'sacredsword', 'ironhead', 'xscissor', 'swordsdance'].filter(m => MV[m] || m === 'leafblade'));
     S(802, '玛夏多', 'fighting/ghost', '90/125/80/90/90/125', 'technician/technician', ['spectralthief', 'closecombat', 'shadowsneak', 'bulletpunch', 'icepunch'], { leg: 1 });
     S(807, '捷拉奥拉', 'electric', '88/112/75/102/80/143', 'voltabsorb/voltabsorb', ['plasmafists', 'closecombat', 'knockoff', 'voltswitch'], { leg: 1 });
@@ -7531,7 +7534,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(934, '盐石巨灵', 'rock', '100/100/130/45/90/35', 'purifyingsalt/sturdy', ['saltcure', 'stoneedge', 'recover', 'stealthrock', 'bodypress'].filter(m => MV[m] || m === 'saltcure'));
     S(936, '红莲铠骑', 'fire/psychic', '85/60/100/125/80/75', 'flashfire/flashfire', ['armorcannon', 'psychic', 'aurasphere', 'energyball', 'calmmind']);
     S(937, '苍炎刃鬼', 'fire/ghost', '75/125/80/60/100/85', 'flashfire/flashfire', ['bitterblade', 'shadowclaw', 'closecombat', 'swordsdance', 'willowisp']);
-    S(970, '晶光花', 'rock/poison', '83/55/90/130/81/86', 'toxicdebris/corrosion', ['powergem', 'sludgewave', 'earthpower', 'stealthrock', 'energyball']);
+    S(970, '晶光花', 'rock/poison', '83/55/90/130/81/86', 'toxicdebris/corrosion', ['powergem', 'sludgewave', 'earthpower', 'stealthrock', 'energyball', 'meteorbeam']);
     S(977, '吃吼霸', 'water', '150/100/115/65/65/35', 'unaware/obliviousx', ['liquidation', 'earthquake', 'rest', 'bodypress', 'wavecrash', 'orderup'].filter(m => MV[m] || m === 'liquidation'));
     S(979, '弃世猴', 'fighting/ghost', '110/115/80/50/90/90', 'vitalspirit/defiant', ['ragefist', 'closecombat', 'drainpunch', 'bulkup', 'taunt']);
     S(980, '土王', 'poison/ground', '130/75/60/45/100/20', 'poisonpoint/unaware', ['earthquake', 'poisonjab', 'toxic', 'recover', 'stealthrock']);
@@ -8340,7 +8343,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(788,'卡璞鳍鳍','water/fairy','70/75/115/95/130/85','mistysurge/telepathy',['naturesmadness','scald','moonblast','icebeam','calmmind','taunt'],{leg:1});
     S(789,'科斯莫古','psychic','43/29/31/29/31/37','unaware/unaware',['splash','terablast'],{evo:1,leg:1});
     S(790,'科斯莫姆','psychic','43/29/131/29/131/37','sturdy/sturdy',['splash','terablast','cosmicpower'],{evo:1,leg:1});
-    S(793,'虚吾伊德','rock/poison','109/53/47/127/131/103','beastboost/beastboost',['powergem','sludgewave','thunderbolt','stealthrock','toxic'],{leg:1});
+    S(793,'虚吾伊德','rock/poison','109/53/47/127/131/103','beastboost/beastboost',['powergem','sludgewave','thunderbolt','stealthrock','toxic','meteorbeam'],{leg:1});
     S(794,'爆肌蚊','bug/fighting','107/139/139/53/53/79','beastboost/beastboost',['superpower','lunge','poisonjab','drainpunch','icepunch'],{leg:1});
     S(795,'费洛美螂','bug/fighting','71/137/37/137/37/151','beastboost/beastboost',['highjumpkick','bugbuzz','icebeam','poisonjab','uturn'],{leg:1});
     S(796,'电束木','electric','83/89/71/173/71/83','beastboost/beastboost',['thunderbolt','voltswitch','thunderwave','signalbeam','powergem'],{leg:1});
@@ -12352,6 +12355,7 @@ return ev;
         /* ★ 战斗结束后：重置双方所有宝可梦的临时状态（形态/异常/能力等级/濒死等） */
         [...this.pp, ...this.ep].forEach(m => {
           const hadBooster = m.vol.booster;
+          const hadPowerHerb = m.vol.powerherb;
           m.mega = null; m.dyn = false; m.dynT = 0; m.tera = false;
           m.types = m.baseTypes.slice();
           m.ability = m.baseAbility;
@@ -12365,6 +12369,8 @@ return ev;
           if (keepCanGmax2 !== undefined) m.vol.canGmax = keepCanGmax2;
           /* ★ 驱劲能量：消耗后在本场战斗结束时还原 */
           if (hadBooster && !m.item) m.item = 'boosterenergy';
+          /* ★ 强力香草：消耗后在本场战斗结束时还原 */
+          if (hadPowerHerb && !m.item) m.item = 'powerherb';
           m.recalc();
           m.hp = Math.min(m.hp, m.maxhp);
         });
@@ -12792,13 +12798,20 @@ return ev;
       }
       async chooseMove(m) {
         $('#menuMain').classList.add('hidden');
-        const mm = $('#menuMoves'); mm.classList.remove('hidden');
-        const locked = m.vol.lock ? m.vol.lock.k : null;
+        /* ★ 再来一次：被锁招式PP耗尽时自动解除防死锁 */
+        if (m.vol.encore) { const em = m.moves.find(x => x.k === m.vol.encore.k); if (!em || em.pp <= 0) m.vol.encore = null; }
+        /* ★ 强制锁定：蓄力/暗影潜袭/再来一次/逆鳞 状态下只能选择指定招式（极巨化期间免疫锁招） */
+        const forcedK = m.dyn ? null : (m.vol.charge || m.vol.shadowCharge || (m.vol.encore ? m.vol.encore.k : null) || (m.vol.lock ? m.vol.lock.k : null));
         const choiceLock = (['choiceband', 'choicespecs', 'choicescarf'].includes(m.item) && !m.dyn) ? m.vol.choiceLock : null;
         let wantMega = false, wantDyn = false, wantTera = false;
         const canMega = this.rules.mega && !!MEGA[m.id] && !this.usedForm.p && !m.dyn && (m.id !== 718 || m.vol.completeForm) && !(m.mega && m.mega.stone);
-        const canDyn = this.rules.dyna && !this.usedForm.p && !m.dyn && !(m.mega && m.mega.stone) && ![888, 889, 890].includes(m.id);
+        /* ★ 没有可用招式（PP耗尽/封印/突击背心）时无法极巨化 */
+        const hasUsableMove = forcedK ? true : m.moves.some(mv => mv.pp > 0 && (!m.vol.disabled || m.vol.disabled.k !== mv.k) && !(m.item === 'assaultvest' && MV[mv.k].c === 'X'));
+        const canDyn = this.rules.dyna && !this.usedForm.p && !m.dyn && !(m.mega && m.mega.stone) && ![888, 889, 890].includes(m.id) && hasUsableMove;
         const canTera = this.rules.tera && !this.usedForm.p && !m.tera;
+        /* ★ 无任何可用招式时：点击战斗自动使用挣扎（不打开技能菜单） */
+        if (!forcedK && !hasUsableMove) { return { type: 'move', move: { k: 'struggle' } }; }
+        const mm = $('#menuMoves'); mm.classList.remove('hidden');
         return new Promise(res => {
           let backs = [], offEsc = null;
           const cleanup = () => { backs.forEach(([b, h]) => b.removeEventListener('click', h)); if (offEsc) offEsc(); };
@@ -12837,17 +12850,27 @@ return ev;
               tag.textContent = `● 极巨化中\n剩余 ${m.dynT} 回合`;
               formCol.appendChild(tag);
             }
-            /* ★ 讲究锁：极巨化（已生效或预览中）时解锁；被锁招式PP耗尽时自动解锁防死锁 */
-            let effChoiceLock = wantDyn ? null : choiceLock;
+            /* ★ 讲究锁：极巨化（已生效或预览中）时解锁；被锁招式PP耗尽时自动解锁防死锁；强制锁定（蓄力/再来一次等）优先于讲究锁 */
+            let effChoiceLock = forcedK ? null : (wantDyn ? null : choiceLock);
+            /* ★ 点击极巨化时同样解除锁招 */
+            const effForced = wantDyn ? null : forcedK;
             if (effChoiceLock) { const lm = m.moves.find(x => x.k === effChoiceLock); if (!lm || lm.pp <= 0) { effChoiceLock = null; m.vol.choiceLock = null; } }
             if (effChoiceLock) {
               const lk = el('div', ''); lk.id = 'formHint'; lk.style.color = '#ffb35c';
               lk.textContent = `🔒 讲究道具锁定\n仅可用「${MV[effChoiceLock].n}」`;
               formCol.appendChild(lk);
             }
+            /* ★ 强制锁定提示：蓄力/暗影潜袭/再来一次/逆鳞 */
+            if (effForced && !effChoiceLock) {
+              const lk = el('div', ''); lk.id = 'formHint'; lk.style.color = '#ff8a9a';
+              const reason = m.vol.charge ? '蓄力中' : m.vol.shadowCharge ? '暗影潜袭中' : m.vol.encore ? '被再来一次困住' : '招式被锁定';
+              lk.textContent = `${reason}\n只能使用「${MV[effForced].n}」`;
+              formCol.appendChild(lk);
+            }
             m.moves.forEach(mv => {
               const d = MV[mv.k];
-              const dis = (locked && locked !== mv.k) || (effChoiceLock && effChoiceLock !== mv.k) || mv.pp <= 0 || (m.item === 'assaultvest' && d.c === 'X') || (m.vol.disabled && m.vol.disabled.k === mv.k);
+              const isForced = effForced === mv.k;
+              const dis = (effForced && !isForced) || (effChoiceLock && effChoiceLock !== mv.k) || (mv.pp <= 0 && !isForced) || (m.item === 'assaultvest' && d.c === 'X' && !isForced) || (!isForced && m.vol.disabled && m.vol.disabled.k === mv.k);
               /* ★ 显示属性：太晶爆发/制裁光砾/皮肤类特性 按实际生效属性着色 */
                let showT = d.t, showNm = null;
               /* ★ 基格尔德Mega：核心惩罚者→归无之光 */
@@ -13178,8 +13201,8 @@ return ev;
         /* ★ 暗影潜袭：第二回合从暗影中现身并发动攻击 */
         else if (mon.vol.shadowCharge) { const sk = mon.vol.shadowCharge; mon.vol.shadowCharge = null; mon.vol.justCharged = true; moveSel = { k: sk }; await say(`${mon.vol.illusionName || mon.name} 从暗影中现身，发动了攻击！`); }
         else if (mon.vol.recharge) { mon.vol.recharge = false; await say(`${mon.vol.illusionName || mon.name} 必须休息一回合！`); return; }
-        // 锁定（逆鳞）
-        if (mon.vol.lock) moveSel = { k: mon.vol.lock.k };
+        // 锁定（逆鳞）★ 极巨化期间免疫锁招
+        if (mon.vol.lock && !mon.dyn) moveSel = { k: mon.vol.lock.k };
         let mvk = moveSel.k || moveSel;
         const origMvk = mvk;
         /* ★ 基格尔德Mega：核心惩罚者变为归无之光 */
@@ -13251,23 +13274,30 @@ return ev;
           }
           await say(`${mon.vol.illusionName || mon.name} 陷入了混乱！`);
         }
-        if (mon.vol.flinch) { mon.vol.flinch = false; if (mon.has('steadfastx')) { this.abBanner(mon); await this.changeStat(mon, 'spe', 1, mon); await say(`${mon.vol.illusionName || mon.name} 的不屈之心发动了！`); } await say(`${mon.vol.illusionName || mon.name} 畏缩了，无法行动！`); return; }
+        /* ★ 畏缩：极巨化期间免疫畏缩 */
+        if (mon.vol.flinch && !mon.dyn) { mon.vol.flinch = false; if (mon.has('steadfastx')) { this.abBanner(mon); await this.changeStat(mon, 'spe', 1, mon); await say(`${mon.vol.illusionName || mon.name} 的不屈之心发动了！`); } await say(`${mon.vol.illusionName || mon.name} 畏缩了，无法行动！`); return; }
         // ★ 诅咒之躯封印：被封印的招式无法使用
         if (mon.vol.disabled && mon.vol.disabled.k === mvk) {
           await say(`${mon.vol.illusionName || mon.name} 的${mv.n}被封印了，无法使用！`); return;
         }
         /* ★ 蓄力招式（日光束等）：晴天秒发，否则第一回合蓄力、第二回合释放；极巨化时直接变为极巨草原，无需蓄力 */
         /* ★ 电光束：雨天下不蓄力，攻击前提升特攻1级 */
+        /* ★ 强力香草：携带时立即完成蓄力并消耗道具（流星光束的特攻提升同步生效） */
         if (mv.charge && !mon.vol.justCharged && !mon.dyn) {
-          const skipCharge = (this.wxActive() === 'sun') || (mon.has('megasol')) || (mv.k === 'electroshot' && this.wxActive() === 'rain');
-          if (!skipCharge) {
+          const herb = mon.item === 'powerherb';
+          const skipCharge = herb || (this.wxActive() === 'sun') || (mon.has('megasol')) || (mv.k === 'electroshot' && this.wxActive() === 'rain');
+          if (skipCharge) {
+            if (herb) { mon.item = null; mon.vol.powerherb = true; await say(`${mon.vol.illusionName || mon.name} 的强力香草发动了，立刻完成了蓄力！`); }
+            if (mv.k === 'electroshot' && this.wxActive() === 'rain') { await this.changeStat(mon, 'spa', 1, mon); }
+            if (mv.meteorbeam) { await this.changeStat(mon, 'spa', 1, mon); }
+          } else {
             mon.vol.charge = mvk;
             FX.chargeFx(side, mv.t);
             await say(`${mon.vol.illusionName || mon.name} 吸收了光能！`);
+            if (mv.meteorbeam) { await this.changeStat(mon, 'spa', 1, mon); }
             if (mvObj && mvk !== 'struggle') { let cost = foe.has('pressure') ? 2 : 1; mvObj.pp = Math.max(0, mvObj.pp - cost); }
             return;
           }
-          if (mv.k === 'electroshot' && this.wxActive() === 'rain') { await this.changeStat(mon, 'spa', 1, mon); }
         }
         /* ★ 暗影潜袭：第一回合从场上消失（期间不会被任何招式命中），第二回合发动攻击（可贯穿保护） */
         if (mv.shadowforce && !mon.vol.justCharged && !mon.dyn) {
@@ -13512,12 +13542,19 @@ return ev;
             mon.hp = Math.min(mon.maxhp, mon.hp + h); AU.heal(); await say(`${mon.vol.illusionName || mon.name} 吸取了对手的HP！`);
           }
         }
-        if (useMv.recoil && totalDmg > 0 && !mon.has('rockhead') && !mon.has('magicguard') && !mon.fainted) {
-          const rec = Math.max(1, Math.floor(totalDmg / useMv.recoil));
-          mon.hp = Math.max(0, mon.hp - rec);
-          await say(`${mon.vol.illusionName || mon.name} 受到了反作用力伤害！`);
-          BUI.dmgPop(side, `-${rec}`, '#ff9d8a');
-        }
+      if (useMv.recoil && totalDmg > 0 && !mon.has('rockhead') && !mon.has('magicguard') && !mon.fainted) {
+        const rec = Math.max(1, Math.floor(totalDmg / useMv.recoil));
+        mon.hp = Math.max(0, mon.hp - rec);
+        await say(`${mon.vol.illusionName || mon.name} 受到了反作用力伤害！`);
+        BUI.dmgPop(side, `-${rec}`, '#ff9d8a');
+      }
+      /* ★ 挣扎反伤：1/4最大HP，坚硬脑袋/魔法防守无法减免，造成伤害时才结算 */
+      if (useMv.struggle && totalDmg > 0 && !mon.fainted) {
+        const rec = Math.max(1, Math.floor(mon.maxhp / 4));
+        mon.hp = Math.max(0, mon.hp - rec);
+        await say(`${mon.vol.illusionName || mon.name} 受到了反作用力伤害！`);
+        BUI.dmgPop(side, `-${rec}`, '#ff9d8a');
+      }
         if (!mon.has('klutz') && mon.item === 'lifeorb' && totalDmg > 0 && !mon.has('magicguard') && !(mon.has('sheerforce') && useMv.sec) && !mon.fainted) {
           const lo = Math.max(1, Math.floor(mon.baseMax / 10));   // ★ 按未翻倍HP计算
           mon.hp = Math.max(0, mon.hp - lo);
@@ -13609,7 +13646,7 @@ return ev;
         if (imm === 'immune') { await say(`对 ${foe.name} 没有效果…`); return { dmg: 0, immune: true }; }
         if (imm === 'absorb') { return { dmg: 0, immune: true }; }
         // 神奇守护
-        const e0 = effMult(mv.t, foe.types);
+        const e0 = mv.struggle ? 1 : effMult(mv.t, foe.types);
         if (foe.has('wonderguard') && e0 <= 1 && !mv.ignAb) { this.abBanner(foe); await say(`${foe.name} 的神奇守护发动了！只有效果绝佳的招式才能击中！`); return { dmg: 0, immune: true }; }
         // ★ 防弹：免疫弹类/球类招式
         if (foe.has('bulletproof') && mv.bullet) { this.abBanner(foe); await say(`${foe.name} 的防弹特性发动了！${mv.n}无效！`); return { dmg: 0, immune: true }; }
@@ -14154,9 +14191,13 @@ return ev;
         } else if (mon.types.includes(mv.t)) {
           stab = adapt ? 2 : 1.5;
         }
+        /* ★ 挣扎：无属性伤害，无本系加成 */
+        if (mv.struggle) stab = 1;
         dmg = Math.floor(dmg * stab);
         // 属性相克
         let eff = effMult(mv.t, foe.types);
+        /* ★ 挣扎：不受属性相克影响（对所有属性伤害相同，可命中幽灵/神奇守护） */
+        if (mv.struggle) eff = 1;
         /* ★ 千箭齐发：可击中飞行系和浮游特性 */
         if (mv.thousandarrows && eff === 0) eff = 1;
         /* ★ 归无之光：可击中妖精系 */
@@ -14609,6 +14650,8 @@ return ev;
           this.tailwind[side] = 4; await say(`${mon.name} 召唤了顺风！己方速度翻倍！`); return;
         }
         if (mv.encore) {
+          /* ★ 极巨化的宝可梦不会被再来一次 */
+          if (foe.dyn) { await say(`${foe.name} 正在极巨化，无法被再来一次！`); return; }
           const lastK = foe.vol.lastMove;
           if (!lastK || !foe.moves.some(m => m.k === lastK)) { await say('没有可以再来一次的招式…'); return; }
           foe.vol.encore = { k: lastK, t: 3 }; await say(`${foe.name} 被再来一次困住了！`); return;
@@ -15342,6 +15385,12 @@ return ev;
           m.vol.flinch = false; m.vol.switchedInThisTurn = false;
           if (m.vol.confuse > 0) { m.vol.confuse--; if (m.vol.confuse === 0) await say(`${m.name} 的混乱解除了。`); }
           if (m.vol.taunt > 0) m.vol.taunt--;
+          /* ★ 再来一次倒计时：结束或锁定招式PP耗尽时解除 */
+          if (m.vol.encore) {
+            m.vol.encore.t--;
+            const em = m.moves.find(x => x.k === m.vol.encore.k);
+            if (m.vol.encore.t <= 0 || !em || em.pp <= 0) { await say(`${m.name} 的再来一次效果结束了！`); m.vol.encore = null; }
+          }
           /* ★ 反射壁/光墙/极光幕倒计时 */
           if (m.vol.reflect > 0) { m.vol.reflect--; if (m.vol.reflect === 0) await say(`${m.name} 的反射壁消失了！`); }
           if (m.vol.lightscreen > 0) { m.vol.lightscreen--; if (m.vol.lightscreen === 0) await say(`${m.name} 的光墙消失了！`); }
@@ -15414,6 +15463,7 @@ return ev;
             else if (d.selfUp) { const st = m.stages; s = (st.atk + st.spa < 3) ? 14 : -15; if (m.hpPct() < .4) s -= 10; }
             else if (d.leechseed) { s = foe.vol.seed ? -25 : foe.types.includes('grass') ? -25 : 12; }
             else if (d.taunt) { s = foe.vol.taunt ? -20 : 8; }
+            else if (d.encore) { const lm = foe.vol.lastMove; s = lm && foe.moves.some(x => x.k === lm) ? 8 : -15; }
             else if (d.trickroom) { s = -10; }
             else if (d.parting) { s = m.hpPct() < .4 && this.ep.filter(x => x.alive()).length > 1 ? 15 : -15; }
             else s = -5;
@@ -15426,7 +15476,9 @@ return ev;
       }
       async aiAction() {
         const m = this.E();
-        if (m.vol.lock) return { type: 'move', move: { k: m.vol.lock.k } };
+        /* ★ 再来一次：强制使用锁定招式（极巨化期间免疫锁招） */
+        if (m.vol.encore && !m.dyn) { const ek = m.vol.encore.k; const em = m.moves.find(x => x.k === ek); if (em && em.pp > 0) return { type: 'move', move: { k: ek } }; else m.vol.encore = null; }
+        if (m.vol.lock && !m.dyn) return { type: 'move', move: { k: m.vol.lock.k } };
         if (m.vol.charge) return { type: 'move', move: { k: m.vol.charge } };
         if (m.vol.shadowCharge) return { type: 'move', move: { k: m.vol.shadowCharge } };
         /* ★ AI换人作为本回合行动（同样消耗回合） */
@@ -15737,8 +15789,10 @@ return ev;
         if (moves.some(k => MV[k] && MV[k].sound) && Math.random() < 0.3) return 'throatspray';
         /* ★ 驱劲能量：古代活性/夸克充能宝可梦 30% */
         if ((sp.ab.includes('protosynthesis') || sp.ab.includes('quarkdrive')) && Math.random() < 0.3) return 'boosterenergy';
-        /* ★ 机变骰子：拥有连续攻击招式的宝可梦 30% */
-        if (moves.some(k => MV[k] && (MV[k].multi || MV[k].multiPow)) && Math.random() < 0.3) return 'loadeddice';
+        /* ★ 机变骰子：只出现在拥有2~5连击招式的宝可梦身上 30%（固定连击数/三旋击/鼠数儿不触发） */
+        if (moves.some(k => MV[k] && MV[k].multi && MV[k].multi[0] >= 2 && MV[k].multi[1] === 5) && Math.random() < 0.3) return 'loadeddice';
+        /* ★ 强力香草：拥有蓄力招式的宝可梦 35%（只出现在有蓄力招式的宝可梦身上） */
+        if (moves.some(k => MV[k] && MV[k].charge) && Math.random() < 0.35) return 'powerherb';
         /* ★ 打空保险：≥3个命中不满招式 30% */
         if (moves.filter(k => MV[k] && MV[k].a != null && MV[k].a < 100).length >= 3 && Math.random() < 0.3) return 'blunderpolicy';
         /* ★ 广角镜：≥2个命中不满招式 30% */
@@ -17264,6 +17318,8 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
           this.usedForm.p = true; this.doMega('p', Pm, idx); await sleep(700);
         } else if (pa.dyn && this.rules.dyna && !this.usedForm.p && !Pm.dyn && !(Pm.mega && Pm.mega.stone) && ![888, 889, 890].includes(Pm.id)) {
           this.usedForm.p = true; Pm.dyn = true; Pm.dynT = 3; Pm.recalc(); Pm.hp *= 2;
+          /* ★ 极巨化解除一切锁招/再来一次/蓄力/暗影潜袭 */
+          Pm.vol.lock = null; Pm.vol.encore = null; Pm.vol.charge = null; Pm.vol.shadowCharge = null; Pm.vol.choiceLock = null;
           if (Pm._userGmax !== undefined ? Pm._userGmax : (Pm.vol.canGmax !== undefined ? Pm.vol.canGmax : GMAXLIST.has(Pm.id))) Pm.vol.gmax = true;
           if (!CFG.fancyAudio) AU.dyna(); FX.dyna('p'); await say(`极巨化！${Pm.name} 的体型变得巨大了！HP翻倍！${Pm.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
         } else if (pa.tera && this.rules.tera && !this.usedForm.p && !Pm.tera) {
@@ -17303,6 +17359,8 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
           if (!this.rules.megaMaster) this.usedForm.e = true; this.doMega('e', E, ea.megaIdx || 0); await sleep(700);
         } else if (ea.dyn && this.rules.dyna && !this.usedForm.e && !E.dyn && !(E.mega && E.mega.stone) && ![888, 889, 890].includes(E.id)) {
           this.usedForm.e = true; E.dyn = true; E.dynT = 3; E.recalc(); E.hp *= 2;
+          /* ★ 极巨化解除一切锁招/再来一次/蓄力/暗影潜袭 */
+          E.vol.lock = null; E.vol.encore = null; E.vol.charge = null; E.vol.shadowCharge = null; E.vol.choiceLock = null;
           if (E.vol.canGmax !== undefined ? E.vol.canGmax : (GMAXLIST.has(E.id) && Math.random() < 0.7)) E.vol.gmax = true;
           if (!CFG.fancyAudio) AU.dyna(); FX.dyna('e'); await say(`极巨化！${E.name} 的体型变得巨大了！${E.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
         } else if (ea.tera && this.rules.tera && !this.usedForm.e && !E.tera) {
@@ -17416,6 +17474,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (d.recharge) p.push('使用后下一回合无法行动');
       if (d.noRepeat) p.push('不能连续使用（连续使用时会失败）');
       if (d.charge) p.push('第一回合蓄力，第二回合攻击');
+      if (d.meteorbeam) p.push('蓄力时提升1级特攻');
       if (d.rampage) p.push('狂暴攻击2~3回合，结束后陷入混乱');
       if (d.seismic) p.push('伤害固定为使用者等级');
       if (d.hex) p.push('对手处于异常状态时威力翻倍');
@@ -17866,11 +17925,11 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
 
       offEsc = onEsc(() => { AU.no(); close(); });
     }
-    /* ★ 重新游戏：清空工厂进度（保留历史最佳记录） */
+    /* ★ 重新游戏：清空工厂进度（保留历史最佳记录与BP） */
     $('#facReset').onclick = async () => {
-      const idx = await dlgChoices('重新游戏', '确定要清空当前轮次、连胜、BP 与租借队伍，重新开始挑战吗？（历史最佳记录将保留）', ['确定，重新开始', '取消']);
+      const idx = await dlgChoices('重新游戏', '确定要清空当前轮次、连胜与租借队伍，重新开始挑战吗？（BP 与历史最佳记录将保留）', ['确定，重新开始', '取消']);
       if (idx === 0) {
-        GM.fac.round = 1; GM.fac.win = 0; GM.fac.bp = 0; GM.fac.party = null; GM.fac.revives = 0; GM.fac.nextExpert = null;
+        GM.fac.round = 1; GM.fac.win = 0; GM.fac.party = null; GM.fac.revives = 0; GM.fac.nextExpert = null;
         saveFac();
         FAC.ui(); FAC.lobby();
         toast('已重新开始！');
