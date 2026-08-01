@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -208,7 +208,44 @@
 
     /* ---------- title / menu ---------- */
     #title {
-      background: linear-gradient(180deg, #7ec8ff 0%, #b8e6ff 45%, #79c98e 46%, #3f9e5f 100%)
+      background:
+        radial-gradient(120% 80% at 32% 114%, rgba(255, 246, 214, .5) 0%, rgba(255, 246, 214, 0) 58%),
+        radial-gradient(70% 55% at 78% 113%, rgba(255, 236, 190, .38) 0%, rgba(255, 236, 190, 0) 62%),
+        linear-gradient(180deg, #3b9ade 0%, #6cbfee 24%, #9fd8ff 46%, #c9ecff 57%, #eefbf0 61%)
+    }
+
+    /* 远景丘陵：宽缓起伏，两明一暗错落 */
+    #title::before {
+      content: "";
+      position: absolute;
+      left: -6%;
+      right: -6%;
+      bottom: 200px;
+      height: 90px;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 230px 48px at 38% 100%, #c9eed6 78%, rgba(201, 238, 214, 0) 100%),
+        radial-gradient(ellipse 340px 70px at 22% 100%, #b9e6c9 78%, rgba(185, 230, 201, 0) 100%),
+        radial-gradient(ellipse 300px 64px at 85% 100%, #b9e6c9 78%, rgba(185, 230, 201, 0) 100%),
+        radial-gradient(ellipse 480px 86px at 55% 100%, #a5dbb8 80%, rgba(165, 219, 184, 0) 100%);
+      filter: saturate(.9)
+    }
+
+    /* 阳光射线（缓慢扫动，极淡） */
+    #title::after {
+      content: "";
+      position: absolute;
+      inset: -30% -20%;
+      z-index: 0;
+      background: repeating-conic-gradient(from 300deg at 88% 4%, rgba(255, 255, 255, .07) 0deg 1.4deg, rgba(255, 255, 255, 0) 1.4deg 4.8deg);
+      animation: rays 34s ease-in-out infinite alternate;
+      pointer-events: none
+    }
+
+    @keyframes rays {
+      to {
+        transform: rotate(8deg)
+      }
     }
 
     #title .sun {
@@ -223,26 +260,48 @@
       animation: sunpulse 5s ease-in-out infinite
     }
 
+    #title .sun::before {
+      content: "";
+      position: absolute;
+      inset: -30px;
+      border-radius: 50%;
+      border: 2px dashed rgba(255, 236, 160, .5);
+      animation: sunspin 80s linear infinite
+    }
+
+    #title .sun::after {
+      content: "";
+      position: absolute;
+      inset: -62px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 240, 180, .30), rgba(255, 240, 180, 0) 68%)
+    }
+
     @keyframes sunpulse {
       50% {
         box-shadow: 0 0 90px 34px rgba(255, 220, 90, .7)
       }
     }
 
+    @keyframes sunspin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
     .cloud {
       position: absolute;
-      background: #fff;
-      border-radius: 40px;
-      opacity: .9;
-      filter: blur(1px)
+      border-radius: 60px;
+      background: linear-gradient(180deg, #ffffff 58%, #eaf2fb 100%);
+      box-shadow: 0 14px 22px -10px rgba(46, 104, 168, .4)
     }
 
     .cloud::before,
     .cloud::after {
       content: "";
       position: absolute;
-      background: #fff;
-      border-radius: 50%
+      border-radius: 50%;
+      background: inherit
     }
 
     .cloud::before {
@@ -260,28 +319,37 @@
     }
 
     .c1 {
-      width: 150px;
-      height: 40px;
-      top: 60px;
-      animation: drift 44s linear infinite
+      width: 190px;
+      height: 52px;
+      top: 70px;
+      animation: drift 44s linear infinite, bob 6.5s ease-in-out infinite
     }
 
     .c2 {
-      width: 100px;
-      height: 28px;
-      top: 130px;
-      animation: drift 60s linear infinite;
-      animation-delay: -20s;
+      width: 130px;
+      height: 36px;
+      top: 150px;
+      animation: drift 60s linear infinite, bob 8s ease-in-out infinite;
+      animation-delay: -20s, -2s;
       opacity: .75
     }
 
     .c3 {
-      width: 190px;
-      height: 46px;
-      top: 20px;
-      animation: drift 75s linear infinite;
-      animation-delay: -45s;
+      width: 240px;
+      height: 64px;
+      top: 18px;
+      animation: drift 75s linear infinite, bob 7s ease-in-out infinite;
+      animation-delay: -45s, -4s;
       opacity: .6
+    }
+
+    .c4 {
+      width: 70px;
+      height: 18px;
+      top: 205px;
+      animation: drift 90s linear infinite, bob 9s ease-in-out infinite;
+      animation-delay: -60s, -1s;
+      opacity: .45
     }
 
     @keyframes drift {
@@ -291,6 +359,38 @@
 
       to {
         left: 110%
+      }
+    }
+
+    @keyframes bob {
+      50% {
+        transform: translateY(7px)
+      }
+    }
+
+    /* 草地花粉光点（缓慢漂浮） */
+    .pollen {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 210px;
+      height: 90px;
+      z-index: 1;
+      opacity: .5;
+      background:
+        radial-gradient(3px 3px at 15% 60%, rgba(255, 255, 255, .9) 98%, transparent),
+        radial-gradient(2px 2px at 35% 30%, rgba(255, 255, 255, .7) 98%, transparent),
+        radial-gradient(3px 3px at 55% 75%, rgba(255, 255, 255, .8) 98%, transparent),
+        radial-gradient(2px 2px at 72% 40%, rgba(255, 255, 255, .6) 98%, transparent),
+        radial-gradient(3px 3px at 90% 65%, rgba(255, 255, 255, .9) 98%, transparent);
+      background-size: 180px 90px, 140px 80px, 200px 90px, 160px 80px, 190px 90px;
+      animation: pollenFloat 7s ease-in-out infinite;
+      pointer-events: none
+    }
+
+    @keyframes pollenFloat {
+      50% {
+        transform: translateY(-16px)
       }
     }
 
@@ -375,14 +475,15 @@
       padding: 12px 18px;
       font-family: 'ZCOOL KuaiLe';
       font-size: 24px;
-      box-shadow: 0 5px 0 rgba(20, 16, 40, .4);
-      transition: transform .12s, background .12s;
+      box-shadow: 0 5px 0 rgba(20, 16, 40, .4), 0 14px 26px -10px rgba(10, 60, 40, .35);
+      transition: transform .12s, background .12s, box-shadow .12s;
       text-align: left
     }
 
     .menuItem:hover {
       transform: translateX(8px) scale(1.02);
-      background: #fff6cf
+      background: #fff6cf;
+      box-shadow: 0 5px 0 rgba(20, 16, 40, .4), 0 18px 32px -10px rgba(10, 60, 40, .45)
     }
 
     .menuItem .ball {
@@ -434,11 +535,26 @@
     #title .grass {
       position: absolute;
       bottom: 0;
-      width: 100%;
-      height: 70px;
-      background:
-        radial-gradient(30px 22px at 10% 100%, #2f7d49 98%, transparent), radial-gradient(40px 30px at 30% 100%, #35915a 98%, transparent),
-        radial-gradient(34px 26px at 55% 100%, #2f7d49 98%, transparent), radial-gradient(44px 32px at 80% 100%, #35915a 98%, transparent)
+      left: 0;
+      right: 0;
+      height: 200px;
+      z-index: 1;
+      background: linear-gradient(180deg,
+        #f2f6d8 0%,
+        #d5ecb6 13%,
+        #a9d9a6 32%,
+        #74c58b 52%,
+        #4aad6a 75%,
+        #3d9c5f 100%)
+    }
+
+    /* 草地近景压暗，增加纵深 */
+    #title .grass::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 55%, rgba(20, 90, 50, .22) 100%);
+      pointer-events: none
     }
 
     /* ---------- generic screen header ---------- */
@@ -694,8 +810,18 @@
       opacity: 0;
       transition: opacity .8s;
       pointer-events: none;
-      background: radial-gradient(ellipse at 50% 0%, rgba(255, 60, 60, .55), rgba(120, 10, 40, .35) 55%, transparent 80%),
-        repeating-linear-gradient(75deg, rgba(255, 120, 120, .12) 0 14px, transparent 14px 34px);
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255, 60, 60, .55), rgba(120, 10, 40, .35) 55%, transparent 80%);
+    }
+
+    #dynastorm::before {
+      content: "";
+      position: absolute;
+      top: -30%;
+      bottom: -30%;
+      left: -40%;
+      right: -40%;
+      background: repeating-linear-gradient(75deg, rgba(255, 120, 120, .12) 0 14px, transparent 14px 34px);
       animation: stormShift 3s linear infinite
     }
 
@@ -1341,7 +1467,7 @@
 
     @keyframes stormShift {
       to {
-        background-position: 0 0, 200px 0
+        transform: translateX(35px)
       }
     }
 
@@ -4712,6 +4838,19 @@
         padding: 0 10px;
       }
 
+      /* 标题背景降高：矮屏下压缩草地/丘陵，给菜单留空间 */
+      #title .grass {
+        height: 150px !important;
+      }
+
+      #title::before {
+        bottom: 150px;
+      }
+
+      .pollen {
+        bottom: 160px !important;
+      }
+
       /* 3. 通用头部与内容区 */
       .scrHead {
         padding: 10px 14px !important;
@@ -5229,6 +5368,35 @@
         left: 58px !important;
       }
 
+      /* 异常状态浮层跟随移动端缩放后的精灵位置 */
+      #estfx {
+        top: 104px !important;
+        right: 84px !important;
+        width: 120px !important;
+        height: 120px !important;
+      }
+
+      #pstfx {
+        bottom: 102px !important;
+        left: 56px !important;
+        width: 150px !important;
+        height: 140px !important;
+      }
+
+      #bscene.dyna #estfx {
+        top: 58px !important;
+        right: 54px !important;
+        width: 200px !important;
+        height: 200px !important;
+      }
+
+      #bscene.dyna #pstfx {
+        bottom: 80px !important;
+        left: 38px !important;
+        width: 200px !important;
+        height: 200px !important;
+      }
+
       /* 状态/天气条：居中限宽自动换行，避免遮挡角落的信息卡 */
       #wxchip {
         left: 50% !important;
@@ -5294,6 +5462,35 @@
         width: 140px !important;
         height: 140px !important;
         bottom: 66px !important;
+      }
+
+      /* 异常状态浮层跟随极短屏精灵位置 */
+      #estfx {
+        top: 84px !important;
+        right: 70px !important;
+        width: 100px !important;
+        height: 96px !important;
+      }
+
+      #pstfx {
+        bottom: 80px !important;
+        left: 42px !important;
+        width: 120px !important;
+        height: 110px !important;
+      }
+
+      #bscene.dyna #estfx {
+        top: 48px !important;
+        right: 60px !important;
+        width: 160px !important;
+        height: 160px !important;
+      }
+
+      #bscene.dyna #pstfx {
+        bottom: 60px !important;
+        left: 34px !important;
+        width: 160px !important;
+        height: 150px !important;
       }
 
       #bui {
@@ -5693,6 +5890,8 @@
       <div class="cloud c1"></div>
       <div class="cloud c2"></div>
       <div class="cloud c3"></div>
+      <div class="cloud c4"></div>
+      <div class="pollen"></div>
       <div class="flyby" style="top:40px">🕊️</div>
       <div class="grass"></div>
       <div id="titleInner">
@@ -6009,7 +6208,11 @@
       init() {
         if (this.ctx) return; const C = window.AudioContext || window.webkitAudioContext; this.ctx = new C();
         this.master = this.ctx.createGain(); this.master.gain.value = .5; this.master.connect(this.ctx.destination);
-        this.sfx = this.ctx.createGain(); this.sfx.gain.value = 1; this.sfx.connect(this.master);
+        this.sfx = this.ctx.createGain(); this.sfx.gain.value = 1;
+        /* ★ 动态压缩器：防止多个音色叠加爆音（削峰限幅） */
+        this.comp = this.ctx.createDynamicsCompressor();
+        this.comp.threshold.value = -14; this.comp.knee.value = 8; this.comp.ratio.value = 10; this.comp.attack.value = .002; this.comp.release.value = .18;
+        this.sfx.connect(this.comp); this.comp.connect(this.master);
         this.mus = this.ctx.createGain(); this.mus.gain.value = .22; this.mus.connect(this.master);
         this.setVol();
       },
@@ -6507,8 +6710,7 @@
     M('teatime','茶会','normal','X',null,null,10,{teatime:1});
     M('octolock','蛸固','fighting','X',null,100,15,{octolock:1});
     M('boltbeak','电喙','electric','P',85,100,10,{ct:1,boltbeak:1,fishious:1});
-    M('strongdrill','强力钻','ground','P',120,100,5,{ct:1,strongdrill:1});
-    M('rapidblade','迅子利刃','steel','S',70,100,15,{rapidblade:1});
+    M('hyperdrill','强力钻','ground','P',120,100,5,{ct:1,hyperdrill:1});
     M('fishiousrend','鳃咬','water','P',80,100,10,{ct:1,bite:1,fishious:1});
     M('courtchange','换场','normal','X',null,100,10,{courtchange:1});
     M('clangoroussoul','魂舞烈音爆','dragon','X',null,100,5,{clangorous:1});
@@ -6524,7 +6726,7 @@
     M('skittersmack','爬击','bug','P',70,90,10,{ct:1,selfDropT:{drop:'spa',n:-1}});
     M('burningjealousy','妒火','fire','S',70,100,5,{burningjeal:1});
     M('lashout','泄愤','dark','P',75,100,5,{lashout:1});
-    M('poltergeist','灵骚','ghost','P',110,90,5,{});
+    M('poltergeist','灵骚','ghost','P',110,90,10,{poltergeist:1});
     M('corrosivegas','腐蚀气体','poison','X',null,100,40,{corrosivegas:1});
     M('coaching','指导','fighting','X',null,null,10,{coaching:1});
     M('flipturn','快速折返','water','P',60,100,20,{ct:1,uturn:1});
@@ -6823,7 +7025,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     A('embodyaspect','面影辉映','回忆面具：特防+1；水井面具：防御+1；火灶面具：攻击+1；基础面具：速度+1');
     A('toxicchain','毒锁链','攻击命中时30%使对手剧毒');
     A('poisonpuppeteer','毒傀儡','使对手中毒/剧毒时，对手会陷入混乱');
-    A('supersweetsyrup','满溢甜香','出场时降低对手回避率1级');
+    A('supersweetsyrup','甘露之蜜','出场时散发甜香，降低对手闪避率1级');
     A('teraformzero','归零化境','太晶化时消除全场天气和场地');
     A('terashift','太晶变形','出场时吸收太晶能量变为太晶形态');
     A('terashell','太晶甲壳','HP全满时受到的攻击属性相性倍率≥1时变为1/2');
@@ -6874,7 +7076,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     /* ---- 第六批新增招式 ---- */
     M('fakeout','击掌奇袭','normal','P',40,100,10,{pri:3,ct:1,sec:{flinch:1,ch:100},fakeout:1});
     M('rapidspin','高速旋转','normal','P',50,100,40,{ct:1,rapidspin:1});
-    M('lowkick','过肩摔','fighting','P',null,100,20,{ct:1,lowkick:1});
+    M('lowkick','踢到','fighting','P',null,100,20,{ct:1,lowkick:1});
     M('crosschop','十字劈','fighting','P',100,80,5,{ct:1,crit:1});
     M('healbell','治愈铃声','normal','X',null,null,5,{healbell:1,sound:1});
     M('acrobatics','杂技','flying','P',55,100,15,{ct:1,acrobatics:1});
@@ -7010,7 +7212,6 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     M('pounce','虫扑','bug','P',50,100,20,{ct:1,selfDropT:{drop:'spe',n:-1}});
     M('trailblaze','起草','grass','P',50,100,20,{ct:1,selfUp:{drop:'spe',n:1}});
     M('chillingwater','泼冷水','water','S',50,100,20,{selfDropT:{drop:'atk',n:-1}});
-    M('hyperdrill','强力钻','normal','P',100,100,5,{ct:1});
     M('twinbeam','双光束','psychic','S',40,100,10,{multi:[2,2]});
     M('mortalspin','晶光转转','poison','P',30,100,15,{rapidspin:1,sec:{st:'psn',ch:100}});
     M('terastarstorm','太晶星群','normal','S',120,100,5,{terastarstorm:1});
@@ -7021,7 +7222,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     M('ivy cudgel','棘藤棒','grass','P',100,100,10,{ct:1});
     M('electroshot','电光束','electric','S',130,100,10,{charge:1});
     M('ficklebeam','随机光','dragon','S',80,100,5,{ficklebeam:1});
-    M('thunderclap','迅雷','electric','P',70,100,5,{pri:1,ct:1,sucker:1});
+    M('thunderclap','迅雷','electric','S',70,100,5,{pri:1,sucker:1});
     M('mighty cleave','强劈','steel','P',95,100,5,{ct:1,slicing:1});
     M('tachyoncutter','迅子利刃','steel','S',50,100,10,{multi:[2,2],slicing:1});
     M('hardpress','硬压','steel','P',null,100,10,{hardpress:1});
@@ -7320,7 +7521,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(887, '多龙巴鲁托', 'dragon/ghost', '88/120/75/100/75/142', 'clearbody/infiltrator', ['dragondarts', 'shadowball', 'uturn', 'dragondance', 'flamethrower']);
     S(888, '苍响', 'fairy', '92/120/115/80/115/138', 'intrepidsword/intrepidsword', ['behemothblade', 'playrough', 'closecombat', 'wildcharge', 'swordsdance'], { leg: 1 });
     S(889, '藏玛然特', 'fighting', '92/120/115/80/115/138', 'dauntlessshield/dauntlessshield', ['behemothbash', 'closecombat', 'playrough', 'crunch'], { leg: 1 });
-    S(892, '武道熊师(一击流)', 'fighting/dark', '100/130/100/63/60/97', 'unseenfist/unseenfist', ['wickedblow', 'closecombat', 'suckerpunch', 'aquajet', 'ironhead'], { leg: 1 });
+    S(892, '武道熊师(一击流)', 'fighting/dark', '100/130/100/63/60/97', 'unseenfist/unseenfist', ['wickedblow', 'closecombat', 'suckerpunch', 'ironhead'], { leg: 1 });
     /* --- 第9世代 --- */
     S(908, '魔幻假面喵', 'grass/dark', '76/110/70/81/70/123', 'overgrow/protean', ['flowertrick', 'knockoff', 'suckerpunch', 'uturn', 'playrough']);
     S(911, '骨纹巨声鳄', 'fire/ghost', '104/75/100/110/75/66', 'blaze/unaware', ['torchsong', 'shadowball', 'earthpower', 'willowisp', 'slackoff']);
@@ -8094,7 +8295,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(619,'功夫鼬','fighting','45/85/50/55/50/65','innerfocus/regenerator/reckless',['highjumpkick','knockoff','uturn','fakeout','stoneedge'],{evo:1});
     S(621,'赤面龙','dragon','77/120/90/60/90/48','roughskin/sheerforce/moldbreaker',['outrage','earthquake','crunch','swordsdance','firepunch']);
     S(622,'泥偶小人','ground/ghost','59/74/50/35/50/35','ironfist/klutz/noguard',['earthquake','shadowpunch','icepunch','stoneedge','stealthrock'],{evo:1});
-    S(623,'泥偶巨人','ground/ghost','89/124/80/55/80/55','ironfist/klutz/noguard',['earthquake','shadowpunch','icepunch','stoneedge','stealthrock']);
+    S(623,'泥偶巨人','ground/ghost','89/124/80/55/80/55','ironfist/klutz/noguard',['earthquake','dynamicpunch','poltergeist','shadowpunch','icepunch','stoneedge','stealthrock']);
     S(624,'驹刀小兵','dark/steel','45/85/70/40/40/60','defiant/innerfocus/pressure',['knockoff','ironhead','suckerpunch','swordsdance','lowkick'],{evo:1});
     S(626,'爆炸头水牛','normal','95/110/95/40/95/55','reckless/sapsipper/soundproof',['headcharge','earthquake','closecombat','stoneedge','swordsdance']);
     S(627,'毛头小鹰','normal/flying','70/83/50/37/50/60','keeneye/sheerforce/hustle',['bravebird','facade','uturn','roost','swordsdance'],{evo:1});
@@ -8184,9 +8385,9 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(900,'劈斧螳螂','bug/rock','70/135/95/45/70/85','swarm/sheerforce/scrappy',['stoneaxe','xscissor','stoneedge','knockoff','swordsdance','quickattack']);
     S(901,'月月熊','ground/normal','130/140/105/45/80/50','guts/bulletproof/unnerve',['facade','earthquake','closecombat','crunch','swordsdance']);
     S(902,'幽尾玄鱼','water/ghost','120/112/65/80/75/78','swiftswim/adaptability/moldbreaker',['waterfall','shadowclaw','crunch','aquajet','swordsdance','lastrespects']);
-    S(903,'大狃拉','fighting/poison','80/130/60/40/80/120','pressure/unburden/pickpocket',['closecombat','poisonjab','knockoff','swordsdance','direclaw']);
+    S(903,'大狃拉','fighting/poison','80/130/60/40/80/120','pressure/unburden/poisontouch',['closecombat','poisonjab','knockoff','swordsdance','direclaw']);
     S(904,'万针鱼','dark/poison','65/115/95/65/65/85','poisonpoint/swiftswim/intimidate',['waterfall','poisonjab','swordsdance','aquajet','crunch']);
-    S(905,'眷恋云','fairy/flying','74/115/70/135/80/106','healer/contrary',['springtidestorm','moonblast','hurricane','earthpower','nastyplot','tailwind','superpower'],{leg:1});
+    S(905,'眷恋云','fairy/flying','74/115/70/135/80/106','cutecharm/contrary',['springtidestorm','moonblast','hurricane','earthpower','nastyplot','tailwind','superpower'],{leg:1});
     S(947,'怖纳噬草','grass/ghost','55/115/70/80/70/90','windrider/infiltrator',['powerwhip','shadowclaw','knockoff','swordsdance','willowisp']);
     S(949,'陆地水母','ground/grass','40/40/35/50/100/70','myceliummight/myceliummight',['earthpower','gigadrain','energyball','stealthrock','toxic']);
     S(955,'超能艳鸵','psychic','95/60/60/101/60/105','opportunist/frisk/speedboost',['psychic','shadowball','calmmind','psyshock','dazzlinggleam']);
@@ -8205,7 +8406,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(976,'轻身鳕','psychic/water','70/75/60/120/80/100','moldbreaker/owntempo/analytic',['psychic','hydropump','icebeam','calmmind','thunderbolt']);
     S(978,'米立龙','dragon/water','68/50/60/120/95/82','commander/stormdrain',['dragonpulse','hydropump','icebeam','calmmind','recover']);
     S(981,'奇麒麟','normal/psychic','103/90/70/110/75/65','armortail/cudchew',['psychic','hypervoice','shadowball','thunderbolt','calmmind','agility', 'twinbeam']);
-    S(982,'土龙节节','normal','125/100/80/85/75/55','serenegrace/runaway/rattled',['strongdrill','bodyslam','earthquake','rockslide','thunderwave','roost','stealthrock']);
+    S(982,'土龙节节','normal','125/100/80/85/75/55','serenegrace/runaway/rattled',['hyperdrill','bodyslam','earthquake','rockslide','thunderwave','roost','stealthrock']);
     S(985,'吼叫尾','fairy/psychic','115/65/99/65/115/111','protosynthesis/protosynthesis',['moonblast','psychic','thunderbolt','calmmind','dazzlinggleam'],{leg:1});
     S(986,'猛恶菇','grass/dark','111/127/99/79/99/55','protosynthesis/protosynthesis',['spore','powerwhip','knockoff','swordsdance','earthquake','synthesis'],{leg:1});
     S(988,'沙铁皮','ground/fighting','115/131/131/53/53/87','protosynthesis/protosynthesis',['earthquake','closecombat','stealthrock','knockoff','icepunch'],{leg:1});
@@ -8232,11 +8433,11 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(1016,'吉雉鸡','poison/flying','88/91/82/70/125/99','toxicchain/toxicchain',['sludgebomb','airslash','hurricane','nastyplot','roost'],{leg:1});
     S(1017,'厄诡椪','grass','80/120/84/60/96/110','defiant/waterabsorb/moldbreaker/sturdy',['ivy cudgel','powerwhip','knockoff','swordsdance','earthquake','synthesis'],{leg:1});
     S(1018,'铝钢桥龙','steel/dragon','90/105/130/125/65/85','lightmetal/heavymetal/stalwart',['electroshot','flashcannon','dragonpulse','darkpulse','thunderbolt','stealthrock']);
-    S(1019,'蜜集大蛇','grass/dragon','80/100/84/95/80/100','sapsipper/sapsipper',['powerwhip','dragonclaw','knockoff','swordsdance','earthquake']);
+    S(1019,'蜜集大蛇','grass/dragon','106/80/110/120/80/44','supersweetsyrup/regenerator/stickyhold',['ficklebeam','powerwhip','dragonclaw','knockoff','swordsdance','earthquake']);
     S(1020,'破空焰','dragon/fire','105/115/121/65/93/91','protosynthesis/protosynthesis',['burningbulwark','flareblitz','outrage','earthquake','stoneedge','roost','swordsdance'],{leg:1});
     S(1021,'猛雷鼓','electric/dragon','125/73/91/137/89/75','protosynthesis/protosynthesis',['thunderclap','thunderbolt','dragonpulse','flamethrower','voltswitch','calmmind'],{leg:1});
     S(1022,'铁磐岩','rock/psychic','90/120/80/68/108/124','quarkdrive/quarkdrive',['stoneedge','psychicfangs','closecombat','swordsdance','earthquake'],{leg:1});
-    S(1023,'铁头壳','steel/psychic','90/72/100/122/108/98','quarkdrive/quarkdrive',['rapidblade','flashcannon','psychic','thunderbolt','calmmind','stealthrock'],{leg:1});
+    S(1023,'铁头壳','steel/psychic','90/72/100/122/108/98','quarkdrive/quarkdrive',['tachyoncutter','flashcannon','psychic','thunderbolt','calmmind','stealthrock'],{leg:1});
     S(1024,'太乐巴戈斯','normal','90/65/85/65/85/60','terashift/terashift',['terastarstorm','earthpower','calmmind','recover','thunderbolt'],{leg:1});
     S(1025,'桃歹郎','poison/ghost','88/88/160/88/88/88','poisonpuppeteer/poisonpuppeteer',['malignantchain','sludgebomb','shadowball','nastyplot','earthpower','darkpulse'],{leg:1});
     /* ============ 第七批：多形态补全（独立宝可梦） ============ */
@@ -8268,7 +8469,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(10080,'雷电云(灵兽)','electric/flying','79/105/70/145/80/101','voltabsorb/voltabsorb',['wildboltstorm','thunderbolt','hurricane','focusblast','nastyplot','thunderwave','voltswitch','sludgewave'],{leg:1});
     S(10081,'土地云(灵兽)','ground/flying','89/145/90/105/80/91','intimidate/intimidate',['earthquake','stoneedge','uturn','stealthrock','swordsdance','knockoff','superpower'],{leg:1});
     /* --- 眷恋云灵兽形态 --- */
-    S(10418,'眷恋云(灵兽)','fairy/flying','74/115/70/135/80/106','overcoatx/overcoatx',['springtidestorm','moonblast','hurricane','earthpower','nastyplot','tailwind'],{leg:1});
+    S(10418,'眷恋云(灵兽)','fairy/flying','74/115/110/135/100/46','overcoatx/overcoatx',['springtidestorm','moonblast','hurricane','earthpower','nastyplot','tailwind'],{leg:1});
     /* --- 酋雷姆合体形态 --- */
     S(10082,'酋雷姆(暗黑)','dragon/ice','125/170/100/120/90/95','teravolt/teravolt',['outrage','icebeam','fusionbolt','earthpower','stoneedge','dragonclaw'],{leg:1});
     S(10083,'酋雷姆(焰白)','dragon/ice','125/120/90/170/100/95','turboblaze/turboblaze',['dracometeor','icebeam','fusionflare','earthpower','focusblast','dragonpulse'],{leg:1});
@@ -8280,7 +8481,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(10362,'蕾冠王(骑白马)','psychic/ice','100/165/150/85/130/50','asone/asone',['glaciallance','psychic','highhorsepower','swordsdance','earthquake','closecombat'],{leg:1});
     S(10363,'蕾冠王(骑黑马)','psychic/ghost','100/85/80/165/100/150','asone/asone',['astralbarrage','psychic','shadowball','nastyplot','drainingkiss','calmmind'],{leg:1});
     /* --- 基格尔德10%形态 --- */
-    S(10340,'基格尔德(10%)','dragon/ground','54/100/71/61/85/115','aurabreak/aurabreak',['thousandarrows','outrage','extremespeed','earthquake','dragondance','irontail'],{leg:1});
+    S(10340,'基格尔德(10%)','dragon/ground','54/100/71/61/85/115','aurabreak/powerconstruct',['thousandarrows','outrage','extremespeed','earthquake','dragondance','irontail'],{leg:1});
     /* --- 爱管侍(母) --- */
     S(10355,'爱管侍(母)','psychic/normal','70/55/65/95/105/85','screenCleaner/synchronize/psychicsurge',['psychic','moonblast','thunderbolt','calmmind','thunderwave','dazzlinggleam']);
     /* --- 月月熊赫月形态 --- */
@@ -8342,7 +8543,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(40058,'卡蒂狗(洗翠)','fire/rock','70/90/70/60/60/80','intimidate/flashfire/rockhead',['flareblitz','stoneedge','wildcharge','willowisp','crunch'],{evo:1});
     S(40059,'风速狗(洗翠)','fire/rock','90/115/80/95/70/105','intimidate/flashfire/rockhead',['flareblitz','stoneedge','wildcharge','willowisp','crunch']);
     S(40100,'霹雳电球(洗翠)','electric/grass','40/30/50/70/60/80','soundproof/static/aftermath',['thunderbolt','energyball','voltswitch','thunderwave','explosion'],{evo:1});
-    S(40101,'顽皮雷弹(洗翠)','electric/grass','60/50/70/110/90/90','soundproof/static/aftermath',['chloroblast','thunderbolt','energyball','voltswitch','thunderwave','explosion']);
+    S(40101,'顽皮雷弹(洗翠)','electric/grass','60/50/70/80/80/150','soundproof/static/aftermath',['chloroblast','thunderbolt','energyball','voltswitch','thunderwave','explosion']);
     S(40211,'千针鱼(洗翠)','dark/poison','65/95/75/55/75/65','poisonpoint/swiftswim/intimidate',['barbbarrage','waterfall','poisonjab','swordsdance','aquajet','crunch']);
     S(40215,'纽拉(洗翠)','fighting/poison','55/95/55/35/75/115','innerfocus/keeneye/unburden',['closecombat','poisonjab','knockoff','swordsdance','iceshard'],{evo:1});
     S(40549,'裙儿小姐(洗翠)','grass/fighting','70/105/75/90/75/95','chlorophyll/leafguard/healer',['leafblade','closecombat','knockoff','swordsdance','victorydance']);
@@ -8369,6 +8570,861 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
   - 部分宝可梦原数据里已经混入了 Mega 特性，例如长耳兔的 scrappy，
     为了避免超过 3 个特性，这里只补最常见的一项
 */
+
+const W = {
+  11: 9.9,
+  13: 3.2,
+  14: 10,
+  17: 30,
+  20: 18.5,
+  21: 2,
+  22: 38,
+  23: 6.9,
+  27: 12,
+  29: 7,
+  30: 20,
+  32: 9,
+  33: 19.5,
+  35: 7.5,
+  37: 9.9,
+  39: 5.5,
+  40: 12,
+  41: 7.5,
+  42: 55,
+  43: 5.4,
+  44: 8.6,
+  46: 5.4,
+  47: 29.5,
+  48: 30,
+  50: 0.8,
+  52: 4.2,
+  53: 32,
+  54: 19.6,
+  56: 28,
+  57: 32,
+  58: 19,
+  60: 12.4,
+  61: 20,
+  63: 19.5,
+  66: 19.5,
+  67: 70.5,
+  69: 4,
+  70: 6.4,
+  71: 15.5,
+  72: 45.5,
+  75: 105,
+  76: 300,
+  77: 30,
+  79: 36,
+  81: 6,
+  82: 60,
+  83: 15,
+  84: 39.2,
+  85: 85.2,
+  86: 90,
+  87: 120,
+  88: 30,
+  89: 30,
+  90: 4,
+  92: 0.1,
+  93: 0.1,
+  96: 32.4,
+  97: 75.6,
+  98: 6.5,
+  99: 60,
+  100: 10.4,
+  101: 66.6,
+  102: 2.5,
+  103: 120,
+  104: 6.5,
+  105: 45,
+  106: 49.8,
+  107: 50.2,
+  108: 65.5,
+  109: 1,
+  111: 115,
+  113: 34.6,
+  114: 35,
+  116: 8,
+  117: 25,
+  118: 15,
+  119: 39,
+  122: 54.5,
+  124: 40.6,
+  125: 30,
+  126: 44.5,
+  128: 88.4,
+  132: 4,
+  137: 36.5,
+  138: 7.5,
+  139: 35,
+  140: 11.5,
+  141: 40.5,
+  144: 55.4,
+  146: 60,
+  147: 3.3,
+  148: 16.5,
+  152: 6.4,
+  153: 15.8,
+  155: 7.9,
+  156: 19,
+  158: 9.5,
+  159: 25,
+  161: 6,
+  162: 32.5,
+  163: 21.2,
+  164: 40.8,
+  165: 10.8,
+  166: 35.6,
+  167: 8.5,
+  168: 33.5,
+  170: 12,
+  172: 2,
+  173: 3,
+  174: 1,
+  175: 1.5,
+  176: 3.2,
+  177: 2,
+  179: 7.8,
+  180: 13.3,
+  182: 5.8,
+  183: 8.5,
+  185: 38,
+  187: 0.5,
+  188: 1,
+  189: 3,
+  190: 11.5,
+  191: 1.8,
+  192: 8.5,
+  193: 38,
+  194: 8.5,
+  198: 2.1,
+  199: 79.5,
+  200: 1,
+  201: 5,
+  202: 28.5,
+  203: 41.5,
+  204: 7.2,
+  206: 14,
+  207: 64.8,
+  209: 7.8,
+  210: 48.7,
+  211: 3.9,
+  213: 20.5,
+  215: 28,
+  216: 8.8,
+  217: 125.8,
+  218: 35,
+  219: 55,
+  220: 6.5,
+  221: 55.8,
+  222: 5,
+  223: 12,
+  224: 28.5,
+  225: 16,
+  226: 220,
+  227: 50.5,
+  228: 10.8,
+  231: 33.5,
+  232: 120,
+  233: 32.5,
+  234: 71.2,
+  235: 58,
+  236: 21,
+  237: 48,
+  238: 6,
+  239: 23.5,
+  240: 21.4,
+  241: 75.5,
+  243: 178,
+  244: 198,
+  246: 72,
+  247: 152,
+  250: 199,
+  251: 5,
+  252: 5,
+  253: 21.6,
+  255: 2.5,
+  256: 19.5,
+  258: 7.6,
+  259: 28,
+  261: 13.6,
+  263: 17.5,
+  264: 32.5,
+  265: 3.6,
+  266: 10,
+  267: 28.4,
+  268: 11.5,
+  269: 31.6,
+  270: 2.6,
+  271: 32.5,
+  273: 4,
+  274: 28,
+  276: 2.3,
+  278: 9.5,
+  280: 6.6,
+  281: 20.2,
+  283: 1.7,
+  284: 3.6,
+  285: 4.5,
+  287: 24,
+  288: 46.5,
+  290: 5.5,
+  293: 16.3,
+  294: 40.5,
+  295: 84,
+  296: 86.4,
+  298: 2,
+  299: 97,
+  300: 11,
+  301: 32.6,
+  304: 60,
+  305: 120,
+  307: 11.2,
+  309: 15.2,
+  311: 4.2,
+  312: 4.2,
+  313: 17.7,
+  314: 17.7,
+  315: 2,
+  316: 10.3,
+  317: 80,
+  318: 20.8,
+  320: 130,
+  321: 398,
+  322: 24,
+  325: 30.6,
+  326: 71.5,
+  327: 5,
+  328: 15,
+  329: 15.3,
+  331: 51.3,
+  333: 1.2,
+  335: 40.3,
+  336: 52.5,
+  337: 168,
+  338: 154,
+  339: 1.9,
+  340: 23.6,
+  341: 11.5,
+  343: 21.5,
+  345: 23.8,
+  346: 60.4,
+  347: 12.5,
+  348: 68.2,
+  349: 7.4,
+  351: 0.8,
+  352: 22,
+  353: 2.3,
+  355: 15,
+  357: 100,
+  358: 1,
+  360: 14,
+  361: 16.8,
+  362: 256.5,
+  363: 39.5,
+  364: 87.6,
+  365: 150.6,
+  366: 52.5,
+  367: 27,
+  368: 22.6,
+  369: 23.4,
+  370: 8.7,
+  371: 42.1,
+  372: 110.5,
+  374: 95.2,
+  375: 202.5,
+  377: 230,
+  378: 175,
+  379: 205,
+  380: 40,
+  385: 1.1,
+  386: 60.8,
+  387: 10.2,
+  388: 97,
+  390: 6.2,
+  391: 22,
+  393: 5.2,
+  394: 23,
+  396: 2,
+  397: 15.5,
+  399: 20,
+  401: 2.2,
+  402: 25.5,
+  403: 9.5,
+  404: 30.5,
+  406: 1.2,
+  408: 31.5,
+  410: 57,
+  412: 3.4,
+  413: 6.5,
+  414: 23.3,
+  415: 5.5,
+  416: 38.5,
+  417: 3.9,
+  418: 29.5,
+  419: 33.5,
+  420: 3.3,
+  421: 9.3,
+  422: 6.3,
+  425: 1.2,
+  426: 15,
+  427: 5.5,
+  431: 3.9,
+  432: 43.8,
+  433: 0.6,
+  434: 19.2,
+  435: 38,
+  436: 60.5,
+  438: 15,
+  439: 13,
+  440: 24.4,
+  441: 1.9,
+  443: 20.5,
+  446: 105,
+  447: 20.2,
+  449: 49.5,
+  451: 12,
+  452: 61.5,
+  453: 23,
+  454: 44.4,
+  455: 27,
+  456: 7,
+  457: 24,
+  458: 65,
+  459: 50.5,
+  463: 140,
+  464: 282.8,
+  465: 128.6,
+  467: 68,
+  470: 25.5,
+  471: 25.9,
+  476: 340,
+  477: 106.6,
+  478: 26.6,
+  480: 0.3,
+  481: 0.3,
+  482: 0.3,
+  484: 336,
+  485: 430,
+  486: 420,
+  487: 750,
+  488: 85.6,
+  489: 3.1,
+  490: 1.4,
+  492: 2.1,
+  495: 8.1,
+  496: 16,
+  498: 9.9,
+  499: 55.5,
+  501: 5.9,
+  502: 24.5,
+  504: 11.6,
+  505: 27,
+  506: 4.1,
+  507: 14.7,
+  509: 10.1,
+  511: 10.5,
+  512: 30.5,
+  513: 11,
+  514: 28,
+  515: 13.5,
+  516: 29,
+  517: 23.3,
+  518: 60.5,
+  519: 2.1,
+  520: 15,
+  521: 29,
+  522: 29.8,
+  523: 79.5,
+  524: 18,
+  525: 102,
+  526: 260,
+  527: 2.1,
+  528: 10.5,
+  529: 8.5,
+  531: 31,
+  532: 12.5,
+  533: 40,
+  535: 4.5,
+  536: 17,
+  538: 55.5,
+  540: 2.5,
+  541: 7.3,
+  542: 20.5,
+  543: 5.3,
+  544: 58.5,
+  546: 0.6,
+  548: 6.6,
+  549: 16.3,
+  550: 18,
+  551: 15.2,
+  552: 33.4,
+  554: 37.5,
+  556: 28,
+  557: 14.5,
+  558: 200,
+  559: 11.8,
+  561: 14,
+  562: 1.5,
+  563: 76.5,
+  564: 16.5,
+  565: 81,
+  566: 9.5,
+  567: 32,
+  568: 31,
+  569: 107.3,
+  570: 12.5,
+  572: 5.8,
+  574: 5.8,
+  575: 18,
+  576: 44,
+  577: 1,
+  578: 8,
+  579: 20.1,
+  580: 5.5,
+  581: 24.2,
+  582: 5.7,
+  583: 41,
+  584: 57.5,
+  585: 19.5,
+  586: 92.5,
+  587: 5,
+  588: 5.9,
+  589: 33,
+  590: 1,
+  592: 33,
+  593: 135,
+  594: 31.6,
+  595: 0.6,
+  597: 18.8,
+  599: 21,
+  600: 51,
+  601: 81,
+  602: 0.3,
+  603: 22,
+  605: 9,
+  606: 34.5,
+  607: 3.1,
+  608: 13,
+  610: 18,
+  611: 36,
+  613: 8.5,
+  614: 260,
+  615: 148,
+  616: 7.7,
+  617: 25.3,
+  618: 11,
+  619: 20,
+  621: 139,
+  622: 92,
+  623: 330,
+  624: 10.2,
+  626: 94.6,
+  627: 10.5,
+  628: 41,
+  629: 9,
+  630: 39.5,
+  631: 58,
+  632: 33,
+  633: 17.3,
+  634: 50,
+  636: 28.8,
+  638: 250,
+  639: 260,
+  640: 200,
+  641: 63,
+  642: 61,
+  643: 330,
+  644: 345,
+  645: 68,
+  646: 325,
+  647: 48.5,
+  648: 6.5,
+  649: 82.5,
+  650: 9,
+  651: 29,
+  653: 9.4,
+  654: 14.5,
+  656: 7,
+  657: 10.9,
+  659: 5,
+  660: 42.4,
+  661: 1.7,
+  662: 16,
+  664: 2.5,
+  665: 8.4,
+  666: 17,
+  667: 13.5,
+  669: 0.1,
+  670: 0.9,
+  671: 10,
+  672: 31,
+  673: 91,
+  674: 8,
+  676: 28,
+  677: 3.5,
+  678: 8.5,
+  679: 2,
+  680: 4.5,
+  682: 0.5,
+  683: 15.5,
+  684: 3.5,
+  685: 5,
+  686: 3.5,
+  688: 31,
+  689: 96,
+  690: 7.3,
+  691: 81.5,
+  692: 8.3,
+  694: 6,
+  695: 21,
+  696: 26,
+  698: 25.2,
+  699: 225,
+  702: 2.2,
+  703: 5.7,
+  704: 2.8,
+  705: 17.5,
+  708: 7,
+  709: 71,
+  710: 5,
+  711: 12.5,
+  712: 99.5,
+  713: 505,
+  714: 8,
+  718: 305,
+  719: 8.8,
+  720: 9,
+  721: 195,
+  722: 1.5,
+  723: 16,
+  725: 4.3,
+  726: 25,
+  728: 7.5,
+  729: 17.5,
+  731: 1.2,
+  732: 14.8,
+  734: 6,
+  735: 14.2,
+  736: 4.4,
+  737: 10.5,
+  739: 7,
+  741: 3.4,
+  742: 0.2,
+  744: 9.2,
+  746: 0.3,
+  747: 8,
+  749: 110,
+  751: 4,
+  752: 82,
+  753: 1.5,
+  754: 18.5,
+  755: 1.5,
+  756: 11.5,
+  757: 4.8,
+  759: 6.8,
+  760: 135,
+  761: 3.2,
+  762: 8.2,
+  764: 0.3,
+  765: 76,
+  766: 82.8,
+  767: 12,
+  768: 108,
+  769: 70,
+  770: 250,
+  771: 1.2,
+  772: 120.5,
+  773: 100.5,
+  774: 40,
+  775: 19.9,
+  776: 212,
+  779: 19,
+  780: 185,
+  781: 210,
+  782: 29.7,
+  783: 47,
+  786: 18.6,
+  787: 45.5,
+  788: 21.2,
+  789: 0.1,
+  790: 999.9,
+  793: 55.5,
+  794: 333.6,
+  795: 25,
+  796: 100,
+  797: 999.9,
+  799: 888,
+  800: 230,
+  801: 80.5,
+  803: 1.8,
+  804: 150,
+  805: 820,
+  806: 13,
+  810: 5,
+  811: 14,
+  813: 4.5,
+  814: 9,
+  816: 4,
+  817: 11.5,
+  819: 2.5,
+  820: 6,
+  821: 1.8,
+  822: 16,
+  824: 8,
+  825: 19.5,
+  827: 8.9,
+  828: 19.9,
+  829: 2.2,
+  830: 2.5,
+  831: 6,
+  832: 43,
+  833: 8.5,
+  835: 13.5,
+  836: 34,
+  837: 12,
+  838: 78,
+  840: 0.5,
+  841: 1,
+  843: 7.6,
+  844: 65.5,
+  845: 18,
+  846: 1,
+  847: 30,
+  848: 11,
+  850: 1,
+  852: 4,
+  853: 39,
+  854: 0.2,
+  855: 0.4,
+  856: 3.4,
+  857: 4.8,
+  859: 5.5,
+  860: 12.5,
+  863: 28,
+  864: 0.4,
+  865: 117,
+  866: 58.2,
+  867: 66.6,
+  868: 0.3,
+  869: 0.5,
+  870: 62,
+  871: 1,
+  872: 3.8,
+  873: 42,
+  874: 520,
+  875: 89,
+  876: 28,
+  877: 3,
+  878: 100,
+  879: 650,
+  880: 190,
+  881: 150,
+  882: 215,
+  883: 175,
+  885: 2,
+  886: 11,
+  890: 950,
+  891: 12,
+  893: 70,
+  894: 145,
+  895: 200,
+  896: 800,
+  897: 44.5,
+  898: 7.7,
+  900: 89,
+  901: 290,
+  902: 110,
+  903: 43,
+  904: 60.5,
+  905: 48,
+  906: 4.1,
+  907: 12.2,
+  909: 9.8,
+  910: 30.7,
+  912: 6.1,
+  913: 21.5,
+  915: 10.2,
+  916: 120,
+  917: 4,
+  918: 16.5,
+  919: 1,
+  921: 2.5,
+  922: 6.5,
+  924: 1.8,
+  925: 2.8,
+  926: 10.9,
+  927: 14.9,
+  928: 6.5,
+  929: 11.9,
+  930: 48.2,
+  931: 2.4,
+  932: 16,
+  933: 105,
+  935: 10.5,
+  938: 0.4,
+  939: 113,
+  940: 3.6,
+  941: 38.6,
+  942: 16,
+  943: 61,
+  944: 0.7,
+  945: 27.2,
+  946: 0.6,
+  947: 6,
+  948: 33,
+  949: 58,
+  950: 79,
+  951: 3,
+  952: 15,
+  953: 1,
+  955: 1.5,
+  956: 90,
+  957: 8.9,
+  958: 59.1,
+  960: 1.8,
+  961: 5.4,
+  963: 60.2,
+  964: 60.2,
+  965: 35,
+  966: 120,
+  967: 63,
+  968: 310,
+  969: 8,
+  971: 35,
+  972: 15,
+  974: 45,
+  975: 700,
+  976: 90,
+  978: 8,
+  981: 160,
+  982: 39.2,
+  985: 8,
+  986: 21,
+  988: 92,
+  989: 60,
+  990: 240,
+  992: 380.7,
+  993: 111,
+  995: 303,
+  996: 17,
+  997: 30,
+  998: 210,
+  999: 5,
+  1001: 74.2,
+  1003: 699.7,
+  1004: 4.9,
+  1005: 380,
+  1009: 280,
+  1010: 125,
+  1011: 9.7,
+  1012: 1.1,
+  1013: 2.2,
+  1014: 92.2,
+  1015: 12.2,
+  1016: 30.1,
+  1017: 39.8,
+  1018: 60,
+  1019: 93,
+  1020: 590,
+  1021: 480,
+  1022: 162.5,
+  1023: 156,
+  1024: 6.5,
+  1025: 0.3,
+  10019: 3.8,
+  10020: 25.5,
+  10026: 21,
+  10027: 40,
+  10028: 55,
+  10031: 60.8,
+  10032: 60.8,
+  10033: 60.8,
+  10037: 9.9,
+  10038: 19.9,
+  10050: 1,
+  10051: 66.6,
+  10052: 4.2,
+  10053: 33,
+  10058: 0.3,
+  10059: 0.3,
+  10060: 0.3,
+  10061: 0.3,
+  10062: 0.3,
+  10063: 650,
+  10064: 5.2,
+  10074: 20.3,
+  10075: 110,
+  10076: 316,
+  10079: 63,
+  10080: 61,
+  10081: 68,
+  10082: 325,
+  10083: 325,
+  10088: 42,
+  10089: 52,
+  10103: 415.6,
+  10105: 34,
+  10126: 9.5,
+  10127: 14,
+  10128: 39,
+  10163: 0.9,
+  10188: 490,
+  10225: 3.4,
+  10226: 3.4,
+  10227: 3.4,
+  10268: 6.5,
+  10314: 460,
+  10315: 350,
+  10340: 33.5,
+  10355: 28,
+  10360: 105,
+  10362: 809.1,
+  10363: 53.6,
+  10417: 110,
+  10418: 48,
+  10441: 290,
+  20052: 7.5,
+  20077: 24,
+  20078: 80,
+  20079: 36,
+  20080: 70.5,
+  20083: 42,
+  20110: 16,
+  20122: 56.8,
+  20144: 50.9,
+  20145: 58.2,
+  20146: 66,
+  20199: 79.5,
+  20222: 0.5,
+  20263: 17.5,
+  20264: 32.5,
+  20554: 40,
+  20555: 120,
+  20562: 1.5,
+  20618: 20.5,
+  30128: 115,
+  30129: 85,
+  30130: 110,
+  30194: 11,
+  40058: 22.7,
+  40059: 168,
+  40077: 12.5,
+  40078: 73,
+  40100: 13,
+  40101: 71,
+  40157: 69.8,
+  40211: 3.9,
+  40215: 27,
+  40503: 58.2,
+  40549: 19.2,
+  40571: 262.4,
+  40628: 43.4,
+  40705: 68.5,
+  40706: 334.1,
+  40724: 37,
+};
 const THIRD_ABILITY_PATCH = {
   10: 'runaway',
   12: 'tintedlens',
@@ -8985,8 +10041,8 @@ const THIRD_ABILITY_PATCH = {
     1012:'heatproof', 1013:'heatproof',
     1014:'toxicchain', 1015:'toxicchain',
     1016:'toxicchain', 1017:'embodyaspect',
-    1018:'stalwart', 1019:'sapsipper',
-    1020:'protosynthesis', 1021:'protosynthesis',
+     1018:'stalwart',
+     1020:'protosynthesis', 1021:'protosynthesis',
     1022:'quarkdrive', 1023:'quarkdrive',
       1024:'terashift', 1025:'poisonpuppeteer',
      /* ★ 第七批多形态补全 */
@@ -9002,7 +10058,6 @@ const THIRD_ABILITY_PATCH = {
      10362:'asone', 10363:'asone',
      10340:'aurabreak',
      10355:'psychicsurge',
-     10418:'contrary',
      10126:'insomnia', 10127:'insomnia', 10128:'insomnia',
      10163:'levitate', 10417:'adaptability', 10441:'mindseye',
 };
@@ -10103,7 +11158,7 @@ return ev;
       _tokens: {
         zap() { AU.tone(1500, .06, 'square', .13, 0, -700); AU.tone(280, .05, 'square', .09, .02, 420); },
         boom() { AU.tone(120, .32, 'sawtooth', .2, 0, -55); AU.noise(.22, .22, 0, 600); },
-        boom2() { AU.tone(70, .4, 'sawtooth', .26, 0, -30); AU.tone(220, .2, 'square', .12, 0, -120); AU.noise(.3, .3, 0, 420); },
+        boom2() { AU.tone(70, .4, 'sawtooth', .18, 0, -30); AU.tone(220, .2, 'square', .09, 0, -120); AU.noise(.3, .2, 0, 420); },
         thud() { AU.tone(100, .2, 'sine', .26, 0, -45); },
         swish() { AU.noise(.15, .15, 0, 3200); },
         whoosh() { SND._noiseSweep(.3, .16, 500, 2600); },
@@ -10139,7 +11194,7 @@ return ev;
         heal() { [523, 659, 784, 1046].forEach((f, i) => AU.tone(f, .1, 'triangle', .15, i * .07)); },
         shield() { AU.tone(900, .15, 'sine', .18, 0, 200); AU.tone(1250, .2, 'sine', .13, .07, 300); },
         mega() { for (let i = 0; i < 8; i++) AU.tone(500 + i * 180, .09, 'sawtooth', .1, i * .05); AU.tone(1800, .5, 'triangle', .18, .42, -400); AU.tone(2400, .35, 'sine', .1, .5, 300); },
-        dyna() { AU.tone(55, .6, 'sawtooth', .3, 0, 50); AU.noise(.5, .22, .05, 350); for (let i = 0; i < 5; i++) AU.tone(140 + i * 70, .14, 'square', .12, .18 + i * .09, 120); },
+        dyna() { AU.tone(55, .6, 'sawtooth', .22, 0, 50); AU.noise(.5, .18, .05, 350); for (let i = 0; i < 5; i++) AU.tone(140 + i * 70, .14, 'square', .1, .18 + i * .09, 120); },
         tera() { [1200, 1600, 2000, 2400, 2000, 2600].forEach((f, i) => AU.tone(f, .12, 'sine', .13, i * .07, 200)); AU.tone(3200, .4, 'sine', .12, .45, -600); }
       },
       play(tokens) {
@@ -10281,7 +11336,7 @@ return ev;
         svg.style.color = c;
         svg.setAttribute('width', '160'); svg.setAttribute('height', '470');
         svg.setAttribute('viewBox', '0 0 160 470');
-        svg.innerHTML = `<defs><filter id="${id}"><feGaussianBlur stdDeviation="6"/></filter></defs>
+        svg.innerHTML = `<defs><filter id="${id}"><feGaussianBlur stdDeviation="4"/></filter></defs>
           <path d="M80 0 L44 150 L92 160 L36 320 L86 336 L30 470" fill="none" stroke="${c}" stroke-width="18" stroke-linejoin="round" filter="url(#${id})"/>
           <path d="M80 0 L44 150 L92 160 L36 320 L86 336 L30 470" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
           <path d="M92 160 L140 220 L112 240 L150 300" fill="none" stroke="${c}" stroke-width="10" stroke-linejoin="round" filter="url(#${id})"/>
@@ -11395,6 +12450,12 @@ return ev;
           || (ab === 'quarkdrive' && this.terrain === 'electric')
           || (ab === 'protosynthesis' && this.wx === 'sun');
         if (willTrigger) showAbilityBanner(m, side);
+        /* ★ 甘露之蜜：出场时散发甜香，降低对手闪避率1级 */
+        if (ab === 'supersweetsyrup' && foe && foe.alive()) {
+          this.abBanner(m);
+          foe.stages.eve = clamp((foe.stages.eve || 0) - 1, -6, 6);
+          await say(`${m.name} 的甘露之蜜发动了！散发甜香，对手的闪避率下降了！`);
+        }
         const msg = async t => { await say(`${m.name} 的特性发动了！${t}`); };
         /* ★ 原始回归：固拉多/盖欧卡携带专属宝珠时出场触发 */
         if (m.id === 383 && m.item === 'redorb' && !m.vol.primal) {
@@ -11545,7 +12606,6 @@ return ev;
           if (ally) { ally.hp = Math.min(ally.maxhp, ally.hp + Math.floor(ally.maxhp / 4)); await say(`${m.name} 的款待发动了！${ally.name}回复了HP！`); }
           else { m.hp = Math.min(m.maxhp, m.hp + Math.floor(m.maxhp / 4)); await say(`${m.name} 的款待发动了！回复了HP！`); }
         }
-        if (ab === 'supersweetsyrup') { if (foe && foe.alive()) { foe.vol.syrupEvasion = true; await say(`${m.name} 的满溢甜香发动了！对手的回避率下降了！`); } }
         if (ab === 'terashift') {
           if (m.id === 1024) {
             const hpPct = m.hp / m.maxhp;
@@ -11590,7 +12650,17 @@ return ev;
           await say(`${m.name} 的特性是面影辉映，太晶化时将根据面具获得额外增益！`);
         }
         if (ab === 'neutralizinggas') { await say(`${m.name} 的化学变化气体发动了！全场特性被暂时无效化了！`); }
-        if (ab === 'powerconstruct' && m.hpPct() <= 0.5) { await say(`${m.name} 的群聚变形发动了！变成了完全体形态！`); m.vol.completeForm = true; }
+        if (ab === 'powerconstruct' && m.hpPct() <= 0.5) {
+          m.vol.completeForm = true;
+          const baseHp = m.id === 10340 ? 54 : 108;
+          const healAmt = 216 - baseHp;
+          m.mega = { f: 10120, t: 'dragon/ground', s: [216,100,121,91,95,85], a: 'powerconstruct' };
+          m.recalc(); m.hp = Math.min(m.maxhp, m.hp + healAmt);
+          this.abBanner(m);
+          if (!CFG.fancyAudio) AU.mega(); BUI.burst(side); FX.transform(side, 'power');
+          await say(`${m.name} 的群聚变形发动了！变成了完全体形态！`);
+          BUI.refresh(this);
+        }
       }
       async setWeather(w, m) {
         const isPrimal = w === 'desolate' || w === 'primordial';
@@ -12088,6 +13158,8 @@ return ev;
           if (foe.has('sandveil') && this.wx === 'sand') acc = Math.floor(acc * 0.8);
           if (foe.has('snowcloak') && this.wx === 'hail') acc = Math.floor(acc * 0.8);
           if (foe.has('tangledfeet') && foe.vol.confuse > 0) acc = Math.floor(acc * 0.5);
+          /* ★ 闪避率阶段：目标每级闪避提升命中×0.9，降低则÷0.9 */
+          if (foe.stages && foe.stages.eve) acc = Math.floor(acc * Math.pow(0.9, foe.stages.eve));
         }
         return acc;
       }
@@ -12340,6 +13412,14 @@ return ev;
             return;
           }
         }
+        // ★ 灵骚判定：目标未持有道具时使用失败；成功使用时探知对手的道具
+        if (useMv.poltergeist) {
+          if (!foe.item) {
+            await say(`${mon.vol.illusionName || mon.name} 的灵骚失败了！对手没有持有道具！`);
+            return;
+          }
+          await say(`${mon.vol.illusionName || mon.name} 的灵骚发动了！${foe.name} 被自己持有的「${IT[foe.item]?.n || '未知道具'}」攻击了！`);
+        }
         // 命中判定
         let acc = this.hitAccuracy(mon, foe, useMv);
         if (acc != null && !mon.has('noguard') && !foe.has('noguard') && Math.random() * 100 > acc) {
@@ -12515,7 +13595,7 @@ return ev;
         let protectPierce = false, fullPierce = false;
         if (foe.vol.protect) {
           /* ★ 强力钻：可穿透保护造成全额伤害（无法穿透极巨防壁） */
-          if (mv.strongdrill && !foe.vol.maxguard) {
+          if (mv.hyperdrill && !foe.vol.maxguard) {
             fullPierce = true;
             await say(`${foe.name} 的保护被强力钻贯穿了！`);
           }
@@ -12538,6 +13618,8 @@ return ev;
         // 伤害计算
         const r = this.calcDmg(mon, foe, mv);
         let dmg = r.dmg;
+        /* ★ 随机光拿出全力：播报提示 */
+        if (r.fickle) await say(`${mon.vol.illusionName || mon.name} 拿出了全力！`);
         /* ★ 秘剑·千重涛：命中后撒菱 */
         if (mv.ceaselessedge && dmg > 0 && foe.hp > 0) {
           const ts = this.foeSide(side);
@@ -13000,7 +14082,18 @@ return ev;
         if (mv.eruption) { mv = { ...mv, p: Math.max(1, Math.floor(150 * mon.hp / mon.maxhp)) }; }
         if (mv.lastrespects) { const side = this.sideOf(mon); const fainted = (side === 'p' ? this.pp : this.ep).filter(m2 => m2 && m2.fainted).length; mv = { ...mv, p: 50 + 50 * fainted }; }
         if (mv.fishious && !foe.vol.actedThisTurn) { mv = { ...mv, p: mv.p * 2 }; }
+        /* ★ 踢到/打草结：威力随对手体重变化（轻金属减半、重金属翻倍） */
+        if (mv.lowkick) {
+          let w = (foe.mega && foe.mega.a === 'powerconstruct') ? 610 : (W[foe.id] ?? 50);
+          if (foe.has('heavymetal')) w *= 2;
+          if (foe.has('lightmetal')) w *= 0.5;
+          const p = w <= 10 ? 20 : w <= 25 ? 40 : w <= 50 ? 60 : w <= 100 ? 80 : w <= 200 ? 100 : 120;
+          mv = { ...mv, p };
+        }
         const mb = mon.has('moldbreaker');
+        /* ★ 随机光：30%概率拿出全力，威力翻倍 */
+        let fickle = false;
+        if (mv.ficklebeam && Math.random() < 0.3) { fickle = true; mv = { ...mv, p: mv.p * 2 }; }
         // 会心
         let cs = (mv.crit ? 1 : 0) + (mv.alwaysCrit ? 2 : 0) + (mon.has('superluck') ? 1 : 0) + (mon.item === 'scopelens' ? 1 : 0) + (mon.vol.gmaxCrit ? 2 : 0);
         const crit = mv.alwaysCrit || (mon.has('merciless') && (foe.status === 'psn' || foe.status === 'tox')) || (!foe.has('shellarmor') && !foe.has('battlearmor') && Math.random() < [1 / 24, 1 / 8, 1 / 2, 1][Math.min(cs, 3)]);
@@ -13222,7 +14315,7 @@ return ev;
         if (crit) dmg = Math.floor(dmg * (mon.has('sniper') ? 2.25 : 1.5));
         // 随机
         dmg = Math.floor(dmg * (85 + Math.random() * 16) / 100);
-        return { dmg: Math.max(eff > 0 ? 1 : 0, dmg), eff, crit };
+        return { dmg: Math.max(eff > 0 ? 1 : 0, dmg), eff, crit, fickle };
       }
       async directDmg(m, d, side, msg) {
         if (m.has('magicguard')) return;
@@ -13906,7 +14999,7 @@ return ev;
           if (old.has('naturalcure')) { this.abBanner(old); old.status = null; old.sleepT = 0; old.toxicN = 0; }
           /* ★ 全能变身：标记已交换下场，下次出场时触发英雄形态 */
           if (old.has('zerotohero')) old.vol.wasSwitchedOut = true;
-          old.vol.choiceLock = null; old.vol.lock = null; old.vol.charge = null; old.vol.recharge = false; old.vol.protect = false; old.vol.flinch = false; old.vol.confuse = 0; old.vol.proteanUsed = false; old.vol.disabled = null; old.vol.lastMove = null;
+          old.vol.choiceLock = null; old.vol.lock = null; old.vol.charge = null; old.vol.recharge = false; old.vol.protect = false; old.vol.flinch = false; old.vol.confuse = 0; if (old.vol.proteanUsed) old.types = old.baseTypes.slice(); old.vol.proteanUsed = false; old.vol.disabled = null; old.vol.lastMove = null;
           /* ★ 超极巨效果离场清除：被G-Max Phantom困住的、被Torment的、束缚的 */
           old.vol.gmaxTrap = false; old.vol.gmaxTorment = false; old.vol.gmaxCrit = false; old.vol.binding = 0;
           /* ★ 极巨化离场即解除（HP按比例折算）；Mega进化与太晶化本场战斗内永久保留 */
@@ -16276,10 +17369,12 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (d.weatherball) p.push('随天气改变属性，且威力提升至100');
       if (d.terablast) p.push('太晶化后变为太晶属性');
       if (d.knockoff) p.push('拍落对手的持有道具');
+      if (d.poltergeist) p.push('对手未持有道具时使用失败；成功时探知对手的持有道具');
+      if (d.lowkick) p.push('对手越重威力越高（上限120）');
+      if (d.ficklebeam) p.push('30%概率拿出全力，威力翻倍');
       if (d.uturn) p.push('攻击后替换下场');
       if (d.dyna2x) p.push('对极巨化宝可梦伤害×2');
-      if (d.strongdrill) p.push('可无视保护类招式造成全额伤害（无法穿透极巨防壁）');
-      if (d.rapidblade) p.push('铁头壳的专属招式');
+      if (d.hyperdrill) p.push('可无视保护类招式造成全额伤害（无法穿透极巨防壁）');
       if (d.boltbeak) p.push('对手本回合尚未行动时威力翻倍');
       if (d.triplearrows) p.push('50%几率降低对手防御1级');
       if (d.chillyreception) p.push('天气变为冰雹，随后自身替换下场');
@@ -16325,10 +17420,10 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (d.k === 'ceaselessedge') p.push('洗翠大剑鬼的专属招式。命中后在对手场地撒下撒菱');
       if (d.k === 'direclaw') p.push('洗翠大狃拉的专属招式。30%几率使对手中毒/麻痹/睡眠');
       if (d.k === 'barbbarrage') p.push('洗翠千针鱼的专属招式。30%几率使对手中毒');
-      if (d.k === 'ceaselessedge') p.push('洗翠大剑鬼的专属招式。命中后在对手场地撒下撒菱');
-      if (d.k === 'direclaw') p.push('洗翠大狃拉的专属招式。30%几率使对手中毒/麻痹/睡眠');
-      if (d.k === 'barbbarrage') p.push('洗翠千针鱼的专属招式。30%几率使对手中毒');
-      if (d.k === 'moongeistbeam') p.push('无视对手特性的影响进行攻击');
+      if (d.k === 'coreenforcer') p.push('基格尔德的专属招式。Mega后变为归无之光（200威力，可击中妖精系）');
+      if (d.k === 'ivy cudgel') p.push('棘藤棒。属性随厄诡椪携带的面具变化');
+      if (d.k === 'judgment') p.push('制裁光砾。属性随携带的石板变化（传说石板克制对手属性）');
+      if (d.k === 'populationbomb') p.push('鼠数儿。连续攻击1~10次，每击独立判定命中');
       if (d.terastarstorm) p.push('太晶星群。对太晶化/星晶化的宝可梦效果绝佳');
       if (d.revival) p.push('复活1只濒死的同行宝可梦，并回复其最大HP的50%');
       const ups = [];['selfUp', 'selfUp2', 'selfUp3'].forEach(key => { if (d[key]) ups.push(STN[d[key].drop] + (Math.abs(d[key].n) >= 2 ? '2级' : '1级')); });
@@ -16350,6 +17445,61 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (d.powder) p.push('对草属性无效');
       if (d.punch) p.push('拳类招式（铁拳×1.2）');
       if (d.pulse) p.push('波动招式（超级发射器×1.5）');
+      if (d.ct) p.push('接触招式（可触发静电/火焰之躯/毒刺等特性）');
+      if (d.sound) p.push('声音招式（庞克摇滚×1.3）');
+      if (d.bullet) p.push('弹/球类招式（防弹特性免疫）');
+      if (d.bite) p.push('咬住类招式（强壮之颚×1.5）');
+      if (d.slicing) p.push('切割类招式（锋锐×1.5）');
+      if (d.ignAb) p.push('无视对手特性的影响进行攻击');
+      if (d.sucker) p.push('若对手本回合使用攻击招式且尚未出手则先制攻击，否则失败');
+      if (d.selfko) p.push('使用后自身濒死');
+      if (d.firstimpression) p.push('先制+2，仅出场第一回合可使用');
+      if (d.feint) p.push('先制+2，无视保护类招式造成伤害');
+      if (d.bodypress) p.push('以自身的防御计算伤害');
+      if (d.fishious) p.push('对手本回合尚未行动时威力翻倍');
+      if (d.revelation) p.push('属性随自身当前形态变化（花舞鸟专属）');
+      if (d.thousandarrows) p.push('可击中飞行系和浮游特性的宝可梦');
+      if (d.lastrespects) p.push('同行宝可梦每濒死1只威力+50');
+      if (d.ruination || d.naturesmad || d.superfang) p.push('伤害固定为对手当前HP的一半');
+      if (d.clangorous) p.push('消耗1/3最大HP，除HP外所有能力提升1级（魂舞烈音爆）');
+      if (d.lunar) p.push('回复1/4最大HP并治愈自身异常状态');
+      if (d.jungleheal) p.push('回复己方全体1/4HP并治愈异常状态');
+      if (d.healbell) p.push('治愈己方全体的异常状态');
+      if (d.terrain) p.push('改变场地5回合：' + ({ electric: '电气场地（电系增强，免疫睡眠）', grassy: '青草场地（草系增强，每回合回复）', psychic: '精神场地（超能增强，先制免疫）', misty: '薄雾场地（龙系伤害减半）' }[d.terrain] || ''));
+      if (d.screen) p.push('5回合内我方受到的' + (d.screen === 'light' ? '特殊' : d.screen === 'reflect' ? '物理' : '') + '伤害减半');
+      if (d.trap) p.push('束缚对手，使其无法替换宝可梦');
+      if (d.roar) p.push('使对手强制替换下场（先制度-6）');
+      if (d.tailwind) p.push('己方全体4回合内速度翻倍');
+      if (d.defog) p.push('清除双方场地陷阱和光墙');
+      if (d.encore) p.push('使对手3回合内只能使用同一招式');
+      if (d.substitute) p.push('制造替身抵挡伤害');
+      if (d.wish) p.push('回合末回复最大HP的一半');
+      if (d.yawn) p.push('使对手下一回合陷入睡眠');
+      if (d.stockpile) p.push('蓄力并提升防御、特防各1级（最多3次）');
+      if (d.swallow) p.push('根据蓄力层数回复1/4~全部HP后清空蓄力');
+      if (d.spitup) p.push('根据蓄力层数造成伤害（每层100）后清空蓄力');
+      if (d.ingrain) p.push('扎根并每回合回复HP，无法替换');
+      if (d.recycle) p.push('恢复已消耗的树果');
+      if (d.refresh) p.push('治愈自身中毒、麻痹、灼伤');
+      if (d.perish) p.push('3回合后双方同时濒死（中途替换可化解）');
+      if (d.memento) p.push('自身濒死，使对手攻击、特攻降低2级');
+      if (d.healingwish) p.push('自身濒死，回复下一只宝可梦全部HP并治愈异常');
+      if (d.lunardance) p.push('自身濒死，回复下一只宝可梦全部HP、PP并治愈异常');
+      if (d.finalgambit) p.push('自身濒死，对对手造成等于自身HP的伤害');
+      if (d.bestow) p.push('将自身道具交给对手');
+      if (d.quash) p.push('使对手本回合最后行动');
+      if (d.allyswitch) p.push('与同行宝可梦交换位置');
+      if (d.telekinesis) p.push('使对手浮空，无法躲避攻击');
+      if (d.magiccoat) p.push('反弹对手的变化招式');
+      if (d.snatch) p.push('抢先夺取对手本回合的变化招式');
+      if (d.craftyshield) p.push('本回合防住对手的变化招式');
+      if (d.flatter) p.push('使对手特攻提升1级但陷入混乱');
+      if (d.swagger) p.push('使对手攻击提升2级但陷入混乱');
+      if (d.captivate) p.push('降低对手特攻2级');
+      if (d.orderup) p.push('造成伤害后自身攻击提升1级');
+      if (d.burning) p.push('受到接触攻击时使对手灼伤');
+      if (d.transform) p.push('变身成对手，复制其种族值、招式与特性');
+      if (d.maxguard) p.push('极巨防壁：防住对手的攻击');
       if (!p.length) p.push(d.c === 'X' ? '变化招式。' : '基础攻击招式。');
       return p.join('；');
     }
