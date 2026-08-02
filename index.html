@@ -1945,11 +1945,11 @@
     }
 
     #battle.doubles #pcard {
-      right: 26px
+      right: 214px
     }
 
     #battle.doubles #pcard2 {
-      right: 214px
+      right: 26px
     }
 
     #battle.doubles .plat.e {
@@ -5978,12 +5978,12 @@
 
       /* 我方卡：右下纵向堆叠 */
       #battle.doubles #pcard {
-        bottom: 8px !important;
+        bottom: 140px;
         right: 8px !important;
       }
 
       #battle.doubles #pcard2 {
-        bottom: 140px;
+        bottom: 8px !important;
         right: 8px !important;
       }
 
@@ -12056,7 +12056,9 @@ return ev;
             /* ★ 竖屏纵向堆叠：上方卡保持 CSS 的 6px，下方卡按上方卡高度动态下移，避免重叠 */
             e1.style.top = '';
             e0.style.top = eH > 0 ? (6 + eH + 6) + 'px' : '';
-            p1.style.bottom = pH > 0 ? (8 + pH + 6) + 'px' : '';
+            /* ★ 我方卡片已对调：pcard(slot0) 在上、pcard2(slot1) 在下，上方卡按高度动态上移 */
+            p0.style.bottom = pH > 0 ? (8 + pH + 6) + 'px' : '';
+            p1.style.bottom = '';
           }
         }
         this.sprites(b);
@@ -13898,13 +13900,11 @@ return ev;
         const mons = [this.slotMon(side, 0), this.slotMon(side, 1)].filter(Boolean);
         for (let i = 0; i < mons.length; i++) { mons[i]._slot = i; this._prepSendOut(mons[i], side); }
         await Promise.all(mons.map((m, i) => BUI.entryAnim(side, m, this.wild, i, i > 0)));
-        for (let i = 0; i < mons.length; i++) {
-          const m = mons[i];
-          const nm = m.vol.illusionName || m.name;
-          if (side === 'e') await say(this.wild ? `野生的 ${nm} 出现了！` : `${this.trainerName || '对手'} 派出了 ${nm}！`);
-          else await say(i === 0 ? `去吧！${nm}！` : `${nm}，就决定是你了！`);
-          this.participants.add(m);
-        }
+        /* ★ 双打同时出场：同侧合并为一行播报 */
+        const nms = mons.map(m => m.vol.illusionName || m.name);
+        if (side === 'e') await say(this.wild ? `野生的 ${nms.join(' 和 ')} 出现了！` : `${this.trainerName || '对手'} 派出了 ${nms.join(' 和 ')}！`);
+        else await say(mons.length > 1 ? `去吧！${nms[0]} 和 ${nms[1]}，就决定是你们了！` : `去吧！${nms[0]}！`);
+        mons.forEach(m => this.participants.add(m));
         BUI.refresh(this);
       }
       /* ★ 入场特性按速度顺序发动（受戏法空间影响；同速随机） */
@@ -14722,7 +14722,8 @@ return ev;
             const zone = el('div', 'targetZone');
             zone.appendChild(el('h4', '', label));
             const row = el('div', 'targetRow');
-            (this.doubles ? [1, 0] : [0]).forEach(s => {
+            const slots = isEnemy && this.doubles ? [1, 0] : (this.doubles ? [0, 1] : [0]);
+            slots.forEach(s => {
               const m = isEnemy ? this.slotMon('e', s) : this.slotMon('p', s);
               const c = el('div', 'targetCard');
               if (!m) { c.classList.add('disabled'); c.innerHTML = '<div style="color:#999;font-weight:900">— 无 —</div>'; row.appendChild(c); return; }
@@ -15122,7 +15123,7 @@ return ev;
           return;
         }
         mon.vol.justCharged = false;
-        if (!this.foesOf(mon).length) { return; }
+        /* 敌方全部倒下时仍播报使用招式，随后由目标解析提示使用失败（不直接静默返回） */
         // 极巨化转换
         // 极巨化转换
         let useMv = mv;
@@ -15486,7 +15487,18 @@ return ev;
         };
         switch (rng) {
           case RNG.ENEMY_ANY: { const rd = redirectFoe(foes); return rd ? [rd] : pickTarget(foes, foes[0]); }
-          case RNG.ANY: { const rd = redirectFoe(foes); if (rd) return [rd]; if (act && act.target && act.target.alive() && act.target !== mon && all.includes(act.target)) return [act.target]; /* 显式目标已倒下：使用失败，不自动改打其他 */ if (act && act.target) return []; /* 无显式目标（AI/自动）：只打敌方，敌方全灭不选队友 */ return foes.length ? pickTarget(foes, foes[0]) : []; }
+          case RNG.ANY: {
+            const rd = redirectFoe(foes); if (rd) return [rd];
+            if (act && act.target && act.target !== mon && act.target.alive() && all.includes(act.target)) return [act.target];
+            /* ★ 显式目标在出招前倒下：敌方目标→自动改打其他存活敌方；队友目标→使用失败 */
+            if (act && act.target && act.target !== mon) {
+              const isAllyTgt = this.sideOf(act.target) === side;
+              if (isAllyTgt) return [];
+              return foes.length ? pickTarget(foes, foes[0]) : [];
+            }
+            /* 无显式目标（AI/自动）：只打敌方，敌方全灭不选队友 */
+            return foes.length ? pickTarget(foes, foes[0]) : [];
+          }
           case RNG.ENEMY_ALL: return foes.slice();
           case RNG.ALL_EXCEPT_SELF: return all.filter(x => x !== mon);
           case RNG.SELF: return [mon];
@@ -15623,7 +15635,7 @@ return ev;
           foe.formSprite = FORMSPRITE.noice;
           this.abBanner(foe);
           await say(`${foe.name} 的结冻头抵挡了攻击！结冻头碎裂了！`);
-          BUI.dmgPop(side === 'p' ? 'e' : 'p', '抵挡', '#9fe8f5', foe._slot || 0);
+          BUI.dmgPop(tgtSide, '抵挡', '#9fe8f5', foe._slot || 0);
           if (mv.maxfx) {
             const f = mv.maxfx;
             if (f.up) await this.changeStat(mon, f.up, 1, mon);
@@ -15640,14 +15652,14 @@ return ev;
           foe.vol.disguise = false; this.abBanner(foe);
           foe.disguiseUsed = true;   // ★ 本场已触发，换人后不再恢复
           foe.formSprite = FORMSPRITE.busted;
-          FX.transform(side === 'p' ? 'e' : 'p', 'disguise', foe._slot || 0);
+          FX.transform(tgtSide, 'disguise', foe._slot || 0);
           await say(`${foe.name} 的画皮抵挡了攻击！`);
-          BUI.dmgPop(side === 'p' ? 'e' : 'p', '抵挡', '#ffd93b', foe._slot || 0);
+          BUI.dmgPop(tgtSide, '抵挡', '#ffd93b', foe._slot || 0);
           if (!foe.has('magicguard')) {
             const rec = Math.max(1, Math.floor(foe.baseMax / 8));   // ★ 按未翻倍HP计算
             foe.hp = Math.max(0, foe.hp - rec);
             await say(`${foe.name} 因画皮破损受到了伤害！`);
-            BUI.dmgPop(side === 'p' ? 'e' : 'p', `-${rec}`, '#ff9d8a');
+            BUI.dmgPop(tgtSide, `-${rec}`, '#ff9d8a');
           }
           if (mv.maxfx) {
             const f = mv.maxfx;
@@ -15665,8 +15677,8 @@ return ev;
           else if (foe.has('sturdy') && foe.hp === foe.maxhp && !mv.ignAb) { dmg = foe.hp - 1; this.abBanner(foe); await say(`${foe.name} 靠结实撑住了！`); }
         }
         // 动画 + ★属性攻击特效（与受击动画同步）
-        const tgtSpr = side === 'p' ? BUI.espr : BUI.pspr;
-        FX.attack(side, mon, foe, mv);
+        const tgtSpr = BUI.sprEl(tgtSide, foe._slot || 0);
+        FX.attack(side, mon, foe, mv, tgtSide);
         await BUI.anim(tgtSpr, 'hit', 400);
         if (!CFG.fancyAudio) AU.hit(); if (r.crit) { await say('击中要害！'); } if (r.eff > 1) { AU.superEff(); await say('效果绝佳！'); } else if (r.eff > 0 && r.eff < 1) { AU.notEff(); await say('收效甚微…'); }
         foe.hp = Math.max(0, foe.hp - dmg);
@@ -15684,7 +15696,7 @@ return ev;
           const pct = Math.max(1, Math.round(dmg / foe.maxhp * 100));
           const leftPct = Math.round(foe.hp / foe.maxhp * 100);
           this.addLog(`↳ ${foe.vol.illusionName || foe.name} 受到 ${dmg} 点伤害（${pct}% HP）· 对手剩余 ${leftPct}%${r.crit ? ' · 击中要害' : ''}${r.eff > 1 ? ' · 效果绝佳' : (r.eff > 0 && r.eff < 1) ? ' · 收效甚微' : ''}`);
-          const popSide = side === 'p' ? 'e' : 'p';
+          const popSide = tgtSide;
           BUI.dmgPop(popSide, `-${dmg} (${pct}%)`, r.crit ? '#ffd93b' : r.eff > 1 ? '#ff9d6b' : (r.eff > 0 && r.eff < 1) ? '#8fb6e8' : '#ffffff', foe._slot || 0);
           if (r.crit) setTimeout(() => BUI.dmgPop(popSide, '击中要害!', '#ffd93b', foe._slot || 0), 170);
         }
