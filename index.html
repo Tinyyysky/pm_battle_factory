@@ -394,28 +394,43 @@
       }
     }
 
-    .flyby {
+    .flyPoke {
       position: absolute;
-      font-size: 34px;
-      animation: fly 16s linear infinite;
-      filter: drop-shadow(0 4px 3px rgba(0, 0, 0, .25))
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ff4b3e 46%, #26233a 46% 54%, #fff 54%);
+      border: 3px solid #26233a;
+      box-shadow: 0 5px 12px rgba(0, 0, 0, .28);
+      opacity: .8;
+      animation: pokeDrift 24s ease-in-out infinite;
+      pointer-events: none
     }
 
-    @keyframes fly {
-      0% {
-        transform: translate(-80px, 120px) scaleX(1)
-      }
+    .flyPoke::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border: 3px solid #26233a;
+      border-radius: 50%;
+      transform: translate(-50%, -50%)
+    }
 
-      49% {
-        transform: translate(1100px, 40px) scaleX(1)
+    @keyframes pokeDrift {
+      0% {
+        transform: translate(-60px, 80px)
       }
 
       50% {
-        transform: translate(1100px, 60px) scaleX(-1)
+        transform: translate(1080px, 34px)
       }
 
       100% {
-        transform: translate(-80px, 140px) scaleX(-1)
+        transform: translate(-60px, 80px)
       }
     }
 
@@ -1918,13 +1933,12 @@
     }
 
     #battle.doubles #ecard {
-      left: 26px
-    }
-
-    #battle.doubles #ecard2 {
       left: 214px
     }
 
+    #battle.doubles #ecard2 {
+      left: 26px
+    }
     #battle.doubles #pcard,
     #battle.doubles #pcard2 {
       bottom: 19px
@@ -2184,7 +2198,7 @@
 
     #targetOv .targetCard img {
       width: 58px;
-      height: 58px;
+      height: auto;
       image-rendering: pixelated
     }
 
@@ -5953,12 +5967,12 @@
 
       /* 敌方卡：左上纵向堆叠 */
       #battle.doubles #ecard {
-        top: 6px !important;
+        top: 124px;
         left: 6px !important;
       }
 
       #battle.doubles #ecard2 {
-        top: 124px;
+        top: 6px !important;
         left: 6px !important;
       }
 
@@ -5977,47 +5991,47 @@
       #battle.doubles .plat.e {
         width: 280px !important;
         height: 44px !important;
-        top: 282px !important;
+        top: 252px !important;
         right: 24px !important;
       }
 
       #battle.doubles #espr {
         width: 88px !important;
         height: 88px !important;
-        top: 196px !important;
+        top: 166px !important;
         right: 40px !important;
       }
 
       #battle.doubles #espr2 {
         width: 80px !important;
         height: 80px !important;
-        top: 204px !important;
+        top: 174px !important;
         right: 148px !important;
       }
 
       #battle.doubles #eshadow {
         width: 76px !important;
-        top: 282px !important;
+        top: 252px !important;
         right: 52px !important;
       }
 
       #battle.doubles #eshadow2 {
         width: 70px !important;
-        top: 286px !important;
+        top: 256px !important;
         right: 158px !important;
       }
 
       #battle.doubles #espr.dyn {
         width: 150px !important;
         height: 150px !important;
-        top: 140px !important;
+        top: 110px !important;
         right: 30px !important;
       }
 
       #battle.doubles #espr2.dyn {
         width: 138px !important;
         height: 138px !important;
-        top: 148px !important;
+        top: 118px !important;
         right: 136px !important;
       }
 
@@ -6631,7 +6645,7 @@
       <div class="cloud c3"></div>
       <div class="cloud c4"></div>
       <div class="pollen"></div>
-      <div class="flyby" style="top:40px">🕊️</div>
+      <div class="flyPoke" style="top:60px"></div>
       <div class="grass"></div>
       <div id="titleInner">
         <div class="logo">宝可梦<em>·</em>无限工厂</div>
@@ -6958,21 +6972,33 @@
     ============================================================ */
     const AU = {
       ctx: null, master: null, sfx: null, mus: null, muted: false, musOn: true, cur: null, timers: [],
+
+      musNodes: new Set(),
+      _trackMusNode(n, detach) {
+        if (!n) return n;
+        this.musNodes.add(n);
+        if (n.onended == null) {
+          try { n.onended = () => { this.musNodes.delete(n); }; } catch (e) { }
+        }
+        if (detach && n.disconnect) n.disconnect();
+        return n;
+      },
       init() {
         if (this.ctx) return; const C = window.AudioContext || window.webkitAudioContext; this.ctx = new C();
         this.master = this.ctx.createGain(); this.master.gain.value = .5; this.master.connect(this.ctx.destination);
         this.sfx = this.ctx.createGain(); this.sfx.gain.value = 1;
-        /* ★ 动态压缩器：防止多个音色叠加爆音（削峰限幅） */
+
         this.comp = this.ctx.createDynamicsCompressor();
         this.comp.threshold.value = -14; this.comp.knee.value = 8; this.comp.ratio.value = 10; this.comp.attack.value = .002; this.comp.release.value = .18;
         this.sfx.connect(this.comp); this.comp.connect(this.master);
-        this.mus = this.ctx.createGain(); this.mus.gain.value = .22; this.mus.connect(this.master);
+        this.mus = this.ctx.createGain(); this.mus.gain.value = .429; this.mus.connect(this.master);
         this.setVol();
       },
-      /* ★ 应用用户音量设置（音效/背景音乐分开） */
+
       setVol() {
         if (this.sfx) this.sfx.gain.value = CFG.sfxVol ?? 1;
-        if (this.mus) this.mus.gain.value = (CFG.musVol ?? 1) * .22;
+
+        if (this.mus) this.mus.gain.value = (CFG.musVol ?? 1) * .429;
       },
       t() { return this.ctx.currentTime; },
       env(g, t0, a, d, v) { g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(v, t0 + a); g.gain.exponentialRampToValueAtTime(.0001, t0 + a + d); },
@@ -6981,6 +7007,125 @@
         const t0 = this.t() + when, o = this.ctx.createOscillator(), g = this.ctx.createGain();
         o.type = type; o.frequency.setValueAtTime(f, t0); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, f + slide), t0 + dur);
         this.env(g, t0, .005, dur, v); o.connect(g); g.connect(dest || this.sfx); o.start(t0); o.stop(t0 + dur + .05);
+
+        if (dest === this.mus) this._trackMusNode(o);
+      },
+
+      mtone(f, dur, voice, v = .1) {
+        if (this.muted || !this.ctx || !f) return;
+        const t0 = this.t(), out = this.mus || this.sfx;
+        const mkGain = (a = .005) => {
+          const g = this._trackMusNode(this.ctx.createGain());
+          g.gain.setValueAtTime(0, t0);
+          g.gain.linearRampToValueAtTime(v, t0 + a);
+          g.gain.exponentialRampToValueAtTime(.0001, t0 + a + dur);
+          g.connect(out);
+          return g;
+        };
+        const mkFilter = (type, fc) => {
+          const fl = this._trackMusNode(this.ctx.createBiquadFilter());
+          fl.type = type; fl.frequency.value = fc; fl.Q.value = 1;
+          return fl;
+        };
+        const mkNoise = (dur2, v2, type, fc) => {
+          const len = Math.max(1, Math.floor(this.ctx.sampleRate * dur2));
+          const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), dd = buf.getChannelData(0);
+          for (let i = 0; i < len; i++) dd[i] = Math.random() * 2 - 1;
+          const s = this._trackMusNode(this.ctx.createBufferSource()), fl = this._trackMusNode(this.ctx.createBiquadFilter()), g = this._trackMusNode(this.ctx.createGain());
+          s.buffer = buf; fl.type = type; fl.frequency.value = fc;
+          g.gain.setValueAtTime(v2, t0);
+          g.gain.exponentialRampToValueAtTime(.0001, t0 + dur2);
+          s.connect(fl); fl.connect(g); g.connect(out); s.start(t0);
+        };
+        if (voice === 'kick') {
+          const o = this._trackMusNode(this.ctx.createOscillator()), g = mkGain(.002);
+          o.type = 'sine';
+          o.frequency.setValueAtTime(150, t0);
+          o.frequency.exponentialRampToValueAtTime(42, t0 + dur * .9);
+          o.connect(g); o.start(t0); o.stop(t0 + dur + .05);
+          return;
+        }
+        if (voice === 'snare') {
+          mkNoise(dur, v * .9, 'highpass', 1400);
+          const o = this._trackMusNode(this.ctx.createOscillator()), g = mkGain(.002);
+          o.type = 'triangle'; o.frequency.setValueAtTime(190, t0);
+          o.connect(g); o.start(t0); o.stop(t0 + dur * .8);
+          return;
+        }
+        if (voice === 'hat') {
+          mkNoise(dur * .55, v * .55, 'highpass', 6500);
+          return;
+        }
+        if (voice === 'clap') {
+          for (let i = 0; i < 3; i++) mkNoise(dur * .4, v * .6, 'bandpass', 1200 + i * 500);
+          return;
+        }
+        if (voice === 'bass') {
+          const o = this._trackMusNode(this.ctx.createOscillator()), fl = mkFilter('lowpass', 420), g = mkGain(.005);
+          o.type = 'sawtooth';
+          o.frequency.setValueAtTime(f, t0);
+          o.frequency.exponentialRampToValueAtTime(f * .94, t0 + dur);
+          fl.frequency.setValueAtTime(520, t0);
+          fl.frequency.exponentialRampToValueAtTime(140, t0 + dur);
+          o.connect(fl); fl.connect(g); o.start(t0); o.stop(t0 + dur + .05);
+          return;
+        }
+        if (voice === 'lead') {
+          const fl = mkFilter('lowpass', 2400), g = mkGain(.008);
+          for (const det of [0, 7]) {
+            const o = this._trackMusNode(this.ctx.createOscillator());
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(f * (1 + det / 1000), t0);
+            o.connect(fl); o.start(t0); o.stop(t0 + dur + .05);
+          }
+          fl.connect(g);
+          return;
+        }
+        if (voice === 'pad') {
+          const fl = mkFilter('lowpass', 1000), g = mkGain(.09);
+          for (const det of [0, 5, -5]) {
+            const o = this._trackMusNode(this.ctx.createOscillator());
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(f * (1 + det / 1000), t0);
+            o.connect(fl); o.start(t0); o.stop(t0 + dur + .08);
+          }
+          fl.connect(g);
+          return;
+        }
+        if (voice === 'pluck' || voice === 'arp') {
+          const o = this._trackMusNode(this.ctx.createOscillator()), fl = mkFilter('lowpass', voice === 'pluck' ? 2800 : 3600), g = mkGain(.004);
+          o.type = voice === 'pluck' ? 'triangle' : 'square';
+          o.frequency.setValueAtTime(f, t0);
+          o.connect(fl); fl.connect(g); o.start(t0); o.stop(t0 + dur + .05);
+          return;
+        }
+
+        if (voice === 'bell') {
+          const g = mkGain(.006);
+          for (const det of [0, 4]) {
+            const o = this._trackMusNode(this.ctx.createOscillator());
+            o.type = 'sine';
+            o.frequency.setValueAtTime(f * (1 + det / 100), t0);
+            o.connect(g); o.start(t0); o.stop(t0 + dur + .25);
+          }
+          const o2 = this._trackMusNode(this.ctx.createOscillator());
+          o2.type = 'triangle'; o2.frequency.setValueAtTime(f * 2, t0);
+          o2.connect(g); o2.start(t0); o2.stop(t0 + dur * .55);
+          return;
+        }
+
+        if (voice === 'flute') {
+          const fl = mkFilter('lowpass', 1900), g = mkGain(.03);
+          for (const det of [0, -3]) {
+            const o = this._trackMusNode(this.ctx.createOscillator());
+            o.type = 'sine';
+            o.frequency.setValueAtTime(f * (1 + det / 1000), t0);
+            o.connect(fl); o.start(t0); o.stop(t0 + dur + .05);
+          }
+          fl.connect(g);
+          return;
+        }
+        this.tone(f, dur, 'square', v, 0, 0, out);
       },
       noise(dur, v = .2, when = 0, fc = 1200) {
         if (this.muted || !this.ctx) return;
@@ -7021,22 +7166,39 @@
         };
         let t = 0; (V[kind] || V.win).forEach(([f, d]) => { if (f) this.tone(f, d * .16, 'square', .16, t); if (f) this.tone(f / 2, d * .16, 'triangle', .14, t); t += d * .16; });
       },
-      /* --- 多段落音序器 BGM：A-B-C 分段轮换，告别单句死循环 --- */
+
       seq: null,
       playMusic(name) {
         if (!this.ctx || this.muted || !this.musOn) return; this.stopMusic();
         const P = MUSIC[name]; if (!P) return; this.cur = name;
+
+        if (this.mus && this.ctx) {
+          const base = Math.max(.001, (CFG.musVol ?? 1) * .429);
+          const t0 = this.t();
+          try {
+            this.mus.gain.cancelScheduledValues(t0);
+            this.mus.gain.setValueAtTime(Math.max(.001, base * .12), t0);
+            this.mus.gain.linearRampToValueAtTime(base, t0 + .8);
+          } catch (e) { this.mus.gain.value = base; }
+        }
         const secs = P.secs || [{ bars: P.bars || 2, trks: P.trks || [] }];
         const spb = 60 / P.bpm / 2;
         const secLoops = P.secLoops || 2;
         let secIdx = 0, step = 0, loops = 0;
+        const MODERN = new Set(['bass', 'lead', 'pad', 'pluck', 'arp', 'kick', 'snare', 'hat', 'clap', 'bell', 'flute']);
         const tick = () => {
           if (this.cur !== name) return;
           const sec = secs[secIdx];
           const len = (sec.bars || 2) * 8;
           for (const trk of sec.trks) {
-            const n = trk.notes[step % trk.notes.length];
-            if (n && n[0]) this.tone(n[0], spb * (n[1] || 1) * .9, trk.w || 'square', trk.v || .1, 0, 0, this.mus);
+
+            const notes = typeof trk.notes === 'string' ? [...trk.notes].map(ch => ch === 'x' ? [trk.f || 1, 1] : [0, 1]) : trk.notes;
+            const n = notes[step % notes.length];
+            if (n && n[0]) {
+              const dur = spb * (n[1] || 1) * .9;
+              if (MODERN.has(trk.w)) this.mtone(n[0], dur, trk.w, trk.v || .1);
+              else this.tone(n[0], dur, trk.w || 'square', trk.v || .1, 0, 0, this.mus);
+            }
           }
           step++;
           if (step >= len) {
@@ -7047,236 +7209,545 @@
         };
         tick();
       },
-      stopMusic() { this.cur = null; this.timers.forEach(clearTimeout); this.timers = []; }
-    };
-    const N = { C2: 65, D2: 73, E2: 82, F2: 87, G2: 98, A2: 110, B2: 123, C3: 131, D3: 147, E3: 165, F3: 175, G3: 196, A3: 220, B3: 247, C4: 262, D4: 294, E4: 330, F4: 349, G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988, C6: 1046 };
-    /* ★ 全局画面/声音设置（localStorage 持久化） */
-    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1 }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
-    function saveCfg() { localStorage.setItem('pif_cfg', JSON.stringify(CFG)); }
-    /* ============================================================
-       多段落 BGM 曲库（secs 分段轮换，每段内部循环 secLoops 次）
-       风格：对战工厂放克风 · 无限战斗高强度电子
-    ============================================================ */
-    const MUSIC = {
-      title: {
-        bpm: 132, secLoops: 2, secs: [
-          { bars: 4, trks: [
-            { w: 'square', v: .1, notes: [
-              [N.E5, 1], [0, 1], [N.G5, 1], [0, 1], [N.A5, 1], [0, 1], [N.G5, 1], [N.E5, 1],
-              [N.D5, 1], [0, 1], [N.E5, 1], [0, 1], [N.C5, 2], [0, 2], [N.D5, 1], [N.E5, 1],
-              [N.G5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1], [N.C5, 2], [0, 1],
-              [N.A5, 2], [N.G5, 1], [N.E5, 1], [N.D5, 1], [N.C5, 2], [0, 1], [0, 1], [0, 1]] },
-            { w: 'triangle', v: .18, notes: [
-              [N.C3, 2], [0, 1], [N.C3, 1], [N.G3, 2], [0, 1], [N.A3, 2], [0, 2], [N.E3, 2],
-              [N.F3, 2], [0, 2], [N.C3, 2], [0, 1], [N.G3, 2], [0, 2], [N.C3, 2], [0, 2],
-              [N.A3, 2], [0, 2], [N.E3, 2], [0, 1], [N.F3, 2], [0, 2], [N.G3, 2], [0, 1],
-              [N.C3, 2], [0, 2], [N.G3, 2], [0, 1], [N.C3, 2], [0, 2], [0, 1], [0, 1]] }
-          ] },
-          { bars: 4, trks: [
-            { w: 'square', v: .1, notes: [
-              [N.A5, 1], [0, 1], [N.G5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [N.C5, 1],
-              [N.D5, 1], [0, 1], [N.E5, 1], [0, 1], [N.G5, 2], [N.E5, 1], [N.D5, 1], [N.C5, 1],
-              [N.E5, 1], [0, 1], [N.G5, 1], [0, 1], [N.A5, 2], [0, 1], [N.G5, 1], [N.E5, 1],
-              [N.D5, 1], [0, 1], [N.C5, 1], [0, 1], [N.D5, 2], [0, 2], [0, 1], [0, 1]] },
-            { w: 'triangle', v: .18, notes: [
-              [N.C3, 2], [0, 1], [N.C3, 1], [N.G3, 2], [0, 2], [N.E3, 2], [0, 1], [N.G3, 2],
-              [N.F3, 2], [0, 1], [N.F3, 1], [N.C3, 2], [0, 2], [N.G3, 2], [0, 1], [N.B3, 2],
-              [N.C3, 2], [0, 2], [N.G3, 2], [0, 1], [N.A3, 2], [0, 2], [N.E3, 2], [0, 1],
-              [N.F3, 2], [0, 2], [N.C3, 2], [0, 1], [N.G3, 2], [0, 2], [0, 1], [0, 1]] }
-          ] }
-        ]
-      },
-      battle: {
-        bpm: 146, secLoops: 2, secs: [
-          { bars: 4, trks: [
-            { w: 'square', v: .13, notes: [
-              [N.A3, 1], [0, 1], [0, 1], [N.A3, 1], [N.A3, 1], [0, 1], [0, 1], [N.C4, 1],
-              [0, 1], [N.A3, 1], [0, 1], [0, 1], [N.A3, 1], [0, 1], [N.C4, 1], [N.B3, 1],
-              [0, 1], [N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [N.A3, 1], [N.C4, 1], [0, 1],
-              [N.A3, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.G3, 1], [0, 1]] },
-            { w: 'square', v: .07, notes: [
-              [N.E5, 1], [0, 1], [0, 1], [0, 1], [N.A5, 1], [0, 1], [0, 1], [0, 1],
-              [N.G5, 1], [0, 1], [N.E5, 1], [0, 1], [N.C5, 1], [0, 1], [0, 1], [N.D5, 1],
-              [N.E5, 1], [0, 1], [0, 1], [0, 1], [N.D5, 1], [0, 1], [N.C5, 1], [0, 1],
-              [N.B4, 1], [0, 1], [N.A4, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
-            { w: 'triangle', v: .05, notes: [
-              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.F4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.C4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.E4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
-            { w: 'sawtooth', v: .025, notes: [
-              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1],
-              [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1],
-              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1],
-              [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1]] }
-          ] },
-          { bars: 4, trks: [
-            { w: 'square', v: .13, notes: [
-              [N.F3, 1], [0, 1], [0, 1], [N.F3, 1], [N.F3, 1], [0, 1], [0, 1], [N.G3, 1],
-              [0, 1], [N.F3, 1], [0, 1], [0, 1], [N.F3, 1], [0, 1], [N.G3, 1], [N.A3, 1],
-              [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [N.A3, 1], [0, 1],
-              [N.E3, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
-            { w: 'square', v: .07, notes: [
-              [N.C5, 1], [0, 1], [0, 1], [0, 1], [N.D5, 1], [0, 1], [0, 1], [0, 1],
-              [N.E5, 1], [0, 1], [0, 1], [0, 1], [N.G5, 1], [0, 1], [0, 1], [N.F5, 1],
-              [N.E5, 1], [0, 1], [N.D5, 1], [0, 1], [N.C5, 1], [0, 1], [0, 1], [0, 1],
-              [N.B4, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.A4, 1], [0, 1]] },
-            { w: 'triangle', v: .05, notes: [
-              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.F4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.G4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.E4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] }
-          ] },
-          { bars: 4, trks: [
-            { w: 'square', v: .13, notes: [
-              [N.A3, 1], [0, 1], [0, 1], [N.A3, 1], [N.A3, 1], [0, 1], [0, 1], [N.C4, 1],
-              [0, 1], [N.A3, 1], [0, 1], [0, 1], [N.D4, 1], [0, 1], [N.C4, 1], [N.B3, 1],
-              [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [N.B3, 1], [0, 1],
-              [N.A3, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.A3, 1]] },
-            { w: 'square', v: .07, notes: [
-              [N.E5, 1], [0, 1], [0, 1], [0, 1], [N.C5, 1], [0, 1], [N.D5, 1], [N.E5, 1],
-              [N.G5, 1], [0, 1], [0, 1], [0, 1], [N.E5, 1], [0, 1], [0, 1], [0, 1],
-              [N.F5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1], [0, 1], [0, 1],
-              [N.E5, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
-            { w: 'triangle', v: .05, notes: [
-              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.F4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.G4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
-            { w: 'sawtooth', v: .025, notes: [
-              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1],
-              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1],
-              [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1],
-              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1]] }
-          ] }
-        ]
-      },
-      /* ★ 激烈变奏：Mega / 极巨 / 太晶激活时切入 */
-      battleX: {
-        bpm: 152, secLoops: 3, secs: [
-          { bars: 4, trks: [
-            { w: 'square', v: .14, notes: [
-              [N.A3, 1], [N.A3, 1], [0, 1], [N.A3, 1], [N.A3, 1], [0, 1], [N.A3, 1], [N.C4, 1],
-              [0, 1], [N.A3, 1], [N.C4, 1], [0, 1], [N.A3, 1], [N.B3, 1], [N.C4, 1], [N.D4, 1],
-              [0, 1], [N.A3, 1], [0, 1], [N.A3, 1], [N.A3, 1], [0, 1], [N.C4, 1], [0, 1],
-              [N.A3, 1], [0, 1], [N.C4, 1], [0, 1], [0, 1], [0, 1], [N.G3, 1], [N.B3, 1]] },
-            { w: 'square', v: .08, notes: [
-              [N.E5, 1], [0, 1], [N.A5, 1], [0, 1], [N.G5, 1], [0, 1], [N.E5, 1], [N.D5, 1],
-              [N.E5, 1], [0, 1], [N.G5, 1], [0, 1], [N.A5, 1], [0, 1], [N.G5, 1], [N.E5, 1],
-              [N.D5, 1], [0, 1], [N.E5, 1], [0, 1], [N.F5, 1], [0, 1], [N.E5, 1], [N.D5, 1],
-              [N.C5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1], [N.B4, 1], [0, 1]] },
-            { w: 'sawtooth', v: .05, notes: [
-              [N.C5, 1], [0, 1], [0, 1], [N.C5, 1], [0, 1], [N.C5, 1], [0, 1], [N.E5, 1],
-              [0, 1], [N.C5, 1], [0, 1], [N.C5, 1], [0, 1], [N.E5, 1], [0, 1], [N.F5, 1],
-              [0, 1], [N.C5, 1], [0, 1], [N.C5, 1], [0, 1], [N.E5, 1], [0, 1], [N.C5, 1],
-              [0, 1], [N.B4, 1], [0, 1], [N.C5, 1], [0, 1], [N.D5, 1], [0, 1], [0, 1]] },
-            { w: 'triangle', v: .05, notes: [
-              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.F4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.C4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.E4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] },
-            { w: 'sawtooth', v: .03, notes: [
-              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1],
-              [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1],
-              [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1],
-              [0, 1], [N.C6, 1], [0, 1], [0, 1], [0, 1], [N.C6, 1], [0, 1], [N.C6, 1]] }
-          ] },
-          { bars: 4, trks: [
-            { w: 'square', v: .14, notes: [
-              [N.F3, 1], [N.F3, 1], [0, 1], [N.F3, 1], [N.F3, 1], [0, 1], [N.F3, 1], [N.G3, 1],
-              [0, 1], [N.F3, 1], [0, 1], [N.F3, 1], [N.F3, 1], [0, 1], [N.G3, 1], [N.A3, 1],
-              [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [N.G3, 1], [0, 1], [N.A3, 1], [0, 1],
-              [N.E3, 1], [N.E3, 1], [0, 1], [N.E3, 1], [0, 1], [N.G3, 1], [0, 1], [0, 1]] },
-            { w: 'square', v: .08, notes: [
-              [N.C5, 1], [0, 1], [N.D5, 1], [0, 1], [N.E5, 1], [0, 1], [N.G5, 1], [0, 1],
-              [N.A5, 1], [0, 1], [N.G5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [N.C5, 1],
-              [N.E5, 1], [0, 1], [N.G5, 1], [0, 1], [N.F5, 1], [0, 1], [N.E5, 1], [N.D5, 1],
-              [N.C5, 1], [0, 1], [N.B4, 1], [0, 1], [N.A4, 1], [0, 1], [0, 1], [0, 1]] },
-            { w: 'triangle', v: .05, notes: [
-              [N.A4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.F4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.G4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.E4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] }
-          ] }
-        ]
-      },
-      factory: {
-        bpm: 118, secLoops: 2, secs: [
-          { bars: 4, trks: [
-            { w: 'triangle', v: .15, notes: [
-              [N.D3, 1], [0, 1], [N.D3, 1], [0, 1], [N.D3, 1], [0, 1], [N.A3, 1], [0, 1],
-              [N.D3, 1], [0, 1], [N.D3, 1], [0, 1], [N.F3, 1], [0, 1], [N.E3, 1], [0, 1],
-              [N.G3, 1], [0, 1], [N.G3, 1], [0, 1], [N.G3, 1], [0, 1], [N.D3, 1], [0, 1],
-              [N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [0, 1], [0, 1]] },
-            { w: 'square', v: .07, notes: [
-              [N.D5, 1], [0, 1], [N.F5, 1], [0, 1], [N.A5, 1], [0, 1], [N.G5, 1], [N.F5, 1],
-              [N.D5, 1], [0, 1], [N.F5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1],
-              [N.G5, 1], [0, 1], [N.B4, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1],
-              [N.C5, 1], [0, 1], [N.E5, 1], [0, 1], [N.A5, 1], [0, 1], [0, 1], [0, 1]] },
-            { w: 'triangle', v: .06, notes: [
-              [N.D4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.B3, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.G3, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.A3, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] }
-          ] },
-          { bars: 4, trks: [
-            { w: 'triangle', v: .15, notes: [
-              [N.B2, 1], [0, 1], [N.B2, 1], [0, 1], [N.B2, 1], [0, 1], [N.F3, 1], [0, 1],
-              [N.B2, 1], [0, 1], [N.B2, 1], [0, 1], [N.G3, 1], [0, 1], [N.A3, 1], [0, 1],
-              [N.E3, 1], [0, 1], [N.E3, 1], [0, 1], [N.E3, 1], [0, 1], [N.B2, 1], [0, 1],
-              [N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [N.A3, 1], [0, 1], [N.G3, 1], [N.F3, 1]] },
-            { w: 'square', v: .07, notes: [
-              [N.D5, 1], [0, 1], [N.B4, 1], [0, 1], [N.D5, 1], [0, 1], [N.F5, 1], [0, 1],
-              [N.G5, 1], [0, 1], [N.F5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [0, 1],
-              [N.C5, 1], [0, 1], [N.E5, 1], [0, 1], [N.G5, 1], [0, 1], [N.A5, 1], [0, 1],
-              [N.G5, 1], [0, 1], [N.E5, 1], [0, 1], [N.D5, 1], [N.C5, 1], [N.B4, 1], [0, 1]] },
-            { w: 'triangle', v: .06, notes: [
-              [N.G4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.E4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.C4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1],
-              [N.D4, 2], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1], [0, 1]] }
-          ] }
-        ]
-      },
-      story: {
-        bpm: 104, secLoops: 2, secs: [
-          { bars: 4, trks: [
-            { w: 'triangle', v: .15, notes: [
-              [N.G4, 1], [N.B4, 1], [N.D5, 1], [0, 1], [N.G5, 2], [N.F5, 1], [N.D5, 1], [N.B4, 1],
-              [N.A4, 1], [N.C5, 1], [N.E5, 1], [0, 1], [N.A5, 2], [N.G5, 1], [N.E5, 1], [N.C5, 1],
-              [N.D5, 1], [N.F5, 1], [N.A5, 1], [0, 1], [N.G5, 2], [N.E5, 1], [N.C5, 1], [0, 1],
-              [N.G4, 1], [N.B4, 1], [N.D5, 1], [N.G5, 1], [N.D5, 1], [N.B4, 1], [N.G4, 1], [0, 1]] },
-            { w: 'square', v: .06, notes: [
-              [0, 1], [0, 1], [0, 1], [N.G5, 1], [0, 2], [0, 1], [N.E5, 1], [0, 1],
-              [0, 1], [0, 1], [0, 1], [N.F5, 1], [0, 2], [0, 1], [N.D5, 1], [0, 1],
-              [0, 1], [0, 1], [0, 1], [N.A5, 1], [0, 2], [0, 1], [N.G5, 1], [0, 1],
-              [0, 1], [0, 1], [0, 1], [N.B4, 1], [0, 1], [0, 1], [N.D5, 1], [0, 1]] },
-            { w: 'triangle', v: .16, notes: [
-              [N.C3, 2], [0, 1], [N.C3, 1], [N.G3, 2], [0, 1], [N.A3, 2], [0, 2], [N.E3, 2],
-              [N.F3, 2], [0, 2], [N.C3, 2], [0, 1], [N.G3, 2], [0, 2], [N.C3, 2], [0, 2],
-              [N.A3, 2], [0, 2], [N.E3, 2], [0, 1], [N.F3, 2], [0, 2], [N.G3, 2], [0, 1],
-              [N.C3, 2], [0, 2], [N.G3, 2], [0, 1], [N.C3, 2], [0, 2], [0, 1], [0, 1]] }
-          ] },
-          { bars: 4, trks: [
-            { w: 'triangle', v: .15, notes: [
-              [N.G4, 1], [N.B4, 1], [N.D5, 1], [0, 1], [N.G5, 2], [N.F5, 1], [N.D5, 1], [N.B4, 1],
-              [N.A4, 1], [N.C5, 1], [N.E5, 1], [0, 1], [N.A5, 2], [N.G5, 1], [N.E5, 1], [N.C5, 1],
-              [N.B4, 1], [N.D5, 1], [N.F5, 1], [0, 1], [N.E5, 2], [N.D5, 1], [N.C5, 1], [N.B4, 1],
-              [N.G4, 1], [N.A4, 1], [N.B4, 1], [N.C5, 1], [N.D5, 1], [N.G4, 1], [N.G4, 1], [0, 1]] },
-            { w: 'square', v: .06, notes: [
-              [0, 1], [0, 1], [0, 1], [N.G5, 1], [0, 2], [0, 1], [N.E5, 1], [0, 1],
-              [0, 1], [0, 1], [0, 1], [N.F5, 1], [0, 2], [0, 1], [N.D5, 1], [0, 1],
-              [0, 1], [0, 1], [0, 1], [N.B4, 1], [0, 1], [0, 1], [N.D5, 1], [0, 1],
-              [0, 1], [0, 1], [0, 1], [N.G5, 1], [0, 2], [0, 1], [0, 1], [0, 1]] },
-            { w: 'triangle', v: .16, notes: [
-              [N.C3, 2], [0, 1], [N.C3, 1], [N.G3, 2], [0, 1], [N.A3, 2], [0, 2], [N.E3, 2],
-              [N.F3, 2], [0, 2], [N.C3, 2], [0, 1], [N.G3, 2], [0, 2], [N.C3, 2], [0, 2],
-              [N.A3, 2], [0, 2], [N.E3, 2], [0, 1], [N.F3, 2], [0, 2], [N.G3, 2], [0, 1],
-              [N.C3, 2], [0, 2], [N.G3, 2], [0, 1], [N.C3, 2], [0, 2], [0, 1], [0, 1]] }
-          ] }
-        ]
+      stopMusic() {
+        this.cur = null; this.timers.forEach(clearTimeout); this.timers = [];
+
+        this.musNodes.forEach(n => {
+          try { if (typeof n.stop === 'function') n.stop(); } catch (e) { }
+          try { if (n.disconnect) n.disconnect(); } catch (e) { }
+        });
+        this.musNodes.clear();
       }
     };
+    const N = { C2: 65, D2: 73, E2: 82, F2: 87, G2: 98, A2: 110, B2: 123, C3: 131, D3: 147, E3: 165, F3: 175, G3: 196, A3: 220, B3: 247, C4: 262, D4: 294, E4: 330, F4: 349, G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988, C6: 1046 };
+
+    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
+    function saveCfg() { localStorage.setItem('pif_cfg', JSON.stringify(CFG)); }
+
+const _ST = (f, s) => f * Math.pow(2, s / 12);
+const _b8 = R => [[R, 1], [R, 1], [_ST(R, 12), 1], [R, 1], [_ST(R, 7), 1], [R, 1], [_ST(R, 12), 1], [R, 1]];
+const _bq = R => [[R, 2], [0, 2], [_ST(R, 7), 2], [0, 2]];
+const _b16 = R => [..._b8(R), ..._b8(_ST(R, 12))];
+const _bq2 = R => [..._bq(R), ..._bq(_ST(R, 12))];
+const _B4 = (a, b, c, d, q) => [...(q ? _bq2(a) : _b16(a)), ...(q ? _bq2(b) : _b16(b)), ...(q ? _bq2(c) : _b16(c)), ...(q ? _bq2(d) : _b16(d))];
+
+const _B5 = (a, b, c, d) => {
+  const p5 = r => _ST(r, 7), p7 = r => _ST(r, 10);
+  return [
+    [a, 2], [0, 2], [p5(a), 2], [0, 2], [a, 2], [p5(a), 2], [p7(a), 2], [0, 2],
+    [b, 2], [0, 2], [p5(b), 2], [0, 2], [b, 2], [p5(b), 2], [p7(b), 2], [0, 2],
+    [c, 2], [0, 2], [p5(c), 2], [0, 2], [c, 2], [p5(c), 2], [p7(c), 2], [0, 2],
+    [d, 2], [0, 2], [p5(d), 2], [0, 2], [d, 2], [p5(d), 2], [p7(d), 2], [0, 2]
+  ];
+};
+
+const _BP = (a, b, c, d) => {
+  const p5 = r => _ST(r, 7), p7 = r => _ST(r, 10), p12 = r => _ST(r, 12);
+  return [
+    [a, 1], [0, 1], [a, 1], [p5(a), 1], [a, 1], [p12(a), 1], [a, 1], [0, 1],
+    [a, 1], [p5(a), 1], [0, 1], [a, 1], [p5(a), 1], [p12(a), 1], [p7(a), 1], [0, 1],
+    [b, 1], [0, 1], [b, 1], [p5(b), 1], [b, 1], [p12(b), 1], [b, 1], [0, 1],
+    [b, 1], [p5(b), 1], [0, 1], [b, 1], [p5(b), 1], [p12(b), 1], [p7(b), 1], [0, 1],
+    [c, 1], [0, 1], [c, 1], [p5(c), 1], [c, 1], [p12(c), 1], [c, 1], [0, 1],
+    [c, 1], [p5(c), 1], [0, 1], [c, 1], [p5(c), 1], [p12(c), 1], [p7(c), 1], [0, 1],
+    [d, 1], [0, 1], [d, 1], [p5(d), 1], [d, 1], [p12(d), 1], [d, 1], [0, 1],
+    [d, 1], [p5(d), 1], [0, 1], [d, 1], [p5(d), 1], [p12(d), 1], [p7(d), 1], [0, 1]
+  ];
+};
+
+const _BB = (a, b, c, d) => {
+  const p3 = r => _ST(r, 4), p5 = r => _ST(r, 7), p7 = r => _ST(r, 10), p12 = r => _ST(r, 12);
+  return [
+    /* 缂備焦顨忛崗娑氱博閹绢喖妞介悘鐐扮矙濞搭噣鏌ㄥ☉娆戠叝缂佹鍊婚幃鎵沪閼恒儳锛濋梻?+ 婵炴垶鎸搁鍫ャ€侀幋锕€鐐婇柣鎰暩閹煎繘鏌ㄥ☉妯煎ⅲ妞ゃ垺鍨归幐褔鎮ч崼婵單ら梺?*/
+    [a, 1], [p3(a), 1], [p5(a), 1], [p12(a), 1],
+    [p5(a), 1], [p3(a), 1], [a, 1], [p7(a), 1],
+    /* 缂備焦顨忛崗娑氳姳閳哄懎妞介悘鐐扮矙濞搭噣鏌ㄥ☉娆戠叝缂併劌寮堕幆鏃堟晝娴ｅ搫鍔滈梺?+ 婵炴垶鎸搁鍫ャ€侀幋锔芥櫖闁割偅绻勭€瑰绱掑☉娆愨拹闁告柨鎳橀弫?*/
+    [b, 1], [p5(b), 1], [0, 2], [b, 1], [0, 1],
+    [p3(b), 1], [p5(b), 1], [b, 1], [0, 1],
+
+    [0, 1], [c, 1], [p5(c), 1], [p12(c), 1],
+    [p5(c), 1], [p12(c), 1], [p7(c), 1], [p12(c), 1],
+
+    [d, 2], [0, 2], [d, 1], [0, 1], [p5(d), 2],
+    [d, 1], [p3(d), 1], [p5(d), 1], [p7(d), 1], [p12(d), 2], [0, 1]
+  ];
+};
+
+const _BM = (a, b, c, d) => {
+  const p3 = r => _ST(r, 4), p5 = r => _ST(r, 7), p7 = r => _ST(r, 10), p12 = r => _ST(r, 12);
+  return [
+    [a, 1], [p12(a), 1], [a, 1], [p5(a), 1], [p12(a), 1], [a, 1], [p5(a), 1], [0, 1],
+    [a, 1], [p12(a), 1], [p5(a), 1], [a, 1], [p7(a), 1], [p12(a), 1], [p5(a), 1], [0, 1],
+    [b, 1], [p12(b), 1], [b, 1], [p5(b), 1], [p12(b), 1], [b, 1], [p5(b), 1], [0, 1],
+    [b, 1], [p12(b), 1], [p5(b), 1], [b, 1], [p7(b), 1], [p12(b), 1], [p5(b), 1], [0, 1],
+    [c, 1], [p12(c), 1], [c, 1], [p5(c), 1], [p12(c), 1], [c, 1], [p5(c), 1], [0, 1],
+    [c, 1], [p12(c), 1], [p5(c), 1], [c, 1], [p7(c), 1], [p12(c), 1], [p5(c), 1], [0, 1],
+    [d, 1], [p12(d), 1], [d, 1], [p5(d), 1], [p12(d), 1], [d, 1], [p5(d), 1], [0, 1],
+    [d, 1], [p12(d), 1], [p5(d), 1], [d, 1], [p7(d), 1], [p12(d), 1], [p5(d), 1], [0, 1]
+  ];
+};
+
+const _BR = (a, b, c, d) => {
+  const p5 = r => _ST(r, 7), p7 = r => _ST(r, 10), p12 = r => _ST(r, 12);
+  return [
+    [a, 1], [a, 1], [p5(a), 1], [a, 1], [p12(a), 1], [a, 1], [p5(a), 1], [a, 1],
+    [a, 1], [p5(a), 1], [p12(a), 1], [p5(a), 1], [a, 1], [p7(a), 1], [p12(a), 1], [a, 1],
+    [b, 1], [b, 1], [p5(b), 1], [b, 1], [p12(b), 1], [b, 1], [p5(b), 1], [b, 1],
+    [b, 1], [p5(b), 1], [p12(b), 1], [p5(b), 1], [b, 1], [p7(b), 1], [p12(b), 1], [b, 1],
+    [c, 1], [c, 1], [p5(c), 1], [c, 1], [p12(c), 1], [c, 1], [p5(c), 1], [c, 1],
+    [c, 1], [p5(c), 1], [p12(c), 1], [p5(c), 1], [c, 1], [p7(c), 1], [p12(c), 1], [c, 1],
+    [d, 1], [d, 1], [p5(d), 1], [d, 1], [p12(d), 1], [d, 1], [p5(d), 1], [d, 1],
+    [d, 1], [p5(d), 1], [p12(d), 1], [p5(d), 1], [d, 1], [p7(d), 1], [p12(d), 1], [d, 1]
+  ];
+};
+
+const _BF = (a, b, c, d) => {
+  const p3 = r => _ST(r, 3), p5 = r => _ST(r, 7), p7 = r => _ST(r, 10), p12 = r => _ST(r, 12);
+  return [
+    [a, 3], [p5(a), 2], [0, 3],
+    [p7(a), 3], [p5(a), 1], [p3(a), 1], [p5(a), 1], [p7(a), 2],
+    [b, 3], [p5(b), 2], [0, 3],
+    [p7(b), 3], [p5(b), 1], [p3(b), 1], [p5(b), 1], [p7(b), 2],
+    [c, 3], [p5(c), 2], [0, 3],
+    [p7(c), 3], [p5(c), 1], [p3(c), 1], [p5(c), 1], [p7(c), 2],
+    [d, 3], [p5(d), 2], [0, 3],
+    [p7(d), 3], [p5(d), 1], [p3(d), 1], [p5(d), 1], [p7(d), 2]
+  ];
+};
+
+const _BS = (a, b, c, d) => {
+  const p5 = r => _ST(r, 7), p7 = r => _ST(r, 10), p12 = r => _ST(r, 12);
+  return [
+    [0, 1], [a, 1], [0, 1], [a, 1], [p5(a), 1], [0, 1], [a, 1], [0, 1],
+    [p7(a), 1], [p12(a), 1], [p7(a), 1], [p5(a), 1], [0, 1], [a, 1], [p5(a), 1], [0, 1],
+    [0, 1], [b, 1], [0, 1], [b, 1], [p5(b), 1], [0, 1], [b, 1], [0, 1],
+    [p7(b), 1], [p12(b), 1], [p7(b), 1], [p5(b), 1], [0, 1], [b, 1], [p5(b), 1], [0, 1],
+    [0, 1], [c, 1], [0, 1], [c, 1], [p5(c), 1], [0, 1], [c, 1], [0, 1],
+    [p7(c), 1], [p12(c), 1], [p7(c), 1], [p5(c), 1], [0, 1], [c, 1], [p5(c), 1], [0, 1],
+    [0, 1], [d, 1], [0, 1], [d, 1], [p5(d), 1], [0, 1], [d, 1], [0, 1],
+    [p7(d), 1], [p12(d), 1], [p7(d), 1], [p5(d), 1], [0, 1], [d, 1], [p5(d), 1], [0, 1]
+  ];
+};
+
+const _P4 = (a, b, c, d) => {
+  const p5 = r => _ST(r, 7), p7 = r => _ST(r, 10), p5d = r => _ST(r, -5);
+  const alt = r => r > 330 ? p5d(r) : (r > 262 ? p5d(r) : p5(r));
+  return [[a, 8], [alt(a), 8], [b, 8], [alt(b), 8], [c, 8], [alt(c), 8], [d, 8], [alt(d), 8]];
+};
+const _K4 = 'x.x.x.x.x.x.x.x.';
+const _K13 = 'x...x...x...x...';
+const _SN = '....x.......x...';
+const _H8 = 'xxxxxxxxxxxxxxxx';
+const _HO = '..x..x..x..x..x.';
+const _K14 = 'x...x...x...x...';
+const _M1 = (a, b, ma, mb) => { const t1 = ma ? 3 : 4, t2 = mb ? 3 : 4; return [
+  [a, 1], [0, 1], [_ST(a, t1), 1], [_ST(a, 7), 1], [_ST(a, 12), 1], [_ST(a, 7), 1], [_ST(a, t1), 1], [0, 1],
+  [_ST(a, 5), 1], [0, 1], [_ST(a, 9), 1], [_ST(a, 12), 1], [_ST(a, 14), 1], [_ST(a, 12), 1], [_ST(a, 9), 1], [0, 1],
+  [b, 1], [0, 1], [_ST(b, t2), 1], [_ST(b, 7), 1], [_ST(b, 12), 1], [_ST(b, 7), 1], [_ST(b, t2), 1], [0, 1],
+  [_ST(b, 5), 1], [0, 1], [_ST(b, 9), 1], [_ST(b, 12), 1], [_ST(b, 14), 1], [_ST(b, 12), 1], [_ST(b, 9), 1], [0, 1]]; };
+const _M2 = (a, b, ma, mb) => { const t1 = ma ? 3 : 4, t2 = mb ? 3 : 4; return [
+  [a, 1], [_ST(a, 2), 1], [_ST(a, t1), 1], [_ST(a, 7), 1], [_ST(a, 7), 1], [0, 1], [_ST(a, t1), 1], [_ST(a, 2), 1],
+  [a, 1], [0, 1], [_ST(a, 5), 1], [_ST(a, 7), 1], [_ST(a, 12), 1], [0, 1], [_ST(a, 7), 1], [0, 1],
+  [b, 1], [_ST(b, 2), 1], [_ST(b, t2), 1], [_ST(b, 7), 1], [_ST(b, 7), 1], [0, 1], [_ST(b, t2), 1], [_ST(b, 2), 1],
+  [b, 1], [0, 1], [_ST(b, 5), 1], [_ST(b, 7), 1], [_ST(b, 12), 1], [0, 1], [_ST(b, 7), 1], [0, 1]]; };
+const _M3 = (a, b, ma, mb) => { const t1 = ma ? 3 : 4, t2 = mb ? 3 : 4; return [
+  [a, 1], [0, 1], [0, 1], [_ST(a, 12), 1], [0, 1], [_ST(a, t1), 1], [0, 1], [_ST(a, 7), 1],
+  [a, 1], [_ST(a, 7), 1], [a, 1], [0, 1], [_ST(a, 12), 1], [0, 1], [_ST(a, 14), 1], [_ST(a, 12), 1],
+  [b, 1], [0, 1], [0, 1], [_ST(b, 12), 1], [0, 1], [_ST(b, t2), 1], [0, 1], [_ST(b, 7), 1],
+  [b, 1], [_ST(b, 7), 1], [b, 1], [0, 1], [_ST(b, 12), 1], [0, 1], [_ST(b, 14), 1], [_ST(b, 12), 1]]; };
+const _A2 = (a, b, ma, mb) => { const t1 = ma ? 3 : 4, t2 = mb ? 3 : 4; return [
+  [a, 1], [_ST(a, t1), 1], [_ST(a, 7), 1], [_ST(a, 12), 1], [_ST(a, 7), 1], [_ST(a, t1), 1], [a, 1], [_ST(a, 12), 1],
+  [_ST(a, 12), 1], [_ST(a, 7), 1], [_ST(a, t1), 1], [a, 1], [_ST(a, 7), 1], [_ST(a, 12), 1], [_ST(a, 19), 1], [_ST(a, 12), 1],
+  [b, 1], [_ST(b, t2), 1], [_ST(b, 7), 1], [_ST(b, 12), 1], [_ST(b, 7), 1], [_ST(b, t2), 1], [b, 1], [_ST(b, 12), 1],
+  [_ST(b, 12), 1], [_ST(b, 7), 1], [_ST(b, t2), 1], [b, 1], [_ST(b, 7), 1], [_ST(b, 12), 1], [_ST(b, 19), 1], [_ST(b, 12), 1]]; };
+const _T = n => n === 2 ? _M2 : n === 3 ? _M3 : _M1;
+
+const _M64 = (a, b, c, d, ma, mb, mc, md, t1, t2) => [..._T(t1)(a, b, ma, mb), ..._T(t2)(c, d, mc, md)];
+const _A4 = (a, b, c, d, ma, mb, mc, md) => [..._A2(a, b, ma, mb), ..._A2(c, d, mc, md)];
+
+const _PH = (a, b, c, d, ma, mb, mc, md) => {
+  const p = (r, m) => [r, 1], t = (r, m) => [_ST(r, m), 1];
+  return [
+    [0, 1], p(a, 0), t(a, 12), t(a, 7), p(a, 0), t(a, 12), [0, 1], t(a, 7),
+    p(a, 0), t(a, 4), t(a, 7), t(a, 12), t(a, 16), t(a, 12), t(a, 7), [0, 1],
+    [0, 1], p(b, 0), t(b, 12), t(b, 7), p(b, 0), t(b, 12), [0, 1], t(b, 7),
+    p(b, 0), t(b, 4), t(b, 7), t(b, 12), t(b, 16), t(b, 12), t(b, 7), [0, 1]
+  ];
+};
+
+const _RF = (a, b, c, d, ma, mb, mc, md) => {
+  const k = (r, m) => [_ST(r, m), 1];
+  return [
+    k(a, 0), k(a, 0), k(a, 7), k(a, 12), k(a, 7), k(a, 0), k(a, 12), k(a, 7),
+    k(a, 0), k(a, 0), k(a, 4), k(a, 7), k(a, 12), k(a, 7), k(a, 4), k(a, 0),
+    k(b, 0), k(b, 0), k(b, 7), k(b, 12), k(b, 7), k(b, 0), k(b, 12), k(b, 7),
+    k(b, 0), k(b, 0), k(b, 4), k(b, 7), k(b, 12), k(b, 7), k(b, 4), k(b, 0)
+  ];
+};
+
+const _SF = (a, b, c, d, ma, mb, mc, md) => {
+  const p = (r, m) => [_ST(r, m), 1];
+  return [
+    p(a, 0), [0, 1], p(a, 12), p(a, 0), [0, 2], p(a, 7), p(a, 0),
+    p(a, 5), [0, 1], p(a, 12), p(a, 7), [0, 2], p(a, 12), [0, 1],
+    p(b, 0), [0, 1], p(b, 12), p(b, 0), [0, 2], p(b, 7), p(b, 0),
+    p(b, 5), [0, 1], p(b, 12), p(b, 7), [0, 2], p(b, 12), [0, 1]
+  ];
+};
+
+const _EL = (a, b, c, d, ma, mb, mc, md) => {
+  const p = (r, m) => [_ST(r, m), 1];
+  return [
+    p(a, 0), [0, 1], p(a, 0), [0, 1], p(a, 12), [0, 1], p(a, 7), [0, 1],
+    p(a, 7), [0, 1], p(a, 12), [0, 1], p(a, 19), [0, 1], p(a, 12), [0, 1],
+    p(b, 0), [0, 1], p(b, 0), [0, 1], p(b, 12), [0, 1], p(b, 7), [0, 1],
+    p(b, 7), [0, 1], p(b, 12), [0, 1], p(b, 19), [0, 1], p(b, 12), [0, 1]
+  ];
+};
+
+
+const MUSIC = {
+  title: {
+
+    bpm: 84, secLoops: 2, secs: [
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.F3, N.D4, _ST(N.F4, 5), N.C4) },
+        { w: 'bass', v: .06, notes: _BB(N.F2, N.D3, _ST(N.F2, 5), N.C3) },
+        { w: 'pluck', v: .045, notes: _M64(N.F4, N.D4, _ST(N.F4, 5), N.C4, false, true, false, false, 1, 2) },
+        { w: 'bell', v: .05, notes: _M64(N.F5, N.D5, _ST(N.F4, 5), N.C5, false, true, false, false, 3, 1) },
+        { w: 'flute', v: .03, notes: _A4(N.F5, N.D5, _ST(N.F4, 5), N.C5, false, true, false, false) },
+        { w: 'kick', f: 1, v: .08, notes: _K13 },
+        { w: 'hat', f: 1, v: .02, notes: _HO }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(_ST(N.F4, 5), N.F3, N.C4, N.D4) },
+        { w: 'bass', v: .06, notes: _BB(_ST(N.F2, 5), N.F2, N.C3, N.D3) },
+        { w: 'pluck', v: .045, notes: _M64(_ST(N.F4, 5), N.F3, N.C4, N.D4, false, false, false, true, 2, 3) },
+        { w: 'bell', v: .05, notes: _M64(_ST(N.F4, 5), N.F5, N.C5, N.D5, false, false, false, true, 1, 2) },
+        { w: 'flute', v: .03, notes: _A4(_ST(N.F4, 5), N.F5, N.C5, N.D5, false, false, false, true) },
+        { w: 'kick', f: 1, v: .08, notes: _K13 },
+        { w: 'hat', f: 1, v: .02, notes: _HO }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.D4, _ST(N.F4, 5), N.C4, N.F3) },
+        { w: 'bass', v: .06, notes: _BB(N.D3, _ST(N.F2, 5), N.C3, N.F2) },
+        { w: 'pluck', v: .045, notes: _M64(N.D4, _ST(N.F4, 5), N.C4, N.F3, true, false, false, false, 3, 1) },
+        { w: 'bell', v: .05, notes: _M64(N.D5, _ST(N.F4, 5), N.C5, N.F5, true, false, false, false, 2, 3) },
+        { w: 'flute', v: .03, notes: _A4(N.D5, _ST(N.F4, 5), N.C5, N.F5, true, false, false, false) },
+        { w: 'kick', f: 1, v: .08, notes: _K13 },
+        { w: 'hat', f: 1, v: .02, notes: _HO }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.F3, N.C4, N.D4, _ST(N.F4, 5)) },
+        { w: 'bass', v: .06, notes: _BB(N.F2, N.C3, N.D3, _ST(N.F2, 5)) },
+        { w: 'pluck', v: .045, notes: _M64(N.F4, N.C4, N.D4, _ST(N.F4, 5), false, false, true, false, 1, 3) },
+        { w: 'bell', v: .05, notes: _M64(N.F5, N.C6, N.D5, _ST(N.F4, 5), false, false, false, false, 2, 1) },
+        { w: 'flute', v: .03, notes: _A4(N.F5, N.C6, N.D5, _ST(N.F4, 5), false, false, false, false) },
+        { w: 'kick', f: 1, v: .08, notes: _K13 },
+        { w: 'hat', f: 1, v: .02, notes: _HO }
+      ] },
+
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.F3, N.D4, N.B3, N.C4) },
+        { w: 'bass', v: .055, notes: _BB(N.F2, N.D3, N.B2, N.C3) },
+        { w: 'bell', v: .055, notes: _M64(N.F5, N.D5, N.B4, N.C5, false, true, true, false, 1, 2) },
+        { w: 'flute', v: .028, notes: _A4(N.F5, N.D5, N.B4, N.C5, false, true, true, false) }
+      ] }
+    ]
+  },
+  menu: {
+
+    bpm: 112, secLoops: 2, secs: [
+      { bars: 8, trks: [
+        { w: 'pad', v: .035, notes: _P4(N.C3, N.G2, N.A3, N.F3) },
+        { w: 'bass', v: .1, notes: _BM(N.C2, N.G2, N.A2, N.F2) },
+        { w: 'pluck', v: .06, notes: _PH(N.C4, N.G4, N.A4, N.F4) },
+        { w: 'arp', v: .03, notes: _A4(N.C5, N.G4, N.A4, N.F4, true, false, false, false) },
+        { w: 'bell', v: .026, notes: _M64(N.E5, N.D5, N.C5, N.A4, false, false, false, false, 3, 1) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .035, notes: _P4(N.F3, N.C3, N.G2, N.A3) },
+        { w: 'bass', v: .1, notes: _BM(N.F2, N.C2, N.G2, N.A2) },
+        { w: 'pluck', v: .06, notes: _PH(N.F4, N.C4, N.G4, N.A4, false, true, false, false) },
+        { w: 'arp', v: .03, notes: _A4(N.F4, N.C5, N.G4, N.A4, false, true, false, false) },
+        { w: 'bell', v: .026, notes: _M64(N.A4, N.G4, N.E5, N.C5, false, false, false, false, 1, 2) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .035, notes: _P4(N.A3, N.F3, N.C3, N.G2) },
+        { w: 'bass', v: .1, notes: _BM(N.A2, N.F2, N.C2, N.G2) },
+        { w: 'pluck', v: .06, notes: _PH(N.A4, N.F4, N.C4, N.G4, true, true, false, false) },
+        { w: 'arp', v: .03, notes: _A4(N.A4, N.F4, N.C5, N.G4, true, true, false, false) },
+        { w: 'bell', v: .026, notes: _M64(N.C5, N.A4, N.G4, N.E5, false, false, false, false, 2, 3) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .035, notes: _P4(N.F3, N.C3, N.G2, N.E3) },
+        { w: 'bass', v: .1, notes: _BM(N.F2, N.C2, N.G2, N.E2) },
+        { w: 'pluck', v: .06, notes: _PH(N.F4, N.C4, N.G4, N.E4, false, false, false, true) },
+        { w: 'arp', v: .03, notes: _A4(N.F4, N.C5, N.G4, N.E4, false, false, false, true) },
+        { w: 'bell', v: .026, notes: _M64(N.C5, N.A4, N.G4, N.D5, false, false, false, false, 3, 2) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .035, notes: _P4(N.C3, N.G2, N.F3, N.A3) },
+        { w: 'bass', v: .1, notes: _BM(N.C2, N.G2, N.F2, N.A2) },
+        { w: 'pluck', v: .06, notes: _PH(N.C4, N.G4, N.F4, N.A4, false, true, false, false) },
+        { w: 'arp', v: .03, notes: _A4(N.C5, N.G4, N.F4, N.A4, false, true, false, false) },
+        { w: 'bell', v: .026, notes: _M64(N.G4, N.E5, N.C5, N.A4, false, false, false, false, 1, 3) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] }
+    ]
+  },
+  battle: {
+
+    bpm: 138, secLoops: 2, secs: [
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.E3, N.C4, N.G3, N.D4) },
+        { w: 'bass', v: .11, notes: _BR(N.E2, N.C3, N.G2, N.D3) },
+        { w: 'lead', v: .06, notes: _RF(N.E3, N.C4, N.G3, N.D4) },
+        { w: 'arp', v: .026, notes: _A4(N.E4, N.C5, N.G4, N.D5, true, false, false, false) },
+        { w: 'kick', f: 1, v: .17, notes: _K4 },
+        { w: 'snare', f: 1, v: .11, notes: _SN },
+        { w: 'hat', f: 1, v: .04, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.C4, N.G3, N.D4, N.E3) },
+        { w: 'bass', v: .11, notes: _BR(N.C3, N.G2, N.D3, N.E2) },
+        { w: 'lead', v: .06, notes: _RF(N.C4, N.G3, N.D4, N.E3) },
+        { w: 'arp', v: .026, notes: _M64(N.C5, N.G4, N.D5, N.E4, false, false, true, false, 2, 3) },
+        { w: 'kick', f: 1, v: .17, notes: _K4 },
+        { w: 'snare', f: 1, v: .11, notes: _SN },
+        { w: 'hat', f: 1, v: .04, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.D4, N.E3, N.C4, N.G3) },
+        { w: 'bass', v: .11, notes: _BR(N.D3, N.E2, N.C3, N.G2) },
+        { w: 'lead', v: .06, notes: _RF(N.D4, N.E3, N.C4, N.G3) },
+        { w: 'arp', v: .026, notes: _A4(N.D5, N.E4, N.C5, N.G4, true, false, false, false) },
+        { w: 'kick', f: 1, v: .17, notes: _K4 },
+        { w: 'snare', f: 1, v: .11, notes: _SN },
+        { w: 'hat', f: 1, v: .04, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.C4, N.G3, N.D4, N.A3) },
+        { w: 'bass', v: .11, notes: _BR(N.C3, N.G2, N.D3, N.A2) },
+        { w: 'lead', v: .06, notes: _RF(N.C4, N.G3, N.D4, N.A3) },
+        { w: 'arp', v: .026, notes: _M64(N.C5, N.G4, N.D5, N.A4, true, false, false, false, 1, 3) },
+        { w: 'kick', f: 1, v: .17, notes: _K4 },
+        { w: 'snare', f: 1, v: .11, notes: _SN },
+        { w: 'hat', f: 1, v: .04, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.G3, N.D4, N.E3, N.C4) },
+        { w: 'bass', v: .11, notes: _BR(N.G2, N.D3, N.E2, N.C3) },
+        { w: 'lead', v: .06, notes: _RF(N.G3, N.D4, N.E3, N.C4) },
+        { w: 'arp', v: .026, notes: _A4(N.G4, N.D5, N.E4, N.C5, false, false, true, true) },
+        { w: 'kick', f: 1, v: .17, notes: _K4 },
+        { w: 'snare', f: 1, v: .11, notes: _SN },
+        { w: 'hat', f: 1, v: .04, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.E3, N.C4, N.G3, N.A3) },
+        { w: 'bass', v: .11, notes: _BR(N.E2, N.C3, N.G2, N.A2) },
+        { w: 'lead', v: .06, notes: _RF(N.E3, N.C4, N.G3, N.A3) },
+        { w: 'arp', v: .026, notes: _M64(N.E4, N.C5, N.G4, N.A4, true, true, false, false, 3, 2) },
+        { w: 'kick', f: 1, v: .17, notes: _K4 },
+        { w: 'snare', f: 1, v: .11, notes: _SN },
+        { w: 'hat', f: 1, v: .04, notes: _H8 }
+      ] }
+    ]
+  },
+
+  battleX: {
+
+    bpm: 158, secLoops: 2, secs: [
+      { bars: 8, trks: [
+        { w: 'pad', v: .045, notes: _P4(N.E3, N.C4, N.G3, N.D4) },
+        { w: 'bass', v: .13, notes: _BR(N.E2, N.C3, N.G2, N.D3) },
+        { w: 'lead', v: .065, notes: _RF(N.E4, N.C5, N.G4, N.D5) },
+        { w: 'arp', v: .04, notes: _A4(N.E4, N.C5, N.G4, N.D5, true, false, false, false) },
+        { w: 'kick', f: 1, v: .18, notes: _K4 },
+        { w: 'snare', f: 1, v: .12, notes: _SN },
+        { w: 'hat', f: 1, v: .05, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .045, notes: _P4(N.C4, N.G3, N.D4, N.E3) },
+        { w: 'bass', v: .13, notes: _BR(N.C3, N.G2, N.D3, N.E2) },
+        { w: 'lead', v: .065, notes: _RF(N.C5, N.G4, N.D5, N.E4) },
+        { w: 'arp', v: .04, notes: _M64(N.C5, N.G4, N.D5, N.E4, false, false, true, false, 2, 3) },
+        { w: 'kick', f: 1, v: .18, notes: _K4 },
+        { w: 'snare', f: 1, v: .12, notes: _SN },
+        { w: 'hat', f: 1, v: .05, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .045, notes: _P4(N.D4, N.E3, N.C4, N.G3) },
+        { w: 'bass', v: .13, notes: _BR(N.D3, N.E2, N.C3, N.G2) },
+        { w: 'lead', v: .065, notes: _RF(N.D5, N.E4, N.C5, N.G4) },
+        { w: 'arp', v: .04, notes: _A4(N.D5, N.E4, N.C5, N.G4, true, false, false, false) },
+        { w: 'kick', f: 1, v: .18, notes: _K4 },
+        { w: 'snare', f: 1, v: .12, notes: _SN },
+        { w: 'hat', f: 1, v: .05, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .045, notes: _P4(N.C4, N.G3, N.D4, N.A3) },
+        { w: 'bass', v: .13, notes: _BR(N.C3, N.G2, N.D3, N.A2) },
+        { w: 'lead', v: .065, notes: _RF(N.C5, N.G4, N.D5, N.A4) },
+        { w: 'arp', v: .04, notes: _M64(N.C5, N.G4, N.D5, N.A4, true, false, false, false, 1, 3) },
+        { w: 'kick', f: 1, v: .18, notes: _K4 },
+        { w: 'snare', f: 1, v: .12, notes: _SN },
+        { w: 'hat', f: 1, v: .05, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .045, notes: _P4(N.G3, N.D4, N.E3, N.C4) },
+        { w: 'bass', v: .13, notes: _BR(N.G2, N.D3, N.E2, N.C3) },
+        { w: 'lead', v: .065, notes: _RF(N.G4, N.D5, N.E4, N.C5) },
+        { w: 'arp', v: .04, notes: _A4(N.G4, N.D5, N.E4, N.C5, false, false, true, true) },
+        { w: 'kick', f: 1, v: .18, notes: _K4 },
+        { w: 'snare', f: 1, v: .12, notes: _SN },
+        { w: 'hat', f: 1, v: .05, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .045, notes: _P4(N.E3, N.C4, N.G3, N.A3) },
+        { w: 'bass', v: .13, notes: _BR(N.E2, N.C3, N.G2, N.A2) },
+        { w: 'lead', v: .065, notes: _RF(N.E4, N.C5, N.G4, N.A4) },
+        { w: 'arp', v: .04, notes: _M64(N.E4, N.C5, N.G4, N.A4, true, true, false, false, 3, 2) },
+        { w: 'kick', f: 1, v: .18, notes: _K4 },
+        { w: 'snare', f: 1, v: .12, notes: _SN },
+        { w: 'hat', f: 1, v: .05, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .045, notes: _P4(N.E3, N.D4, N.C4, N.G3) },
+        { w: 'bass', v: .13, notes: _BR(N.E2, N.D3, N.C3, N.G2) },
+        { w: 'lead', v: .065, notes: _RF(N.E4, N.D5, N.C5, N.G4) },
+        { w: 'arp', v: .04, notes: _A4(N.E4, N.D5, N.C5, N.G4, true, false, false, false) },
+        { w: 'kick', f: 1, v: .18, notes: _K4 },
+        { w: 'snare', f: 1, v: .12, notes: _SN },
+        { w: 'hat', f: 1, v: .05, notes: _H8 }
+      ] }
+    ]
+  },
+  factory: {
+
+    bpm: 104, secLoops: 2, secs: [
+      { bars: 8, trks: [
+        { w: 'pad', v: .05, notes: _P4(N.D3, N.B2, N.F3, N.C3) },
+        { w: 'bass', v: .07, notes: _BF(N.D2, N.B2, N.F2, N.C3) },
+        { w: 'pluck', v: .06, notes: _SF(N.D4, N.B4, N.F4, N.C4) },
+        { w: 'bell', v: .024, notes: _M64(N.A4, N.F4, N.D4, N.G4, false, false, false, false, 2, 1) },
+        { w: 'kick', f: 1, v: .13, notes: _K13 },
+        { w: 'snare', f: 1, v: .07, notes: _SN },
+        { w: 'hat', f: 1, v: .02, notes: _HO }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .05, notes: _P4(N.F3, N.C3, N.D3, N.A3) },
+        { w: 'bass', v: .07, notes: _BF(N.F2, N.C3, N.D2, N.A2) },
+        { w: 'pluck', v: .06, notes: _SF(N.F4, N.C4, N.D4, N.A4) },
+        { w: 'bell', v: .024, notes: _M64(N.C5, N.A4, N.F4, N.E4, false, false, false, false, 3, 2) },
+        { w: 'kick', f: 1, v: .13, notes: _K13 },
+        { w: 'snare', f: 1, v: .07, notes: _SN },
+        { w: 'hat', f: 1, v: .02, notes: _HO }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .05, notes: _P4(N.B2, N.F3, N.C3, N.D3) },
+        { w: 'bass', v: .07, notes: _BF(N.B2, N.F2, N.C3, N.D2) },
+        { w: 'pluck', v: .06, notes: _SF(N.B4, N.F4, N.C4, N.D4) },
+        { w: 'bell', v: .024, notes: _M64(N.F4, N.D4, N.G4, N.A4, false, false, false, false, 1, 2) },
+        { w: 'kick', f: 1, v: .13, notes: _K13 },
+        { w: 'snare', f: 1, v: .07, notes: _SN },
+        { w: 'hat', f: 1, v: .02, notes: _HO }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .05, notes: _P4(N.A3, N.D3, N.F3, N.C3) },
+        { w: 'bass', v: .07, notes: _BF(N.A2, N.D2, N.F2, N.C3) },
+        { w: 'pluck', v: .06, notes: _SF(N.A4, N.D4, N.F4, N.C4) },
+        { w: 'bell', v: .024, notes: _M64(N.E4, N.C5, N.A4, N.G4, false, false, false, false, 2, 3) },
+        { w: 'kick', f: 1, v: .13, notes: _K13 },
+        { w: 'snare', f: 1, v: .07, notes: _SN },
+        { w: 'hat', f: 1, v: .02, notes: _HO }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .05, notes: _P4(N.D3, N.C3, N.A3, N.B2) },
+        { w: 'bass', v: .07, notes: _BF(N.D2, N.C3, N.A2, N.B2) },
+        { w: 'pluck', v: .06, notes: _SF(N.D4, N.C4, N.A4, N.B4) },
+        { w: 'bell', v: .024, notes: _M64(N.F4, N.G4, N.E4, N.D4, false, false, false, false, 1, 3) },
+        { w: 'kick', f: 1, v: .13, notes: _K13 },
+        { w: 'snare', f: 1, v: .07, notes: _SN },
+        { w: 'hat', f: 1, v: .02, notes: _HO }
+      ] }
+    ]
+  },
+  story: {
+
+    bpm: 122, secLoops: 2, secs: [
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.G3, N.E3, N.C4, N.D4) },
+        { w: 'bass', v: .09, notes: _BS(N.G2, N.E2, N.C3, N.D3) },
+        { w: 'pluck', v: .06, notes: _EL(N.G4, N.E4, N.C5, N.D5) },
+        { w: 'arp', v: .028, notes: _A4(N.G4, N.E4, N.C5, N.D5, true, false, false, false) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.C4, N.G3, N.D4, N.E3) },
+        { w: 'bass', v: .09, notes: _BS(N.C3, N.G2, N.D3, N.E2) },
+        { w: 'pluck', v: .06, notes: _EL(N.C5, N.G4, N.D5, N.E4, false, true, false, false) },
+        { w: 'arp', v: .028, notes: _M64(N.C5, N.G4, N.D5, N.E4, false, true, false, false, 2, 3) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.E3, N.C4, N.G3, N.D4) },
+        { w: 'bass', v: .09, notes: _BS(N.E2, N.C3, N.G2, N.D3) },
+        { w: 'pluck', v: .06, notes: _EL(N.E4, N.C5, N.G4, N.D5, true, false, false, false) },
+        { w: 'arp', v: .028, notes: _A4(N.E4, N.C5, N.G4, N.D5, true, false, false, false) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.D4, N.C4, N.E3, N.G3) },
+        { w: 'bass', v: .09, notes: _BS(N.D3, N.C3, N.E2, N.G2) },
+        { w: 'pluck', v: .06, notes: _EL(N.D5, N.C5, N.E4, N.G4, true, false, true, false) },
+        { w: 'arp', v: .028, notes: _M64(N.D5, N.C5, N.E4, N.G4, true, false, true, false, 1, 3) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.C4, N.G3, N.D4, N.G3) },
+        { w: 'bass', v: .09, notes: _BS(N.C3, N.G2, N.D3, N.G2) },
+        { w: 'pluck', v: .06, notes: _EL(N.C5, N.G4, N.D5, N.G4, false, false, false, true) },
+        { w: 'arp', v: .028, notes: _A4(N.C5, N.G4, N.D5, N.G4, false, false, false, true) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] },
+      { bars: 8, trks: [
+        { w: 'pad', v: .04, notes: _P4(N.G3, N.D4, N.C4, N.E3) },
+        { w: 'bass', v: .09, notes: _BS(N.G2, N.D3, N.C3, N.E2) },
+        { w: 'pluck', v: .06, notes: _EL(N.G4, N.D5, N.C5, N.E4, true, false, true, false) },
+        { w: 'arp', v: .028, notes: _A4(N.G4, N.D5, N.C5, N.E4, true, false, true, false) },
+        { w: 'kick', f: 1, v: .16, notes: _K4 },
+        { w: 'snare', f: 1, v: .1, notes: _SN },
+        { w: 'hat', f: 1, v: .035, notes: _H8 }
+      ] }
+    ]
+  }
+};
     document.addEventListener('pointerdown', () => { AU.init(); if (AU.ctx.state === 'suspended') AU.ctx.resume(); }, { once: false });
 
     /* ============================================================
@@ -7468,7 +7939,7 @@
     M('teatime','茶会','normal','X',null,null,10,{teatime:1});
     M('octolock','蛸固','fighting','X',null,100,15,{octolock:1});
     M('boltbeak','电喙','electric','P',85,100,10,{ct:1,boltbeak:1,fishious:1});
-    M('hyperdrill','强力钻','ground','P',120,100,5,{ct:1,hyperdrill:1});
+    M('hyperdrill','强力钻','normal','P',120,100,5,{ct:1,hyperdrill:1});
     M('fishiousrend','鳃咬','water','P',80,100,10,{ct:1,bite:1,fishious:1});
     M('courtchange','换场','normal','X',null,100,10,{courtchange:1});
     M('clangoroussoul','魂舞烈音爆','dragon','X',null,100,5,{clangorous:1});
@@ -8684,7 +9155,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(284,'雨翅蛾','bug/flying','70/60/62/100/82/80','intimidate/unnerve',['bugbuzz','airslash','hydropump','quiverdance','roost','hurricane']);
     S(285,'蘑蘑菇','grass','60/40/60/40/60/35','effectspore/poisonheal/quickfeet',['tackle','seedbomb','spore','swordsdance','drainpunch'],{evo:1});
     S(287,'懒人獭','normal','60/60/60/35/35/30','truant/truant',['tackle','facade','knockoff','earthquake'],{evo:1});
-    S(288,'过动猿','normal','80/80/80/55/55/90','truant/truant',['facade','knockoff','earthquake','firepunch','icepunch'],{evo:1});
+    S(288,'过动猿','normal','80/80/80/55/55/90','vitalspirit/vitalspirit',['facade','knockoff','earthquake','firepunch','icepunch'],{evo:1});
     S(290,'土居忍士','bug/ground','31/45/90/30/30/40','compoundeyes/infiltrator',['xscissor','earthquake','swordsdance','protect','quickattack'],{evo:1});
     S(293,'咕妞妞','normal','64/51/23/51/23/28','soundproof/rattled',['hypervoice','shadowball','flamethrower','icebeam'],{evo:1});
     S(294,'吼爆弹','normal','84/71/43/71/43/48','soundproof/scrappy',['boomburst','hypervoice','shadowball','flamethrower','icebeam','thunderbolt'],{evo:1});
@@ -11643,13 +12114,13 @@ return ev;
         if (side === 'e') { const arr = b.ep; pips = '<div class="pips">' + arr.map(x => `<span class="pip ${x.alive() ? '' : 'down'}"></span>`).join('') + '</div>'; }
         const hpnum = side === 'p' ? `<div class="hpnum">${m.hp} / ${m.maxhp}</div>` : (CFG.enemyHpPct ? `<div class="hpnum">${m.hp > 0 ? Math.max(1, Math.ceil(m.hpPct() * 100)) : 0}%</div>` : '');
         const xp = side === 'p' ? `<div class="xpbar"><div class="xpfill" style="width:${Math.round(100 * (m.xp - Math.pow(m.lvl, 3)) / (Math.pow(m.lvl + 1, 3) - Math.pow(m.lvl, 3)))}%"></div></div>` : '';
-        const it = (m.item && (side === 'p' || CFG.enemyItem)) ? `<div style="font-size:10px;color:#888;font-weight:700">持有：${IT[m.item]?.n || ''}</div>` : '';
+        const it = (m.item && (side === 'p' ? CFG.myItem : CFG.enemyItem)) ? `<div style="font-size:10px;color:#888;font-weight:700">持有：${IT[m.item]?.n || ''}</div>` : '';
         const ab = AB[m.ability];
-        const abRow = (ab && (side === 'p' || CFG.enemyAbility)) ? `<div style="margin-top:3px"><span class="abchip" title="${ab.d}">${ab.n}</span></div>` : '';
+        const abRow = (ab && (side === 'p' ? CFG.myAbility : CFG.enemyAbility)) ? `<div style="margin-top:3px"><span class="abchip" title="${ab.d}">${ab.n}</span></div>` : '';
         /* 能力等级实时显示（红升蓝降） */
         const sig = STATKEYS.map(k => m.stages[k]).join(',');
-        const cardEl = this.card(side);
-        const changed = cardEl._sig !== sig; cardEl._sig = sig;
+        const changed = m._stgSig !== null && m._stgSig !== sig;
+        m._stgSig = sig;
         const SN = { atk: '攻', def: '防', spa: '特攻', spd: '特防', spe: '速' };
         const stgs = STATKEYS.filter(k => m.stages[k] !== 0).map(k => {
           const v = m.stages[k];
@@ -13412,6 +13883,7 @@ return ev;
       _prepSendOut(m, side) {
         const keepSwitched = m.vol?.wasSwitchedOut || false;
         m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; if (m.id === 875 && !m.iceHeadUsed) m.vol.iceHead = true; m.vol.switchedInThisTurn = true; m.vol.wasSwitchedOut = keepSwitched; m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; m.fainted = false;
+        m._stgSig = null;   // 换人时重置能力变化动画记录，避免误触发
         if (m._transformed) { m.id = m._originalId; m.sp = m._originalSp; m.name = m._originalName; m.types = m._originalTypes; m.baseTypes = m._originalBaseTypes; m.ability = m._originalAbility; m.baseAbility = m._originalBaseAbility; m.moves = m._originalMoves; m.mega = null; m._transformed = false; m.recalc(); if (m.hp > m.maxhp) m.hp = m.maxhp; }
         /* ★ 幻觉：上场前即设置伪装（显示伪装宝可梦的外观与名称） */
         if (m.has('illusion')) {
@@ -14248,7 +14720,7 @@ return ev;
             const zone = el('div', 'targetZone');
             zone.appendChild(el('h4', '', label));
             const row = el('div', 'targetRow');
-            (this.doubles ? [0, 1] : [0]).forEach(s => {
+            (this.doubles ? [1, 0] : [0]).forEach(s => {
               const m = isEnemy ? this.slotMon('e', s) : this.slotMon('p', s);
               const c = el('div', 'targetCard');
               if (!m) { c.classList.add('disabled'); c.innerHTML = '<div style="color:#999;font-weight:900">— 无 —</div>'; row.appendChild(c); return; }
@@ -14932,7 +15404,8 @@ return ev;
         // 命中判定
         let acc = this.hitAccuracy(mon, foe, useMv);
         if (acc != null && !mon.has('noguard') && !foe.has('noguard') && Math.random() * 100 > acc) {
-          await say(`${mon.vol.illusionName || mon.name} 的 ${useMv.n} 没有命中！`);
+          await say(`${mon.vol.illusionName || mon.name} 的 ${useMv.n} 没有命中 ${foe.vol.illusionName || foe.name}！`);
+          this.addLog(`${mon.vol.illusionName || mon.name} 的 ${useMv.n} 没有命中 ${foe.vol.illusionName || foe.name}`);
           /* ★ 打空保险：miss后速度+2并消耗 */
           if (!mon.has('klutz') && mon.item === 'blunderpolicy') {
             mon.item = null;
@@ -14961,7 +15434,8 @@ return ev;
           if ((useMv.multiPow || useMv.k === 'populationbomb') && h > 0) {
             const ha = this.hitAccuracy(mon, foe, useMv);
             if (ha != null && !mon.has('noguard') && !foe.has('noguard') && Math.random() * 100 > ha) {
-              await say(`第 ${h + 1} 击没有命中！`);
+              await say(`第 ${h + 1} 击没有命中 ${foe.vol.illusionName || foe.name}！`);
+              this.addLog(`第 ${h + 1} 击没有命中 ${foe.vol.illusionName || foe.name}`);
               break;
             }
           }
@@ -15206,7 +15680,7 @@ return ev;
         if (dmg > 0) {
           const pct = Math.max(1, Math.round(dmg / foe.maxhp * 100));
           const leftPct = Math.round(foe.hp / foe.maxhp * 100);
-          this.addLog(`↳ 造成 ${dmg} 点伤害（${pct}% HP）· 对手剩余 ${leftPct}%${r.crit ? ' · 击中要害' : ''}${r.eff > 1 ? ' · 效果绝佳' : (r.eff > 0 && r.eff < 1) ? ' · 收效甚微' : ''}`);
+          this.addLog(`↳ ${foe.vol.illusionName || foe.name} 受到 ${dmg} 点伤害（${pct}% HP）· 对手剩余 ${leftPct}%${r.crit ? ' · 击中要害' : ''}${r.eff > 1 ? ' · 效果绝佳' : (r.eff > 0 && r.eff < 1) ? ' · 收效甚微' : ''}`);
           const popSide = side === 'p' ? 'e' : 'p';
           BUI.dmgPop(popSide, `-${dmg} (${pct}%)`, r.crit ? '#ffd93b' : r.eff > 1 ? '#ff9d6b' : (r.eff > 0 && r.eff < 1) ? '#8fb6e8' : '#ffffff', foe._slot || 0);
           if (r.crit) setTimeout(() => BUI.dmgPop(popSide, '击中要害!', '#ffd93b', foe._slot || 0), 170);
@@ -15861,7 +16335,7 @@ return ev;
           if (mv.t === 'electric' && foe.types.includes('ground')) { await say(`对 ${foe.name} 没有效果…`); return; }
         }
         // 命中
-        if (mv.a != null && Math.random() * 100 > mv.a * (mon.has('compoundeyes') ? 1.3 : 1)) { await say(`${mv.n} 没有命中！`); return; }
+        if (mv.a != null && Math.random() * 100 > mv.a * (mon.has('compoundeyes') ? 1.3 : 1)) { await say(`${mv.n} 没有命中 ${foe.vol.illusionName || foe.name}！`); return; }
         /* ★ 变化招式共用特效：作用于招式目标（减益/异常/场地技→对手，强化/回复→自身） */
         const mySide = this.sideOf(mon);
         const onFoe = !!(mv.setSt || mv.setDrop || mv.taunt || mv.leechseed || mv.trick || mv.parting || mv.clearsmog || mv.hazard);
@@ -18782,6 +19256,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
           doubles: wantDouble
         });
         await fadeTo('#free');
+        AU.playMusic('menu');   // 战斗结束回到自由对战界面，恢复菜单BGM
         if (r.result === 'win') {
           AU.jingle('win');
           toast('🎉 胜利！');
@@ -19138,13 +19613,13 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
     $('#itemCount').textContent = Object.keys(IT).length + ' 种';
     $('#abCount').textContent = Object.keys(AB).length + ' 种';
     $('#mvCount').textContent = Object.keys(MV).length + ' 个';
-    $('#mStory').onclick = async () => { AU.ok(); showStorySlotSelect(); };
+    $('#mStory').onclick = async () => { AU.ok(); AU.playMusic('story'); showStorySlotSelect(); };
     $('#mFactory').onclick = async () => { AU.ok(); await fadeTo('#factory'); FAC.lobby(); };
-    $('#mFree').onclick = async () => { AU.ok(); buildFree(); await fadeTo('#free'); };
-    $('#mDex').onclick = async () => { AU.ok(); buildDex(); await fadeTo('#dex'); };
-    $('#mItemDex').onclick = async () => { AU.ok(); buildItemDex(); await fadeTo('#itemdex'); };
-    $('#mAbilityDex').onclick = async () => { AU.ok(); buildAbilityDex(); await fadeTo('#abilitydex'); };
-    $('#mMoveDex').onclick = async () => { AU.ok(); buildMoveDex(); await fadeTo('#movedex'); };
+    $('#mFree').onclick = async () => { AU.ok(); AU.playMusic('menu'); buildFree(); await fadeTo('#free'); };
+    $('#mDex').onclick = async () => { AU.ok(); AU.playMusic('menu'); buildDex(); await fadeTo('#dex'); };
+    $('#mItemDex').onclick = async () => { AU.ok(); AU.playMusic('menu'); buildItemDex(); await fadeTo('#itemdex'); };
+    $('#mAbilityDex').onclick = async () => { AU.ok(); AU.playMusic('menu'); buildAbilityDex(); await fadeTo('#abilitydex'); };
+    $('#mMoveDex').onclick = async () => { AU.ok(); AU.playMusic('menu'); buildMoveDex(); await fadeTo('#movedex'); };
     $('#mSound').onclick = () => { AU.ok(); openSettings(); };
     $$('[data-back]').forEach(b => b.onclick = async () => { AU.no(); await fadeTo('#title'); AU.playMusic('title'); });
     $('#storyBack').onclick = async () => { AU.no(); autoSaveStory(); await fadeTo('#title'); AU.playMusic('title'); };
@@ -19742,7 +20217,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           () => !CFG.muted, v => { CFG.muted = !v; AU.muted = CFG.muted; if (CFG.muted) AU.stopMusic(); }),
         settingsSlider('音效音量', '出招/命中/技能音效的音量（0~200%）',
           () => CFG.sfxVol, v => { CFG.sfxVol = v; }),
-        settingsRow('背景音乐', '芯片风格循环 BGM',
+        settingsRow('背景音乐', '现代合成器风格循环 BGM（贝斯/主音/和弦垫/鼓组）',
           () => CFG.music, v => { CFG.music = v; AU.musOn = v; if (v) { AU.init(); AU.playMusic(AU.cur || 'title'); } else AU.stopMusic(); }),
         settingsSlider('背景音乐音量', '背景音乐的音量（0~200%）',
           () => CFG.musVol, v => { CFG.musVol = v; }),
@@ -19771,6 +20246,10 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           () => CFG.enemyAbility, v => { CFG.enemyAbility = v; }),
         settingsRow('敌方道具显示', '在敌方信息卡上显示持有道具名称',
           () => CFG.enemyItem, v => { CFG.enemyItem = v; }),
+        settingsRow('我方宝可梦特性显示', '在我方信息卡上显示特性名称',
+          () => CFG.myAbility, v => { CFG.myAbility = v; }),
+        settingsRow('我方宝可梦道具显示', '在我方信息卡上显示持有道具名称',
+          () => CFG.myItem, v => { CFG.myItem = v; }),
       ]));
       box.insertAdjacentHTML('beforeend', '<div style="font-size:11px;color:#888;padding:10px 4px 2px">设置自动保存。关闭天气/场地特效后，场景顶部的天气/场地文字指示仍会保留，仅移除画面氛围层。</div>');
       const about = el('button', 'btn blue', '📖 关于作者'); about.style.cssText = 'width:100%;margin-top:12px';
