@@ -2752,15 +2752,15 @@
       }
 
       22% {
-        transform: translate(-4px, 2px)
+        transform: translate(-2px, 1px)
       }
 
       48% {
-        transform: translate(3px, -2px)
+        transform: translate(1.5px, -1px)
       }
 
       72% {
-        transform: translate(-2px, 1px)
+        transform: translate(-1px, .5px)
       }
     }
 
@@ -5991,47 +5991,47 @@
       #battle.doubles .plat.e {
         width: 280px !important;
         height: 44px !important;
-        top: 252px !important;
+        top: 226px !important;
         right: 24px !important;
       }
 
       #battle.doubles #espr {
         width: 88px !important;
         height: 88px !important;
-        top: 166px !important;
+        top: 142px !important;
         right: 40px !important;
       }
 
       #battle.doubles #espr2 {
         width: 80px !important;
         height: 80px !important;
-        top: 174px !important;
+        top: 150px !important;
         right: 148px !important;
       }
 
       #battle.doubles #eshadow {
         width: 76px !important;
-        top: 252px !important;
+        top: 226px !important;
         right: 52px !important;
       }
 
       #battle.doubles #eshadow2 {
         width: 70px !important;
-        top: 256px !important;
+        top: 230px !important;
         right: 158px !important;
       }
 
       #battle.doubles #espr.dyn {
         width: 150px !important;
         height: 150px !important;
-        top: 110px !important;
+        top: 86px !important;
         right: 30px !important;
       }
 
       #battle.doubles #espr2.dyn {
         width: 138px !important;
         height: 138px !important;
-        top: 118px !important;
+        top: 94px !important;
         right: 136px !important;
       }
 
@@ -6087,45 +6087,45 @@
     /* ====== 双打·竖屏极短屏：敌方整体继续上移，防止出界 ====== */
     @media (max-height: 560px) and (max-width: 900px) {
       #battle.doubles .plat.e {
-        top: 238px !important;
+        top: 214px !important;
         right: 26px !important;
         width: 256px !important;
         height: 38px !important;
       }
 
       #battle.doubles #espr {
-        top: 162px !important;
+        top: 138px !important;
         right: 42px !important;
         width: 76px !important;
         height: 76px !important;
       }
 
       #battle.doubles #espr2 {
-        top: 170px !important;
+        top: 146px !important;
         right: 146px !important;
         width: 68px !important;
         height: 68px !important;
       }
 
       #battle.doubles #eshadow {
-        top: 236px !important;
+        top: 212px !important;
         right: 54px !important;
       }
 
       #battle.doubles #eshadow2 {
-        top: 240px !important;
+        top: 216px !important;
         right: 156px !important;
       }
 
       #battle.doubles #espr.dyn {
-        top: 106px !important;
+        top: 82px !important;
         right: 34px !important;
         width: 132px !important;
         height: 132px !important;
       }
 
       #battle.doubles #espr2.dyn {
-        top: 112px !important;
+        top: 88px !important;
         right: 130px !important;
         width: 122px !important;
         height: 122px !important;
@@ -6167,45 +6167,45 @@
         right: 20px !important;
         width: 68px !important;
         height: 68px !important;
-        top: 212px !important;
+        top: 188px !important;
       }
 
       #battle.doubles #espr2 {
         right: 100px !important;
         width: 62px !important;
         height: 62px !important;
-        top: 218px !important;
+        top: 194px !important;
       }
 
       #battle.doubles .plat.e {
         width: 226px !important;
         height: 40px !important;
-        top: 282px !important;
+        top: 258px !important;
         right: 18px !important;
       }
 
       #battle.doubles #eshadow {
         right: 32px !important;
-        top: 276px !important;
+        top: 252px !important;
         width: 62px !important;
       }
 
       #battle.doubles #eshadow2 {
         right: 110px !important;
-        top: 280px !important;
+        top: 256px !important;
         width: 56px !important;
       }
 
       #battle.doubles #espr.dyn {
         right: 12px !important;
-        top: 148px !important;
+        top: 124px !important;
         width: 128px !important;
         height: 128px !important;
       }
 
       #battle.doubles #espr2.dyn {
         right: 106px !important;
-        top: 154px !important;
+        top: 130px !important;
         width: 118px !important;
         height: 118px !important;
       }
@@ -7800,7 +7800,7 @@ const MUSIC = {
     M('fireblast', '大字爆炎', 'fire', 'S', 110, 85, 5, { sec: { st: 'burn', ch: 10 } }); M('flareblitz', '闪焰冲锋', 'fire', 'P', 120, 100, 15, { ct: 1, recoil: 3, sec: { st: 'burn', ch: 10 } });
     M('firepunch', '火焰拳', 'fire', 'P', 75, 100, 15, { ct: 1, punch: 1, sec: { st: 'burn', ch: 10 } }); M('overheat', '过热', 'fire', 'S', 130, 90, 5, { self: { drop: 'spa', n: -2 } });
     M('willowisp', '鬼火', 'fire', 'X', null, 85, 15, { setSt: 'burn' }); M('sunnyday', '大晴天', 'fire', 'X', null, null, 5, { weather: 'sun' });
-    M('heatwave', '热风', 'fire', 'S', 95, 90, 10, { sec: { st: 'burn', ch: 10 }, wind: 1 }); M('lavaplume', '熔岩风暴', 'fire', 'S', 80, 100, 15, { sec: { st: 'burn', ch: 30 } });
+    M('heatwave', '热风', 'fire', 'S', 95, 90, 10, { sec: { st: 'burn', ch: 10 }, wind: 1 }); M('lavaplume', '喷烟', 'fire', 'S', 80, 100, 15, { sec: { st: 'burn', ch: 30 } });
     M('vcreate', 'V热焰', 'fire', 'P', 180, 95, 5, { ct: 1, self: { drop: 'def', n: -1 }, self2: { drop: 'spd', n: -1 }, self3: { drop: 'spe', n: -1 } });
     M('boltstrike', '雷击', 'electric', 'P', 130, 85, 5, { ct: 1, sec: { st: 'par', ch: 20 } }); M('pyroball', '火焰球', 'fire', 'P', 120, 90, 5, { sec: { st: 'burn', ch: 10 }, bullet: 1 });
     M('torchsong', '闪焰高歌', 'fire', 'S', 80, 100, 10, { selfUp: { drop: 'spa', n: 1 } }); M('bitterblade', '悔念剑', 'fire', 'P', 90, 100, 10, { ct: 1, drain: 50 });
@@ -8063,7 +8063,7 @@ const MUSIC = {
       snarl: 'enemy-all', strugglebug: 'enemy-all', electroweb: 'enemy-all', overdrive: 'enemy-all',
       glaciate: 'enemy-all', diamondstorm: 'enemy-all', terastarstorm: 'enemy-all', makeitrain: 'enemy-all',
       coreenforcer: 'enemy-all', astralbarrage: 'enemy-all', glaciallance: 'enemy-all', dragonenergy: 'enemy-all',
-      clangoroussoulblaze: 'enemy-all', maxmv: 'enemy-any',
+      clangoroussoulblaze: 'enemy-all', maxmv: 'any',
       /* 场地陷阱/场地状态：作用于对方场地 */
       stealthrock: 'enemy-all', spikes: 'enemy-all', toxicspikes: 'enemy-all', stickyweb: 'enemy-all', defog: 'enemy-all',
       /* 除自己外的全场 */
@@ -8105,7 +8105,7 @@ const MUSIC = {
       if (typeof k === 'string' && k.startsWith('gmax-')) return RNG.ENEMY_ALL;
       const d = MV[k];
       if (!d) return RNG.SELF;
-      return d.c === 'X' ? RNG.SELF : RNG.ENEMY_ANY;
+      return d.c === 'X' ? RNG.SELF : RNG.ANY;
     }
 
     /* ---- 特性 ---- */
@@ -12179,7 +12179,7 @@ return ev;
         gem.style.right = ''; gem.style.bottom = '';
       },
       /* ★ 出场动画：投球→弹跳→爆开→实体化+星屑；野生宝可梦直接滑入 */
-      async entryAnim(side, m, isWild, slot = 0) {
+      async entryAnim(side, m, isWild, slot = 0, silent = false) {
         const layer = $('#fxlayer');
         const spr = this.sprEl(side, slot);
         /* ★ 先彻底隐藏立绘并禁用过渡，杜绝投球/滑入前的渐隐闪现 */
@@ -12194,7 +12194,7 @@ return ev;
         if (!CFG.entryAnim) {
           spr.style.transition = '';
           spr.style.opacity = 1;
-          AU.ball();
+          if (!silent) AU.ball();
           await sleep(120);
           return;
         }
@@ -12202,7 +12202,7 @@ return ev;
           spr.style.transition = '';
           spr.style.opacity = 1;
           spr.classList.add('wildIn');
-          AU.ball();
+          if (!silent) AU.ball();
           await sleep(720);
           spr.classList.remove('wildIn');
           return;
@@ -12216,7 +12216,7 @@ return ev;
         if (side === 'p') { ball.style.left = (cx - 18) + 'px'; ball.style.bottom = (lr.height - cy - 18) + 'px'; }
         else { ball.style.right = (lr.width - cx - 18) + 'px'; ball.style.top = (cy - 18) + 'px'; }
         layer.appendChild(ball);
-        AU.ball();
+        if (!silent) AU.ball();
         await sleep(300);
         ball.classList.add('bounce');
         AU.shake();
@@ -12227,7 +12227,7 @@ return ev;
         else { burst.style.right = (lr.width - cx - 24) + 'px'; burst.style.top = (cy - 24) + 'px'; }
         layer.appendChild(burst);
         ball.remove();
-        AU.ok();
+        if (!silent) AU.ok();
         /* 宝可梦实体化 */
         spr.style.opacity = 1;
         spr.classList.add('entry');
@@ -12851,7 +12851,7 @@ return ev;
               this.extraFx('bub', foeSide, { c, c2: '#e8b8ff' }, tSlot);
             break;
           case 'ground': /* 极巨大地：大地崩裂 */
-            this.shake(4, 420);
+            this.shake(2, 340);
             for (let i = 0; i < 8; i++) setTimeout(() => {
               this.p({ cls: 'fxShard', x: ft.x + rnd(-70, 70), y: ft.y, c: pick([c, '#8a6a3c']), bg: `linear-gradient(135deg,#fff,${c})`, dx: rnd(-80, 80), dy: rnd(-100, -30), rot: rnd(0, 240), an: 'fxShardA', dur: rnd(5, 8) / 10 });
             }, i * 40);
@@ -13038,7 +13038,7 @@ return ev;
             this.wave(side, cfg);
             break;
           case 'nova':
-            this.shake(4, 400);
+            this.shake(2, 320);
             for (let i = 0; i < 2; i++) this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: cfg.c2 || cfg.c, an: 'fxRingBigB', dur: .6, delay: i * .16 });
             break;
           case 'bolt':
@@ -13090,9 +13090,9 @@ return ev;
         this.p({ cls: 'fxRing', x: B.x, y: B.y, c, an: 'fxRingB', dur: .5 });
       },
       /* ---- 攻击演出（普通/极巨/超极巨通吃） ---- */
-      attack(side, mon, foe, mv) {
+      attack(side, mon, foe, mv, tgtSide) {
         if (!this.on()) { typeVFX(mv.t, side === 'p' ? 'e' : 'p'); return; }
-        const foeSide = side === 'p' ? 'e' : 'p';
+        const foeSide = tgtSide || (side === 'p' ? 'e' : 'p');
         const aSlot = (mon && mon._slot) || 0, tSlot = (foe && foe._slot) || 0;
         let cfg;
         if (mv.k === 'maxmv') {
@@ -13455,7 +13455,7 @@ return ev;
       'flamethrower': {  c: '#ff7a2f', c2: '#ffd23b', proj: 'beam', extra: ['ember'], snd: 'hiss blast' },
       'fireblast': {  c: '#ff5f2f', c2: '#ffd23b', proj: 'flame', big: 1, flash: 1, extra: ['ember', 'nova'], snd: 'boom2 blast' },
       'overheat': {  c: '#ff5f2f', c2: '#ffd23b', proj: 'flame', big: 1, flash: 1, extra: ['ember'], snd: 'boom2 blast' },
-      'eruption': {  c: '#ff3d1f', c2: '#ffd23b', proj: 'none', big: 1, flash: 1, shake: 1, extra: ['ember', 'nova'], snd: 'rumble boom2 blast' },
+    'eruption': {  c: '#ff3d1f', c2: '#ffd23b', proj: 'none', big: 1, flash: 1, extra: ['ember', 'nova'], snd: 'rumble boom2 blast' },
       'heatwave': {  c: '#ff8a3d', c2: '#ffd23b', proj: 'none', big: 1, extra: ['ember'], snd: 'rush blast' },
       'flareblitz': {  c: '#ff5f2f', c2: '#ffd23b', proj: 'none', big: 1, flash: 1, extra: ['ember', 'nova'], snd: 'rush boom2 blast' },
       'firepunch': {  c: '#ff7a2f', c2: '#ffd23b', proj: 'none', extra: ['ember'], snd: 'thud blast' },
@@ -13820,7 +13820,7 @@ return ev;
             if (m.has('honeygather') && m.alive() && Math.random() < 0.3) {
               const berries = ['sitrus'];
               const got = pick(berries);
-              if (GM.bag[got] !== undefined) GM.bag[got]++;
+              GM.bag[got] = (GM.bag[got] || 0) + 1;
               await say(`${m.name} 的采蜜特性发动了！获得了${IT[got].n}！`);
             }
             // ★ 捡拾：胜利后概率获得道具
@@ -13828,7 +13828,7 @@ return ev;
               if (m.has('pickup') && m.alive() && Math.random() < 0.1) {
                 const items = ['potion', 'sitrus', 'quickclaw'];
                 const got = pick(items);
-                if (GM.bag[got] !== undefined) GM.bag[got]++;
+                GM.bag[got] = (GM.bag[got] || 0) + 1;
                 await say(`${m.name} 的捡拾特性发动了！获得了${IT[got].n}！`);
               }
             }
@@ -13897,7 +13897,7 @@ return ev;
       async sendOutDouble(side) {
         const mons = [this.slotMon(side, 0), this.slotMon(side, 1)].filter(Boolean);
         for (let i = 0; i < mons.length; i++) { mons[i]._slot = i; this._prepSendOut(mons[i], side); }
-        await Promise.all(mons.map((m, i) => BUI.entryAnim(side, m, this.wild, i)));
+        await Promise.all(mons.map((m, i) => BUI.entryAnim(side, m, this.wild, i, i > 0)));
         for (let i = 0; i < mons.length; i++) {
           const m = mons[i];
           const nm = m.vol.illusionName || m.name;
@@ -14726,7 +14726,7 @@ return ev;
               const m = isEnemy ? this.slotMon('e', s) : this.slotMon('p', s);
               const c = el('div', 'targetCard');
               if (!m) { c.classList.add('disabled'); c.innerHTML = '<div style="color:#999;font-weight:900">— 无 —</div>'; row.appendChild(c); return; }
-              c.appendChild(miniSprite(m.id));
+              c.appendChild(miniSprite(m.vol.illusion || m.id));
               const hpTxt = m.alive() ? `${Math.round(m.hpPct() * 100)}% HP` : '濒死';
               const eff = effOf(m);
               const effHtml = eff == null ? '' : eff === 0
@@ -15257,7 +15257,7 @@ return ev;
         if (useMv.destiny) { mon.vol.destiny = true; await say(`${mon.vol.illusionName || mon.name} 正在瞄准同命！`); return; }
         /* ★ 双打目标解析（含看我嘛/愤怒粉/避雷针/引水/食草重定向） */
         const targets = this.targetsFor(mon, useMv, act);
-        if (!targets.length) { await say('没有可用的目标！'); return; }
+        if (!targets.length) { const fmsg = '目标已经倒下，使用失败了！'; await say(`${displayName} 的 ${useMv.n}${fmsg}`); this.addLog(`${displayName} 的 ${useMv.n}${fmsg}`); return; }
         // 变化招式执行
         if (useMv.c === 'X') {
           /* ★ 变化招式在暗影潜袭目标上落空 */
@@ -15486,7 +15486,7 @@ return ev;
         };
         switch (rng) {
           case RNG.ENEMY_ANY: { const rd = redirectFoe(foes); return rd ? [rd] : pickTarget(foes, foes[0]); }
-          case RNG.ANY: { const rd = redirectFoe(foes); return rd ? [rd] : pickTarget(all.filter(x => x !== mon), foes[0] || allies[0]); }
+          case RNG.ANY: { const rd = redirectFoe(foes); if (rd) return [rd]; if (act && act.target && act.target.alive() && act.target !== mon && all.includes(act.target)) return [act.target]; /* 显式目标已倒下：使用失败，不自动改打其他 */ if (act && act.target) return []; /* 无显式目标（AI/自动）：只打敌方，敌方全灭不选队友 */ return foes.length ? pickTarget(foes, foes[0]) : []; }
           case RNG.ENEMY_ALL: return foes.slice();
           case RNG.ALL_EXCEPT_SELF: return all.filter(x => x !== mon);
           case RNG.SELF: return [mon];
@@ -15542,6 +15542,7 @@ return ev;
       }
       /* ---------- 单次伤害结算 ---------- */
       async hitOnce(side, mon, foe, mv, act) {
+        const tgtSide = this.sideOf(foe);   // 受击方实际侧（攻击队友时特效/动画朝队友）
         /* ★ 巨剑突击破绽：必定命中并清除标记 */
         if (foe.vol.glaiveRush) { foe.vol.glaiveRush = false; }
         // 免疫检查（特性/属性）
@@ -17748,7 +17749,8 @@ return ev;
               if (canKO) allyPen *= 0.5;   // ★ 能确杀敌方时仍可能误伤队友
               s = en - allyPen;
             } else {
-              const list = rng === 'any' ? [...allies, ...realFoes] : realFoes;
+              /* ★ 单体攻击：AI 只从敌方中选目标，绝不主动攻击队友（即使对队友克制度更高） */
+              const list = realFoes;
               let bf = null, bfs = -1e9;
               for (const foeReal of list) {
                 const foe = this.seenFoe(foeReal);
@@ -17756,10 +17758,8 @@ return ev;
                 if (fs > bfs) { bfs = fs; bf = foeReal; }
               }
               /* 看我嘛/愤怒粉：敌方单体招式会被吸引 */
-              if (rng !== 'any') {
-                const fm = realFoes.find(f => f.vol && f.vol.followme);
-                if (fm) { bf = fm; bfs = Math.max(bfs, 35); }
-              }
+              const fm = realFoes.find(f => f.vol && f.vol.followme);
+              if (fm) { bf = fm; bfs = Math.max(bfs, 35); }
               s = bfs; target = bf;
             }
             if (d.a && d.a < 90) s -= (100 - d.a) / 8;
