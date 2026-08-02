@@ -5383,13 +5383,13 @@
       }
 
       #ecard {
-        top: 10px !important;
-        left: 10px !important;
+        top: 10px;
+        left: 10px;
       }
 
       #pcard {
-        bottom: 10px !important;
-        right: 10px !important;
+        bottom: 10px;
+        right: 10px;
       }
 
       /* 底部操作栏重构为更紧凑的布局 */
@@ -12053,7 +12053,9 @@ return ev;
           };
           const eH = align(e0, e1), pH = align(p0, p1);
           if (window.matchMedia && window.matchMedia('(max-width: 768px), (orientation: portrait)').matches) {
-            e1.style.top = eH > 0 ? (6 + eH + 6) + 'px' : '';
+            /* ★ 竖屏纵向堆叠：上方卡保持 CSS 的 6px，下方卡按上方卡高度动态下移，避免重叠 */
+            e1.style.top = '';
+            e0.style.top = eH > 0 ? (6 + eH + 6) + 'px' : '';
             p1.style.bottom = pH > 0 ? (8 + pH + 6) + 'px' : '';
           }
         }
