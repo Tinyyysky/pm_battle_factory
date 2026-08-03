@@ -15549,7 +15549,7 @@ return ev;
         await say(`${mon.vol.illusionName || mon.name} 要回到队伍里了！`);
         const slot = this.fieldSlotOf(mon);
         /* ★ 折返类招式离场必须选择替换宝可梦，不允许返回/取消 */
-        if (side === 'p') { const idx = await this.chooseParty(false, false, slot, mon); if (idx != null && !this.pt.includes(idx)) await this.doSwitch('p', idx, slot); }
+        if (side === 'p') { const idx = await this.chooseParty(false, false, slot, mon); if (idx != null && (!this.pt || !this.pt.includes(idx))) await this.doSwitch('p', idx, slot); }
         else { const to = this.aiBestSwitchForSlot(slot); if (to > -1) await this.doSwitch('e', to, slot); }
       }
       /* ---------- 单次伤害结算 ---------- */
