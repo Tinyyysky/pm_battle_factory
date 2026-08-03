@@ -4285,6 +4285,90 @@
       padding: 10px 12px 24px
     }
 
+    /* ★ 记录/AI思考 切换标签 */
+    .logTabs {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px
+    }
+
+    .logTab {
+      flex: 1;
+      background: rgba(255, 255, 255, .06);
+      border: 2px solid rgba(255, 255, 255, .15);
+      color: #aab;
+      border-radius: 8px;
+      padding: 5px 0;
+      font-family: 'ZCOOL KuaiLe';
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      letter-spacing: 1px
+    }
+
+    .logTab.on {
+      background: linear-gradient(180deg, #ffd93b, #f2b705);
+      border-color: #ffd93b;
+      color: #fff;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, .25)
+    }
+
+    /* ★ AI思考内容列表 */
+    #aiThinkList {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 12px 24px
+    }
+
+    .aiThinkTurn {
+      border: 2px solid rgba(159, 232, 255, .25);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      background: rgba(159, 232, 255, .05)
+    }
+
+    .aiThinkHead {
+      font-family: 'ZCOOL KuaiLe';
+      font-size: 14px;
+      font-weight: 900;
+      color: #9fe8ff;
+      letter-spacing: 1px;
+      margin-bottom: 5px
+    }
+
+    .aiThinkMove {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 900;
+      color: #ffd93b;
+      background: rgba(255, 217, 59, .12);
+      border: 1px solid rgba(255, 217, 59, .4);
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin: 0 4px 4px 0
+    }
+
+    .aiThinkBody {
+      font-size: 11px;
+      line-height: 1.6;
+      color: #b8c4e8;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 320px;
+      overflow-y: auto;
+      border-top: 1px dashed rgba(159, 232, 255, .2);
+      padding-top: 6px;
+      margin-top: 4px
+    }
+
+    .aiThinkEmpty {
+      color: #777;
+      font-size: 12px;
+      text-align: center;
+      padding: 30px 10px
+    }
+
     .logTurnH {
       position: sticky;
       top: 0;
@@ -7083,9 +7167,11 @@
           <div id="logHead">
             <div class="lt">📋 对战记录 <span class="px" style="font-size:8px;color:#9fe8ff" id="logTurnBig">回合
                 1</span><button id="logClose">✕</button></div>
+            <div class="logTabs"><button id="logTabBtn" class="logTab on">📋 记录</button><button id="aiThinkBtn" class="logTab">🤖 AI思考</button></div>
             <div id="logSit"></div>
           </div>
           <div id="logList"></div>
+          <div id="aiThinkList" class="hidden"></div>
         </div>
         <div class="plat e"><i class="teraring"></i></div>
         <div class="plat p"><i class="teraring"></i></div>
@@ -7445,7 +7531,7 @@
     };
     const N = { C2: 65, D2: 73, E2: 82, F2: 87, G2: 98, A2: 110, B2: 123, C3: 131, D3: 147, E3: 165, F3: 175, G3: 196, A3: 220, B3: 247, C4: 262, D4: 294, E4: 330, F4: 349, G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988, C6: 1046 };
 
-    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
+    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
     function saveCfg() { localStorage.setItem('pif_cfg', JSON.stringify(CFG)); }
 
 const _ST = (f, s) => f * Math.pow(2, s / 12);
@@ -8062,7 +8148,7 @@ const MUSIC = {
     M('collisioncourse', '全开猛撞', 'fighting', 'P', 100, 100, 5, { ct: 1, se2: 1 });
     M('knockoff', '拍落', 'dark', 'P', 65, 100, 20, { ct: 1, knockoff: 1 }); M('crunch', '咬碎', 'dark', 'P', 80, 100, 15, { ct: 1, bite: 1, sec: { drop: 'def', n: -1, ch: 20 } });
     M('firefang', '火焰牙', 'fire', 'P', 65, 95, 15, { ct: 1, bite: 1, sec: { st: 'burn', ch: 10 } });
-    M('icefang', '冰冻牙', 'ice', 'P', 65, 95, 15, { ct: 1, bite: 1, sec: { st: 'frz', ch: 10 } });
+    M('icefang', '冰冻牙', 'ice', 'P', 65, 95, 15, { ct: 1, bite: 1, sec: { st: 'frz', ch: 10 } }); M('icywind', '冰冻之风', 'ice', 'S', 55, 95, 15, { selfDropT: { drop: 'spe', n: -1 } });
     M('thunderfang', '雷电牙', 'electric', 'P', 65, 95, 15, { ct: 1, bite: 1, sec: { st: 'par', ch: 10 } });
     M('psychicfangs', '精神之牙', 'psychic', 'P', 85, 100, 10, { ct: 1, bite: 1 });
     M('jawlock', '紧咬不放', 'dark', 'P', 80, 100, 10, { ct: 1, bite: 1 });
@@ -8284,7 +8370,7 @@ const MUSIC = {
       dazzlinggleam: 'enemy-all', rockslide: 'enemy-all', eruption: 'enemy-all', originpulse: 'enemy-all',
       precipiceblades: 'enemy-all', landswrath: 'enemy-all', breakingwipe: 'enemy-all', expandingforce: 'enemy-all',
       springtidestorm: 'enemy-all', bleakwindstorm: 'enemy-all', wildboltstorm: 'enemy-all', sandsearstorm: 'enemy-all',
-      snarl: 'enemy-all', strugglebug: 'enemy-all', electroweb: 'enemy-all', overdrive: 'enemy-all',
+      snarl: 'enemy-all', strugglebug: 'enemy-all', electroweb: 'enemy-all', overdrive: 'enemy-all', icywind: 'enemy-all',
       glaciate: 'enemy-all', diamondstorm: 'enemy-all', terastarstorm: 'enemy-all', makeitrain: 'enemy-all',
       coreenforcer: 'enemy-all', astralbarrage: 'enemy-all', glaciallance: 'enemy-all', dragonenergy: 'enemy-all',
       clangoroussoulblaze: 'enemy-all', maxmv: 'any',
@@ -9055,7 +9141,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(980, '土王', 'poison/ground', '130/75/60/45/100/20', 'poisonpoint/unaware', ['earthquake', 'poisonjab', 'toxic', 'recover', 'stealthrock']);
     S(983, '仆刀将军', 'dark/steel', '100/135/120/60/85/50', 'defiant/defiant', ['kowtowcleave', 'suckerpunch', 'ironhead', 'swordsdance', 'knockoff']);
     S(984, '雄伟牙', 'ground/fighting', '115/131/131/53/53/87', 'protosynthesis/protosynthesis', ['earthquake', 'closecombat', 'stealthrock', 'knockoff', 'icepunch']);
-    S(987, '振翼发', 'ghost/fairy', '55/55/55/135/135/135', 'protosynthesis/protosynthesis', ['shadowball', 'moonblast', 'thunderbolt', 'calmmind', 'dazzlinggleam']);
+    S(987, '振翼发', 'ghost/fairy', '55/55/55/135/135/135', 'protosynthesis/protosynthesis', ['shadowball', 'moonblast', 'thunderbolt', 'calmmind', 'dazzlinggleam', 'icywind']);
     S(991, '铁包袱', 'ice/water', '56/80/114/124/60/136', 'quarkdrive/quarkdrive', ['freezedry', 'hydropump', 'taunt', 'uturn', 'icebeam']);
     S(994, '铁毒蛾', 'fire/poison', '80/70/60/140/110/110', 'quarkdrive/quarkdrive', ['fireblast', 'sludgewave', 'energyball', 'thunderbolt']);
     S(1000, '赛富豪', 'steel/ghost', '87/60/95/133/91/84', 'goodasgold/goodasgold', ['makeitrain', 'shadowball', 'focusblast', 'recover', 'thunderbolt']);
@@ -10111,7 +10197,16 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
        898: ['trickroom'], 956: ['helpinghand']
     };
     /* ★ 双打独占技能：单打中完全无用的招式。对战工厂单打不会分配，图鉴中统一标注「双打独占」 */
-    const DOUBLE_ONLY = ['helpinghand', 'followme', 'ragepowder', 'coaching', 'wideguard', 'spotlight'];
+    const DOUBLE_ONLY = ['helpinghand', 'followme', 'ragepowder', 'coaching', 'wideguard', 'spotlight', 'protect'];
+    /* ★ 双打专属招式并入学习面（图鉴可见并标注「双打独占」） */
+    Object.entries(DOUBLE_MOVES).forEach(([id, mvs]) => {
+      const sp = SPDB[+id];
+      if (sp) mvs.forEach(k => { if (MV[k] && !sp.mv.includes(k)) sp.mv.push(k); });
+    });
+    /* ★ 全体发放守住：除已有守住类技能（守住/王盾/碉堡/尖刺防守/线阱/极巨防壁/拦堵/烈焰防护）的宝可梦外，其余全部获得守住（双打独占） */
+    SP.forEach(sp => {
+      if (!sp.mv.some(k => MV[k] && MV[k].protect)) sp.mv.push('protect');
+    });
     /* ============ 第三特性补全补丁 ============ */
 /*
   规则：
@@ -12347,6 +12442,17 @@ return ev;
         const hpnum = side === 'p' ? `<div class="hpnum">${m.hp} / ${m.maxhp}</div>` : (CFG.enemyHpPct ? `<div class="hpnum">${m.hp > 0 ? Math.max(1, Math.ceil(m.hpPct() * 100)) : 0}%</div>` : '');
         const xp = side === 'p' ? `<div class="xpbar"><div class="xpfill" style="width:${Math.round(100 * (m.xp - Math.pow(m.lvl, 3)) / (Math.pow(m.lvl + 1, 3) - Math.pow(m.lvl, 3)))}%"></div></div>` : '';
         const it = (m.item && (side === 'p' ? CFG.myItem : CFG.enemyItem)) ? `<div style="font-size:10px;color:#888;font-weight:700">持有：${IT[m.item]?.n || ''}</div>` : '';
+        /* ★ 敌方速度线：当前等级下可达的速度范围（性格-速度+0EV ～ 性格+速度+32EV） */
+        const speLine = (side === 'e' && CFG.enemySpeedLine) ? (() => {
+          const bs = m.mega ? m.mega.s : m.sp.s;
+          const iv = m.iv ?? 25;
+          const c = Math.floor((2 * bs[5] + iv) * m.lvl / 100) + 5;
+          const spMin = Math.floor(c * 0.9);
+          const spMax = Math.floor((c + 32) * 1.1);
+          return `<div style="font-size:10px;color:#e0912b;font-weight:700">速线 ${spMin} ~ ${spMax}</div>`;
+        })() : '';
+        /* ★ 我方速度显示：当前实际速度（含性格/能力等级/道具/天气/顺风等） */
+        const mySpe = (side === 'p' && CFG.mySpeedShow) ? `<div style="font-size:10px;color:#e0912b;font-weight:700">当前速度 ${b ? m.effStat('spe', b) : m.st.spe}</div>` : '';
         const ab = AB[m.ability];
         const abRow = (ab && (side === 'p' ? CFG.myAbility : CFG.enemyAbility)) ? `<div style="margin-top:3px"><span class="abchip" title="${ab.d}">${ab.n}</span></div>` : '';
         /* 能力等级实时显示（红升蓝降） */
@@ -12365,7 +12471,7 @@ return ev;
         return `<div class="row1"><span class="nm">${displayName}${m.shiny ? ' ✦' : ''}</span><span class="lv">${m.lvl}</span>${stch}${gmaxChips}${confCh}${tags}</div>
       <div style="margin-top:2px">${types}</div>
       <div class="hpwrap"><span class="hplabel">HP</span><div class="hpbar"><div class="hpfill ${cls}" style="width:${pct}%"></div></div></div>
-      ${hpnum}${xp}${pips}${it}${abRow}${stgrow}`;
+      ${hpnum}${xp}${pips}${it}${abRow}${speLine}${mySpe}${stgrow}`;
       },
       /* ★ 预加载指定边的宝可梦立绘（出场动画前调用，避免动画中图片才加载出来） */
       loadSprite(side, m, slot = 0) {
@@ -12701,7 +12807,31 @@ return ev;
         html += `<div class="logE ${cls}"><span class="li">${ic}</span><span>${e.text}</span></div>`;
       });
       list.innerHTML = html;
+      /* ★ AI思考面板：显示真实AI的思考内容与实际出招 */
+      const thinkList = $('#aiThinkList');
+      if (thinkList) {
+        const th = (b._aiThinking || []).map(en => {
+          const mvChips = (en.moves || []).map(mv => {
+            const nm = MV[mv.k] ? MV[mv.k].n : mv.k;
+            return `<span class="aiThinkMove">${mv.slot != null ? '槽' + mv.slot + '·' : ''}${escapeHtml(nm)}${mv.target ? '→' + escapeHtml(mv.target) : ''}</span>`;
+          }).join('');
+          const body = en.thinking ? `<div class="aiThinkBody">${escapeHtml(en.thinking)}</div>` : '';
+          return `<div class="aiThinkTurn"><div class="aiThinkHead">🤖 第 ${en.turn} 回合 · 实际出招：${mvChips}</div>${body}</div>`;
+        }).join('');
+        let emptyMsg = '<div class="aiThinkEmpty">暂无AI思考记录</div>';
+        if (b._aiState === 'ok') emptyMsg = '<div class="aiThinkEmpty">✅ 真实AI已连接——思考记录会在对手出招后逐回合显示</div>';
+        else if (b._aiState === 'failed') emptyMsg = '<div class="aiThinkEmpty">❌ 真实AI请求失败，本场已回退内置AI（原因见「📋 记录」标签页）</div>';
+        else if (b._aiState === 'on') emptyMsg = '<div class="aiThinkEmpty">🤖 真实AI已开启，等待API响应…</div>';
+        else if (CFG.aiReal && !CFG.aiApiKey) emptyMsg = '<div class="aiThinkEmpty">⚠️ 已开启真实AI但未填写API Key（设置→真实AI对战）</div>';
+        else if (CFG.aiReal) emptyMsg = '<div class="aiThinkEmpty">🤖 真实AI已开启，等待首回合出招…</div>';
+        thinkList.innerHTML = th || emptyMsg;
+        if ($('#logOv').classList.contains('on') && thinkList.classList.contains('on')) thinkList.scrollTop = thinkList.scrollHeight;
+      }
       if ($('#logOv').classList.contains('on')) list.scrollTop = list.scrollHeight;
+    }
+    /* ★ 简单HTML转义（AI思考内容可能包含特殊字符） */
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
     /* ============ 属性攻击特效 & 变化招式共用特效 ============ */
     const TYPEVFX = {
@@ -13913,6 +14043,7 @@ return ev;
         this._helpingHand = false;
         this.trainerName = o.trainer || null;
         this.rules = Object.assign({ mega: true, dyna: true, tera: true, switch: true, items: true, run: true, capture: false }, o.rules);
+        this.noXp = o.noXp || false;   // ★ 标准化赛制（双打冠军Lv50）不获得经验值
         this.aiLevel = o.ai || 1; this.onEnd = o.onEnd; this.onWildFlee = o.onWildFlee;
         this.pi = 0; this.ei = 0; this.turn = 0; this.over = false; this.result = null;
         this.wx = null; this.wxT = 0; this.trickT = 0; this.terrain = null; this.terrainT = 0;
@@ -13923,6 +14054,8 @@ return ev;
         this.usedForm = { p: false, e: false };
         this.aiSwitches = o.aiSwitches ?? 1;
         this.caught = null; this.participants = new Set(); this.log = []; this.pendingSwitches = [];
+        this._aiThinking = [];   // ★ 真实AI思考记录：{turn, moves:[{slot,k,target}], thinking}（供记录面板查看）
+        this._aiState = 'off'; this._aiFailLogged = false;   // ★ 真实AI连接状态：off/on/ok/failed
       }
       P() { return this.pp[this.pi]; } E() { return this.ep[this.ei]; }
       /* ★ 双打场槽 */
@@ -13967,11 +14100,19 @@ return ev;
       async start() {
         AU.playMusic('battle');
         this.musicBase = 'battle';
+        this._aiThinkingPending = null;   // ★ 清空上场的挂起思考
+        window.curBattle = this;          // ★ 供记录面板随时刷新渲染
+        /* ★ 真实AI连接状态提示（写入战斗记录，便于排查） */
+        if (this.realAIOn()) { this._aiState = 'on'; this.addLog('🤖 真实AI已开启：本场对手由API实时决策'); }
+        else if (CFG.aiReal && !CFG.aiApiKey) { this.addLog('🤖 已开启真实AI但未填写API Key，本场回退内置AI'); }
         preloadSprites([...this.pp, ...this.ep]);
         this.log = [];
         LOGFN = t => this.addLog(t);
         $('#logOv').classList.remove('on');
         $('#logList').innerHTML = '';
+        $('#aiThinkList').innerHTML = '';
+        $('#logTabBtn').classList.add('on'); $('#aiThinkBtn').classList.remove('on');
+        $('#logList').classList.remove('hidden'); $('#aiThinkList').classList.add('hidden');
         /* ★ 开局清场：宝可梦出场前隐藏所有卡片与立绘（含上一场残留） */
         for (const s of [0, 1]) {
           const ce = BUI.card('e', s), cp = BUI.card('p', s);
@@ -14496,6 +14637,8 @@ return ev;
         if (this.doubles) return this.doTurnDoubles();
         const Pm = this.P(), E = this.E();
         if (!Pm || !E) return this.finish();
+        /* ★ 提前启动AI决策：玩家选择招式期间并行进行（真实AI时玩家点完即可出招，无需等待） */
+        const eaPromise = this.aiAction();
         let pa = null, ea = null;
         pa = await this.getPlayerAction(); if (this.over) return;
         if (pa.type === 'run') { await say('成功逃走了！'); AU.run(); this.result = 'run'; this.over = true; return; }
@@ -14503,7 +14646,7 @@ return ev;
           await this.tryCapture(pa.item); if (this.over) return;
           ea = { type: 'move', move: this.pickAIMove() }; await this.execActions({ type: 'skip' }, ea); return;
         }
-        ea = await this.aiAction();
+        ea = await eaPromise;
         /* ★ 双方同时换人 */
         if (pa.type === 'switch' && ea.type === 'switch') {
           const first = this.speedOrder(Pm, E);
@@ -14520,6 +14663,8 @@ return ev;
       /* ---------- 双打回合 ---------- */
       async doTurnDoubles() {
         if (!this.sideAliveCount('p') || !this.sideAliveCount('e')) return this.finish();
+        /* ★ 提前启动AI决策（双打一次请求两个槽位）：玩家选择招式期间并行进行 */
+        const eActsPromise = this.aiActions();
         const pActs = await this.getPlayerActionsDoubles();
         if (this.over) return;
         if (pActs.some(a => a && a.type === 'run')) {
@@ -14529,11 +14674,11 @@ return ev;
         if (ballAct) {
           await this.tryCapture(ballAct.item);
           if (this.over) return;
-          const eActs = this.aiActions();
+          const eActs = await eActsPromise;
           await this.execActions([{ type: 'skip' }, { type: 'skip' }], eActs);
           return;
         }
-        const eActs = this.aiActions();
+        const eActs = await eActsPromise;
         /* ★ 换人/道具立即结算，槽位行动改为跳过 */
         for (let s = 0; s < 2; s++) {
           const a = pActs[s];
@@ -15196,12 +15341,12 @@ return ev;
           return Math.random() < .5 ? -1 : 1;
         });
         for (const a of acts) {
-          if (this.over) return;
+          if (this.over) { this.commitAIThinking(); return; }
           if (a.mon.fainted) continue;
           a.mon.vol.actedThisTurn = true;   // ★ 标记本回合已出手（供突袭判定）
           const _danceMvKey = (a.move && typeof a.move === 'object' ? a.move.k : a.move);
           await this.doMove(a.side, a.mon, a.move, a);
-          if (this.over) return;
+          if (this.over) { this.commitAIThinking(); return; }
           /* ★ 舞者：使出舞蹈招式后，对手若有舞者则立即用相同招式 */
           if (_danceMvKey && MV[_danceMvKey] && MV[_danceMvKey].dance) {
             const foe = this.foeOf(a.mon);
@@ -15212,6 +15357,16 @@ return ev;
               await this.doMove(this.sideOf(foe), foe, { k: _danceMvKey }, { side: this.sideOf(foe), mon: foe, move: { k: _danceMvKey } });
             }
           }
+        }
+        /* ★ 真实AI思考记录：等本回合行动全部执行完才提交显示（玩家选招期间不显示当前回合的思考） */
+        this.commitAIThinking();
+      }
+      /* ★ 提交待显示的AI思考记录 */
+      commitAIThinking() {
+        if (this._aiThinkingPending) {
+          this._aiThinking.push(this._aiThinkingPending);
+          this._aiThinkingPending = null;
+          renderBattleLog(this);
         }
       }
       /* ---------- 命中率统一计算（广角镜/复眼/天气/闪避等全部修饰） ---------- */
@@ -15500,6 +15655,8 @@ return ev;
         }
         // ---- 攻击招式 ----
         const spread = targets.length > 1;
+        /* ★ 双打群体招式AOE衰减：命中2个以上目标时每个目标×0.75（含只打1个敌人但波及队友的地震/冲浪/放电等） */
+        if (spread) useMv = { ...useMv, spread: true };
         // ★ 精神场地：地面上的宝可梦不受先制招式影响
         if (this.terrain === 'psychic' && (useMv.pri || 0) > 0 && targets.some(t => this.grounded(t))) { await say('精神场地挡住了先制招式！'); return; }
         // 女王的威严 / 耀眼 / 尾甲（保护整个场地一侧）
@@ -16406,6 +16563,7 @@ return ev;
           if (this.terrain === 'electric' && mv.t === 'electric' && this.grounded(mon)) dmg = Math.floor(dmg * 1.3);
           if (this.terrain === 'electric' && mv.psyblade) dmg = Math.floor(dmg * 1.5);
           if (this.terrain === 'grassy' && mv.t === 'grass' && this.grounded(mon)) dmg = Math.floor(dmg * 1.3);
+          if (this.terrain === 'grassy' && mv.k === 'earthquake') dmg = Math.floor(dmg * 0.5);   // ★ 青草场地：地震伤害减半（不限攻击者是否接地；其他地面技能不受影响）
           if (this.terrain === 'psychic' && mv.t === 'psychic' && this.grounded(mon)) dmg = Math.floor(dmg * 1.3);
           if (this.terrain === 'misty' && mv.t === 'dragon' && this.grounded(foe)) dmg = Math.floor(dmg * .5);
         }
@@ -16549,6 +16707,8 @@ return ev;
         if (crit) dmg = Math.floor(dmg * (mon.has('sniper') ? 2.25 : 1.5));
         // 随机
         dmg = Math.floor(dmg * (85 + Math.random() * 16) / 100);
+        /* ★ 双打群体招式AOE衰减：命中2个以上目标时，每个目标的伤害×0.75（含只打1个敌人但波及队友的地震/冲浪等） */
+        if (mv.spread) dmg = Math.max(1, Math.floor(dmg * 0.75));
         return { dmg: Math.max(eff > 0 ? 1 : 0, dmg), eff, crit, fickle };
       }
       async directDmg(m, d, side, msg) {
@@ -17384,6 +17544,7 @@ return ev;
         }
       }
       async gainXP(silent) {
+        if (this.noXp) return;   // ★ 双打冠军50级标准赛制：不获得经验值
         for (const m of this.participants) {
           if (m.fainted || m.xpGot) continue;
           const foe = this.ep.find(x => x.fainted && !x.xpDone);
@@ -17855,6 +18016,234 @@ return ev;
         if (!best) best = 'struggle';
         return { best, score: bestS };
       }
+      /* ================= 真实AI（API） ================= */
+      realAIOn() { return !!CFG.aiReal && !!CFG.aiApiKey && !this.wild; }
+      async callRealAI(messages, noThink) {
+        const base = (CFG.aiProvider === 'openai' && CFG.aiBaseUrl) ? CFG.aiBaseUrl.replace(/\/+$/, '') : 'https://api.deepseek.com';
+        const ctrl = new AbortController();
+        /* ★ 大幅放开限制：token上限与超时都放大（并行决策下玩家选招期间请求早已完成，超时仅作最后保险） */
+        const to = setTimeout(() => ctrl.abort(), 300000);
+        try {
+          const res = await fetch(base + '/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + CFG.aiApiKey },
+            body: JSON.stringify((() => {
+              const payload = { model: CFG.aiModel || 'deepseek-v4-flash', messages, max_tokens: 16384, stream: false };
+              /* ★ DeepSeek思考模式（官方参数）：
+                   thinking.type = enabled/disabled 开关；reasoning_effort = low/high/max 控制思考强度（deepseek-v4-flash 映射：low→low）
+                   思考模式下 temperature 等参数不生效（官方文档说明），仅关闭思考时才发送 */
+              if (CFG.aiProvider === 'deepseek') {
+                if (CFG.aiDeepSeekThink && !noThink) {
+                  payload.thinking = { type: 'enabled' };
+                  payload.reasoning_effort = 'low';
+                } else {
+                  payload.thinking = { type: 'disabled' };
+                  payload.temperature = 0.3;
+                }
+              } else {
+                payload.temperature = 0.3;
+              }
+              return payload;
+            })())
+          });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          /* ★ 返回完整消息：content=实际输出；思考内容兼容多种字段名（DeepSeek reasoning_content / 其他 reasoning / thinking） */
+          const msg = data.choices && data.choices[0] && data.choices[0].message ? data.choices[0].message : null;
+          return msg ? { content: msg.content || '', reasoning_content: msg.reasoning_content || msg.reasoning || msg.thinking || '' } : { content: '', reasoning_content: '' };
+        } finally { clearTimeout(to); }
+      }
+      /* ★ 招式效果短提示（压缩上下文用） */
+      aiMoveHint(k) {
+        const d = MV[k];
+        if (!d) return '';
+        if (d.c === 'X') {
+          if (d.protect) return '保护';
+          if (d.weather) return '改天气';
+          if (d.trickroom) return '空间';
+          if (d.tailwind) return '顺风';
+          if (d.screen) return '开墙';
+          if (d.hazard) return '下陷阱';
+          if (d.heal || d.rest) return '回复';
+          if (d.setSt) return '上状态';
+          if (d.selfUp || d.selfUp2 || d.selfUp3) return '强化';
+          if (d.coaching) return '指导队友攻防+1';
+          if (d.helpinghand) return '帮助队友伤害×1.5';
+          if (d.followme) return '吸引单体攻击';
+          if (d.ragepowder) return '吸引单体攻击(草/防尘无效)';
+          if (d.wideguard) return '防群体招式';
+          if (d.parting) return '换人';
+          return '变化';
+        }
+        if (d.multi) return '连击' + d.multi[0] + '~' + d.multi[1] + '次';
+        if (d.drain) return '吸血' + d.drain + '%';
+        if (d.recoil) return '反伤';
+        if (d.pri) return '先制+' + d.pri;
+        return '';
+      }
+      /* ★ 宝可梦简报：own=true 为本方（全信息）；own=false 为对方（特性池猜测、道具未知） */
+      aiMonBrief(m, own) {
+        const pct = Math.max(0, Math.round(m.hpPct() * 100));
+        const status = m.status ? ({ burn: '灼伤', par: '麻痹', psn: '中毒', tox: '剧毒', sleep: '睡眠', frz: '冰冻' }[m.status] || m.status) : '无';
+        const stg = STATKEYS.filter(k => m.stages[k]).map(k => STN[k] + (m.stages[k] > 0 ? '+' : '') + m.stages[k]).join('/') || '无';
+        const moves = m.moves.map(x => {
+          const d = MV[x.k]; if (!d) return '';
+          const hint = this.aiMoveHint(x.k);
+          return x.k + '(' + d.n + ',' + TNAME[d.t] + '/' + (d.c === 'P' ? '物' : d.c === 'S' ? '特' : '变') + (d.p ? '威' + d.p : '') + (d.a != null ? '命' + d.a : '') + 'PP' + x.pp + (hint ? '·' + hint : '') + ')';
+        }).filter(Boolean).join(' ');
+        const abInfo = own ? ('特性:' + (AB[m.ability]?.n || '未知')) : ('特性池:' + m.sp.ab.map(a => AB[a]?.n || a).join('/') + '(实际未知,需猜)');
+        const itemInfo = own ? (m.item ? '道具:' + (IT[m.item]?.n || '?') : '道具:无') : '道具:未知(可从战斗记录推断)';
+        /* ★ 本方：6项具体数值（含性格/个体/对战点数后的实际能力值）；对方：速度线最小~最大（性格-速度+0EV ～ 性格+速度+32EV） */
+        const statInfo = own
+          ? ('数值:HP' + m.maxhp + ' 攻' + m.st.atk + ' 防' + m.st.def + ' 特攻' + m.st.spa + ' 特防' + m.st.spd + ' 速' + m.st.spe)
+          : (() => {
+              const bs = m.mega ? m.mega.s : m.sp.s;
+              const iv = m.iv ?? 25;
+              const c = Math.floor((2 * bs[5] + iv) * m.lvl / 100) + 5;
+              const spMin = Math.floor(c * 0.9);
+              const spMax = Math.floor((c + 32) * 1.1);
+              return '速度线:' + spMin + '~' + spMax + '(该宝可梦当前等级可达速度范围)';
+            })();
+        return `${m.name} Lv.${m.lvl} ${m.types.join('/')} HP${pct}% 状态:${status} 能力:${stg} ${statInfo} ${abInfo} ${itemInfo} 晶${TNAME[m.teraType]}${m.alive() ? '' : '[已濒死]'}\n  招式: ${moves}`;
+      }
+      /* ★ 构建本回合完整战况提示词（单打/双打通用，双打一次请求两个槽位） */
+      buildAIPrompt() {
+        const L = [];
+        L.push('回合:' + this.turn + ' 模式:' + (this.doubles ? '双打' : '单打'));
+        const wx = this.wx ? ({ sun: '大晴天', rain: '下雨', sand: '沙暴', hail: '冰雹', delta: '德尔塔气流', desolate: '终结之地', primordial: '始源之海' }[this.wx] || this.wx) : '无';
+        L.push('场地: 天气=' + wx + (this.trickT ? ' 戏法空间剩余' + this.trickT + '回合' : '') + (this.terrain ? ' 场地=' + ({ electric: '电气', grassy: '青草', psychic: '精神', misty: '薄雾' }[this.terrain] || this.terrain) : '') + ' 顺风:我方' + this.tailwind.p + '回合/对方' + this.tailwind.e + '回合');
+        const scr = side => { const arr = side === 'e' ? this.et : this.pt; const tm = side === 'e' ? this.ep : this.pp; return (arr || []).map(i => { const x = tm[i]; return x && x.vol ? (x.vol.reflect ? '反射壁' : '') + (x.vol.lightscreen ? '光墙' : '') : ''; }).join(''); };
+        L.push('  墙:我方(' + (scr('p') || '无') + ') 对方(' + (scr('e') || '无') + ')' + (this.auroraveil.p ? ' 我方极光幕' : '') + (this.auroraveil.e ? ' 对方极光幕' : ''));
+        L.push('  陷阱:我方(岩' + this.haz.p.sr + '菱' + this.haz.p.spikes + '毒' + this.haz.p.tspikes + ') 对方(岩' + this.haz.e.sr + '菱' + this.haz.e.spikes + '毒' + this.haz.e.tspikes + ')');
+        /* ★ 形态状态：极巨/太晶/Mega 可用性与双方使用情况（供AI判断是否使用形态） */
+        const megaS = this.rules.mega ? (this.rules.megaMaster ? '可用(无限制)' : (this.usedForm.e ? '已使用' : '可用(本场1次)')) : '本场禁用';
+        const dynaS = this.rules.dyna ? (this.usedForm.e ? '已使用' : '可用(本场1次,3回合)') : '本场禁用';
+        const teraS = (this.rules.tera && !this.rules.megaMaster) ? (this.usedForm.e ? '已使用' : '可用(本场1次)') : '本场禁用';
+        const pMega = this.usedForm.p ? '已用' : '未用';
+        L.push('【形态状态】我方: Mega' + megaS + ' 极巨化' + dynaS + ' 太晶化' + teraS + '；对方: Mega' + pMega + ' 极巨化' + (this.usedForm.p ? '已用' : '未用') + ' 太晶化' + (this.usedForm.p ? '已用' : '未用'));
+        L.push('【我方队伍(你控制的对手方)】');
+        const eField = this.doubles ? (this.et || [0, 1]) : [this.ei];
+        eField.forEach((idx, i) => { const x = this.ep[idx]; if (x && x.alive()) L.push('场上槽' + i + ': ' + this.aiMonBrief(x, true)); });
+        this.ep.forEach((x, i) => { if (x && x.alive() && !eField.includes(i)) L.push('后备: ' + this.aiMonBrief(x, true)); });
+        /* ★ 我方场上每只宝可梦的形态可用性（Mega/极巨/太晶各自是否可用） */
+        eField.forEach((idx, i) => {
+          const x = this.ep[idx]; if (!x || !x.alive()) return;
+          const parts = [];
+          parts.push('Mega' + (this.rules.mega && MEGA[x.id] && !this.usedForm.e ? '可' : '不可'));
+          parts.push('极巨' + (this.rules.dyna && ![888, 889, 890].includes(x.id) && !this.usedForm.e ? '可' : '不可'));
+          parts.push('太晶' + (this.rules.tera && !this.rules.megaMaster && !this.usedForm.e ? '可' : '不可'));
+          L.push('  我方场上每只可用的形态→ 槽' + i + '(' + x.name + '): ' + parts.join(' '));
+        });
+        L.push('【对方队伍(玩家方)】');
+        const pField = this.doubles ? (this.pt || [0, 1]) : [this.pi];
+        pField.forEach(i => { const x = this.pp[i]; if (x && x.alive()) L.push('场上: ' + this.aiMonBrief(x, false)); });
+        L.push('【战斗记录(全部回合)】');
+        this.log.forEach(l => L.push('- [回合' + l.t + '] ' + String(l.text).slice(0, 300)));
+        return L.join('\n');
+      }
+      parseRealAI(txt) {
+        if (!txt) return null;
+        const m = txt.match(/\{[\s\S]*\}/);
+        if (!m) return null;
+        try { return JSON.parse(m[0]); } catch (e) { return null; }
+      }
+      /* ★ 校验API返回的招式与目标，生成合法行动；目标缺失/方向错误自动兜底修正 */
+      realAIAct(m, slot, obj) {
+        if (!obj || typeof obj.move !== 'string') return null;
+        if (!m.moves.some(x => x.k === obj.move && x.pp > 0)) return null;
+        const act = { type: 'move', move: { k: obj.move }, slot: slot == null ? undefined : slot };
+        const rng = rngOf(obj.move);
+        const side = this.sideOf(m);
+        const all = [...this.fieldMons('p'), ...this.fieldMons('e')];
+        let tgt = null;
+        if (obj.target) {
+          tgt = all.find(x => x && x.alive() && (x.name === obj.target || (x.vol && x.vol.illusionName === obj.target)));
+          if (tgt) {
+            const isAlly = this.sideOf(tgt) === side;
+            /* ★ 目标方向校验：指定队友类招式指向对方→无效；单体攻击指向队友→无效（'any'类变化招式如戏法允许任意） */
+            if (rng === 'ally-any' && !isAlly) tgt = null;
+            else if (rng === 'enemy-any' && isAlly) tgt = null;
+            else if (rng === 'any' && isAlly && MV[obj.move] && MV[obj.move].c !== 'X') tgt = null;
+          }
+        }
+        if (tgt) act.target = tgt;
+        /* ★ 指定队友类招式缺目标兜底：优先选持有攻击招式的队友，其次第一个存活队友 */
+        if (rng === 'ally-any' && !act.target) {
+          const allies = this.fieldMons(side).filter(x => x !== m && x.alive());
+          const pick = allies.find(a => a.moves.some(x => MV[x.k] && MV[x.k].c !== 'X' && MV[x.k].p)) || allies[0];
+          if (pick) act.target = pick;
+        }
+        /* ★ 形态标记：由AI判断是否使用极巨/太晶/Mega，按与本地AI相同的可用性约束校验后打标（resolveForms统一结算） */
+        const d0 = MV[act.move.k];
+        if (obj.mega === true && this.rules.mega && MEGA[m.id] && !m.dyn && !(m.mega && m.mega.stone) && (m.id !== 718 || m.vol.completeForm) && (this.rules.megaMaster || !this.usedForm.e)) act.mega = true;
+        if (obj.dyna === true && this.rules.dyna && !m.dyn && !(m.mega && m.mega.stone) && ![888, 889, 890].includes(m.id) && d0 && d0.c !== 'X' && m.hpPct() > .5 && !this.usedForm.e) act.dyn = true;
+        if (obj.tera === true && this.rules.tera && !this.rules.megaMaster && !m.tera && !this.usedForm.e) act.tera = true;
+        return act;
+      }
+      /* ★ 真实AI行动入口：单打一次请求；双打一次请求两个槽位。失败/超时返回null由本地AI接管 */
+      async realAIMoves() {
+        if (!this.realAIOn()) return null;
+        const SYS = '你是一名宝可梦对战AI教练，负责实时操作对手方队伍。你会收到：本回合完整战场状态（我方与对方所有宝可梦信息、场地状态）、我方宝可梦的招式列表、对方宝可梦的信息（对方的具体特性未知但你知道其全部可能特性需自行猜测，对方具体道具未知需从战斗记录中的描述推断）、以及战斗记录。\n规则：\n1. 只输出一个JSON对象，禁止输出任何其他文字、解释或代码块标记。\n2. 单打输出 {"action":"move","move":"招式key"}；也可 {"action":"switch","index":后备序号}（仅当明显被克制且后备明显更优时）。\n3. 双打输出 {"slot0":{"move":"招式key","target":"目标名"},"slot1":{...}}。target（目标）规则非常重要，写错或遗漏必填target会导致该行动无效：\n   - 必须指定target：帮助、指导、号令等「指定队友」类招式 → target必须是我方场上队友的名字；暗影球、鬼火等单体攻击/单体状态招式 → target必须是对方场上宝可梦的名字。\n   - 禁止写target：群体招式（热风/岩崩/地震/冲浪/放电/巨声等）、自身招式（保护/剑舞/冥想/回复/顺风/戏法空间/开墙/强化等）、吸引类（看我嘛/愤怒粉）、我方全体招式（广域防守）。\n   - 双打中若两槽位都需要出招，每个槽位必须给出move；名字以状态信息中的宝可梦名字为准。\n4. 招式key必须出自该宝可梦的招式列表，否则该行动无效。\n5. 形态使用：若状态信息中标注某形态"可"，可在行动JSON中加入 "mega":true 或 "dyna":true 或 "tera":true 表示本回合使用该形态（单打加在顶层，双打加在对应槽位内）；标"不可"或"已使用"的形态禁止标记；每场战斗我方每种形态至多使用一次，双打每回合最多一个槽位使用形态；极巨化仅建议在HP>50%时使用；形态标记必须与攻击/变化招式配合使用。\n6. 决策要点：属性克制、速度先手（含先制/顺风/戏法空间）、击杀线评估、生存与换人、天气场地空间墙的利用、双打配合（避雷针/引水吸收全场招式、指导/帮助强化队友、广域防守防群体招式、看我嘛吸引火力、保护等）。\n7. 不要使用PP耗尽的招式，不要对无效目标使用辅助招式。\n8. 战斗节奏快，直接给出果断的决策。';
+        try {
+          const MSG = [{ role: 'system', content: SYS }, { role: 'user', content: this.buildAIPrompt() }];
+          let resMsg = await this.callRealAI(MSG);
+          /* ★ 思考内容占满输出导致 content 为空：关闭思考快速重试一次，确保拿到决策 */
+          if (!resMsg.content && resMsg.reasoning_content) {
+            resMsg = await this.callRealAI(MSG, true);
+          }
+          const txt = resMsg && resMsg.content ? resMsg.content : '';
+          const reasoning = (resMsg && (resMsg.reasoning_content || resMsg.reasoning || resMsg.thinking)) ? String(resMsg.reasoning_content || resMsg.reasoning || resMsg.thinking) : '';
+          const obj = this.parseRealAI(txt);
+          if (!obj) {
+            /* ★ 返回了内容但无法解析：记录一次诊断日志 */
+            if (!this._aiFailLogged) { this._aiFailLogged = true; this._aiState = 'failed'; this.addLog('🤖 真实AI返回内容无法解析，本场后续回退内置AI'); }
+            return null;
+          }
+          this._aiState = 'ok';
+          /* ★ 思考记录先挂起，等本回合行动执行完才提交（commitAIThinking） */
+          const pending = { turn: this.turn, thinking: reasoning.slice(0, 2000) };
+          if (this.doubles) {
+            const acts = [null, null];
+            const moves = [];
+            let formTaken = false;   // ★ 双打每回合最多一个槽位使用形态
+            for (let s = 0; s < 2; s++) {
+              const m = this.slotMon('e', s);
+              if (!m || !m.alive()) { acts[s] = { type: 'skip' }; continue; }
+              const entry = obj['slot' + s];
+              if (!entry) continue;   // 该槽位未给出 → 留空由本地AI接管
+              const act = this.realAIAct(m, s, entry);
+              if (act) {
+                if (formTaken) { act.mega = false; act.dyn = false; act.tera = false; }
+                if (act.mega || act.dyn || act.tera) formTaken = true;
+                acts[s] = act;
+                moves.push({ slot: s, k: act.move.k, target: act.target ? act.target.name : null });
+              }
+            }
+            if (moves.length) { pending.moves = moves; this._aiThinkingPending = pending; }
+            return acts.some(Boolean) ? acts : null;
+          }
+          const m = this.E();
+          if (!m) return null;
+          if (obj.action === 'switch' && typeof obj.index === 'number') {
+            const bench = this.ep.filter(x => x.alive() && x !== m);
+            const to = bench[obj.index];
+            const idx = to ? this.ep.indexOf(to) : -1;
+            if (idx >= 0 && !trappedReason(m, this.P(), this)) {
+              pending.moves = [{ slot: null, k: '换人→' + to.name }];
+              this._aiThinkingPending = pending;
+              return { type: 'switch', idx };
+            }
+            return null;
+          }
+          const act = this.realAIAct(m, null, obj);
+          if (act) { pending.moves = [{ slot: null, k: act.move.k, target: act.target ? act.target.name : null }]; this._aiThinkingPending = pending; }
+          return act;
+        } catch (e) {
+          /* ★ 请求失败/超时/网络错误：记录一次诊断日志（常见原因：API Key无效、模型名不存在、跨域CORS被浏览器拦截） */
+          if (!this._aiFailLogged) { this._aiFailLogged = true; this._aiState = 'failed'; this.addLog('🤖 真实AI请求失败：' + (e && e.message ? e.message : '未知错误') + '，本场后续回退内置AI'); }
+          return null;
+        }
+      }
       async aiAction() {
         const m = this.E();
         /* ★ 再来一次：强制使用锁定招式（极巨化期间免疫锁招） */
@@ -17862,6 +18251,11 @@ return ev;
         if (m.vol.lock && !m.dyn) return { type: 'move', move: { k: m.vol.lock.k } };
         if (m.vol.charge) return { type: 'move', move: { k: m.vol.charge } };
         if (m.vol.shadowCharge) return { type: 'move', move: { k: m.vol.shadowCharge } };
+        /* ★ 真实AI：API实时决策（失败/超时自动回退本地AI） */
+        if (this.realAIOn()) {
+          const ra = await this.realAIMoves();
+          if (ra && (ra.type === 'move' || ra.type === 'switch')) return ra;
+        }
         /* ★ AI换人作为本回合行动（同样消耗回合） */
         if (this.aiSwitches > 0 && this.ep.filter(x => x.alive()).length > 1 && this.aiWantsSwitch() && !trappedReason(m, this.P(), this)) {
           const to = this.aiBestSwitch();
@@ -17912,14 +18306,26 @@ return ev;
         return best;
       }
       /* ================= 双打AI ================= */
-      aiActions() {
+      async aiActions() {
         if (!this.doubles) return this.aiAction();
+        /* ★ 真实AI：一次请求决策两个槽位（失败/超时回退本地AI） */
+        let realActs = null;
+        if (this.realAIOn()) realActs = await this.realAIMoves();
         const acts = [];
         for (let s = 0; s < 2; s++) {
           const m = this.slotMon('e', s);
           if (!m || !m.alive()) { acts.push({ type: 'skip' }); continue; }
+          if (realActs && realActs[s]) {
+            acts.push(realActs[s]);
+            const last = acts[acts.length - 1];
+            if (last && last.type === 'move' && last.move) m.vol.plannedMove = last.move.k;
+            continue;
+          }
           const formTaken = acts.some(a => a && a.type === 'move' && (a.mega || a.dyn || a.tera));
           acts.push(this.aiActionFor(m, s, formTaken));
+          /* ★ 记录队友已决定的招式（供广域防守等评分参考：队友用地震等全场招式时开广域防守保护自己） */
+          const last = acts[acts.length - 1];
+          if (last && last.type === 'move' && last.move) m.vol.plannedMove = last.move.k;
         }
         return acts;
       }
@@ -17993,21 +18399,23 @@ return ev;
             if (immTypes.has(simMv.t)) s = -100;
             else if (rng === 'enemy-all') {
               let sum = 0, n = 0;
-              for (let i = 0; i < foes.length; i++) { const sim = this.calcDmg(m, foes[i], simMv); if (sim.eff > 0) { sum += sim.dmg; n++; } }
+              const sMv2 = foes.length > 1 ? { ...simMv, spread: true } : simMv;   // ★ AOE衰减：命中2个以上目标×0.75
+              for (let i = 0; i < foes.length; i++) { const sim = this.calcDmg(m, foes[i], sMv2); if (sim.eff > 0) { sum += sim.dmg; n++; } }
               s = n ? sum / n / Math.max(1, foes[0] ? foes[0].maxhp : 1) * 55 : -80;
             } else if (rng === 'all-except-self') {
               /* ★ 地震/放电/冲浪等：评估对敌方收益与误伤队友的风险；
                    队友有避雷针/引水/蓄电/储水/食草/漂浮等免疫时不但不误伤，反而触发队友特性提升 */
+              const sMv3 = { ...simMv, spread: true };   // ★ AOE衰减：双打中全场招式至少波及1个队友，命中2个以上目标×0.75
               let sum = 0, n = 0;
-              for (let i = 0; i < foes.length; i++) { const sim = this.calcDmg(m, foes[i], simMv); if (sim.eff > 0) { sum += sim.dmg; n++; } }
+              for (let i = 0; i < foes.length; i++) { const sim = this.calcDmg(m, foes[i], sMv3); if (sim.eff > 0) { sum += sim.dmg; n++; } }
               let en = n ? sum / n / Math.max(1, foes[0] ? foes[0].maxhp : 1) * 55 : -60;
               let allyPen = 0, allySynergy = 0;
               for (const ally of allies) {
-                const imm = this.abImmune(m, ally, simMv);
-                if (imm === 'absorb') { allySynergy += 14; continue; }
+                const imm = this.abImmune(m, ally, sMv3);
+                if (imm === 'absorb') { allySynergy += 18; continue; }   // ★ 触发队友避雷针/引水等：特攻/速度提升收益
                 if (imm === 'immune') continue;
                 /* ★ 误伤按真实属性相克计算（飞行系只免疫地面，不免疫放电/冲浪等） */
-                const sim = this.calcDmg(m, ally, simMv);
+                const sim = this.calcDmg(m, ally, sMv3);
                 if (sim.eff > 0) {
                   const pct = sim.dmg / Math.max(1, ally.maxhp);
                   allyPen += Math.min(0.9, pct) * 40;
@@ -18015,7 +18423,7 @@ return ev;
                   else if (pct >= 0.5) allyPen += 18;         // ★ 队友重伤
                 }
               }
-              const canKO = foes.some(f => this.calcDmg(m, f, simMv).dmg >= f.hp);
+              const canKO = foes.some(f => this.calcDmg(m, f, sMv3).dmg >= f.hp);
               if (canKO) allyPen *= 0.5;   // ★ 能确杀敌方时仍可能误伤队友
               s = en - allyPen + allySynergy;
             } else {
@@ -18038,7 +18446,7 @@ return ev;
             if (m.hpPct() < .35 && d.p < 50) s -= 5;
           } else {
             if (d.coaching) {
-              /* ★ 指导：收益按队友最佳物理招式的伤害占比评估（攻击+防御各+1，队友已强化满则降低） */
+              /* ★ 指导：收益按队友最佳物理招式的伤害占比评估；队友能力等级越高收益越衰减（每级-8，强化满大幅降低） */
               const phys = allies.filter(a => a.moves.some(x => MV[x.k] && MV[x.k].c === 'P'));
               if (phys.length) {
                 let best = 0, bestAlly = null;
@@ -18053,8 +18461,9 @@ return ev;
                   }
                 }
                 if (bestAlly) {
-                  s = 12 + Math.min(40, Math.round(best * 80));
-                  if (bestAlly.stages.atk + bestAlly.stages.def >= 4) s -= 18;
+                  const stg = bestAlly.stages.atk + bestAlly.stages.def;
+                  s = 12 + Math.min(40, Math.round(best * 80)) - stg * 8;
+                  if (stg >= 4) s -= 12;
                   target = bestAlly;
                 } else s = -30;
               } else s = -30;
@@ -18084,7 +18493,21 @@ return ev;
               /* ★ 愤怒粉：草属性或防尘特性的攻击者无视 */
               const effective = foes.some(f => !(f.types.includes('grass') || f.has('overcoatx')));
               s = allies.length && effective ? 14 : -25;
-            } else if (d.wideguard) { s = foes.length > 1 ? 12 : -15; }
+            } else if (d.wideguard) {
+              /* ★ 广域防守：敌方有群体招式，或队友本回合将使用全场招式（地震等）时使用；
+                   若自己本身免疫队友的全场招式（飞行/漂浮对地震、避雷针/引水等），则无需开广域防守防队友 */
+              if (this.wideGuard[this.sideOf(m)]) s = -25;
+              else {
+                const foeSpread = realFoes.some(f => (f.moves || []).some(x => { const dm = MV[x.k]; if (!dm) return false; const rg = rngOf(x.k); return rg === 'enemy-all' || rg === 'all-except-self'; }));
+                const allySpread = allies.some(a => {
+                  const pm = a.vol.plannedMove;
+                  if (!pm || rngOf(pm) !== 'all-except-self') return false;
+                  const dm = MV[pm];
+                  return dm && !m.has('telepathy') && this.abImmune(a, m, dm) !== 'immune' && this.abImmune(a, m, dm) !== 'absorb';
+                });
+                s = (foeSpread || allySpread) ? 26 : -12;
+              }
+            }
             else if (d.heal || d.rest) { s = m.hpPct() < .55 ? 30 : -20; if (m.hpPct() > .85) s = -25; }
             else if (d.setSt) {
               const foe = foes[0];
@@ -18470,6 +18893,30 @@ return ev;
           moves: [['pyroball', 'highjumpkick', 'zenheadbutt', 'uturn'], ['hydropump', 'darkpulse', 'icebeam', 'uturn'], ['flowertrick', 'knockoff', 'suckerpunch', 'uturn']]
         },
       ],
+      /* ★ 双打阵容：眼镜古玉鱼(过热/恶之波动/热风/大地之力) + 驱劲能量古代活性振翼发(冰冻之风/魔法闪耀/暗影球/月亮之力) + 气势披带极攻古剑豹 + 传说石板阿尔宙斯 */
+      dbl: [{
+        ids: [1004, 987, 1002, 493],
+        abilities: ['beadsofruin', 'protosynthesis', 'swordofruin', 'multitype'],
+        evs: [
+          { hp: 2, atk: 0, def: 0, spa: 32, spd: 0, spe: 32 },
+          { hp: 2, atk: 0, def: 0, spa: 32, spd: 0, spe: 32 },
+          { hp: 2, atk: 32, def: 0, spa: 0, spd: 0, spe: 32 },
+          { hp: 20, atk: 0, def: 0, spa: 32, spd: 0, spe: 14 }
+        ],
+        natures: [
+          { n: '内敛', up: 'spa', down: 'atk' },
+          { n: '胆小', up: 'spe', down: 'atk' },
+          { n: '固执', up: 'atk', down: 'spa' },
+          { n: '内敛', up: 'spa', down: 'atk' }
+        ],
+        items: ['choicespecs', 'boosterenergy', 'focussash', 'legendplate'],
+        moves: [
+          ['overheat', 'darkpulse', 'heatwave', 'earthpower'],
+          ['icywind', 'dazzlinggleam', 'shadowball', 'moonblast'],
+          ['iciclecrash', 'suckerpunch', 'sacredsword', 'swordsdance'],
+          ['judgment', 'extremespeed', 'recover', 'calmmind']
+        ]
+      }],
       lines: { start: '……你，有资格站在这里吗？', lose: '……有意思。', playerLose: '……还不够。下次有缘再见。' },
     };
     /* ============================================================
@@ -18663,12 +19110,12 @@ return ev;
         for (let i = 0; i < 6; i++) { const sp = this.drawOne(round); pool.push(this.buildDouble(sp, this.lvl(round, i), round)); }
         return pool;
       },
-      /* ★ 双打冠军级队伍：从冠军的双打配置中随机抽取（1%概率隐藏冠军·灭天） */
+      /* ★ 双打冠军级队伍：从冠军的双打配置中随机抽取（1%概率隐藏冠军·灭天，使用其专属双打阵容） */
       championDoubleTeam(lvl, force) {
         if (!force && Math.random() < 0.01) {
-          const t = pick(MIE_TIAN.teams);
+          const t = pick(MIE_TIAN.dbl || MIE_TIAN.teams);
           const team = t.ids.map((id, idx) => new P(id, lvl, {
-            moves: t.moves[idx], item: t.items[idx], iv: 31, ev: t.evs[idx],
+            moves: t.moves[idx], item: t.items[idx], ability: t.abilities ? t.abilities[idx] : undefined, iv: 31, ev: t.evs[idx],
             nature: NATURES.find(n => n.n === t.natures[idx].n) || NATURES[0],
             tera: pick(TYP)
           }));
@@ -18767,7 +19214,7 @@ return ev;
           const teams = ch.teams ? ch.teams : (ch.team ? [ch.team] : []);
           list.push({ name: ch.name, sprite: ch.sprite, teams, dbl: ch.dbl || null, lines: ch.lines, hidden: false });
         });
-        list.push({ name: MIE_TIAN.name, sprite: MIE_TIAN.sprite, teams: MIE_TIAN.teams.map(t => t.ids), dbl: null, lines: MIE_TIAN.lines, hidden: true });
+        list.push({ name: MIE_TIAN.name, sprite: MIE_TIAN.sprite, teams: MIE_TIAN.teams.map(t => t.ids), dbl: MIE_TIAN.dbl || null, lines: MIE_TIAN.lines, hidden: true });
         return list;
       },
       /* ★ 遇到冠军级训练家时点亮图鉴 */
@@ -19113,7 +19560,8 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b styl
           trainer: et.head ? et.champion.name : et.master ? et.name : (expert.type ? expert.name : '工厂训练家'),
           rules: { mega: true, dyna: canDyna, tera: true, switch: true, items: false, run: false, capture: false, megaMaster: !!et.master },
           ai: 1 + GM.fac.round * 0.3, aiSwitches: 1,
-          doubles: isDbl
+          doubles: isDbl,
+          noXp: !!(isDbl && et.head)   // ★ 双打冠军50级标准赛制：不获得经验值
         });
         /* ★ 双打冠军战后恢复我方原等级 */
         if (restoreLvls) {
@@ -19124,6 +19572,11 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b styl
           GM.fac.win++; GM.fac.bp += GM.fac.round;
           /* ★ 冠军图鉴：战胜冠军后点亮 */
           if (et.head) this.unlockChampion(et.champion.name);
+          /* ★ 击败隐藏冠军·灭天：额外获得1000 BP（单打/双打通用） */
+          if (et.head && et.champion.name === '灭天') {
+            GM.fac.bp += 1000;
+            await dlg('广播', '🏆 击败隐藏冠军·灭天！额外获得 <b style="color:#ffd93b">1000 BP</b>！', 94);
+          }
           [...r.battle.participants].forEach(m => { if (GM.fac.party.includes(m)) m.battles = (m.battles || 0) + 1; });
           const streak = (GM.fac.round - 1) * 7 + GM.fac.win;
           if (streak > GM.fac.best) { GM.fac.best = streak; localStorage.setItem('pif_best', streak); }
@@ -20320,7 +20773,24 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
     };
     $('#logBtn').onclick = () => {
       AU.cursor(); const ov = $('#logOv'); ov.classList.toggle('on');
-      if (ov.classList.contains('on')) { const l = $('#logList'); l.scrollTop = l.scrollHeight; }
+      if (ov.classList.contains('on')) {
+        /* ★ 打开面板时强制刷新（确保AI思考等最新内容已渲染） */
+        if (window.curBattle) renderBattleLog(window.curBattle);
+        const l = $('#logList'); l.scrollTop = l.scrollHeight;
+      }
+    };
+    /* ★ 记录/AI思考 标签切换 */
+    $('#logTabBtn').onclick = () => {
+      AU.cursor();
+      $('#logTabBtn').classList.add('on'); $('#aiThinkBtn').classList.remove('on');
+      $('#logList').classList.remove('hidden'); $('#aiThinkList').classList.add('hidden');
+      const l = $('#logList'); l.scrollTop = l.scrollHeight;
+    };
+    $('#aiThinkBtn').onclick = () => {
+      AU.cursor();
+      $('#aiThinkBtn').classList.add('on'); $('#logTabBtn').classList.remove('on');
+      $('#aiThinkList').classList.remove('hidden'); $('#logList').classList.add('hidden');
+      const t = $('#aiThinkList'); t.scrollTop = t.scrollHeight;
     };
     $('#logClose').onclick = () => { AU.no(); $('#logOv').classList.remove('on'); };
     $('#bSetBtn').onclick = () => { AU.cursor(); openSettings(); };
@@ -20696,6 +21166,30 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       r.appendChild(inp);
       return r;
     }
+    /* 文本输入设置项 */
+    function settingsText(label, desc, get, set, placeholder = '') {
+      const r = el('div', 'setRow');
+      r.innerHTML = `<div style="flex:1"><b>${label}</b><div style="font-size:11px;color:#888;font-weight:400">${desc}</div></div>`;
+      const inp = el('input');
+      inp.type = 'text';
+      inp.value = get() || '';
+      inp.placeholder = placeholder;
+      inp.style.cssText = 'width:170px;padding:5px 8px;border:2px solid var(--ink);border-radius:6px;font-family:inherit;font-size:12px';
+      inp.onchange = () => { set(inp.value.trim()); };
+      r.appendChild(inp);
+      return r;
+    }
+    /* 下拉选择设置项 */
+    function settingsSelect(label, desc, options, get, set) {
+      const r = el('div', 'setRow');
+      r.innerHTML = `<div style="flex:1"><b>${label}</b><div style="font-size:11px;color:#888;font-weight:400">${desc}</div></div>`;
+      const sel = el('select', '');
+      sel.style.cssText = 'padding:5px 8px;border:2px solid var(--ink);border-radius:6px;font-family:inherit;font-size:12px';
+      options.forEach(o => { const opt = el('option', '', o.n); opt.value = o.v; if (o.v === get()) opt.selected = true; sel.appendChild(opt); });
+      sel.onchange = () => { set(sel.value); };
+      r.appendChild(sel);
+      return r;
+    }
     /* 设置分组：点击标题展开/收起一组设置项 */
     function settingsGroup(label, items, open = false) {
       const g = el('div', 'setGroup');
@@ -20879,6 +21373,26 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           () => CFG.myAbility, v => { CFG.myAbility = v; }),
         settingsRow('我方宝可梦道具显示', '在我方信息卡上显示持有道具名称',
           () => CFG.myItem, v => { CFG.myItem = v; }),
+        settingsRow('敌方速度线显示', '在敌方信息卡上显示该宝可梦当前等级下可达的速度范围（性格-速度+0对战点数 ～ 性格+速度+32对战点数）',
+          () => CFG.enemySpeedLine, v => { CFG.enemySpeedLine = v; }),
+        settingsRow('我方速度显示', '在我方信息卡上显示当前实际速度（含性格/能力等级/道具/天气/顺风等修正）',
+          () => CFG.mySpeedShow, v => { CFG.mySpeedShow = v; }),
+      ]));
+      /* ---- 🤖 真实AI对战（API） ---- */
+      box.appendChild(settingsGroup('🤖 真实AI对战（API）', [
+        settingsRow('真实AI战斗', '开启后所有对手由API实时决策（默认DeepSeek），关闭为内置模拟AI。未填写API Key时自动回退模拟AI',
+          () => CFG.aiReal, v => { CFG.aiReal = v; }),
+        settingsSelect('API服务商', 'DeepSeek使用官方接口；OpenAI自定义可填任意兼容接口（含第三方中转）',
+          [{ n: 'DeepSeek', v: 'deepseek' }, { n: 'OpenAI自定义', v: 'openai' }],
+          () => CFG.aiProvider, v => { CFG.aiProvider = v; }),
+        settingsText('API Key', '填写你的API密钥（仅保存在本机浏览器localStorage）',
+          () => CFG.aiApiKey, v => { CFG.aiApiKey = v; }, 'sk-...'),
+        settingsText('模型名称', 'DeepSeek默认 deepseek-v4-flash；OpenAI自定义按服务商填写',
+          () => CFG.aiModel, v => { CFG.aiModel = v; }, 'deepseek-v4-flash'),
+        settingsRow('DeepSeek 思考', '开启：思考模式（强度 low，推理内容显示在「AI思考」面板）。⚠ 注意：开启后会大幅增加出招等待时间；关闭为直接输出，响应更快更省token',
+          () => CFG.aiDeepSeekThink, v => { CFG.aiDeepSeekThink = v; }),
+        settingsText('接口地址（OpenAI自定义）', 'DeepSeek无需填写；自定义时填写基础地址，如 https://your-api.com/v1',
+          () => CFG.aiBaseUrl, v => { CFG.aiBaseUrl = v; }, 'https://api.deepseek.com'),
       ]));
       box.insertAdjacentHTML('beforeend', '<div style="font-size:11px;color:#888;padding:10px 4px 2px">设置自动保存。关闭天气/场地特效后，场景顶部的天气/场地文字指示仍会保留，仅移除画面氛围层。</div>');
       const about = el('button', 'btn blue', '📖 关于作者'); about.style.cssText = 'width:100%;margin-top:12px';
