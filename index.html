@@ -8353,7 +8353,7 @@ const MUSIC = {
     M('aeroblast', '气旋攻击', 'flying', 'S', 100, 95, 5, { crit: 1 });
     M('oblivionwing', '死亡之翼', 'flying', 'S', 80, 100, 10, { drain: 75 });
     M('moongeistbeam', '暗影之光', 'ghost', 'S', 100, 100, 5, { ignAb: 1 });
-    M('eruption', '喷火', 'fire', 'S', 150, 100, 5, { eruption: 1 });
+    M('eruption', '喷火', 'fire', 'S', 150, 100, 5, { eruption: 1 }); M('waterspout', '喷水', 'water', 'S', 150, 100, 5, { eruption: 1 });
     M('sacredsword', '圣剑', 'fighting', 'P', 90, 100, 15, { ct: 1, sacred: 1 });
 
     /* ---- 双打新增招式 ---- */
@@ -8367,7 +8367,7 @@ const MUSIC = {
     const RNGMAP = {
       /* 敌方群体 */
       swift: 'enemy-all', hypervoice: 'enemy-all', heatwave: 'enemy-all', blizzard: 'enemy-all',
-      dazzlinggleam: 'enemy-all', rockslide: 'enemy-all', eruption: 'enemy-all', originpulse: 'enemy-all',
+      dazzlinggleam: 'enemy-all', rockslide: 'enemy-all', eruption: 'enemy-all', waterspout: 'enemy-all', originpulse: 'enemy-all',
       precipiceblades: 'enemy-all', landswrath: 'enemy-all', breakingwipe: 'enemy-all', expandingforce: 'enemy-all',
       springtidestorm: 'enemy-all', bleakwindstorm: 'enemy-all', wildboltstorm: 'enemy-all', sandsearstorm: 'enemy-all',
       snarl: 'enemy-all', strugglebug: 'enemy-all', electroweb: 'enemy-all', overdrive: 'enemy-all', icywind: 'enemy-all',
@@ -8971,7 +8971,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(6, '喷火龙', 'fire/flying', '78/84/78/109/85/100', 'blaze/solarpower', ['flamethrower', 'fireblast', 'airslash', 'dragonpulse', 'earthquake', 'roost', 'willowisp', 'flareblitz']);
     S(7, '杰尼龟', 'water', '44/48/65/50/64/43', 'torrent/raindish', ['tackle', 'aquajet', 'scald', 'icebeam', 'rapidspin'].filter(m => MV[m]), { evo: 1 });
     S(8, '卡咪龟', 'water', '59/63/80/65/80/58', 'torrent/raindish', ['aquajet', 'scald', 'icebeam', 'surf'], { evo: 1 });
-    S(9, '水箭龟', 'water', '79/83/100/85/105/78', 'torrent/raindish', ['hydropump', 'surf', 'icebeam', 'aurasphere', 'darkpulse', 'dragonpulse', 'scald', 'raindance']);
+    S(9, '水箭龟', 'water', '79/83/100/85/105/78', 'torrent/raindish', ['hydropump', 'surf', 'icebeam', 'aurasphere', 'darkpulse', 'dragonpulse', 'scald', 'raindance', 'waterspout']);
     S(10, '绿毛虫', 'bug', '45/30/35/20/20/45', 'shielddust/shielddust', ['tackle', 'stringshot', 'swift', 'terablast'], { evo: 1 });
     S(12, '巴大蝶', 'bug/flying', '60/45/50/90/80/70', 'compoundeyes/compoundeyes', ['bugbuzz', 'psychic', 'sleeppowder', 'energyball', 'hurricane']);
     S(16, '波波', 'normal/flying', '40/45/40/35/35/56', 'keeneye/tangledfeet', ['tackle', 'gust', 'quickattack'], { evo: 1 });
@@ -9037,7 +9037,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(306, '波士可多拉', 'steel/rock', '70/110/180/60/60/50', 'sturdy/rockhead', ['ironhead', 'earthquake', 'stoneedge', 'superpower', 'stealthrock', 'thunderwave']);
     S(308, '恰雷姆', 'fighting/psychic', '60/60/75/60/75/80', 'purepower/purepower', ['highjumpkick', 'zenheadbutt', 'fakeout', 'icepunch', 'thunderpunch'].filter(m => MV[m] || m === 'highjumpkick'));
     S(310, '雷电兽', 'electric', '70/75/60/105/60/105', 'static/lightningrod', ['thunderbolt', 'flamethrower', 'voltswitch', 'signalbeam', 'thunderwave']);
-    S(324, '煤炭龟', 'fire', '70/85/140/85/70/20', 'drought/drought', ['lavaplume', 'solarbeam', 'stealthrock', 'rockslide', 'earthpower']);
+    S(324, '煤炭龟', 'fire', '70/85/140/85/70/20', 'drought/drought', ['lavaplume', 'solarbeam', 'stealthrock', 'rockslide', 'earthpower', 'eruption']);
     S(332, '梦歌仙人掌', 'grass/dark', '70/115/60/115/60/55', 'sandveil/waterabsorb', ['energyball', 'darkpulse', 'suckerpunch', 'swordsdance', 'seedbomb', 'spikes']);
     S(342, '铁螯龙虾', 'water/dark', '63/120/85/90/55/55', 'hyperCutterx/adaptability', ['crabhammer', 'knockoff', 'aquajet', 'swordsdance', 'superpower']);
     S(350, '美纳斯', 'water', '95/60/79/100/125/81', 'competitive/competitive', ['surf', 'icebeam', 'recover', 'scald', 'toxic', 'lightscreen', 'reflect']);
@@ -9045,8 +9045,8 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(373, '暴飞龙', 'dragon/flying', '95/135/80/110/80/100', 'intimidate/moxie', ['dragonclaw', 'earthquake', 'flamethrower', 'dragondance', 'roost', 'outrage', 'fireblast']);
     S(376, '巨金怪', 'steel/psychic', '80/135/130/95/90/70', 'clearbody/clearbody', ['meteormash', 'zenheadbutt', 'earthquake', 'bulletpunch', 'thunderpunch', 'stealthrock', 'lightscreen', 'reflect']);
     S(381, '拉帝欧斯', 'dragon/psychic', '80/90/80/130/110/110', 'levitate/levitate', ['dracometeor', 'psyshock', 'surf', 'thunderbolt', 'icebeam', 'roost'], { leg: 1 });
-    S(382, '盖欧卡', 'water', '100/100/90/150/140/90', 'drizzle/drizzle', ['originpulse', 'hydropump', 'thunder', 'icebeam', 'calmmind', 'surf'], { leg: 1 });
-    S(383, '固拉多', 'ground', '100/150/140/100/90/90', 'drought/drought', ['precipiceblades', 'earthquake', 'firepunch', 'stoneedge', 'swordsdance', 'solarbeam', 'thunderpunch'], { leg: 1 });
+    S(382, '盖欧卡', 'water', '100/100/90/150/140/90', 'drizzle/drizzle', ['originpulse', 'hydropump', 'thunder', 'icebeam', 'calmmind', 'surf', 'waterspout'], { leg: 1 });
+    S(383, '固拉多', 'ground', '100/150/140/100/90/90', 'drought/drought', ['precipiceblades', 'earthquake', 'firepunch', 'stoneedge', 'swordsdance', 'solarbeam', 'thunderpunch', 'eruption'], { leg: 1 });
     S(384, '烈空坐', 'dragon/flying', '105/150/90/150/90/95', 'airlock/airlock', ['dragonascent', 'extremespeed', 'earthquake', 'swordsdance', 'flamethrower', 'outrage'], { leg: 1 });
     /* --- 第4世代 --- */
     S(392, '烈焰猴', 'fire/fighting', '76/104/71/104/71/108', 'blaze/ironfist', ['closecombat', 'flareblitz', 'machpunch', 'thunderpunch', 'stealthrock', 'swordsdance']);
@@ -9292,7 +9292,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(267,'狩猎凤蝶','bug/flying','60/70/50/100/50/65','swarm/rivalry',['bugbuzz','airslash','energyball','quiverdance','roost','hurricane']);
     S(295,'爆音怪','normal','104/91/63/91/73/68','soundproof/scrappy',['boomburst','hypervoice','shadowball','flamethrower','icebeam','thunderbolt']);
     S(317,'吞食兽','poison','100/73/83/73/83/55','liquidooze/stickyhold',['sludgebomb','gunkshot','knockoff','icebeam','painsplit','toxic']);
-    S(321,'吼鲸王','water','170/90/45/90/45/60','waterveil/obliviousx',['hydropump','icebeam','surf','bodyslam','rest','earthquake']);
+    S(321,'吼鲸王','water','170/90/45/90/45/60','waterveil/obliviousx',['hydropump','icebeam','surf','bodyslam','rest','earthquake','waterspout']);
     S(335,'猫鼬斩','normal','73/115/60/60/60/90','immunity/scrappy',['facade','closecombat','knockoff','swordsdance','quickattack','poisonjab']);
     S(336,'饭匙蛇','poison','73/100/60/100/60/65','shedskin/infiltrator',['gunkshot','knockoff','earthquake','swordsdance','glare','suckerpunch']);
     S(346,'摇篮百合','rock/grass','86/81/97/81/107/43','suctioncups/stormdrain',['powergem','energyball','recover','stealthrock','toxic','earthpower']);
@@ -9742,14 +9742,14 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(221,'长毛猪','ice/ground','100/100/80/60/60/50','obliviousx/snowcloak/thickfat',['earthquake','iciclecrash','iceshard','superpower','stoneedge'],{evo:1});
     S(222,'太阳珊瑚','water/rock','65/55/95/65/95/35','hustle/naturalcure/regenerator',['scald','powergem','earthpower','stealthrock','recover']);
     S(223,'铁炮鱼','water','35/65/35/65/35/65','hustle/sniper/moody',['hydropump','icebeam','thunderbolt','fireblast','seedbomb'],{evo:1});
-    S(224,'章鱼桶','water','75/105/75/105/75/45','suctioncups/sniper/moody',['hydropump','icebeam','thunderbolt','fireblast','energyball']);
+    S(224,'章鱼桶','water','75/105/75/105/75/45','suctioncups/sniper/moody',['hydropump','icebeam','thunderbolt','fireblast','energyball','waterspout']);
     S(225,'信使鸟','ice/flying','45/55/45/65/45/75','vitalspirit/hustle/insomnia',['icebeam','hurricane','freezedry','roost','rapidspin']);
     S(226,'巨翅飞鱼','water/flying','85/40/70/80/140/70','swiftswim/waterabsorb/waterveil',['scald','airslash','icebeam','roost','raindance']);
     S(228,'戴鲁比','dark/fire','45/60/30/80/50/65','earlybird/flashfire/unnerve',['darkpulse','flamethrower','sludgebomb','nastyplot','suckerpunch'],{evo:1});
     S(231,'小小象','ground','90/60/60/40/40/40','pickup/sandveil',['earthquake','stoneedge','iceshard','stealthrock','knockoff'],{evo:1});
     S(233,'多边兽2','normal','85/80/90/105/95/60','trace/download/analytic',['triattack','icebeam','thunderbolt','shadowball','recover']);
     S(234,'惊角鹿','normal','73/95/62/85/65/85','intimidate/frisk/sapsipper',['bodyslam','earthquake','zenheadbutt','thunderwave','megahorn']);
-    S(235,'图图犬','normal','55/20/35/20/45/75','owntempo/technician/moody',['sketch','terablast','facade','quickattack']);
+    S(235,'图图犬','normal','55/20/35/20/45/75','owntempo/technician/moody',['spore','coaching','glare','toxic','banefulbunker','spikyshield','willowisp','lightscreen','reflect','populationbomb','stealthrock','tailwind','swordsdance','victorydance','shellsmash','encore','trickroom','transform','leechseed']);
     S(236,'无畏小子','fighting','35/35/35/35/35/35','guts/steadfastx/vitalspirit',['closecombat','knockoff','stoneedge','machpunch','bulkup'],{evo:1});
     S(237,'战舞郎','fighting','50/95/95/35/110/70','intimidate/technician/steadfastx',['closecombat','knockoff','stoneedge','machpunch','rapidspin']);
     S(238,'迷唇娃','ice/psychic','45/30/15/85/65/65','obliviousx/forewarn/dryskin',['icebeam','psychic','lovelykiss','shadowball','nastyplot'],{evo:1});
@@ -10155,7 +10155,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(40705,'黏美儿(洗翠)','steel/dragon','90/70/110/70/70/30','overcoatx/hydration',['dragonpulse','flashcannon','thunderbolt','sludgebomb','raindance'],{evo:1});
     S(40706,'黏美龙(洗翠)','steel/dragon','80/100/100/110/150/60','overcoatx/hydration',['dragonpulse','flashcannon','thunderbolt','sludgebomb','icebeam','shelter']);
     S(40724,'狙射树枭(洗翠)','grass/fighting','78/112/75/95/100/70','overgrow/longreach',['triplearrows','leafblade','closecombat','bravebird','shadowsneak','roost']);
-    S(40157,'火暴兽(洗翠)','fire/ghost','78/84/78/119/85/90','blaze/frisk',['flamethrower','shadowball','infernalparade','earthpower','willowisp']);
+    S(40157,'火暴兽(洗翠)','fire/ghost','78/84/78/119/85/90','blaze/frisk',['flamethrower','shadowball','infernalparade','earthpower','willowisp','eruption']);
     S(40503,'大剑鬼(洗翠)','water/dark','95/118/94/74/74/75','torrent/sharpness',['ceaselessedge','liquidation','knockoff','swordsdance','megahorn','aquajet']);
     S(40571,'冰岩怪(洗翠)','ice/rock','95/117/184/44/46/28','strongjaw/icebody/sturdy',['mountaingale','iciclecrash','stoneedge','earthquake','swordsdance','stealthrock']);
     S(40628,'勇士雄鹰(洗翠)','psychic/flying','100/112/80/83/80/75','keeneye/sheerforce/tintedlens',['esperwing','airslash','psychic','heatwave','roost','uturn']);
@@ -12813,7 +12813,9 @@ return ev;
         const th = (b._aiThinking || []).map(en => {
           const mvChips = (en.moves || []).map(mv => {
             const nm = MV[mv.k] ? MV[mv.k].n : mv.k;
-            return `<span class="aiThinkMove">${mv.slot != null ? '槽' + mv.slot + '·' : ''}${escapeHtml(nm)}${mv.target ? '→' + escapeHtml(mv.target) : ''}</span>`;
+            /* ★ 显示具体宝可梦名称（双打槽位用宝可梦名替代槽号） */
+            const who = mv.name ? escapeHtml(mv.name) : (mv.slot != null ? '槽' + mv.slot : '');
+            return `<span class="aiThinkMove">${who ? who + '·' : ''}${escapeHtml(nm)}${mv.target ? '→' + escapeHtml(mv.target) : ''}</span>`;
           }).join('');
           const body = en.thinking ? `<div class="aiThinkBody">${escapeHtml(en.thinking)}</div>` : '';
           return `<div class="aiThinkTurn"><div class="aiThinkHead">🤖 第 ${en.turn} 回合 · 实际出招：${mvChips}</div>${body}</div>`;
@@ -15935,7 +15937,28 @@ return ev;
         const slot = this.fieldSlotOf(mon);
         /* ★ 折返类招式离场必须选择替换宝可梦，不允许返回/取消 */
         if (side === 'p') { const idx = await this.chooseParty(false, false, slot, mon); if (idx != null && (!this.pt || !this.pt.includes(idx))) await this.doSwitch('p', idx, slot); }
-        else { const to = this.aiBestSwitchForSlot(slot); if (to > -1) await this.doSwitch('e', to, slot); }
+        else {
+          /* ★ 真实AI：由API选择折返换入的宝可梦（失败/超时回退内置AI） */
+          let to = this.realAIOn() ? await this.realAISwitch(slot) : -1;
+          if (to < 0) to = this.aiBestSwitchForSlot(slot);
+          if (to > -1) await this.doSwitch('e', to, slot);
+        }
+      }
+      /* ★ 真实AI：折返类招式换人决策（API选择后备宝可梦，失败返回-1） */
+      async realAISwitch(slot) {
+        if (!this.realAIOn()) return -1;
+        const SYS2 = '你是宝可梦对战AI教练。对方使用了折返/抛下狠话类招式，你必须换人。根据当前战况（我方后备宝可梦信息）选择最合适上场的宝可梦。只输出一个JSON对象：{"index":后备序号}，index从0开始对应"后备:"列表的顺序，禁止输出其他任何文字。';
+        try {
+          const resMsg = await this.callRealAI([{ role: 'system', content: SYS2 }, { role: 'user', content: this.buildAIPrompt() }]);
+          const obj = this.parseRealAI(resMsg.content);
+          if (obj && typeof obj.index === 'number') {
+            const onField = this.doubles ? (this.et || []) : [this.ei];
+            const bench = this.ep.filter((x, i) => x.alive() && !onField.includes(i));
+            const to = bench[obj.index];
+            if (to) return this.ep.indexOf(to);
+          }
+        } catch (e) { }
+        return -1;
       }
       /* ---------- 单次伤害结算 ---------- */
       async hitOnce(side, mon, foe, mv, act) {
@@ -17158,7 +17181,8 @@ return ev;
             target = await this.chooseFaintedMon(arr);
             if (target == null) { await say('取消了复生祈祷。'); return; }
           } else {
-            target = fainted[0];
+            /* ★ 真实AI：优先复活API指定的濒死宝可梦，未指定则复活第一只 */
+            target = (act && act.target && fainted.includes(act.target)) ? act.target : fainted[0];
           }
           target.fainted = false;
           target.hp = Math.floor(target.maxhp / 2);
@@ -18095,14 +18119,14 @@ return ev;
         const itemInfo = own ? (m.item ? '道具:' + (IT[m.item]?.n || '?') : '道具:无') : '道具:未知(可从战斗记录推断)';
         /* ★ 本方：6项具体数值（含性格/个体/对战点数后的实际能力值）；对方：速度线最小~最大（性格-速度+0EV ～ 性格+速度+32EV） */
         const statInfo = own
-          ? ('数值:HP' + m.maxhp + ' 攻' + m.st.atk + ' 防' + m.st.def + ' 特攻' + m.st.spa + ' 特防' + m.st.spd + ' 速' + m.st.spe)
+          ? ('数值:HP' + m.maxhp + ' 攻' + m.st.atk + ' 防' + m.st.def + ' 特攻' + m.st.spa + ' 特防' + m.st.spd + ' 速' + m.st.spe + ' 太晶属性:' + TNAME[m.teraType])
           : (() => {
               const bs = m.mega ? m.mega.s : m.sp.s;
               const iv = m.iv ?? 25;
               const c = Math.floor((2 * bs[5] + iv) * m.lvl / 100) + 5;
               const spMin = Math.floor(c * 0.9);
               const spMax = Math.floor((c + 32) * 1.1);
-              return '速度线:' + spMin + '~' + spMax + '(该宝可梦当前等级可达速度范围)';
+              return '速度线:' + spMin + '~' + spMax + '(该宝可梦当前等级可达速度范围) 太晶属性:' + TNAME[m.teraType];
             })();
         return `${m.name} Lv.${m.lvl} ${m.types.join('/')} HP${pct}% 状态:${status} 能力:${stg} ${statInfo} ${abInfo} ${itemInfo} 晶${TNAME[m.teraType]}${m.alive() ? '' : '[已濒死]'}\n  招式: ${moves}`;
       }
@@ -18115,6 +18139,12 @@ return ev;
         const scr = side => { const arr = side === 'e' ? this.et : this.pt; const tm = side === 'e' ? this.ep : this.pp; return (arr || []).map(i => { const x = tm[i]; return x && x.vol ? (x.vol.reflect ? '反射壁' : '') + (x.vol.lightscreen ? '光墙' : '') : ''; }).join(''); };
         L.push('  墙:我方(' + (scr('p') || '无') + ') 对方(' + (scr('e') || '无') + ')' + (this.auroraveil.p ? ' 我方极光幕' : '') + (this.auroraveil.e ? ' 对方极光幕' : ''));
         L.push('  陷阱:我方(岩' + this.haz.p.sr + '菱' + this.haz.p.spikes + '毒' + this.haz.p.tspikes + ') 对方(岩' + this.haz.e.sr + '菱' + this.haz.e.spikes + '毒' + this.haz.e.tspikes + ')');
+        /* ★ 形态规则（按对局类型区分）：普通场每种形态各1次；Mega进化大师场 Mega无限制、极巨/太晶禁用 */
+        if (this.rules.megaMaster) {
+          L.push('【形态规则】本场为Mega进化大师赛：Mega进化无次数限制、每回合都可使用（双打每回合仅一个槽位可用形态）；极巨化本场禁用；太晶化本场禁用。');
+        } else {
+          L.push('【形态规则】Mega进化/极巨化/太晶化每场战斗各自最多使用一次（双打每回合仅一个槽位可用形态）。');
+        }
         /* ★ 形态状态：极巨/太晶/Mega 可用性与双方使用情况（供AI判断是否使用形态） */
         const megaS = this.rules.mega ? (this.rules.megaMaster ? '可用(无限制)' : (this.usedForm.e ? '已使用' : '可用(本场1次)')) : '本场禁用';
         const dynaS = this.rules.dyna ? (this.usedForm.e ? '已使用' : '可用(本场1次,3回合)') : '本场禁用';
@@ -18129,9 +18159,9 @@ return ev;
         eField.forEach((idx, i) => {
           const x = this.ep[idx]; if (!x || !x.alive()) return;
           const parts = [];
-          parts.push('Mega' + (this.rules.mega && MEGA[x.id] && !this.usedForm.e ? '可' : '不可'));
-          parts.push('极巨' + (this.rules.dyna && ![888, 889, 890].includes(x.id) && !this.usedForm.e ? '可' : '不可'));
-          parts.push('太晶' + (this.rules.tera && !this.rules.megaMaster && !this.usedForm.e ? '可' : '不可'));
+          parts.push('Mega' + (this.rules.mega && MEGA[x.id] && (this.rules.megaMaster || !this.usedForm.e) ? '✓可用' : '✗不可'));
+          parts.push('极巨' + (this.rules.dyna && ![888, 889, 890].includes(x.id) && !this.usedForm.e ? '✓可用' : '✗不可'));
+          parts.push('太晶' + (this.rules.tera && !this.rules.megaMaster && !this.usedForm.e ? '✓可用' : '✗不可') + '(属性:' + TNAME[x.teraType] + ')');
           L.push('  我方场上每只可用的形态→ 槽' + i + '(' + x.name + '): ' + parts.join(' '));
         });
         L.push('【对方队伍(玩家方)】');
@@ -18152,6 +18182,7 @@ return ev;
         if (!obj || typeof obj.move !== 'string') return null;
         if (!m.moves.some(x => x.k === obj.move && x.pp > 0)) return null;
         const act = { type: 'move', move: { k: obj.move }, slot: slot == null ? undefined : slot };
+        const dm0 = MV[obj.move];
         const rng = rngOf(obj.move);
         const side = this.sideOf(m);
         const all = [...this.fieldMons('p'), ...this.fieldMons('e')];
@@ -18173,17 +18204,22 @@ return ev;
           const pick = allies.find(a => a.moves.some(x => MV[x.k] && MV[x.k].c !== 'X' && MV[x.k].p)) || allies[0];
           if (pick) act.target = pick;
         }
+        /* ★ 复生祈祷：目标为我方已濒死的后备宝可梦（指定复活哪一只） */
+        if (dm0 && dm0.revival && obj.target) {
+          const benchArr = side === 'e' ? this.ep : this.pp;
+          const ft = benchArr.find(x => x && x.fainted && x.name === obj.target);
+          if (ft) act.target = ft;
+        }
         /* ★ 形态标记：由AI判断是否使用极巨/太晶/Mega，按与本地AI相同的可用性约束校验后打标（resolveForms统一结算） */
-        const d0 = MV[act.move.k];
         if (obj.mega === true && this.rules.mega && MEGA[m.id] && !m.dyn && !(m.mega && m.mega.stone) && (m.id !== 718 || m.vol.completeForm) && (this.rules.megaMaster || !this.usedForm.e)) act.mega = true;
-        if (obj.dyna === true && this.rules.dyna && !m.dyn && !(m.mega && m.mega.stone) && ![888, 889, 890].includes(m.id) && d0 && d0.c !== 'X' && m.hpPct() > .5 && !this.usedForm.e) act.dyn = true;
+        if (obj.dyna === true && this.rules.dyna && !m.dyn && !(m.mega && m.mega.stone) && ![888, 889, 890].includes(m.id) && dm0 && dm0.c !== 'X' && m.hpPct() > .5 && !this.usedForm.e) act.dyn = true;
         if (obj.tera === true && this.rules.tera && !this.rules.megaMaster && !m.tera && !this.usedForm.e) act.tera = true;
         return act;
       }
       /* ★ 真实AI行动入口：单打一次请求；双打一次请求两个槽位。失败/超时返回null由本地AI接管 */
       async realAIMoves() {
         if (!this.realAIOn()) return null;
-        const SYS = '你是一名宝可梦对战AI教练，负责实时操作对手方队伍。你会收到：本回合完整战场状态（我方与对方所有宝可梦信息、场地状态）、我方宝可梦的招式列表、对方宝可梦的信息（对方的具体特性未知但你知道其全部可能特性需自行猜测，对方具体道具未知需从战斗记录中的描述推断）、以及战斗记录。\n规则：\n1. 只输出一个JSON对象，禁止输出任何其他文字、解释或代码块标记。\n2. 单打输出 {"action":"move","move":"招式key"}；也可 {"action":"switch","index":后备序号}（仅当明显被克制且后备明显更优时）。\n3. 双打输出 {"slot0":{"move":"招式key","target":"目标名"},"slot1":{...}}。target（目标）规则非常重要，写错或遗漏必填target会导致该行动无效：\n   - 必须指定target：帮助、指导、号令等「指定队友」类招式 → target必须是我方场上队友的名字；暗影球、鬼火等单体攻击/单体状态招式 → target必须是对方场上宝可梦的名字。\n   - 禁止写target：群体招式（热风/岩崩/地震/冲浪/放电/巨声等）、自身招式（保护/剑舞/冥想/回复/顺风/戏法空间/开墙/强化等）、吸引类（看我嘛/愤怒粉）、我方全体招式（广域防守）。\n   - 双打中若两槽位都需要出招，每个槽位必须给出move；名字以状态信息中的宝可梦名字为准。\n4. 招式key必须出自该宝可梦的招式列表，否则该行动无效。\n5. 形态使用：若状态信息中标注某形态"可"，可在行动JSON中加入 "mega":true 或 "dyna":true 或 "tera":true 表示本回合使用该形态（单打加在顶层，双打加在对应槽位内）；标"不可"或"已使用"的形态禁止标记；每场战斗我方每种形态至多使用一次，双打每回合最多一个槽位使用形态；极巨化仅建议在HP>50%时使用；形态标记必须与攻击/变化招式配合使用。\n6. 决策要点：属性克制、速度先手（含先制/顺风/戏法空间）、击杀线评估、生存与换人、天气场地空间墙的利用、双打配合（避雷针/引水吸收全场招式、指导/帮助强化队友、广域防守防群体招式、看我嘛吸引火力、保护等）。\n7. 不要使用PP耗尽的招式，不要对无效目标使用辅助招式。\n8. 战斗节奏快，直接给出果断的决策。';
+        const SYS = '你是一名宝可梦对战AI教练，负责实时操作对手方队伍。你会收到：本回合完整战场状态（我方与对方所有宝可梦信息、场地状态）、我方宝可梦的招式列表、对方宝可梦的信息（对方的具体特性未知但你知道其全部可能特性需自行猜测，对方具体道具未知需从战斗记录中的描述推断）、以及战斗记录。\n规则：\n1. 只输出一个JSON对象，禁止输出任何其他文字、解释或代码块标记。\n2. 单打输出 {"action":"move","move":"招式key"}；也可 {"action":"switch","index":后备序号}（仅当明显被克制且后备明显更优时）。\n3. 双打输出 {"slot0":{"move":"招式key","target":"目标名"},"slot1":{...}}。target（目标）规则非常重要，写错或遗漏必填target会导致该行动无效：\n   - 必须指定target：帮助、指导、号令等「指定队友」类招式 → target必须是我方场上队友的名字；暗影球、鬼火等单体攻击/单体状态招式 → target必须是对方场上宝可梦的名字；复生祈祷（复活队友）→ target必须是我方已濒死的后备宝可梦名字（选择复活哪一只）。\n   - 禁止写target：群体招式（热风/岩崩/地震/冲浪/放电/巨声等）、自身招式（保护/剑舞/冥想/回复/顺风/戏法空间/开墙/强化等）、吸引类（看我嘛/愤怒粉）、我方全体招式（广域防守）。\n   - 双打中若两槽位都需要出招，每个槽位必须给出move；名字以状态信息中的宝可梦名字为准。\n   - 折返类招式（急速折返/伏特替换等）：出招后会自动换人，换人对象由系统另行决策，无需在JSON中指定。\n4. 招式key必须出自该宝可梦的招式列表，否则该行动无效。\n5. 形态使用（重要，不要吝啬）：状态信息中的【形态规则】说明了本场 Mega/极巨/太晶 的使用次数限制（普通场各自1次；Mega进化大师场 Mega无限制、极巨太晶禁用），【形态状态】标注了每只宝可梦的 Mega/极巨/太晶 是否可用（✓可用/✗不可）及太晶属性。极巨化、太晶化、Mega进化是改变战局的关键资源，在能确杀关键目标、抵挡致命伤害、抢占先手或需要翻盘时，应积极果断使用，不要一直不用。若标注"✓可用"，可在行动JSON中加入 "mega":true 或 "dyna":true 或 "tera":true 表示本回合使用该形态（单打加在顶层，双打加在对应槽位内）；标"✗不可"的形态禁止标记；遵守【形态规则】的次数限制；双打每回合最多一个槽位使用形态；极巨化建议在HP>50%时使用；形态标记必须与攻击/变化招式配合使用。\n6. 决策要点：属性克制、速度先手（含先制/顺风/戏法空间）、击杀线评估、生存与换人、天气场地空间墙的利用、双打配合（避雷针/引水吸收全场招式、指导/帮助强化队友、广域防守防群体招式、看我嘛吸引火力、保护等）。\n7. 不要使用PP耗尽的招式，不要对无效目标使用辅助招式。\n8. 战斗节奏快，直接给出果断的决策。';
         try {
           const MSG = [{ role: 'system', content: SYS }, { role: 'user', content: this.buildAIPrompt() }];
           let resMsg = await this.callRealAI(MSG);
@@ -18216,7 +18252,7 @@ return ev;
                 if (formTaken) { act.mega = false; act.dyn = false; act.tera = false; }
                 if (act.mega || act.dyn || act.tera) formTaken = true;
                 acts[s] = act;
-                moves.push({ slot: s, k: act.move.k, target: act.target ? act.target.name : null });
+                moves.push({ slot: s, name: m.name, k: act.move.k, target: act.target ? act.target.name : null });
               }
             }
             if (moves.length) { pending.moves = moves; this._aiThinkingPending = pending; }
@@ -18229,14 +18265,14 @@ return ev;
             const to = bench[obj.index];
             const idx = to ? this.ep.indexOf(to) : -1;
             if (idx >= 0 && !trappedReason(m, this.P(), this)) {
-              pending.moves = [{ slot: null, k: '换人→' + to.name }];
+              pending.moves = [{ slot: null, name: m.name, k: '换人→' + to.name }];
               this._aiThinkingPending = pending;
               return { type: 'switch', idx };
             }
             return null;
           }
           const act = this.realAIAct(m, null, obj);
-          if (act) { pending.moves = [{ slot: null, k: act.move.k, target: act.target ? act.target.name : null }]; this._aiThinkingPending = pending; }
+          if (act) { pending.moves = [{ slot: null, name: m.name, k: act.move.k, target: act.target ? act.target.name : null }]; this._aiThinkingPending = pending; }
           return act;
         } catch (e) {
           /* ★ 请求失败/超时/网络错误：记录一次诊断日志（常见原因：API Key无效、模型名不存在、跨域CORS被浏览器拦截） */
@@ -18941,6 +18977,7 @@ return ev;
         const b = bst(sp);
         let t = b >= 610 ? 1 : b >= 550 ? 2 : b >= 500 ? 3 : b >= 450 ? 4 : b >= 400 ? 5 : 6;
         if (sp.id === 132 || sp.id === 302 || sp.id === 303) t = 4;
+        if (sp.id === 235) t = 3;   // ★ 图图犬：提档到第三档（全能技能池）
         if (sp.evo && t >= 3) t--;
         return t;
       },
@@ -18967,13 +19004,14 @@ return ev;
       },
       lvl(round, i) { return Math.min(100, 48 + (round - 1) * 7 + Math.floor(i / 2)); },
       pickMoves(sp) {
-        /* ★ 单打不分配双打独占技能（帮助/看我嘛/指导/愤怒粉/广域防守/聚光灯） */
+        /* ★ 单打不分配双打独占技能（帮助/看我嘛/指导/愤怒粉/广域防守/聚光灯/守住） */
         const pool = shuffle(sp.mv.filter(k => MV[k] && k !== 'terablast' && !DOUBLE_ONLY.includes(k)));
         const dmg = shuffle(pool.filter(k => MV[k].c !== 'X')), st = shuffle(pool.filter(k => MV[k].c === 'X'));
         const out = dmg.slice(0, st.length ? 3 : 4);
         if (st.length) out.push(st[0]);
         if (Math.random() < 0.2) { if (out.length >= 4) out[3] = 'terablast'; else out.push('terablast'); }
-        return out.slice(0, 4);
+        /* ★ 工厂规则：不携带两个保护类技能（极巨防壁除外） */
+        return this.dedupeProtect(out.slice(0, 4), pool);
       },
       pickItem(sp, moves, ability) {
         /* ★ 苍响/藏玛然特：80%携带专属道具（剑之王/盾之王），20%百战勇者 */
@@ -19032,6 +19070,18 @@ return ev;
         if (it === 'eviolite' && !sp.evo) it = 'sitrus';
         return it;
       },
+      /* ★ 工厂规则：一只宝可梦不携带两个保护类技能（极巨防壁除外）。重复时保留第一个，其余替换为池内其他招式 */
+      dedupeProtect(moves, pool) {
+        const prot = moves.filter(k => MV[k] && MV[k].protect && k !== 'maxguard');
+        if (prot.length <= 1) return moves;
+        const keep = prot[0];
+        const res = moves.filter(k => k === keep || !(MV[k] && MV[k].protect && k !== 'maxguard'));
+        for (const k of shuffle(pool.filter(k => MV[k] && !res.includes(k) && !(MV[k] && MV[k].protect && k !== 'maxguard')))) {
+          if (res.length >= 4) break;
+          res.push(k);
+        }
+        return res.slice(0, 4);
+      },
       build(sp, lvl, round) {
         const moves = this.pickMoves(sp);
         /* ★ 先确定实际特性再抽道具，确保毒疗/中毒激升宝可梦才携带剧毒宝珠 */
@@ -19050,13 +19100,17 @@ return ev;
         if (sup.length > 1 && Math.random() < 0.55) out.push(sup[1]);
         for (const k of dmg) { if (out.length >= 4) break; if (!out.includes(k)) out.push(k); }
         for (const k of st) { if (out.length >= 4) break; if (!out.includes(k)) out.push(k); }
+        /* ★ 图图犬：双打携带看我嘛的概率非常大（90%） */
+        if (sp.id === 235 && !out.includes('followme') && Math.random() < 0.9) {
+          if (out.length >= 4) out[3] = 'followme'; else out.push('followme');
+        }
         if (out.length < 4) {
           for (const p of ['tackle', 'quickattack', 'facade', 'swift', 'hyperbeam']) {
             if (out.length >= 4) break;
             if (MV[p] && !out.includes(p)) out.push(p);
           }
         }
-        return out.slice(0, 4);
+        return this.dedupeProtect(out.slice(0, 4), pool);
       },
       buildDouble(sp, lvl, round) {
         const moves = this.pickMovesDouble(sp);
