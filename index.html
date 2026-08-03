@@ -758,6 +758,22 @@
       border-radius: 5px
     }
 
+    /* ★ 双打独占技能标记 */
+    .dblOnly {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 900;
+      color: #d21f3c;
+      background: #ffe0e5;
+      border: 1px solid #f08a9a;
+      border-radius: 4px;
+      padding: 0 4px;
+      margin-left: 4px;
+      vertical-align: middle;
+      white-space: nowrap;
+      font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif
+    }
+
     /* ---------- battle scene ---------- */
     #battle {
       background: #000
@@ -3647,6 +3663,214 @@
       font-size: 11px;
       color: #a89f85;
       margin-top: 6px
+    }
+
+    /* ============ 冠军图鉴：单打/双打模式切换 ============ */
+    .codexWrap {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden !important
+    }
+
+    .codexStage {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden
+    }
+
+    .codexWrap::before {
+      content: '';
+      position: absolute;
+      inset: -40px -60px;
+      z-index: 0;
+      pointer-events: none;
+      transition: background .6s ease
+    }
+
+    /* ★ 单打：白昼竞技场 */
+    .codexMode-single::before {
+      background:
+        radial-gradient(140% 100% at 50% -10%, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0) 60%),
+        radial-gradient(55% 50% at 18% 108%, rgba(120, 180, 255, .35), rgba(120, 180, 255, 0) 70%),
+        radial-gradient(55% 50% at 82% 108%, rgba(255, 190, 120, .4), rgba(255, 190, 120, 0) 70%),
+        repeating-linear-gradient(0deg, rgba(70, 130, 255, .05) 0 2px, transparent 2px 52px),
+        linear-gradient(175deg, #eaf6ff 0%, #d7ebff 40%, #fff7e6 78%, #ffe9c8 100%)
+    }
+
+    /* ★ 双打：黄昏双人竞技场（多重聚光球池） */
+    .codexMode-double::before {
+      background:
+        radial-gradient(140% 100% at 50% -10%, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 55%),
+        radial-gradient(42% 36% at 22% 100%, rgba(255, 150, 80, .55), rgba(255, 150, 80, 0) 70%),
+        radial-gradient(42% 36% at 50% 100%, rgba(190, 140, 255, .5), rgba(190, 140, 255, 0) 70%),
+        radial-gradient(42% 36% at 78% 100%, rgba(120, 220, 255, .45), rgba(120, 220, 255, 0) 70%),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, .05) 0 2px, transparent 2px 52px),
+        linear-gradient(175deg, #3b2f6e 0%, #5b4396 35%, #b0709e 60%, #ffb27a 85%, #ffd9a0 100%)
+    }
+
+    .codexHead {
+      position: relative;
+      z-index: 1;
+      flex: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .88), rgba(255, 255, 255, .5), rgba(255, 255, 255, 0));
+      transition: background .6s ease
+    }
+
+    .codexMode-double .codexHead {
+      background: linear-gradient(180deg, rgba(50, 38, 90, .92), rgba(80, 60, 130, .55), rgba(80, 60, 130, 0))
+    }
+
+    .codexMode-double .codexTitle {
+      color: #fff;
+      text-shadow: 0 2px 0 rgba(0, 0, 0, .35)
+    }
+
+    .codexMode-double .codexSub {
+      color: #d8c6ff
+    }
+
+    .codexMode-double .codexProg {
+      background: #2a2148;
+      border-color: #0e0a24
+    }
+
+    /* 模式切换按钮 */
+    .codexToggle {
+      display: inline-flex;
+      margin-top: 10px;
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 3px 0 rgba(20, 16, 40, .3)
+    }
+
+    .codexTab {
+      border: 0;
+      background: transparent;
+      font-family: 'ZCOOL KuaiLe';
+      font-size: 14px;
+      font-weight: 900;
+      color: #6b5e8f;
+      padding: 6px 18px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      line-height: 1.4
+    }
+
+    .codexTab + .codexTab {
+      border-left: 2px solid var(--ink)
+    }
+
+    .codexTab.on {
+      background: linear-gradient(180deg, #ffd93b, #f2b705);
+      color: #fff;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, .25)
+    }
+
+    .codexMode-double .codexTab.on {
+      background: linear-gradient(180deg, #c8a2ff, #9b6fd8)
+    }
+
+    .codexTab:active {
+      filter: brightness(.9)
+    }
+
+    /* ★ 一镜到底：扫场光带 */
+    .codexSweep {
+      position: absolute;
+      top: -20%;
+      bottom: -20%;
+      left: 0;
+      width: 46%;
+      z-index: 5;
+      pointer-events: none;
+      background: linear-gradient(100deg, transparent 0%, var(--sweepA, rgba(255, 255, 255, .9)) 35%, var(--sweepB, rgba(255, 255, 255, .96)) 50%, var(--sweepA, rgba(255, 255, 255, .9)) 65%, transparent 100%);
+      transform: translateX(-150%) skewX(-12deg);
+      opacity: 0;
+      will-change: transform
+    }
+
+    .codexSweep.run {
+      opacity: 1;
+      animation: codexSweep .62s cubic-bezier(.55, 0, .15, 1) forwards
+    }
+
+    @keyframes codexSweep {
+      0% {
+        transform: translateX(-170%) skewX(-12deg)
+      }
+      100% {
+        transform: translateX(330%) skewX(-12deg)
+      }
+    }
+
+    .codexGrid {
+      position: relative;
+      z-index: 1;
+      transition: opacity .28s ease, transform .28s ease
+    }
+
+    .codexStage.switching .codexGrid {
+      opacity: .1;
+      transform: translateY(10px) scale(.985)
+    }
+
+    /* 双打模式：卡牌紫色系 + 战术标签 + 4只2×2排列 */
+    .codexMode-double .codexCard:not(.lock):not(.hiddenCh) {
+      background: linear-gradient(180deg, #fdfbff, #f3ecff);
+      border-color: #5b4396;
+      box-shadow: 0 4px 0 rgba(60, 40, 120, .35)
+    }
+
+    .codexMode-double .codexCard:not(.lock):not(.hiddenCh):hover {
+      box-shadow: 0 8px 0 rgba(60, 40, 120, .35)
+    }
+
+    .codexMode-double .codexPortrait {
+      background: radial-gradient(circle at 50% 40%, #fff, #e6d4ff 90%)
+    }
+
+    .codexMode-double .codexTeam .cm {
+      border-color: #8a6fd0;
+      width: 44px
+    }
+
+    .codexMode-double .codexTeam .cm img {
+      width: 32px;
+      height: 32px
+    }
+
+    .codexMode-double .codexTeam .cm span {
+      font-size: 8px
+    }
+
+    .codexMode-double .codexTeam {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      justify-content: center
+    }
+
+    .codexTag {
+      display: inline-block;
+      margin-top: 7px;
+      font-size: 10px;
+      font-weight: 900;
+      color: #7a4fb0;
+      background: #f3e9ff;
+      border: 2px solid #b78ae0;
+      border-radius: 999px;
+      padding: 2px 9px;
+      letter-spacing: 1px;
+      white-space: nowrap
+    }
+
+    .codexMode-single .codexTag {
+      color: #c07a2a;
+      background: #fff3e0;
+      border-color: #e0a95c
     }
 
     .dmgpop {
@@ -8562,6 +8786,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     I('psychicseed', '精神种子', '精神场地上特防+1（消耗）');
     I('mistyseed', '薄雾种子', '薄雾场地上特防+1（消耗）');
     I('bigroot', '大根茎', '吸取HP类招式的回复量×1.3');
+    I('rockyhelmet', '凹凸头盔', '受到接触类招式攻击时，攻击者损失最大HP的1/6');
     I('throatspray', '爽喉喷雾', '使用声音招式后特攻+1（消耗）');
     I('boosterenergy', '驱劲能量', '消耗后发动古代活性/夸克充能');
     I('powerherb', '强力香草', '携带后使用蓄力招式时立刻完成蓄力并攻击；使用后消耗，战斗结束后还原');
@@ -8704,7 +8929,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(196, '太阳伊布', 'psychic', '65/65/60/130/95/110', 'synchronize/magicbounce', ['psychic', 'psyshock', 'shadowball', 'dazzlinggleam', 'calmmind', 'synthesis']);
     S(197, '月亮伊布', 'dark', '95/65/110/60/130/65', 'synchronize/innerfocus', ['foulplay', 'snarl', 'toxic', 'protect', 'quickattack', 'moonblast']);
     S(212, '巨钳螳螂', 'bug/steel', '70/130/100/55/80/65', 'swarm/technician', ['bulletpunch', 'xscissor', 'uturn', 'swordsdance', 'roost', 'superpower', 'knockoff'].filter(m => MV[m]));
-    S(214, '赫拉克罗斯', 'bug/fighting', '80/125/75/40/95/85', 'swarm/guts', ['megahorn', 'closecombat', 'rockblast', 'pinmissile', 'knockoff', 'swordsdance'].filter(m => MV[m]));
+    S(214, '赫拉克罗斯', 'bug/fighting', '80/125/75/40/95/85', 'swarm/guts', ['megahorn', 'closecombat', 'rockblast', 'pinmissile', 'knockoff', 'swordsdance', 'coaching'].filter(m => MV[m]));
     S(229, '黑鲁加', 'dark/fire', '75/90/50/110/80/95', 'earlybird/flashfire', ['darkpulse', 'flamethrower', 'sludgebomb', 'nastyplot', 'suckerpunch', 'solarbeam']);
     S(230, '刺龙王', 'water/dragon', '75/95/95/95/95/85', 'swiftswim/sniper', ['hydropump', 'dragonpulse', 'icebeam', 'raindance', 'flashcannon']);
     S(242, '幸福蛋', 'normal', '255/10/10/75/135/55', 'naturalcure/serenegrace', ['softboiled', 'seismictoss', 'icebeam', 'thunderwave', 'toxic', 'stealthrock']);
@@ -8716,7 +8941,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(260, '巨沼怪', 'water/ground', '100/110/90/85/90/60', 'torrent', ['earthquake', 'waterfall', 'icepunch', 'superpower', 'stealthrock', 'raindance']);
     S(272, '乐天河童', 'water/grass', '80/70/70/90/100/70', 'swiftswim/raindish', ['surf', 'energyball', 'icebeam', 'fakeout', 'raindance', 'focusblast'].filter(m => MV[m] || m === 'surf'));
     S(275, '狡猾天狗', 'grass/dark', '90/100/60/90/60/80', 'chlorophyll/earlybird', ['energyball', 'darkpulse', 'swordsdance', 'lowkick', 'leafstorm'].filter(m => MV[m] || m === 'energyball'));
-    S(282, '沙奈朵', 'psychic/fairy', '68/65/65/125/115/80', 'synchronize/trace', ['moonblast', 'psyshock', 'focusblast', 'calmmind', 'shadowball', 'thunderbolt']);
+    S(282, '沙奈朵', 'psychic/fairy', '68/65/65/125/115/80', 'synchronize/trace', ['moonblast', 'psyshock', 'focusblast', 'calmmind', 'shadowball', 'thunderbolt', 'lightscreen', 'reflect']);
     S(289, '请假王', 'normal', '150/160/100/95/65/100', 'truant/truant', ['earthquake', 'facade', 'shadowclaw', 'superpower', 'firepunch', 'icepunch']);
     S(291, '铁面忍者', 'bug/flying', '61/90/45/50/50/160', 'speedboost/speedboost', ['xscissor', 'aerialace', 'swordsdance', 'protect', 'quickattack']);
     S(292, '脱壳忍者', 'bug/ghost', '1/90/45/30/30/40', 'wonderguard/wonderguard', ['shadowclaw', 'xscissor', 'confuseray', 'protect', 'toxic']);
@@ -8729,10 +8954,10 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(324, '煤炭龟', 'fire', '70/85/140/85/70/20', 'drought/drought', ['lavaplume', 'solarbeam', 'stealthrock', 'rockslide', 'earthpower']);
     S(332, '梦歌仙人掌', 'grass/dark', '70/115/60/115/60/55', 'sandveil/waterabsorb', ['energyball', 'darkpulse', 'suckerpunch', 'swordsdance', 'seedbomb', 'spikes']);
     S(342, '铁螯龙虾', 'water/dark', '63/120/85/90/55/55', 'hyperCutterx/adaptability', ['crabhammer', 'knockoff', 'aquajet', 'swordsdance', 'superpower']);
-    S(350, '美纳斯', 'water', '95/60/79/100/125/81', 'competitive/competitive', ['surf', 'icebeam', 'recover', 'scald', 'toxic']);
+    S(350, '美纳斯', 'water', '95/60/79/100/125/81', 'competitive/competitive', ['surf', 'icebeam', 'recover', 'scald', 'toxic', 'lightscreen', 'reflect']);
     S(359, '阿勃梭鲁', 'dark', '65/130/60/75/60/75', 'pressure/superluck', ['suckerpunch', 'knockoff', 'playrough', 'swordsdance', 'quickattack', 'stoneedge']);
     S(373, '暴飞龙', 'dragon/flying', '95/135/80/110/80/100', 'intimidate/moxie', ['dragonclaw', 'earthquake', 'flamethrower', 'dragondance', 'roost', 'outrage', 'fireblast']);
-    S(376, '巨金怪', 'steel/psychic', '80/135/130/95/90/70', 'clearbody/clearbody', ['meteormash', 'zenheadbutt', 'earthquake', 'bulletpunch', 'thunderpunch', 'stealthrock']);
+    S(376, '巨金怪', 'steel/psychic', '80/135/130/95/90/70', 'clearbody/clearbody', ['meteormash', 'zenheadbutt', 'earthquake', 'bulletpunch', 'thunderpunch', 'stealthrock', 'lightscreen', 'reflect']);
     S(381, '拉帝欧斯', 'dragon/psychic', '80/90/80/130/110/110', 'levitate/levitate', ['dracometeor', 'psyshock', 'surf', 'thunderbolt', 'icebeam', 'roost'], { leg: 1 });
     S(382, '盖欧卡', 'water', '100/100/90/150/140/90', 'drizzle/drizzle', ['originpulse', 'hydropump', 'thunder', 'icebeam', 'calmmind', 'surf'], { leg: 1 });
     S(383, '固拉多', 'ground', '100/150/140/100/90/90', 'drought/drought', ['precipiceblades', 'earthquake', 'firepunch', 'stoneedge', 'swordsdance', 'solarbeam', 'thunderpunch'], { leg: 1 });
@@ -8748,12 +8973,12 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(430, '乌鸦头头', 'dark/flying', '100/125/52/105/52/71', 'insomnia/superluck', ['bravebird', 'suckerpunch', 'heatwave', 'roost', 'darkpulse']);
     S(437, '青铜钟', 'steel/psychic', '67/89/116/79/116/33', 'levitate/heatproof', ['gyroball', 'zenheadbutt', 'earthquake', 'stealthrock', 'trickroom', 'hypnosis']);
     S(445, '烈咬陆鲨', 'dragon/ground', '108/130/95/80/85/102', 'sandveil/roughskin', ['earthquake', 'dragonclaw', 'stoneedge', 'firepunch', 'swordsdance', 'stealthrock', 'outrage', 'dracometeor', 'fireblast', 'thunderbolt']);
-    S(448, '路卡利欧', 'fighting/steel', '70/110/70/115/70/90', 'innerfocus/innerfocus', ['aurasphere', 'flashcannon', 'darkpulse', 'extremespeed', 'closecombat', 'vacuumwave', 'swordsdance']);
+    S(448, '路卡利欧', 'fighting/steel', '70/110/70/115/70/90', 'innerfocus/innerfocus', ['aurasphere', 'flashcannon', 'darkpulse', 'extremespeed', 'closecombat', 'vacuumwave', 'swordsdance', 'coaching']);
     S(450, '河马兽', 'ground', '108/112/118/68/72/47', 'sandstream/sandforce', ['earthquake', 'stoneedge', 'stealthrock', 'slackoff', 'icepunch', 'toxic']);
     S(460, '暴雪王', 'grass/ice', '90/92/75/92/85/60', 'snowwarning/snowwarning', ['blizzard', 'gigadrain', 'woodhammer', 'earthquake', 'iceshard', 'auroraveil']);
     S(461, '玛狃拉', 'dark/ice', '70/120/65/45/85/125', 'pressure/pickpocket', ['knockoff', 'tripleaxel', 'iceshard', 'swordsdance', 'lowkick'].filter(m => MV[m] || m === 'knockoff'));
     S(462, '自爆磁怪', 'electric/steel', '70/70/115/130/90/60', 'sturdy/analytic', ['thunderbolt', 'flashcannon', 'voltswitch', 'thunderwave', 'triattack']);
-    S(468, '波克基斯', 'fairy/flying', '85/50/95/120/115/80', 'serenegrace/superluck', ['airslash', 'moonblast', 'flamethrower', 'roost', 'thunderwave', 'nastyplot']);
+    S(468, '波克基斯', 'fairy/flying', '85/50/95/120/115/80', 'serenegrace/superluck', ['airslash', 'moonblast', 'flamethrower', 'roost', 'thunderwave', 'nastyplot', 'lightscreen', 'reflect']);
     S(472, '天蝎王', 'ground/flying', '75/95/125/45/75/95', 'sandveil/poisonheal', ['earthquake', 'knockoff', 'toxic', 'protect', 'roost', 'uturn']);
     S(473, '象牙猪', 'ice/ground', '110/130/80/70/60/80', 'obliviousx/thickfat', ['earthquake', 'iciclecrash', 'iceshard', 'superpower', 'stoneedge', 'stealthrock']);
     S(474, '多边兽乙型', 'normal', '85/80/70/135/75/90', 'adaptability/download', ['triattack', 'darkpulse', 'icebeam', 'thunderbolt', 'nastyplot', 'recover']);
@@ -8765,8 +8990,8 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     /* --- 第5世代 --- */
     S(497, '君主蛇', 'grass', '75/75/95/75/95/113', 'overgrow/contrary', ['leafstorm', 'dragonpulse', 'leechseed', 'glare', 'darkpulse']);
     S(530, '龙头地鼠', 'ground/steel', '110/135/60/50/65/88', 'sandrush/moldbreaker', ['earthquake', 'ironhead', 'rockslide', 'swordsdance', 'xscissor']);
-    S(534, '修建老匠', 'fighting', '105/140/95/55/65/45', 'guts/ironfist', ['drainpunch', 'machpunch', 'knockoff', 'icepunch', 'facade', 'bulkup']);
-    S(547, '风妖精', 'grass/fairy', '60/67/85/77/75/116', 'prankster/infiltrator', ['energyball', 'moonblast', 'cottonspore', 'leechseed', 'taunt']);
+    S(534, '修建老匠', 'fighting', '105/140/95/55/65/45', 'guts/ironfist', ['drainpunch', 'machpunch', 'knockoff', 'icepunch', 'facade', 'bulkup', 'coaching']);
+    S(547, '风妖精', 'grass/fairy', '60/67/85/77/75/116', 'prankster/infiltrator', ['energyball', 'moonblast', 'cottonspore', 'leechseed', 'taunt', 'tailwind', 'lightscreen', 'reflect']);
     S(553, '流氓鳄', 'dark/ground', '95/117/80/65/70/92', 'intimidate/moxie', ['earthquake', 'knockoff', 'stoneedge', 'superpower', 'taunt']);
     S(591, '败露球菇', 'grass/poison', '114/85/70/85/80/30', 'effectspore/regenerator', ['gigadrain', 'sludgebomb', 'spore', 'clearsmog', 'foulplay']);
     S(596, '电蜘蛛', 'bug/electric', '70/77/60/97/60/108', 'compoundeyes/compoundeyes', ['thunder', 'bugbuzz', 'voltswitch', 'energyball', 'thunderwave']);
@@ -8820,7 +9045,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(908, '魔幻假面喵', 'grass/dark', '76/110/70/81/70/123', 'overgrow/protean', ['flowertrick', 'knockoff', 'suckerpunch', 'uturn', 'playrough']);
     S(911, '骨纹巨声鳄', 'fire/ghost', '104/75/100/110/75/66', 'blaze/unaware', ['torchsong', 'shadowball', 'earthpower', 'willowisp', 'slackoff']);
     S(914, '狂欢浪舞鸭', 'water/fighting', '85/120/80/85/75/85', 'torrent/moxie', ['aquastep', 'closecombat', 'icepunch', 'uturn', 'swordsdance', 'liquidation']);
-    S(923, '巴布土拨', 'electric/fighting', '70/115/70/70/60/105', 'voltabsorb/naturalcure', ['doubleedge', 'closecombat', 'machpunch', 'wildcharge', 'revivalblessing']);
+    S(923, '巴布土拨', 'electric/fighting', '70/115/70/70/60/105', 'voltabsorb/naturalcure', ['doubleedge', 'closecombat', 'machpunch', 'wildcharge', 'revivalblessing', 'coaching']);
     S(934, '盐石巨灵', 'rock', '100/100/130/45/90/35', 'purifyingsalt/sturdy', ['saltcure', 'stoneedge', 'recover', 'stealthrock', 'bodypress'].filter(m => MV[m] || m === 'saltcure'));
     S(936, '红莲铠骑', 'fire/psychic', '85/60/100/125/80/75', 'flashfire/flashfire', ['armorcannon', 'psychic', 'aurasphere', 'energyball', 'calmmind']);
     S(937, '苍炎刃鬼', 'fire/ghost', '75/125/80/60/100/85', 'flashfire/flashfire', ['bitterblade', 'shadowclaw', 'closecombat', 'swordsdance', 'willowisp']);
@@ -8859,7 +9084,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(400, '大尾狸', 'normal/water', '79/85/60/55/60/71', 'simple/unaware', ['waterfall', 'return', 'aquajet', 'stealthrock', 'swordsdance']);
     S(442, '花岩怪', 'ghost/dark', '50/92/108/92/108/35', 'pressure/infiltrator', ['shadowball', 'darkpulse', 'willowisp', 'painsplit', 'suckerpunch', 'calmmind']);
     S(466, '电击魔兽', 'electric', '75/123/67/95/85/95', 'motordrive/vitalspirit', ['thunderpunch', 'wildcharge', 'icepunch', 'earthquake', 'thunderbolt', 'crosschop']);
-    S(475, '艾路雷朵', 'psychic/fighting', '68/125/65/65/115/80', 'steadfastx/justified', ['closecombat', 'psychocut', 'stoneedge', 'swordsdance', 'shadowsneak', 'leafblade']);
+    S(475, '艾路雷朵', 'psychic/fighting', '68/125/65/65/115/80', 'steadfastx/justified', ['closecombat', 'psychocut', 'stoneedge', 'swordsdance', 'shadowsneak', 'leafblade', 'coaching']);
     /* 5代 */
     S(500, '炎武王', 'fire/fighting', '110/123/65/100/65/65', 'blaze/reckless', ['flareblitz', 'closecombat', 'wildcharge', 'headsmash', 'suckerpunch']);
     S(537, '蟾蜍王', 'water/ground', '105/95/75/85/75/74', 'swiftswim/waterabsorb', ['waterfall', 'earthquake', 'icepunch', 'drainpunch', 'stealthrock', 'toxic']);
@@ -9506,7 +9731,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     /* --- 第4世代补全 --- */
     S(443,'圆陆鲨','dragon/ground','58/70/45/40/45/42','sandveil/roughskin',['earthquake','dragonclaw','stoneedge','firefang','swordsdance'],{evo:1});
     S(446,'小卡比兽','normal','135/85/40/40/85/5','pickup/thickfat/gluttony',['bodyslam','earthquake','crunch','rest','firepunch'],{evo:1});
-    S(447,'利欧路','fighting','40/70/40/35/40/60','steadfastx/innerfocus/prankster',['aurasphere','closecombat','extremespeed','swordsdance','vacuumwave'],{evo:1});
+    S(447,'利欧路','fighting','40/70/40/35/40/60','steadfastx/innerfocus/prankster',['aurasphere','closecombat','extremespeed','swordsdance','vacuumwave','coaching'],{evo:1});
     S(449,'沙河马','ground','68/72/78/38/42/32','sandstream/sandforce',['earthquake','stoneedge','stealthrock','slackoff','icepunch'],{evo:1});
     S(451,'钳尾蝎','poison/bug','40/50/90/30/55/65','battlearmor/sniper/keeneye',['knockoff','poisonjab','xscissor','swordsdance','aquajet'],{evo:1});
     S(453,'不良蛙','poison/fighting','48/61/40/61/40/50','anticipation/dryskin/poisontouch',['gunkshot','closecombat','knockoff','suckerpunch','swordsdance'],{evo:1});
@@ -9869,8 +10094,9 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
       358: ['helpinghand'], 362: ['helpinghand'], 376: ['helpinghand'], 385: ['helpinghand', 'followme'],
       392: ['fakeout'], 395: ['helpinghand'], 407: ['helpinghand'], 423: ['helpinghand'],
       426: ['tailwind'], 429: ['trickroom', 'helpinghand'], 430: ['tailwind'], 437: ['trickroom'],
-      440: ['helpinghand'], 448: ['helpinghand'], 454: ['fakeout'], 460: ['helpinghand'],
-      461: ['fakeout'], 468: ['followme', 'tailwind'], 469: ['tailwind'], 475: ['helpinghand'],
+      440: ['helpinghand'],       214: ['coaching'], 448: ['helpinghand', 'coaching'], 447: ['coaching'],
+      475: ['helpinghand', 'coaching'], 534: ['coaching'], 923: ['coaching'], 454: ['fakeout'], 460: ['helpinghand'],
+      461: ['fakeout'], 468: ['followme', 'tailwind'], 469: ['tailwind'],
       477: ['trickroom'], 478: ['helpinghand'], 480: ['trickroom'], 481: ['trickroom'],
       482: ['trickroom'], 488: ['trickroom', 'helpinghand'], 518: ['trickroom'], 531: ['helpinghand'],
       547: ['tailwind', 'helpinghand'], 549: ['helpinghand'], 561: ['trickroom'], 563: ['trickroom'],
@@ -9882,8 +10108,10 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
       770: ['helpinghand'], 784: ['helpinghand'], 788: ['helpinghand'], 806: ['trickroom'],
       826: ['trickroom'], 855: ['trickroom'], 858: ['trickroom'], 861: ['fakeout'],
       864: ['helpinghand'], 867: ['trickroom'], 869: ['helpinghand'], 876: ['followme', 'helpinghand'],
-      898: ['trickroom'], 956: ['helpinghand']
+       898: ['trickroom'], 956: ['helpinghand']
     };
+    /* ★ 双打独占技能：单打中完全无用的招式。对战工厂单打不会分配，图鉴中统一标注「双打独占」 */
+    const DOUBLE_ONLY = ['helpinghand', 'followme', 'ragepowder', 'coaching', 'wideguard', 'spotlight'];
     /* ============ 第三特性补全补丁 ============ */
 /*
   规则：
@@ -14927,8 +15155,8 @@ return ev;
         const pList = Array.isArray(pa) ? pa : [pa];
         const eList = Array.isArray(ea) ? ea : [ea];
         // ★ 清除上一回合残留的保护/广域防守状态
-        for (const m of this.fieldMons('p')) { m.vol.protect = false; m.vol.followme = false; }
-        for (const m of this.fieldMons('e')) { m.vol.protect = false; m.vol.followme = false; }
+        for (const m of this.fieldMons('p')) { m.vol.protect = false; m.vol.followme = false; m.vol.followmePowder = false; }
+        for (const m of this.fieldMons('e')) { m.vol.protect = false; m.vol.followme = false; m.vol.followmePowder = false; }
         this.wideGuard = { p: false, e: false };
         // ★ 突袭判定准备：记录本回合计划招式 + 重置出手标记
         for (const m of this.fieldMons('p')) { m.vol.actedThisTurn = false; m.vol.plannedMove = null; }
@@ -15474,9 +15702,9 @@ return ev;
           if (!t) t = fallback;
           return t ? [t] : [];
         };
-        /* ★ 看我嘛/愤怒粉：敌方单体招式被吸引（多目标与场地招式不受影响） */
+        /* ★ 看我嘛/愤怒粉：敌方单体招式被吸引（多目标与场地招式不受影响；愤怒粉对草属性或防尘特性的攻击者无效） */
         const redirectFoe = list => {
-          const fm = list.filter(f => f.vol && f.vol.followme);
+          const fm = list.filter(f => f.vol && f.vol.followme && !(f.vol.followmePowder && (mon.types.includes('grass') || mon.has('overcoatx'))));
           if (fm.length) return fm[0];
           const abR = { electric: 'lightningrod', water: 'stormdrain', grass: 'sapsipper' }[mv.t];
           if (abR) {
@@ -15703,6 +15931,7 @@ return ev;
         // 接触副作用
         if (mv.ct && !mon.has('magicguard') && !mon.has('longreach')) {
           if (foe.has('ironbarbs') || foe.has('roughskin')) { this.abBanner(foe); await this.directDmg(mon, Math.max(1, Math.floor(mon.baseMax / 8)), side, `${foe.name} 的${AB[foe.ability].n}伤害了 ${mon.vol.illusionName || mon.name}！`); }
+          if (!mon.has('klutz') && foe.item === 'rockyhelmet') { await this.directDmg(mon, Math.max(1, Math.floor(mon.baseMax / 6)), side, `${foe.vol.illusionName || foe.name} 的凹凸头盔反弹了伤害！`); }
           if (foe.has('effectspore') && Math.random() < .3 && !mon.status) { this.abBanner(foe); await this.inflictStatus(mon, pick(['psn', 'par', 'sleep']), foe); }
         }
         /* ★ 新增接触类特性 */
@@ -16610,8 +16839,8 @@ return ev;
           await say(`${mon.name} 帮助了 ${foe.name}！${foe.name} 本回合招式的威力提升了！`);
           return;
         }
-        if (mv.followme) { mon.vol.followme = true; await say(`${mon.name} 使出了看我嘛！成为了攻击目标！`); return; }
-        if (mv.ragepowder) { mon.vol.followme = true; await say(`${mon.name} 撒出了愤怒粉！成为了攻击目标！`); return; }
+        if (mv.followme) { mon.vol.followme = true; mon.vol.followmePowder = false; await say(`${mon.name} 使出了看我嘛！成为了攻击目标！`); return; }
+        if (mv.ragepowder) { mon.vol.followme = true; mon.vol.followmePowder = true; await say(`${mon.name} 撒出了愤怒粉！成为了攻击目标！`); return; }
         if (mv.wideguard) { this.wideGuard[side] = true; await say(`${mon.name} 展开了广域防守！多目标招式无效！`); return; }
         if (mv.coaching) {
           if (!foe || foe.fainted || foe === mon) { await say('没有可以指导的对象！'); return; }
@@ -16691,7 +16920,7 @@ return ev;
         }
         if (mv.spotlight) {
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
-          foe.vol.followme = true;
+          foe.vol.followme = true; foe.vol.followmePowder = false;
           await say(`${foe.name} 成为了聚光灯的焦点！`); return;
         }
         if (mv.stuffcheeks || mv.filletaway) {
@@ -17713,6 +17942,27 @@ return ev;
         }
         return act;
       }
+      /* ★ 同步免疫判定（AI评分用，镜像 checkImmunity 的常见特性）：返回 'absorb' | 'immune' | null */
+      abImmune(mon, foe, mv) {
+        if (mv.ignAb) return null;
+        if (mon.has('moldbreaker')) return null;
+        const t = mv.t;
+        if (t === 'ground' && !mv.thousandarrows && (foe.has('levitate') || foe.has('eelevate') || foe.types.includes('flying'))) return 'immune';
+        if (t === 'electric' && foe.has('voltabsorb')) return 'absorb';
+        if (t === 'electric' && foe.has('lightningrod')) return 'absorb';
+        if (t === 'electric' && foe.has('motordrive')) return 'absorb';
+        if (t === 'water' && foe.has('waterabsorb')) return 'absorb';
+        if (t === 'water' && foe.has('stormdrain')) return 'absorb';
+        if (t === 'water' && foe.has('dryskin')) return 'absorb';
+        if (t === 'water' && foe.has('watercompaction')) return 'absorb';
+        if (t === 'fire' && foe.has('flashfire')) return 'absorb';
+        if (t === 'fire' && foe.has('wellbakedbody')) return 'absorb';
+        if (t === 'grass' && foe.has('sapsipper')) return 'absorb';
+        if (t === 'ground' && foe.has('eartheater')) return 'absorb';
+        if (t === 'flying' && foe.has('windpower')) return 'absorb';
+        if ((t === 'flying' || mv.wind) && foe.has('windrider')) return 'absorb';
+        return null;
+      }
       aiScoreDoubles(m) {
         const realFoes = this.foesOf(m);
         const foes = realFoes.map(f => this.seenFoe(f));
@@ -17746,20 +17996,28 @@ return ev;
               for (let i = 0; i < foes.length; i++) { const sim = this.calcDmg(m, foes[i], simMv); if (sim.eff > 0) { sum += sim.dmg; n++; } }
               s = n ? sum / n / Math.max(1, foes[0] ? foes[0].maxhp : 1) * 55 : -80;
             } else if (rng === 'all-except-self') {
-              /* ★ 地震等：评估对敌方收益与误伤队友的风险 */
+              /* ★ 地震/放电/冲浪等：评估对敌方收益与误伤队友的风险；
+                   队友有避雷针/引水/蓄电/储水/食草/漂浮等免疫时不但不误伤，反而触发队友特性提升 */
               let sum = 0, n = 0;
               for (let i = 0; i < foes.length; i++) { const sim = this.calcDmg(m, foes[i], simMv); if (sim.eff > 0) { sum += sim.dmg; n++; } }
               let en = n ? sum / n / Math.max(1, foes[0] ? foes[0].maxhp : 1) * 55 : -60;
-              let allyPen = 0;
+              let allyPen = 0, allySynergy = 0;
               for (const ally of allies) {
-                if (this.grounded(ally)) {
-                  const sim = this.calcDmg(m, ally, simMv);
-                  if (sim.eff > 0) allyPen += Math.min(0.9, sim.dmg / Math.max(1, ally.maxhp)) * 40;
+                const imm = this.abImmune(m, ally, simMv);
+                if (imm === 'absorb') { allySynergy += 14; continue; }
+                if (imm === 'immune') continue;
+                /* ★ 误伤按真实属性相克计算（飞行系只免疫地面，不免疫放电/冲浪等） */
+                const sim = this.calcDmg(m, ally, simMv);
+                if (sim.eff > 0) {
+                  const pct = sim.dmg / Math.max(1, ally.maxhp);
+                  allyPen += Math.min(0.9, pct) * 40;
+                  if (sim.dmg >= ally.hp) allyPen += 40;      // ★ 会误杀队友
+                  else if (pct >= 0.5) allyPen += 18;         // ★ 队友重伤
                 }
               }
               const canKO = foes.some(f => this.calcDmg(m, f, simMv).dmg >= f.hp);
               if (canKO) allyPen *= 0.5;   // ★ 能确杀敌方时仍可能误伤队友
-              s = en - allyPen;
+              s = en - allyPen + allySynergy;
             } else {
               /* ★ 单体攻击：AI 只从敌方中选目标，绝不主动攻击队友（即使对队友克制度更高） */
               const list = realFoes;
@@ -17769,8 +18027,8 @@ return ev;
                 const fs = dmgScore(this.calcDmg(m, foe, simMv), foe, d);
                 if (fs > bfs) { bfs = fs; bf = foeReal; }
               }
-              /* 看我嘛/愤怒粉：敌方单体招式会被吸引 */
-              const fm = realFoes.find(f => f.vol && f.vol.followme);
+              /* 看我嘛/愤怒粉：敌方单体招式会被吸引（愤怒粉对草属性/防尘特性攻击者无效） */
+              const fm = realFoes.find(f => f.vol && f.vol.followme && !(f.vol.followmePowder && (m.types.includes('grass') || m.has('overcoatx'))));
               if (fm) { bf = fm; bfs = Math.max(bfs, 35); }
               s = bfs; target = bf;
             }
@@ -17779,12 +18037,54 @@ return ev;
             if (d.self && d.self.n < 0) s -= 6;
             if (m.hpPct() < .35 && d.p < 50) s -= 5;
           } else {
-            if (mv.helpinghand) {
-              const canBoost = allies.filter(a => a.moves.some(x => MV[x.k] && MV[x.k].c !== 'X' && MV[x.k].p));
-              if (canBoost.length) { s = 16; target = canBoost[0]; }
+            if (d.coaching) {
+              /* ★ 指导：收益按队友最佳物理招式的伤害占比评估（攻击+防御各+1，队友已强化满则降低） */
+              const phys = allies.filter(a => a.moves.some(x => MV[x.k] && MV[x.k].c === 'P'));
+              if (phys.length) {
+                let best = 0, bestAlly = null;
+                for (const ally of phys) {
+                  for (const amv of ally.moves) {
+                    const dm = MV[amv.k];
+                    if (!dm || dm.c !== 'P' || !dm.p) continue;
+                    for (const foe of realFoes) {
+                      const sim = this.calcDmg(ally, foe, { ...dm, k: amv.k });
+                      if (sim.eff > 0) { const pct = sim.dmg / Math.max(1, foe.maxhp); if (pct > best) { best = pct; bestAlly = ally; } }
+                    }
+                  }
+                }
+                if (bestAlly) {
+                  s = 12 + Math.min(40, Math.round(best * 80));
+                  if (bestAlly.stages.atk + bestAlly.stages.def >= 4) s -= 18;
+                  target = bestAlly;
+                } else s = -30;
+              } else s = -30;
+            } else if (d.helpinghand) {
+              /* ★ 帮助：按队友最强招式的伤害占比与击杀潜力评估——
+                    帮助后能确杀（1.5倍威力）或大幅接近击杀时收益极高，常优于两人各自攻击 */
+              let best = 0, bestAlly = null;
+              for (const ally of allies) {
+                for (const amv of ally.moves) {
+                  const dm = MV[amv.k];
+                  if (!dm || dm.c === 'X' || !dm.p) continue;
+                  for (const foe of realFoes) {
+                    const sim = this.calcDmg(ally, foe, { ...dm, k: amv.k });
+                    if (sim.eff <= 0) continue;
+                    const pct = sim.dmg / Math.max(1, foe.maxhp);
+                    const hpPct = foe.hpPct();
+                    let val = pct * 55;
+                    if (pct * 1.5 >= hpPct) val += 30;          // 帮助后确杀
+                    else if (pct >= hpPct * 0.6) val += 12;     // 帮助后大幅接近击杀
+                    if (val > best) { best = val; bestAlly = ally; }
+                  }
+                }
+              }
+              if (bestAlly) { s = 8 + Math.min(45, Math.round(best)); target = bestAlly; }
               else s = -30;
-            } else if (mv.followme || mv.ragepowder) { s = allies.length ? 14 : -25; }
-            else if (mv.wideguard) { s = foes.length > 1 ? 12 : -15; }
+            } else if (d.followme || d.ragepowder) {
+              /* ★ 愤怒粉：草属性或防尘特性的攻击者无视 */
+              const effective = foes.some(f => !(f.types.includes('grass') || f.has('overcoatx')));
+              s = allies.length && effective ? 14 : -25;
+            } else if (d.wideguard) { s = foes.length > 1 ? 12 : -15; }
             else if (d.heal || d.rest) { s = m.hpPct() < .55 ? 30 : -20; if (m.hpPct() > .85) s = -25; }
             else if (d.setSt) {
               const foe = foes[0];
@@ -17793,14 +18093,31 @@ return ev;
             }
             else if (d.hazard) { const f = this.haz[this.foeSide('e')]; s = (f[d.hazard] || 0) >= (d.hazard === 'sr' ? 1 : d.hazard === 'tspikes' ? 2 : 3) ? -25 : 12; }
             else if (d.selfUp || d.selfUp2 || d.selfUp3) { const st = m.stages; s = (st.atk + st.spa + st.def + st.spd + st.spe < 3) ? 14 : -15; if (m.hpPct() < .4) s -= 10; }
-            else if (d.tailwind) { s = this.tailwind[this.sideOf(m)] > 0 ? -25 : 18; }
-            else if (d.trickroom) { s = -10; }
+            else if (d.tailwind) {
+              /* ★ 顺风：速度是双打胜负关键，对方速度优势越大收益越高；己方速度碾压时价值降低 */
+              if (this.tailwind[this.sideOf(m)] > 0) s = -25;
+              else {
+                let foeSpe = 0, mySpe = 0;
+                for (const f of foes) foeSpe = Math.max(foeSpe, f.effStat('spe', this) || 0);
+                for (const a of allies) mySpe = Math.max(mySpe, a.effStat('spe', this) || 0);
+                if (foeSpe >= mySpe) s = 52;                    // 对手更快：开顺风反超（4回合先手权）
+                else if (mySpe > foeSpe * 1.5) s = 6;           // 己方碾压：价值低
+                else s = 26;                                    // 速度接近：开顺风抢占先手
+              }
+            }
+            else if (d.trickroom) {
+              /* ★ 戏法空间：自身或队友速度较慢时积极使用，已开启则不再使用 */
+              if (this.trickT > 0) s = -25;
+              else { const slow = m.st.spe < 90 || allies.some(a => a.st.spe < 80); s = slow ? 16 : -8; }
+            }
             else if (d.screen) { s = m.vol[d.screen === 'light' ? 'lightscreen' : d.screen === 'reflect' ? 'reflect' : 'auroraveil'] > 0 ? -25 : 12; }
             else if (d.leechseed) { const foe = foes[0]; s = foe && foe.vol.seed ? -25 : (foe && foe.types.includes('grass')) ? -25 : 12; target = realFoes[0]; }
             else if (d.taunt) { const foe = foes[0]; s = foe && foe.vol.taunt ? -20 : 8; target = realFoes[0]; }
             else if (d.encore) { const foe = foes[0]; const lm = foe && foe.vol.lastMove; s = lm && foe.moves.some(x => x.k === lm) ? 8 : -15; target = realFoes[0]; }
             else if (d.parting) { s = m.hpPct() < .4 && this.ep.filter(x => x.alive()).length > 1 ? 15 : -15; }
             else s = -5;
+            /* ★ 团队战术招式加成：顺风/指导/帮助/看我嘛/广域防守/戏法空间/开墙等，让AI更愿意使用团队套路 */
+            if (s > 0 && (d.coaching || d.helpinghand || d.tailwind || d.followme || d.ragepowder || d.wideguard || d.trickroom || d.screen)) s += 12;
           }
           s += Math.random() * 6 * this.aiLevel;
           if (s > bestS) { bestS = s; best = mv.k; bestTarget = target; }
@@ -17921,64 +18238,217 @@ return ev;
     const CHAMPIONS = [
       {
         name: '阿渡', sprite: 149, team: [130, 1007, 149],
-        lines: { start: '我是四天王之首，阿渡！龙的意志将吞噬一切！', lose: '不可能……我的龙竟然……', playerLose: '哼，龙的意志不可动摇。回去再修炼一百年吧。' }
+        lines: { start: '我是四天王之首，阿渡！龙的意志将吞噬一切！', lose: '不可能……我的龙竟然……', playerLose: '哼，龙的意志不可动摇。回去再修炼一百年吧。' },
+        /* ★ 双打：顺风队——快龙/化石翼龙双顺风，配合龙系高速打手 */
+        dbl: [{
+          ids: [149, 142, 130, 1007],
+          abilities: ['multiscale', 'rockhead', 'intimidate', 'orichalcumpulse'],
+          evs: [{ hp: 2, atk: 32, def: 0, spa: 0, spd: 0, spe: 32 }, { hp: 2, atk: 32, def: 0, spa: 0, spd: 0, spe: 32 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 2, atk: 32, def: 0, spa: 0, spd: 0, spe: 32 }],
+          natures: [{ n: '爽朗', up: 'spe', down: 'spa' }, { n: '爽朗', up: 'spe', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }],
+          items: ['sitrus', 'focussash', 'expertbelt', 'choiceband'],
+          moves: [['tailwind', 'dragonclaw', 'firepunch', 'protect'], ['rockslide', 'stoneedge', 'tailwind', 'protect'], ['waterfall', 'powerwhip', 'crunch', 'protect'], ['collisioncourse', 'flareblitz', 'dragonclaw', 'uturn']]
+        }]
       },
       {
         name: '大吾', sprite: 376, team: [306, 384, 376],
-        lines: { start: '我是丰缘冠军大吾。让我和宝可梦们一起，展现钢之意志！', lose: '这就是你的实力吗……了不起。', playerLose: '结果我第一，又强又厉害。' }
+        lines: { start: '我是丰缘冠军大吾。让我和宝可梦们一起，展现钢之意志！', lose: '这就是你的实力吗……了不起。', playerLose: '结果我第一，又强又厉害。' },
+        /* ★ 双打：双墙强化队——巨金怪开反射壁/光墙，掩护烈空坐与钢系队友强化 */
+        dbl: [{
+          ids: [376, 384, 306, 530],
+          abilities: ['clearbody', 'airlock', 'rockhead', 'moldbreaker'],
+          evs: [{ hp: 16, atk: 32, def: 18, spa: 0, spd: 0, spe: 0 }, { hp: 2, atk: 32, def: 0, spa: 0, spd: 0, spe: 32 }, { hp: 20, atk: 32, def: 14, spa: 0, spd: 0, spe: 0 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }],
+          natures: [{ n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '淘气', up: 'def', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }],
+          items: ['lightclay', 'lifeorb', 'leftovers', 'choiceband'],
+          moves: [['reflect', 'lightscreen', 'meteormash', 'zenheadbutt'], ['swordsdance', 'dragonascent', 'extremespeed', 'earthquake'], ['ironhead', 'stoneedge', 'superpower', 'thunderwave'], ['rockslide', 'ironhead', 'earthquake', 'swordsdance']]
+        }]
       },
       {
         name: '竹兰', sprite: 448, team: [448, 493, 445],
-        lines: { start: '我是神奥冠军竹兰。来吧，让我看看你和宝可梦之间的羁绊！', lose: '这就是你的答案吗……我感受到了。', playerLose: '你和宝可梦的羁绊还不够深。回去好好培养羁绊，再来挑战吧。' }
+        lines: { start: '我是神奥冠军竹兰。来吧，让我看看你和宝可梦之间的羁绊！', lose: '这就是你的答案吗……我感受到了。', playerLose: '你和宝可梦的羁绊还不够深。回去好好培养羁绊，再来挑战吧。' },
+        /* ★ 双打：空间队——克雷色利亚开戏法空间，烈咬陆鲨/路卡利欧/黏美龙低速高输出 */
+        dbl: [{
+          ids: [488, 445, 448, 706],
+          abilities: ['levitate', 'roughskin', 'innerfocus', 'sapsipper'],
+          evs: [{ hp: 32, atk: 0, def: 0, spa: 0, spd: 32, spe: 2 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 20, atk: 0, def: 0, spa: 32, spd: 14, spe: 0 }],
+          natures: [{ n: '沉着', up: 'spd', down: 'atk' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '内敛', up: 'spa', down: 'atk' }],
+          items: ['leftovers', 'sitrus', 'lifeorb', 'assaultvest'],
+          moves: [['trickroom', 'psychic', 'moonblast', 'protect'], ['earthquake', 'dragonclaw', 'stoneedge', 'protect'], ['closecombat', 'flashcannon', 'extremespeed', 'protect'], ['dragonpulse', 'flamethrower', 'thunderbolt', 'protect']]
+        }]
       },
       {
         name: '赤红', sprite: 6, team: [6, 25, 150],
-        lines: { start: '……', lose: '……！', playerLose: '……' }
+        lines: { start: '……', lose: '……！', playerLose: '……' },
+        /* ★ 双打：晴天队——九尾日照触发叶绿素，妙蛙花/巨蔓藤晴天高速输出 */
+        dbl: [{
+          ids: [38, 3, 6, 465],
+          abilities: ['drought', 'chlorophyll', 'solarpower', 'chlorophyll'],
+          evs: [{ hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }, { hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }, { hp: 8, atk: 0, def: 0, spa: 32, spd: 0, spe: 26 }],
+          natures: [{ n: '胆小', up: 'spe', down: 'atk' }, { n: '内敛', up: 'spa', down: 'atk' }, { n: '胆小', up: 'spe', down: 'atk' }, { n: '内敛', up: 'spa', down: 'atk' }],
+          items: ['sitrus', 'focussash', 'lifeorb', 'expertbelt'],
+          moves: [['heatwave', 'flamethrower', 'willowisp', 'protect'], ['solarbeam', 'sludgebomb', 'sleeppowder', 'protect'], ['heatwave', 'solarbeam', 'airslash', 'protect'], ['leafstorm', 'gigadrain', 'sleeppowder', 'earthquake']]
+        }]
       },
       {
         name: '小茂', sprite: 9, team: [3, 59, 9],
-        lines: { start: '哼，终于走到这里了吗？那就让我来检验你的实力！', lose: '嘁……这次算你厉害。', playerLose: '哈哈哈！就凭你还想赢我？本大爷可是冠军！回去再练练吧！' }
+        lines: { start: '哼，终于走到这里了吗？那就让我来检验你的实力！', lose: '嘁……这次算你厉害。', playerLose: '哈哈哈！就凭你还想赢我？本大爷可是冠军！回去再练练吧！' },
+        /* ★ 双打：雨天队——大嘴鸥降雨触发悠游自如，刺龙王/乐天河童雨天高速输出 */
+        dbl: [{
+          ids: [279, 230, 272, 9],
+          abilities: ['drizzle', 'swiftswim', 'swiftswim', 'raindish'],
+          evs: [{ hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }, { hp: 32, atk: 0, def: 20, spa: 0, spd: 14, spe: 0 }],
+          natures: [{ n: '胆小', up: 'spe', down: 'atk' }, { n: '内敛', up: 'spa', down: 'atk' }, { n: '内敛', up: 'spa', down: 'atk' }, { n: '大胆', up: 'def', down: 'atk' }],
+          items: ['sitrus', 'choicespecs', 'focussash', 'leftovers'],
+          moves: [['scald', 'hurricane', 'tailwind', 'protect'], ['hydropump', 'dragonpulse', 'icebeam', 'protect'], ['surf', 'energyball', 'fakeout', 'protect'], ['scald', 'icebeam', 'aurasphere', 'raindance']]
+        }]
       },
       {
         name: '小智', sprite: 25, team: [25, 791, 658],
-        lines: { start: '我是小智！来吧，让我们用宝可梦的力量一决胜负！', lose: '太好了！我们赢了！', playerLose: '嘿嘿，这次是我们赢了！不过你的宝可梦也很强，下次再打一场吧！' }
+        lines: { start: '我是小智！来吧，让我们用宝可梦的力量一决胜负！', lose: '太好了！我们赢了！', playerLose: '嘿嘿，这次是我们赢了！不过你的宝可梦也很强，下次再打一场吧！' },
+        /* ★ 双打：避雷针队——围巾雷丘放电先手全场，触发队友皮卡丘避雷针免疫并提升特攻 */
+        dbl: [{
+          ids: [25, 26, 658, 791],
+          abilities: ['lightningrod', 'static', 'protean', 'fullmetalbody'],
+          evs: [{ hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }, { hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }, { hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }],
+          natures: [{ n: '胆小', up: 'spe', down: 'atk' }, { n: '胆小', up: 'spe', down: 'atk' }, { n: '胆小', up: 'spe', down: 'atk' }, { n: '固执', up: 'atk', down: 'spa' }],
+          items: ['sitrus', 'choicescarf', 'expertbelt', 'leftovers'],
+          moves: [['thunderbolt', 'voltswitch', 'thunderwave', 'protect'], ['discharge', 'thunderbolt', 'irontail', 'protect'], ['hydropump', 'darkpulse', 'icebeam', 'uturn'], ['sunsteelstrike', 'zenheadbutt', 'flareblitz', 'protect']]
+        }]
       },
       {
         name: '达拉', sprite: 275,
         teams: [[275, 303, 214], [812, 809, 888], [798, 802, 889]],
-        lines: { start: '呵呵呵……让我和我的宝可梦来检验一下你的实力吧！', lose: '这就是工厂的极限吗……', playerLose: '呵呵呵……看来你的实力还不够格。工厂的大门随时为你敞开，再来挑战吧。' }
+        lines: { start: '呵呵呵……让我和我的宝可梦来检验一下你的实力吧！', lose: '这就是工厂的极限吗……', playerLose: '呵呵呵……看来你的实力还不够格。工厂的大门随时为你敞开，再来挑战吧。' },
+        /* ★ 双打：指导队——格斗宝可梦使用指导提升队友攻击与防御 */
+        dbl: [
+          {
+            ids: [214, 534, 275, 303],
+            abilities: ['guts', 'ironfist', 'chlorophyll', 'intimidate'],
+            evs: [{ hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 20, atk: 32, def: 0, spa: 0, spd: 14, spe: 0 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }, { hp: 20, atk: 32, def: 0, spa: 0, spd: 14, spe: 0 }],
+            natures: [{ n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '内敛', up: 'spa', down: 'atk' }, { n: '固执', up: 'atk', down: 'spa' }],
+            items: ['flameorb', 'leftovers', 'lifeorb', 'sitrus'],
+            moves: [['coaching', 'megahorn', 'closecombat', 'protect'], ['coaching', 'drainpunch', 'machpunch', 'icepunch'], ['leafstorm', 'energyball', 'darkpulse', 'protect'], ['swordsdance', 'playrough', 'suckerpunch', 'knockoff']]
+          },
+          {
+            ids: [448, 888, 812, 809],
+            abilities: ['innerfocus', 'intrepidsword', 'grassysurge', 'ironfist'],
+            evs: [{ hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 20, atk: 32, def: 14, spa: 0, spd: 0, spe: 0 }],
+            natures: [{ n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }],
+            items: ['lifeorb', 'rustedsword', 'choiceband', 'leftovers'],
+            moves: [['coaching', 'closecombat', 'flashcannon', 'extremespeed'], ['behemothblade', 'closecombat', 'playrough', 'protect'], ['grassyglide', 'woodhammer', 'knockoff', 'uturn'], ['doubleironbash', 'superpower', 'thunderpunch', 'protect']]
+          },
+          {
+            ids: [475, 889, 798, 802],
+            abilities: ['justified', 'dauntlessshield', 'beastboost', 'technician'],
+            evs: [{ hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }],
+            natures: [{ n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }],
+            items: ['expertbelt', 'rustedshield', 'lifeorb', 'focussash'],
+            moves: [['coaching', 'sacredsword', 'psychocut', 'shadowsneak'], ['behemothbash', 'closecombat', 'playrough', 'crunch'], ['leafblade', 'sacredsword', 'ironhead', 'swordsdance'], ['spectralthief', 'closecombat', 'shadowsneak', 'icepunch']]
+          }
+        ]
       },
       {
         name: '米可利', sprite: 350, team: [350, 272, 130],
-        lines: { start: '美丽与优雅，才是最强的证明！让我见识你的华丽演出吧！', lose: '你的表现……无愧于冠军之名。', playerLose: '优雅的胜利，属于真正的冠军。你还需要更多沉淀。' }
+        lines: { start: '美丽与优雅，才是最强的证明！让我见识你的华丽演出吧！', lose: '你的表现……无愧于冠军之名。', playerLose: '优雅的胜利，属于真正的冠军。你还需要更多沉淀。' },
+        /* ★ 双打：引水队——围巾美纳斯冲浪全场，触发队友海兔兽引水免疫并提升特攻 */
+        dbl: [{
+          ids: [423, 350, 272, 230],
+          abilities: ['stormdrain', 'competitive', 'swiftswim', 'swiftswim'],
+          evs: [{ hp: 32, atk: 0, def: 20, spa: 0, spd: 14, spe: 0 }, { hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }],
+          natures: [{ n: '悠闲', up: 'def', down: 'spe' }, { n: '胆小', up: 'spe', down: 'atk' }, { n: '内敛', up: 'spa', down: 'atk' }, { n: '内敛', up: 'spa', down: 'atk' }],
+          items: ['leftovers', 'choicescarf', 'lifeorb', 'choicespecs'],
+          moves: [['earthpower', 'surf', 'icebeam', 'recover'], ['surf', 'icebeam', 'scald', 'protect'], ['surf', 'energyball', 'fakeout', 'protect'], ['hydropump', 'dragonpulse', 'icebeam', 'protect']]
+        }]
       },
       {
         name: '阿戴克', sprite: 637, team: [637, 534, 628],
-        lines: { start: '宝可梦不是工具，是并肩的伙伴！让我看看你们的羁绊！', lose: '哈！是场痛快的战斗！', playerLose: '哈哈哈！你们的羁绊，还差得远呢！' }
+        lines: { start: '宝可梦不是工具，是并肩的伙伴！让我看看你们的羁绊！', lose: '哈！是场痛快的战斗！', playerLose: '哈哈哈！你们的羁绊，还差得远呢！' },
+        /* ★ 双打：双墙强化队——波克基斯开墙掩护，火神蛾/凯路迪欧/摔角鹰人强化输出 */
+        dbl: [{
+          ids: [468, 637, 647, 701],
+          abilities: ['serenegrace', 'flamebody', 'justified', 'moldbreaker'],
+          evs: [{ hp: 20, atk: 0, def: 0, spa: 16, spd: 0, spe: 30 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }],
+          natures: [{ n: '胆小', up: 'spe', down: 'atk' }, { n: '内敛', up: 'spa', down: 'atk' }, { n: '内敛', up: 'spa', down: 'atk' }, { n: '固执', up: 'atk', down: 'spa' }],
+          items: ['lightclay', 'leftovers', 'expertbelt', 'lifeorb'],
+          moves: [['reflect', 'lightscreen', 'airslash', 'thunderwave'], ['quiverdance', 'bugbuzz', 'flamethrower', 'hurricane'], ['calmmind', 'secretsword', 'hydropump', 'protect'], ['swordsdance', 'closecombat', 'bravebird', 'roost']]
+        }]
       },
       {
         name: '艾莉丝', sprite: 612, team: [612, 635, 131],
-        lines: { start: '我啊，最喜欢龙系宝可梦了！来吧，和我的龙一起翱翔！', lose: '你的力量……让我的龙都惊叹了！', playerLose: '嘿嘿，龙之力量可不是这么好挑战的！' }
+        lines: { start: '我啊，最喜欢龙系宝可梦了！来吧，和我的龙一起翱翔！', lose: '你的力量……让我的龙都惊叹了！', playerLose: '嘿嘿，龙之力量可不是这么好挑战的！' },
+        /* ★ 双打：顺风队——多龙巴鲁托高速开顺风，龙系打手趁势输出 */
+        dbl: [{
+          ids: [887, 612, 635, 131],
+          abilities: ['infiltrator', 'moldbreaker', 'levitate', 'waterabsorb'],
+          evs: [{ hp: 4, atk: 30, def: 0, spa: 0, spd: 0, spe: 32 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }, { hp: 32, atk: 0, def: 16, spa: 18, spd: 0, spe: 0 }],
+          natures: [{ n: '爽朗', up: 'spe', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '内敛', up: 'spa', down: 'atk' }, { n: '大胆', up: 'def', down: 'atk' }],
+          items: ['focussash', 'choiceband', 'choicespecs', 'leftovers'],
+          moves: [['tailwind', 'dragondarts', 'shadowball', 'uturn'], ['outrage', 'dragonclaw', 'closecombat', 'protect'], ['dracometeor', 'darkpulse', 'flamethrower', 'protect'], ['icebeam', 'surf', 'thunderbolt', 'protect']]
+        }]
       },
       {
         name: '卡露妮', sprite: 700, team: [700, 282, 706],
-        lines: { start: '让我们献上一场如电影般精彩的战斗吧。', lose: '这一幕……我会铭记于心。', playerLose: '故事还没有迎来结局，回去再修炼吧。' }
+        lines: { start: '让我们献上一场如电影般精彩的战斗吧。', lose: '这一幕……我会铭记于心。', playerLose: '故事还没有迎来结局，回去再修炼吧。' },
+        /* ★ 双打：双墙强化队——沙奈朵开光墙/反射壁，掩护仙子伊布与黏美龙强化输出 */
+        dbl: [{
+          ids: [282, 700, 706, 468],
+          abilities: ['trace', 'pixilate', 'sapsipper', 'serenegrace'],
+          evs: [{ hp: 20, atk: 0, def: 0, spa: 16, spd: 0, spe: 30 }, { hp: 20, atk: 0, def: 0, spa: 32, spd: 14, spe: 0 }, { hp: 20, atk: 0, def: 0, spa: 32, spd: 14, spe: 0 }, { hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }],
+          natures: [{ n: '胆小', up: 'spe', down: 'atk' }, { n: '内敛', up: 'spa', down: 'atk' }, { n: '内敛', up: 'spa', down: 'atk' }, { n: '胆小', up: 'spe', down: 'atk' }],
+          items: ['lightclay', 'leftovers', 'assaultvest', 'expertbelt'],
+          moves: [['reflect', 'lightscreen', 'moonblast', 'psyshock'], ['hypervoice', 'moonblast', 'calmmind', 'protect'], ['dragonpulse', 'flamethrower', 'thunderbolt', 'protect'], ['airslash', 'moonblast', 'nastyplot', 'protect']]
+        }]
       },
       {
         name: '库库伊', sprite: 745, team: [745, 727, 724],
-        lines: { start: '我可是研究宝可梦的博士！来验证一下你的宝可梦之道吧！', lose: '啊哈！你这小子，很有一手嘛！', playerLose: '宝可梦的魅力，你还没完全体会到呢！' }
+        lines: { start: '我可是研究宝可梦的博士！来验证一下你的宝可梦之道吧！', lose: '啊哈！你这小子，很有一手嘛！', playerLose: '宝可梦的魅力，你还没完全体会到呢！' },
+        /* ★ 双打：顺风队——恶作剧之心龙卷云先手开顺风，咆哮虎/鬃岩狼人/狙射树枭趁机输出 */
+        dbl: [{
+          ids: [641, 727, 745, 724],
+          abilities: ['prankster', 'intimidate', 'keeneye', 'longreach'],
+          evs: [{ hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }, { hp: 20, atk: 32, def: 0, spa: 0, spd: 14, spe: 0 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }],
+          natures: [{ n: '胆小', up: 'spe', down: 'atk' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '爽朗', up: 'spe', down: 'spa' }, { n: '爽朗', up: 'spe', down: 'spa' }],
+          items: ['focussash', 'sitrus', 'choicescarf', 'expertbelt'],
+          moves: [['tailwind', 'bleakwindstorm', 'hurricane', 'protect'], ['fakeout', 'flareblitz', 'knockoff', 'partingshot'], ['accelerock', 'stoneedge', 'closecombat', 'protect'], ['leafblade', 'bravebird', 'shadowclaw', 'roost']]
+        }]
       },
       {
         name: '丹帝', sprite: 6, team: [6, 887, 812],
-        lines: { start: '伽勒尔冠军丹帝！来吧，让我们来一场全力以赴的对战！', lose: '你很强……下次，我们再来一场吧！', playerLose: '嘿！这就是冠军的实力！' }
+        lines: { start: '伽勒尔冠军丹帝！来吧，让我们来一场全力以赴的对战！', lose: '你很强……下次，我们再来一场吧！', playerLose: '嘿！这就是冠军的实力！' },
+        /* ★ 双打：指导队——恶作剧之心利欧路先手指导，提升喷火龙/轰擂金刚猩/苍响攻击与防御 */
+        dbl: [{
+          ids: [447, 6, 812, 888],
+          abilities: ['prankster', 'solarpower', 'grassysurge', 'intrepidsword'],
+          evs: [{ hp: 20, atk: 32, def: 0, spa: 0, spd: 14, spe: 0 }, { hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }],
+          natures: [{ n: '爽朗', up: 'spe', down: 'spa' }, { n: '胆小', up: 'spe', down: 'atk' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '固执', up: 'atk', down: 'spa' }],
+          items: ['eviolite', 'lifeorb', 'choiceband', 'rustedsword'],
+          moves: [['coaching', 'closecombat', 'vacuumwave', 'protect'], ['heatwave', 'solarbeam', 'airslash', 'protect'], ['grassyglide', 'woodhammer', 'knockoff', 'uturn'], ['behemothblade', 'closecombat', 'playrough', 'protect']]
+        }]
       },
       {
         name: '也慈', sprite: 970, team: [970, 983, 956],
-        lines: { start: '我是帕底亚的首席冠军也慈。来吧，让你见识宝可梦联盟的顶点。', lose: '很出色的对战……我认可你的实力。', playerLose: '顶点之上的风景，你还未能企及。' }
+        lines: { start: '我是帕底亚的首席冠军也慈。来吧，让你见识宝可梦联盟的顶点。', lose: '很出色的对战……我认可你的实力。', playerLose: '顶点之上的风景，你还未能企及。' },
+        /* ★ 双打：空间队——布莉姆温开戏法空间，仆刀将军/超能艳鸵/水晶灯火灵低速高输出 */
+        dbl: [{
+          ids: [858, 983, 956, 609],
+          abilities: ['magicbounce', 'defiant', 'opportunist', 'flashfire'],
+          evs: [{ hp: 32, atk: 0, def: 0, spa: 0, spd: 32, spe: 2 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 30, spe: 0 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }, { hp: 4, atk: 0, def: 0, spa: 32, spd: 0, spe: 30 }],
+          natures: [{ n: '冷静', up: 'spa', down: 'spe' }, { n: '固执', up: 'atk', down: 'spa' }, { n: '冷静', up: 'spa', down: 'spe' }, { n: '内敛', up: 'spa', down: 'atk' }],
+          items: ['leftovers', 'lifeorb', 'expertbelt', 'choicespecs'],
+          moves: [['trickroom', 'psychic', 'moonblast', 'protect'], ['kowtowcleave', 'ironhead', 'swordsdance', 'protect'], ['calmmind', 'psychic', 'psyshock', 'dazzlinggleam'], ['shadowball', 'fireblast', 'energyball', 'willowisp']]
+        }]
       },
       {
         name: '妮莫', sprite: 908, team: [908, 745, 923],
-        lines: { start: '好耶！终于等到你了！来一场痛快淋漓的对战吧！', lose: '哇塞！你太强了！下次我要赢回来！', playerLose: '哈哈哈！我还是更强一点啦！下次再来！' }
+        lines: { start: '好耶！终于等到你了！来一场痛快淋漓的对战吧！', lose: '哇塞！你太强了！下次我要赢回来！', playerLose: '哈哈哈！我还是更强一点啦！下次再来！' },
+        /* ★ 双打：指导队——巴布土拨使用指导提升队友攻击与防御 */
+        dbl: [{
+          ids: [923, 908, 745, 877],
+          abilities: ['voltabsorb', 'protean', 'keeneye', 'hunger'],
+          evs: [{ hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 32, def: 0, spa: 0, spd: 0, spe: 30 }, { hp: 4, atk: 0, def: 0, spa: 30, spd: 0, spe: 32 }],
+          natures: [{ n: '固执', up: 'atk', down: 'spa' }, { n: '爽朗', up: 'spe', down: 'spa' }, { n: '爽朗', up: 'spe', down: 'spa' }, { n: '胆小', up: 'spe', down: 'atk' }],
+          items: ['lifeorb', 'choiceband', 'focussash', 'expertbelt'],
+          moves: [['coaching', 'closecombat', 'machpunch', 'wildcharge'], ['flowertrick', 'knockoff', 'suckerpunch', 'playrough'], ['accelerock', 'stoneedge', 'closecombat', 'protect'], ['thunderbolt', 'darkpulse', 'partingshot', 'protect']]
+        }]
       },
     ];
     /* ============ 隐藏冠军·灭天（1%概率） ============ */
@@ -18050,7 +18520,9 @@ return ev;
       },
       lvl(round, i) { return Math.min(100, 48 + (round - 1) * 7 + Math.floor(i / 2)); },
       pickMoves(sp) {
-        const dmg = shuffle(sp.mv.filter(k => MV[k].c !== 'X' && k !== 'terablast')), st = shuffle(sp.mv.filter(k => MV[k].c === 'X'));
+        /* ★ 单打不分配双打独占技能（帮助/看我嘛/指导/愤怒粉/广域防守/聚光灯） */
+        const pool = shuffle(sp.mv.filter(k => MV[k] && k !== 'terablast' && !DOUBLE_ONLY.includes(k)));
+        const dmg = shuffle(pool.filter(k => MV[k].c !== 'X')), st = shuffle(pool.filter(k => MV[k].c === 'X'));
         const out = dmg.slice(0, st.length ? 3 : 4);
         if (st.length) out.push(st[0]);
         if (Math.random() < 0.2) { if (out.length >= 4) out[3] = 'terablast'; else out.push('terablast'); }
@@ -18191,9 +18663,37 @@ return ev;
         for (let i = 0; i < 6; i++) { const sp = this.drawOne(round); pool.push(this.buildDouble(sp, this.lvl(round, i), round)); }
         return pool;
       },
+      /* ★ 双打冠军级队伍：从冠军的双打配置中随机抽取（1%概率隐藏冠军·灭天） */
+      championDoubleTeam(lvl, force) {
+        if (!force && Math.random() < 0.01) {
+          const t = pick(MIE_TIAN.teams);
+          const team = t.ids.map((id, idx) => new P(id, lvl, {
+            moves: t.moves[idx], item: t.items[idx], iv: 31, ev: t.evs[idx],
+            nature: NATURES.find(n => n.n === t.natures[idx].n) || NATURES[0],
+            tera: pick(TYP)
+          }));
+          return { head: true, champion: MIE_TIAN, team };
+        }
+        const ch = force || pick(CHAMPIONS);
+        const t = ch.dbl ? pick(ch.dbl) : null;
+        if (!t) return { head: false, master: false, team: [] };
+        const team = t.ids.map((id, idx) => new P(id, lvl, {
+          moves: t.moves[idx], item: t.items[idx], ability: t.abilities[idx], iv: 31, ev: t.evs[idx],
+          nature: NATURES.find(n => n.n === t.natures[idx].n) || NATURES[0],
+          tera: pick(TYP)
+        }));
+        return { head: true, champion: ch, team };
+      },
       /* ★ 双打敌人队伍：4只，按双打配置生成 */
       enemyDoubleTeam(round, i, expert) {
         const lvl = this.lvl(round, i);
+        /* ★ 双打同样从第3轮起每两轮（第3、5、7、9…轮）的第7场迎战冠军级训练家（无+4等级加成） */
+        if (round >= 3 && round % 2 === 1 && i === 6) {
+          const ch = round === 3 ? CHAMPIONS.find(c => c.name === '达拉') : null;
+          /* ★ 双打冠军战统一为50级标准赛制 */
+          const et = this.championDoubleTeam(50, ch || null);
+          if (et.team && et.team.length) return et;
+        }
         const team = [];
         const used = new Set();
         while (team.length < 4) {
@@ -18265,9 +18765,9 @@ return ev;
         const list = [];
         CHAMPIONS.forEach(ch => {
           const teams = ch.teams ? ch.teams : (ch.team ? [ch.team] : []);
-          list.push({ name: ch.name, sprite: ch.sprite, teams, lines: ch.lines, hidden: false });
+          list.push({ name: ch.name, sprite: ch.sprite, teams, dbl: ch.dbl || null, lines: ch.lines, hidden: false });
         });
-        list.push({ name: MIE_TIAN.name, sprite: MIE_TIAN.sprite, teams: MIE_TIAN.teams.map(t => t.ids), lines: MIE_TIAN.lines, hidden: true });
+        list.push({ name: MIE_TIAN.name, sprite: MIE_TIAN.sprite, teams: MIE_TIAN.teams.map(t => t.ids), dbl: null, lines: MIE_TIAN.lines, hidden: true });
         return list;
       },
       /* ★ 遇到冠军级训练家时点亮图鉴 */
@@ -18277,52 +18777,98 @@ return ev;
       /* ★ 冠军级图鉴面板 */
       openCodex() {
         const ov = $('#partyOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
-        const box = el('div', 'ovBox codexWrap'); box.style.cssText = 'max-width:780px'; ov.appendChild(box);
+        const box = el('div', 'ovBox codexWrap codexMode-single'); box.style.cssText = 'max-width:820px'; ov.appendChild(box);
         let offEsc = null;
         const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); };
         offEsc = onEsc(() => { AU.no(); close(); });
         const list = this.championList();
         const total = list.length;
-        const unlocked = list.filter(c => GM.fac.champs.includes(c.name)).length;
-        /* 头部：标题 + 进度 */
+        let mode = 'single';
+        /* ★ 双打阵容策略标签 */
+        const DBL_TAG = { 阿渡: '顺风队', 大吾: '双墙强化队', 竹兰: '空间队', 赤红: '晴天叶绿素队', 小茂: '雨天悠游自如队', 小智: '避雷针队', 达拉: '指导队', 米可利: '引水队', 阿戴克: '双墙强化队', 艾莉丝: '顺风队', 卡露妮: '双墙强化队', 库库伊: '顺风队', 丹帝: '指导队', 也慈: '空间队', 妮莫: '指导队' };
+        /* 头部：标题 + 进度 + 模式切换 */
         const head = el('div', 'codexHead');
-        head.insertAdjacentHTML('beforeend', `<div class="codexTitle">🏆 冠军图鉴</div>
-<div class="codexSub">CHAMPION DEX — 已点亮 ${unlocked} / ${total}</div>
-<div class="codexProg"><i style="width:${total ? Math.round(unlocked / total * 100) : 0}%"></i></div>`);
+        const sub = el('div', 'codexSub', '');
+        const prog = el('div', 'codexProg');
+        const progFill = el('i', '', '');
+        prog.appendChild(progFill);
+        head.insertAdjacentHTML('beforeend', '<div class="codexTitle">🏆 冠军图鉴</div>');
+        head.appendChild(sub); head.appendChild(prog);
+        const toggle = el('div', 'codexToggle');
+        const tSingle = el('button', 'codexTab on', '⚔ 单打阵容');
+        const tDouble = el('button', 'codexTab', '🤝 双打阵容');
+        toggle.appendChild(tSingle); toggle.appendChild(tDouble);
+        head.appendChild(toggle);
         const closeBtn = el('button', 'codexClose', '✕');
         closeBtn.onclick = () => { AU.no(); close(); };
         head.appendChild(closeBtn);
         box.appendChild(head);
-        /* 卡牌区 */
+        /* 舞台：卡牌网格 + 扫场光带 */
+        const stage = el('div', 'codexStage');
         const grid = el('div', 'codexGrid');
-        list.forEach(ch => {
-          const seen = GM.fac.champs.includes(ch.name);
-          const card = el('div', 'codexCard ' + (seen ? (ch.hidden ? 'hiddenCh' : 'seen') : 'lock'));
-          if (seen) {
-            const port = el('div', 'codexPortrait');
-            const im = miniSprite(ch.sprite); im.style.width = '100%'; im.style.height = '100%'; port.appendChild(im);
-            card.appendChild(port);
-            card.appendChild(el('div', 'codexName', ch.name));
-            ch.teams.forEach(team => {
-              const row = el('div', 'codexTeam');
-              team.forEach(pid => {
-                const sp = SPDB[pid]; if (!sp) return;
-                const chip = el('div', 'cm');
-                const im2 = miniSprite(pid); im2.style.width = '40px'; im2.style.height = '40px'; chip.appendChild(im2);
-                chip.appendChild(el('span', '', sp.n));
-                row.appendChild(chip);
-              });
-              card.appendChild(row);
-            });
-            if (ch.lines && ch.lines.start) card.appendChild(el('div', 'codexQuote', `“${ch.lines.start}”`));
-          } else {
-            card.appendChild(el('div', 'codexLockIcon', '🔒'));
-            card.appendChild(el('div', 'codexName', '???'));
-            card.appendChild(el('div', 'codexLocked', '未遇见'));
+        const sweep = el('div', 'codexSweep');
+        stage.appendChild(grid); stage.appendChild(sweep);
+        box.appendChild(stage);
+        /* ★ 取某模式的阵容数据：双打优先双打配置，缺失则沿用单打阵容 */
+        function teamDataOf(ch, m) {
+          if (m === 'double') {
+            if (ch.dbl && ch.dbl.length) return ch.dbl.map(t => ({ ids: t.ids, tag: DBL_TAG[ch.name] || '双打阵容' }));
+            return (ch.teams ? ch.teams : (ch.team ? [ch.team] : [])).map(ids => ({ ids, tag: '沿用单打阵容' }));
           }
-          grid.appendChild(card);
-        });
-        box.appendChild(grid);
+          return (ch.teams ? ch.teams : (ch.team ? [ch.team] : [])).map(ids => ({ ids: ids, tag: null }));
+        }
+        function render() {
+          const unlocked = list.filter(c => GM.fac.champs.includes(c.name)).length;
+          sub.textContent = (mode === 'single' ? 'SINGLE' : 'DOUBLE') + ' CHAMPION DEX — 已点亮 ' + unlocked + ' / ' + total;
+          progFill.style.width = (total ? Math.round(unlocked / total * 100) : 0) + '%';
+          grid.innerHTML = '';
+          list.forEach(ch => {
+            const seen = GM.fac.champs.includes(ch.name);
+            const card = el('div', 'codexCard ' + (seen ? (ch.hidden ? 'hiddenCh' : 'seen') : 'lock'));
+            if (seen) {
+              const port = el('div', 'codexPortrait');
+              const im = miniSprite(ch.sprite); im.style.width = '100%'; im.style.height = '100%'; port.appendChild(im);
+              card.appendChild(port);
+              card.appendChild(el('div', 'codexName', ch.name));
+              teamDataOf(ch, mode).forEach(t => {
+                const row = el('div', 'codexTeam');
+                t.ids.forEach(pid => {
+                  const sp = SPDB[pid]; if (!sp) return;
+                  const chip = el('div', 'cm');
+                  const im2 = miniSprite(pid); im2.style.width = '40px'; im2.style.height = '40px'; chip.appendChild(im2);
+                  chip.appendChild(el('span', '', sp.n));
+                  row.appendChild(chip);
+                });
+                card.appendChild(row);
+                if (t.tag) card.appendChild(el('div', 'codexTag', '『' + t.tag + '』'));
+              });
+              if (mode === 'single' && ch.lines && ch.lines.start) card.appendChild(el('div', 'codexQuote', `“${ch.lines.start}”`));
+            } else {
+              card.appendChild(el('div', 'codexLockIcon', '🔒'));
+              card.appendChild(el('div', 'codexName', '???'));
+              card.appendChild(el('div', 'codexLocked', '未遇见'));
+            }
+            grid.appendChild(card);
+          });
+        }
+        /* ★ 一镜到底切换：背景渐变 + 光带横扫 + 内容淡入淡出同步完成 */
+        function switchTo(m) {
+          if (m === mode) return;
+          mode = m;
+          tSingle.classList.toggle('on', m === 'single');
+          tDouble.classList.toggle('on', m === 'double');
+          box.style.setProperty('--sweepA', m === 'double' ? 'rgba(255,240,255,.92)' : 'rgba(255,255,255,.9)');
+          box.style.setProperty('--sweepB', m === 'double' ? 'rgba(255,252,255,.98)' : 'rgba(255,255,255,.96)');
+          box.classList.remove('codexMode-single', 'codexMode-double');
+          box.classList.add(m === 'double' ? 'codexMode-double' : 'codexMode-single');
+          stage.classList.add('switching');
+          sweep.classList.remove('run'); void sweep.offsetWidth; sweep.classList.add('run');
+          setTimeout(() => { render(); stage.classList.remove('switching'); }, 260);
+          AU.cursor();
+        }
+        tSingle.onclick = () => switchTo('single');
+        tDouble.onclick = () => switchTo('double');
+        render();
       },
       /* ============ UI ============ */
       ui() {
@@ -18519,7 +19065,7 @@ return ev;
           const expertInfo = GM.fac.nextExpert ? `<br><span style="color:#ffd93b">下一场对手：<b>${GM.fac.nextExpert.name}</b></span>` : '';
           mid.innerHTML = `<h3 class="disp" style="color:#ffd93b;font-size:24px;text-align:center;margin:10px">准备就绪</h3>
 <div style="color:#aab;font-size:14px;text-align:center;line-height:2">第 <b style="color:#fff">${GM.fac.round}</b> 轮 · 第 <b style="color:#fff">${GM.fac.win + 1}</b> / 7 场${expertInfo}
-${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b style="color:#ff6b6b">⚠ 下一场：冠军级训练家！</b>' : ''}</div>
+${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b style="color:#ff6b6b">⚠ 下一场：冠军级训练家！' + (GM.fac.mode === 'pick4double' ? '（双打·双方统一 Lv50 标准赛制）' : '') + '</b>' : ''}</div>
 <div style="text-align:center;margin-top:10px"><button class="btn" id="facShopBtn">🛒 道具商店</button></div>`;
           $('#facShopBtn').onclick = () => { AU.cursor(); this.openShop(); };
         }
@@ -18542,6 +19088,12 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b styl
           ? { head: false, master: true, name: megaMaster.name, team: this.megaMasterTeam(GM.fac.round, i, megaMaster.type) }
           : (isDbl ? this.enemyDoubleTeam(GM.fac.round, i, expert) : this.enemyTeam(GM.fac.round, i, expert));
         healAll(GM.fac.party);
+        /* ★ 双打冠军战：双方统一等级50级（标准赛制），战后再恢复我方原等级 */
+        let restoreLvls = null;
+        if (isDbl && et.head) {
+          restoreLvls = GM.fac.party.map(m => m.lvl);
+          GM.fac.party.forEach(m => { m.lvl = 50; m.recalc(); m.hp = m.maxhp; });
+        }
         if (et.head) {
           const ch = et.champion;
           await fadeTo('#battle');
@@ -18563,6 +19115,11 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b styl
           ai: 1 + GM.fac.round * 0.3, aiSwitches: 1,
           doubles: isDbl
         });
+        /* ★ 双打冠军战后恢复我方原等级 */
+        if (restoreLvls) {
+          GM.fac.party.forEach((m, i) => { m.lvl = restoreLvls[i]; m.recalc(); m.hp = m.maxhp; });
+          restoreLvls = null;
+        }
         if (r.result === 'win') {
           GM.fac.win++; GM.fac.bp += GM.fac.round;
           /* ★ 冠军图鉴：战胜冠军后点亮 */
@@ -18839,6 +19396,8 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
        12. 图鉴 / 自由对战 / 标题
     ============================================================ */
     function statBar(v) { return `<div class="statRow"><span style="width:34px;color:#888;font-weight:900">${''}</span></div>`; }
+    /* ★ 双打独占技能标记：图鉴招式池中标注「双打独占」 */
+    function dblTag(k) { return DOUBLE_ONLY.includes(k) ? ' <span class="dblOnly">双打独占</span>' : ''; }
     /* 图鉴预览：50级、中性性格、无对战点数，用于展示完整详情 */
     function previewMon(sp) {
       const p = new P(sp.id, 50, { iv: 25, ev: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, nature: NATURES[0], moves: sp.mv.slice(0, 4) });
@@ -18857,7 +19416,7 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
     <div style="font-size:11px;color:#888;font-weight:700">第 ${genOf(sp.id)} 世代 · 总和 ${bst(sp)}${sp.leg ? ' · 传说' : ''}${MEGA[sp.id] ? ' · 可Mega' : ''}${GMAXLIST.has(sp.id) ? ` · 可超极巨（${GMAXMOVE[sp.id]?.n || ''}）` : ''}</div></div>
     ${sp.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:900;color:#777;font-size:11px">${names[i]}</span><span class="px" style="font-size:8px;width:26px;text-align:right">${v}</span><div class="bar"><div class="fill" style="width:${Math.min(100, v / 1.8)}%;background:${v >= 100 ? '#3ecf6c' : v >= 70 ? '#8bc34a' : v >= 45 ? '#f2c230' : '#ef4444'}"></div></div></div>`).join('')}
     <div style="margin-top:8px;font-size:12px"><b>特性：</b>${sp.ab.map(a => AB[a]?.n || a).join(' / ')}</div>
-        <div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}</span>`).join('')}</div>`);
+        <div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}${dblTag(k)}</span>`).join('')}</div>`);
       /* ★ 点开完整详情（全屏） */
       const detBtn = el('button', 'btn blue', '📋 完整详情');
       detBtn.style.cssText = 'width:100%;margin-top:12px';
@@ -18879,7 +19438,7 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
 ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:900;color:#777;font-size:11px">${names[i]}</span><span class="px" style="font-size:8px;width:26px;text-align:right">${v}</span><div class="bar"><div class="fill" style="width:${Math.min(100, v / 1.8)}%;background:${v >= 100 ? '#3ecf6c' : v >= 70 ? '#8bc34a' : v >= 45 ? '#f2c230' : '#ef4444'}"></div></div></div>`).join('')}
 <div style="margin-top:8px;font-size:12px"><b>特性：</b>${AB[cfg.a]?.n || cfg.a}（${AB[cfg.a]?.d || ''}）</div>
 <div style="margin-top:6px;font-size:11px;color:#888;font-weight:700">进化石：${cfg.stone}</div>
-<div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}</span>`).join('')}</div>`);
+<div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}${dblTag(k)}</span>`).join('')}</div>`);
       /* 点开完整详情 */
       const detBtn = el('button', 'btn blue', '📋 完整详情');
       detBtn.style.cssText = 'width:100%;margin-top:12px';
@@ -18906,7 +19465,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
 ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:900;color:#777;font-size:11px">${names[i]}</span><span class="px" style="font-size:8px;width:26px;text-align:right">${v}</span><div class="bar"><div class="fill" style="width:${Math.min(100, v / 1.8)}%;background:${v >= 100 ? '#3ecf6c' : v >= 70 ? '#8bc34a' : v >= 45 ? '#f2c230' : '#ef4444'}"></div></div></div>`).join('')}
 <div style="margin-top:8px;font-size:12px"><b>特性：</b>${AB[cfg.a]?.n || cfg.a}（${AB[cfg.a]?.d || ''}）</div>
 <div style="margin-top:6px;font-size:11px;color:#c07a2a;font-weight:900">专属道具：${cfg.stone}（携带后切换为此形态）</div>
-<div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}</span>`).join('')}</div>`);
+<div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}${dblTag(k)}</span>`).join('')}</div>`);
       const detBtn = el('button', 'btn blue', '📋 完整详情');
       detBtn.style.cssText = 'width:100%;margin-top:12px';
       detBtn.onclick = () => {
@@ -19368,12 +19927,25 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
           const r = el('div', ''); r.style.cssText = 'display:flex;align-items:center;gap:6px;margin:4px 0';
           r.innerHTML = `<span style="width:42px;font-weight:900;font-size:12px;color:${evStCols[i]}">${evNames[i]}${cfg.nature?.up === k ? ' <b style="color:#e2574c">↑</b>' : cfg.nature?.down === k ? ' <b style="color:#3f8fe0">↓</b>' : ''}</span>`;
           const minus = el('button', 'btn tiny', '－');
-          const val = el('span', 'px', String(cfg.ev[k])); val.style.cssText = 'font-size:9px;width:30px;text-align:center';
+          const val = el('input');
+          val.type = 'text'; val.inputMode = 'numeric';
+          val.value = cfg.ev[k];
+          val.style.cssText = 'font-size:9px;width:42px;text-align:center;padding:3px 2px;border:2px solid var(--ink);border-radius:6px;background:#fff;font-family:inherit';
           const plus = el('button', 'btn tiny', '＋');
           const stat = el('span', ''); stat.style.cssText = 'font-size:11px;color:#666;margin-left:4px';
           stat.innerHTML = `${base} → <b style="color:${fin > base ? '#3ecf6c' : fin < base ? '#e2574c' : '#666'}">${fin}</b>`;
-          minus.onclick = () => { if (cfg.ev[k] > 0) { cfg.ev[k]--; AU.cursor(); refreshEV(); } };
-          plus.onclick = () => { const t = evKeys.reduce((a, kk) => a + cfg.ev[kk], 0); if (cfg.ev[k] < 32 && t < 66) { cfg.ev[k]++; AU.cursor(); refreshEV(); } };
+          const adj = d => {
+            if (d < 0 && cfg.ev[k] > 0) { cfg.ev[k]--; AU.cursor(); refreshEV(); return true; }
+            else if (d > 0) { const t = evKeys.reduce((a, kk) => a + cfg.ev[kk], 0); if (cfg.ev[k] < 32 && t < 66) { cfg.ev[k]++; AU.cursor(); refreshEV(); return true; } }
+            return false;
+          };
+          holdBtn(minus, () => adj(-1)); holdBtn(plus, () => adj(1));
+          val.onchange = () => {
+            const nv = Math.max(0, Math.min(32, Math.floor(+val.value) || 0));
+            const rest = evKeys.reduce((a, kk) => a + (kk === k ? 0 : cfg.ev[kk]), 0);
+            cfg.ev[k] = Math.max(0, Math.min(nv, 66 - rest));
+            AU.cursor(); refreshEV();
+          };
           r.appendChild(minus); r.appendChild(val); r.appendChild(plus); r.appendChild(stat);
           evWrap.appendChild(r);
         });
@@ -19572,7 +20144,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
             info.push('PP ' + mv.pp);
             info.push('范围 ' + (RNGN[rngOf(mv.k)] || '—'));
             if (mv.pri) info.push('先制' + (mv.pri > 0 ? '+' : '') + mv.pri);
-            c.innerHTML = `<div class="mvNm">${mv.n}<span class="mvCatTag" style="color:${CATC[mv.c]};border-color:${CATC[mv.c]}">${CATN[mv.c]}</span></div>
+            c.innerHTML = `<div class="mvNm">${mv.n}<span class="mvCatTag" style="color:${CATC[mv.c]};border-color:${CATC[mv.c]}">${CATN[mv.c]}</span>${dblTag(mv.k)}</div>
 <div class="mvInfo">${tyBadge(mv.t)} ${info.join(' · ')}</div><span style="position:absolute;top:6px;right:8px;font-family:'Press Start 2P',monospace;font-size:7px;color:#999">${cnt}种</span>`;
             c.onclick = () => { AU.cursor(); showMvDetail(mv); };
             grid.appendChild(c);
@@ -19588,8 +20160,10 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
 ${tyBadge(mv.t)}
 <span class="mvDetailNm">${mv.n}</span>
 <span class="mvCatTag" style="color:${CATC[mv.c]};border-color:${CATC[mv.c]};font-size:12px;padding:3px 10px">${CATN[mv.c]}</span>
+${dblTag(mv.k)}
 </div>
 <div style="font-size:11px;color:#999;font-weight:700">内部ID：${mv.k}</div>
+${dblTag(mv.k) ? `<div style="font-size:11px;color:#d21f3c;font-weight:900;margin-top:6px">⚠ 双打独占招式：仅在对战工厂双打/自由双打中有用，单打对战不会生效，对战工厂单打不会分配</div>` : ''}
 <div class="mvDetailStats">
 <div class="mvStatBox"><div class="lbl">威力</div><div class="val">${pwrInfo}</div></div>
 <div class="mvStatBox"><div class="lbl">命中</div><div class="val">${mv.a ?? '必中'}</div></div>
@@ -19811,9 +20385,11 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (d.recoil) p.push(`受到造成伤害 1/${d.recoil} 的反作用力伤害`);
       if (d.corelight) p.push('基格尔德Mega归无之光：可击中妖精系，200威力');
       if (d.k === 'malignantchain') p.push('桃歹郎的专属招式。50%几率使对手剧毒');
-      if (d.helpinghand) p.push('双打招式：本回合同伴的招式威力×1.5');
-      if (d.followme) p.push('双打招式：本回合敌方单体招式全部吸引到自己身上');
-      if (d.wideguard) p.push('双打招式：本回合己方不受多目标招式影响');
+      if (d.helpinghand) p.push('双打独占招式：本回合同伴的招式威力×1.5');
+      if (d.followme) p.push('双打独占招式：本回合敌方单体招式全部吸引到自己身上');
+      if (d.wideguard) p.push('双打独占招式：本回合己方不受多目标招式影响');
+      if (d.coaching) p.push('双打独占招式：必中，提升1名队友的攻击与防御（格斗系宝可梦可学会）');
+      if (d.powder) p.push('双打独占招式：本回合敌方单体招式全部吸引到自己身上；粉尘类招式对草属性宝可梦和防尘特性宝可梦无效');
 
       if (d.recharge) p.push('使用后下一回合无法行动');
       if (d.noRepeat) p.push('不能连续使用（连续使用时会失败）');
@@ -20058,7 +20634,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
             showDesc = '极巨招式 · 完全守住所有攻击';
           }
           const c = el('div', 'dMove'); c.style.borderLeftColor = TCOL[showT];
-          c.innerHTML = `<div class="dmTop">${tyBadge(showT)}<b>${showN}</b><span class="dmCat">${showC === 'P' ? '物理' : showC === 'S' ? '特殊' : '变化'}</span></div>
+          c.innerHTML = `<div class="dmTop">${tyBadge(showT)}<b>${showN}</b>${dblTag(mv.k)}<span class="dmCat">${showC === 'P' ? '物理' : showC === 'S' ? '特殊' : '变化'}</span></div>
         <div class="dmNums">${showP != null ? '威力 ' + showP + ' · ' : ''}命中 ${showA ?? '必中'} · PP ${mv.pp}/${mv.maxpp}${d.pri ? ` · 先制 ${d.pri > 0 ? '+' : ''}${d.pri}` : ''}</div>
         <div class="dmDesc">${showDesc}</div>`;
           moveWrap.appendChild(c);
@@ -20138,6 +20714,33 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       return g;
     }
     /* ============ 对战点数自由分配面板 ============ */
+    /* ★ 长按连发：按住按钮持续触发（用于对战点数加减）。
+       - 首次触发后延迟 420ms 才开始连发
+       - 连发速度从 240ms/次 逐渐加速，最快不超过 130ms/次（上限封顶）
+       - 释放监听挂在 window 上：即使按钮在边界被禁用导致 pointerup 丢失，松开也能停止
+       - fn 返回 false（已达边界）时自动停止连发 */
+    function holdBtn(btn, fn) {
+      let t = null, iv = null;
+      const stop = () => { if (t) { clearTimeout(t); t = null; } if (iv) { clearTimeout(iv); iv = null; } };
+      const onDown = e => {
+        e.preventDefault();
+        stop();
+        let step = 240;
+        const MIN_STEP = 130;
+        const tick = () => {
+          if (fn() === false) { stop(); return; }
+          step = Math.max(MIN_STEP, Math.round(step * 0.85));
+          iv = setTimeout(tick, step);
+        };
+        fn();
+        t = setTimeout(() => { iv = setTimeout(tick, step); }, 420);
+      };
+      btn.addEventListener('pointerdown', onDown);
+      window.addEventListener('pointerup', stop);
+      window.addEventListener('pointercancel', stop);
+      window.addEventListener('blur', stop);
+      btn.addEventListener('contextmenu', e => e.preventDefault());
+    }
     function openEVAllocation(team) {
       return new Promise(res => {
         const ov = $('#partyOv'); ov.classList.remove('hidden');
@@ -20189,7 +20792,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
               const c = ctrls[k];
               const raw = statPreview(m, k, 0, { up: null, down: null });
               const fin = statPreview(m, k, draft[k], nat);
-              c.val.textContent = draft[k];
+              c.val.value = draft[k];
               c.name.innerHTML = `${names[i]}${nat.up === k ? ' <b style="color:#e2574c">↑</b>' : nat.down === k ? ' <b style="color:#3f8fe0">↓</b>' : ''}`;
               c.stat.innerHTML = `基础${raw} → <b style="color:${fin > raw ? '#3ecf6c' : fin < raw ? '#e2574c' : '#666'}">${fin}</b>`;
               c.minus.disabled = draft[k] <= 0; c.plus.disabled = draft[k] >= EV_STAT || remain <= 0;
@@ -20198,11 +20801,23 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           keys.forEach((k, i) => {
             const r = el('div', ''); r.style.cssText = 'display:flex;align-items:center;gap:8px;margin:5px 0';
             const name = el('span', ''); name.style.cssText = `width:52px;font-weight:900;color:${stCols[i]}`;
-            const minus = el('button', 'btn tiny', '－'), val = el('span', 'px', '0'), plus = el('button', 'btn tiny', '＋'), stat = el('span', '');
-            val.style.cssText = 'font-size:9px;width:34px;text-align:center'; stat.style.cssText = 'font-size:11px;color:#666;margin-left:6px';
+            const minus = el('button', 'btn tiny', '－'), val = el('input'), plus = el('button', 'btn tiny', '＋'), stat = el('span', '');
+            val.type = 'text'; val.inputMode = 'numeric';
+            val.style.cssText = 'font-size:9px;width:46px;text-align:center;padding:3px 2px;border:2px solid var(--ink);border-radius:6px;background:#fff;font-family:inherit';
+            stat.style.cssText = 'font-size:11px;color:#666;margin-left:6px';
             r.appendChild(name); r.appendChild(minus); r.appendChild(val); r.appendChild(plus); r.appendChild(stat);
-            minus.onclick = () => { if (draft[k] > 0) { draft[k]--; AU.cursor(); refresh(); } };
-            plus.onclick = () => { const used = keys.reduce((a, kk) => a + draft[kk], 0); if (draft[k] < EV_STAT && used < cap) { draft[k]++; AU.cursor(); refresh(); } };
+            const adj = d => {
+              if (d < 0 && draft[k] > 0) { draft[k]--; AU.cursor(); refresh(); return true; }
+              else if (d > 0) { const used = keys.reduce((a, kk) => a + draft[kk], 0); if (draft[k] < EV_STAT && used < cap) { draft[k]++; AU.cursor(); refresh(); return true; } }
+              return false;
+            };
+            holdBtn(minus, () => adj(-1)); holdBtn(plus, () => adj(1));
+            val.onchange = () => {
+              const nv = Math.max(0, Math.min(EV_STAT, Math.floor(+val.value) || 0));
+              const rest = keys.reduce((a, kk) => a + (kk === k ? 0 : draft[kk]), 0);
+              draft[k] = Math.max(0, Math.min(nv, cap - rest));
+              AU.cursor(); refresh();
+            };
             wrap.appendChild(r); ctrls[k] = { name, minus, val, plus, stat };
           });
           refresh();
