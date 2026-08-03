@@ -4190,10 +4190,31 @@
       z-index: 55;
       display: flex;
       flex-direction: column;
-      background: linear-gradient(180deg, #241f47, #171330);
-      border-left: 4px solid #0c0920;
+      /* ★ 记录面板主题变量（默认经典暗色，各对话框风格/浅色模式覆盖） */
+      --lg-bg: linear-gradient(180deg, #241f47, #171330);
+      --lg-border: #0c0920;
+      --lg-headbg: rgba(255, 255, 255, .04);
+      --lg-title: #ffd93b;
+      --lg-text: #cfcbe8;
+      --lg-sub: #aab;
+      --lg-accent: #ffd93b;
+      --lg-accent-soft: rgba(255, 217, 59, .3);
+      --lg-tabbg: rgba(255, 255, 255, .06);
+      --lg-tabborder: rgba(255, 255, 255, .15);
+      --lg-tabon: linear-gradient(180deg, #ffd93b, #f2b705);
+      --lg-tabonborder: #ffd93b;
+      --lg-tabontext: #fff;
+      --lg-ai: #9fe8ff;
+      --lg-ai-soft: rgba(159, 232, 255, .25);
+      --lg-ai-bg: rgba(159, 232, 255, .05);
+      --lg-ai-body: #b8c4e8;
+      --lg-move: #ffd93b;
+      --lg-move-soft: rgba(255, 217, 59, .4);
+      --lg-move-bg: rgba(255, 217, 59, .12);
+      background: var(--lg-bg);
+      border-left: 4px solid var(--lg-border);
       transform: translateX(105%);
-      transition: transform .28s cubic-bezier(.2, .9, .3, 1);
+      transition: transform .28s cubic-bezier(.2, .9, .3, 1), background .3s ease;
       box-shadow: -10px 0 30px rgba(0, 0, 0, .5)
     }
 
@@ -4203,14 +4224,14 @@
 
     #logHead {
       padding: 12px 14px;
-      border-bottom: 3px solid #0c0920;
-      background: rgba(255, 255, 255, .04)
+      border-bottom: 3px solid var(--lg-border);
+      background: var(--lg-headbg)
     }
 
     #logHead .lt {
       font-family: 'ZCOOL KuaiLe';
       font-size: 20px;
-      color: #ffd93b;
+      color: var(--lg-title);
       letter-spacing: 2px;
       display: flex;
       align-items: center;
@@ -4220,8 +4241,8 @@
     #logClose {
       margin-left: auto;
       background: none;
-      border: 2px solid #888;
-      color: #ccc;
+      border: 2px solid var(--lg-sub);
+      color: var(--lg-sub);
       border-radius: 7px;
       padding: 2px 9px;
       font-size: 13px;
@@ -4229,8 +4250,8 @@
     }
 
     #logClose:hover {
-      border-color: #ffd93b;
-      color: #ffd93b
+      border-color: var(--lg-accent);
+      color: var(--lg-accent)
     }
 
     #logSit {
@@ -4249,7 +4270,7 @@
     .lsRow .lsNm {
       font-size: 10px;
       font-weight: 900;
-      color: #aab;
+      color: var(--lg-sub);
       width: 28px;
       flex: none
     }
@@ -4257,9 +4278,9 @@
     .lmini {
       flex: 1;
       height: 9px;
-      background: #3a3728;
+      background: var(--lg-headbg);
       border-radius: 5px;
-      border: 1px solid #0c0920;
+      border: 1px solid var(--lg-border);
       overflow: hidden
     }
 
@@ -4273,7 +4294,7 @@
     .lsRow .lsHp {
       font-family: 'Press Start 2P';
       font-size: 7px;
-      color: #888;
+      color: var(--lg-sub);
       width: 58px;
       text-align: right;
       flex: none
@@ -4294,9 +4315,9 @@
 
     .logTab {
       flex: 1;
-      background: rgba(255, 255, 255, .06);
-      border: 2px solid rgba(255, 255, 255, .15);
-      color: #aab;
+      background: var(--lg-tabbg);
+      border: 2px solid var(--lg-tabborder);
+      color: var(--lg-sub);
       border-radius: 8px;
       padding: 5px 0;
       font-family: 'ZCOOL KuaiLe';
@@ -4307,9 +4328,9 @@
     }
 
     .logTab.on {
-      background: linear-gradient(180deg, #ffd93b, #f2b705);
-      border-color: #ffd93b;
-      color: #fff;
+      background: var(--lg-tabon);
+      border-color: var(--lg-tabonborder);
+      color: var(--lg-tabontext);
       text-shadow: 0 1px 0 rgba(0, 0, 0, .25)
     }
 
@@ -4321,18 +4342,18 @@
     }
 
     .aiThinkTurn {
-      border: 2px solid rgba(159, 232, 255, .25);
+      border: 2px solid var(--lg-ai-soft);
       border-radius: 10px;
       padding: 8px 10px;
       margin-bottom: 10px;
-      background: rgba(159, 232, 255, .05)
+      background: var(--lg-ai-bg)
     }
 
     .aiThinkHead {
       font-family: 'ZCOOL KuaiLe';
       font-size: 14px;
       font-weight: 900;
-      color: #9fe8ff;
+      color: var(--lg-ai);
       letter-spacing: 1px;
       margin-bottom: 5px
     }
@@ -4341,9 +4362,9 @@
       display: inline-block;
       font-size: 12px;
       font-weight: 900;
-      color: #ffd93b;
-      background: rgba(255, 217, 59, .12);
-      border: 1px solid rgba(255, 217, 59, .4);
+      color: var(--lg-move);
+      background: var(--lg-move-bg);
+      border: 1px solid var(--lg-move-soft);
       border-radius: 6px;
       padding: 2px 8px;
       margin: 0 4px 4px 0
@@ -4352,18 +4373,18 @@
     .aiThinkBody {
       font-size: 11px;
       line-height: 1.6;
-      color: #b8c4e8;
+      color: var(--lg-ai-body);
       white-space: pre-wrap;
       word-break: break-word;
       max-height: 320px;
       overflow-y: auto;
-      border-top: 1px dashed rgba(159, 232, 255, .2);
+      border-top: 1px dashed var(--lg-ai-soft);
       padding-top: 6px;
       margin-top: 4px
     }
 
     .aiThinkEmpty {
-      color: #777;
+      color: var(--lg-sub);
       font-size: 12px;
       text-align: center;
       padding: 30px 10px
@@ -4372,15 +4393,15 @@
     .logTurnH {
       position: sticky;
       top: 0;
-      background: #171330;
-      color: #ffd93b;
+      background: var(--lg-bg);
+      color: var(--lg-title);
       font-family: 'ZCOOL KuaiLe';
       font-size: 14px;
       text-align: center;
       padding: 4px 0 3px;
       margin: 12px 0 4px;
       letter-spacing: 2px;
-      border-bottom: 2px dashed rgba(255, 217, 59, .3);
+      border-bottom: 2px dashed var(--lg-accent-soft);
       z-index: 2
     }
 
@@ -4394,7 +4415,7 @@
       align-items: flex-start;
       font-size: 12px;
       line-height: 1.5;
-      color: #cfcbe8;
+      color: var(--lg-text);
       padding: 3px 4px;
       border-radius: 6px;
       animation: logIn .25s ease-out
@@ -4419,67 +4440,67 @@
     }
 
     .lg-super {
-      color: #ff9d6b;
+      color: var(--lg-super, #ff9d6b);
       font-weight: 900
     }
 
     .lg-weak {
-      color: #8fb6e8
+      color: var(--lg-weak, #8fb6e8)
     }
 
     .lg-immune {
-      color: #9a94b8
+      color: var(--lg-immune, #9a94b8)
     }
 
     .lg-crit {
-      color: #ffd93b;
+      color: var(--lg-crit, #ffd93b);
       font-weight: 900
     }
 
     .lg-ko {
-      color: #ff6b6b;
+      color: var(--lg-ko, #ff6b6b);
       font-weight: 900
     }
 
     .lg-stat {
-      color: #7fe3c0
+      color: var(--lg-stat, #7fe3c0)
     }
 
     .lg-status {
-      color: #d9a6ff
+      color: var(--lg-status, #d9a6ff)
     }
 
     .lg-switch {
-      color: #7fc4ff
+      color: var(--lg-switch, #7fc4ff)
     }
 
     .lg-weather {
-      color: #ffe08a
+      color: var(--lg-weather, #ffe08a)
     }
 
     .lg-protect {
-      color: #a8e6a3
+      color: var(--lg-protect, #a8e6a3)
     }
 
     .lg-xp {
-      color: #ffd93b
+      color: var(--lg-xp, #ffd93b)
     }
 
     .lg-mega {
-      color: #ff8ac2;
+      color: var(--lg-mega, #ff8ac2);
       font-weight: 900
     }
 
     .lg-move {
-      color: #e8e4ff
+      color: var(--lg-move, #e8e4ff)
     }
 
     .lg-plain {
-      color: #a9a4c8
+      color: var(--lg-plain, #a9a4c8)
     }
 
     .lg-dmg {
-      color: #ff9d8a;
+      color: var(--lg-dmg, #ff9d8a);
       font-weight: 700
     }
 
@@ -4838,6 +4859,57 @@
       font-size: 12px;
       color: #c9971c;
       animation: blink 1s steps(2) infinite
+    }
+
+    /* ★ 战斗消息框随对话框风格联动 */
+    #msgpanel.dlgStyle-neon {
+      background: linear-gradient(135deg, #12082e 0%, #1d0f4a 55%, #2b1055 100%);
+      border: 2px solid #e040fb;
+      border-radius: 14px;
+      box-shadow: 0 0 18px rgba(224, 64, 251, .45), inset 0 0 26px rgba(224, 64, 251, .12)
+    }
+
+    #msgpanel.dlgStyle-neon #msg {
+      color: #eaf6ff;
+      text-shadow: 0 0 6px rgba(159, 232, 255, .5)
+    }
+
+    #msgpanel.dlgStyle-neon #msg::after {
+      color: #e040fb
+    }
+
+    #msgpanel.dlgStyle-paper {
+      background: linear-gradient(180deg, #fdf3dc 0%, #f6e6c3 60%, #efdcae 100%);
+      border: 2px solid #b08a4e;
+      border-radius: 5px;
+      box-shadow: inset 0 0 30px rgba(176, 138, 78, .25), 0 4px 0 rgba(120, 90, 50, .35)
+    }
+
+    #msgpanel.dlgStyle-paper #msg {
+      color: #4a3318;
+      font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif
+    }
+
+    #msgpanel.dlgStyle-paper #msg::after {
+      color: #8a5a2b
+    }
+
+    #msgpanel.dlgStyle-glass {
+      background: rgba(255, 255, 255, .16);
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      border: 1.5px solid rgba(255, 255, 255, .55);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .4)
+    }
+
+    #msgpanel.dlgStyle-glass #msg {
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, .45)
+    }
+
+    #msgpanel.dlgStyle-glass #msg::after {
+      color: rgba(255, 255, 255, .8)
     }
 
     @keyframes blink {
@@ -5320,6 +5392,1430 @@
       justify-content: flex-start
     }
 
+    /* ============ 对话框风格（设置中可切换） ============ */
+    /* ★ 霓虹（赛博发光） */
+    #dlgBox.dlgStyle-neon {
+      background: linear-gradient(135deg, #12082e 0%, #1d0f4a 55%, #2b1055 100%);
+      border: 2px solid #e040fb;
+      border-radius: 16px;
+      box-shadow: 0 0 18px rgba(224, 64, 251, .45), 0 0 42px rgba(64, 156, 255, .25), inset 0 0 26px rgba(224, 64, 251, .12)
+    }
+
+    #dlgBox.dlgStyle-neon::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .03) 0 2px, transparent 2px 4px)
+    }
+
+    .dlgStyle-neon #dlgSpeaker {
+      background: linear-gradient(90deg, #e040fb, #4f9df7);
+      border-color: #e040fb;
+      border-radius: 999px;
+      text-shadow: 0 0 8px rgba(255, 255, 255, .6);
+      box-shadow: 0 0 12px rgba(224, 64, 251, .5)
+    }
+
+    .dlgStyle-neon #dlgText {
+      color: #eaf6ff;
+      text-shadow: 0 0 6px rgba(159, 232, 255, .5)
+    }
+
+    .dlgStyle-neon #dlgSprite {
+      filter: drop-shadow(0 0 10px rgba(224, 64, 251, .6))
+    }
+
+    .dlgStyle-neon #dlgChoices .btn {
+      background: rgba(224, 64, 251, .12);
+      border-color: rgba(224, 64, 251, .6);
+      color: #eaf6ff
+    }
+
+    /* ★ 羊皮纸（复古手账） */
+    #dlgBox.dlgStyle-paper {
+      background: linear-gradient(180deg, #fdf3dc 0%, #f6e6c3 60%, #efdcae 100%);
+      border: 2px solid #b08a4e;
+      border-radius: 5px;
+      box-shadow: inset 0 0 30px rgba(176, 138, 78, .25), 0 4px 0 rgba(120, 90, 50, .35)
+    }
+
+    .dlgStyle-paper #dlgSpeaker {
+      background: #8a5a2b;
+      border: 2px solid #5d3a16;
+      border-radius: 5px;
+      box-shadow: 2px 2px 0 rgba(93, 58, 22, .5)
+    }
+
+    .dlgStyle-paper #dlgText {
+      color: #4a3318;
+      font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif;
+      letter-spacing: .5px
+    }
+
+    .dlgStyle-paper #dlgSprite {
+      filter: sepia(.35) contrast(1.05)
+    }
+
+    .dlgStyle-paper #dlgChoices .btn {
+      background: #fdf3dc;
+      border-color: #b08a4e;
+      color: #4a3318
+    }
+
+    /* ★ 毛玻璃（半透明磨砂） */
+    #dlgBox.dlgStyle-glass {
+      background: rgba(255, 255, 255, .16);
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      border: 1.5px solid rgba(255, 255, 255, .55);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .4)
+    }
+
+    .dlgStyle-glass #dlgSpeaker {
+      background: rgba(255, 255, 255, .28);
+      border: 1.5px solid rgba(255, 255, 255, .7);
+      color: #fff;
+      backdrop-filter: blur(6px);
+      border-radius: 999px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, .4)
+    }
+
+    .dlgStyle-glass #dlgText {
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, .45)
+    }
+
+    .dlgStyle-glass #dlgChoices .btn {
+      background: rgba(255, 255, 255, .18);
+      border-color: rgba(255, 255, 255, .6);
+      color: #fff;
+      backdrop-filter: blur(6px)
+    }
+
+    /* ★ 通知（toast）随风格联动 */
+    #toast.toastStyle-neon {
+      background: linear-gradient(90deg, #1d0f4a, #2b1055);
+      border: 2px solid #e040fb;
+      border-radius: 999px;
+      box-shadow: 0 0 14px rgba(224, 64, 251, .5)
+    }
+
+    #toast.toastStyle-paper {
+      background: #f6e6c3;
+      color: #4a3318;
+      border: 2px solid #b08a4e;
+      box-shadow: 2px 2px 0 rgba(120, 90, 50, .35)
+    }
+
+    #toast.toastStyle-glass {
+      background: rgba(255, 255, 255, .2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(255, 255, 255, .6);
+      color: #fff
+    }
+
+    /* ★ 漫画（粗描边气泡） */
+    #dlgBox.dlgStyle-comic {
+      background: #fff;
+      border: 4px solid #111;
+      border-radius: 0 26px 0 26px;
+      box-shadow: 6px 6px 0 #111
+    }
+
+    .dlgStyle-comic #dlgSpeaker {
+      background: #111;
+      color: #ffd93b;
+      border-color: #111;
+      border-radius: 0;
+      box-shadow: 3px 3px 0 #555
+    }
+
+    .dlgStyle-comic #dlgText {
+      color: #111;
+      font-weight: 900
+    }
+
+    .dlgStyle-comic #dlgChoices .btn {
+      border: 3px solid #111;
+      border-radius: 0;
+      box-shadow: 3px 3px 0 #111;
+      color: #111
+    }
+
+    #msgpanel.dlgStyle-comic {
+      background: #fff;
+      border: 4px solid #111;
+      border-radius: 0 22px 0 22px;
+      box-shadow: 5px 5px 0 #111
+    }
+
+    #msgpanel.dlgStyle-comic #msg {
+      color: #111;
+      font-weight: 900
+    }
+
+    #msgpanel.dlgStyle-comic #msg::after {
+      color: #111
+    }
+
+    #toast.toastStyle-comic {
+      background: #fff;
+      color: #111;
+      border: 3px solid #111;
+      border-radius: 0;
+      box-shadow: 4px 4px 0 #111
+    }
+
+    /* ★ 像素（复古街机） */
+    #dlgBox.dlgStyle-pixel {
+      background: #1e1a30;
+      border: 4px solid #58c8f0;
+      border-radius: 0;
+      box-shadow: 0 0 0 4px #1e1a30, 0 0 0 8px #58c8f0, inset 0 0 0 2px #58c8f0
+    }
+
+    .dlgStyle-pixel #dlgSpeaker {
+      background: #58c8f0;
+      color: #1e1a30;
+      border-color: #58c8f0;
+      border-radius: 0;
+      font-family: 'Press Start 2P';
+      font-size: 10px
+    }
+
+    .dlgStyle-pixel #dlgText {
+      color: #8ff0c4;
+      font-family: 'Press Start 2P';
+      font-size: 12px;
+      line-height: 2;
+      text-shadow: 2px 2px 0 rgba(14, 90, 58, .6)
+    }
+
+    .dlgStyle-pixel #dlgChoices .btn {
+      background: #1e1a30;
+      border: 2px solid #8ff0c4;
+      border-radius: 0;
+      color: #8ff0c4;
+      font-family: 'Press Start 2P';
+      font-size: 11px
+    }
+
+    #msgpanel.dlgStyle-pixel {
+      background: #1e1a30;
+      border: 4px solid #58c8f0;
+      border-radius: 0;
+      box-shadow: 0 0 0 4px #1e1a30, 0 0 0 8px #58c8f0
+    }
+
+    #msgpanel.dlgStyle-pixel #msg {
+      color: #8ff0c4;
+      font-family: 'Press Start 2P';
+      font-size: 12px;
+      line-height: 2
+    }
+
+    #msgpanel.dlgStyle-pixel #msg::after {
+      color: #58c8f0
+    }
+
+    #toast.toastStyle-pixel {
+      background: #1e1a30;
+      border: 2px solid #58c8f0;
+      border-radius: 0;
+      box-shadow: 0 0 0 3px #1e1a30, 0 0 0 6px #58c8f0;
+      color: #8ff0c4;
+      font-family: 'Press Start 2P';
+      font-size: 11px
+    }
+
+    /* ★ 星际（深空星云） */
+    #dlgBox.dlgStyle-space {
+      background:
+        radial-gradient(1px 1px at 20% 30%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 70% 18%, #ffd93b 50%, transparent 51%),
+        radial-gradient(1px 1px at 40% 72%, #9fe8ff 50%, transparent 51%),
+        radial-gradient(1px 1px at 85% 55%, #fff 50%, transparent 51%),
+        radial-gradient(2px 2px at 55% 40%, rgba(255, 255, 255, .7) 50%, transparent 51%),
+        linear-gradient(160deg, #050b1f, #0d1b3e 60%, #1a1040);
+      border: 2px solid #4f9df7;
+      border-radius: 18px;
+      box-shadow: 0 0 24px rgba(79, 157, 247, .4)
+    }
+
+    .dlgStyle-space #dlgSpeaker {
+      background: linear-gradient(90deg, #4f9df7, #7a5cf0);
+      border-color: #4f9df7;
+      border-radius: 999px
+    }
+
+    .dlgStyle-space #dlgText {
+      color: #dbe9ff
+    }
+
+    .dlgStyle-space #dlgChoices .btn {
+      background: rgba(79, 157, 247, .15);
+      border-color: rgba(79, 157, 247, .6);
+      color: #dbe9ff
+    }
+
+    #msgpanel.dlgStyle-space {
+      background:
+        radial-gradient(1px 1px at 25% 35%, #fff 50%, transparent 51%),
+        radial-gradient(1px 1px at 75% 60%, #9fe8ff 50%, transparent 51%),
+        linear-gradient(160deg, #050b1f, #0d1b3e 60%, #1a1040);
+      border: 2px solid #4f9df7;
+      border-radius: 18px;
+      box-shadow: 0 0 20px rgba(79, 157, 247, .35)
+    }
+
+    #msgpanel.dlgStyle-space #msg {
+      color: #dbe9ff
+    }
+
+    #msgpanel.dlgStyle-space #msg::after {
+      color: #9fe8ff
+    }
+
+    #toast.toastStyle-space {
+      background: linear-gradient(160deg, #0d1b3e, #1a1040);
+      border: 2px solid #4f9df7;
+      border-radius: 999px;
+      box-shadow: 0 0 14px rgba(79, 157, 247, .5)
+    }
+
+    /* ★ 森林（苔绿木纹） */
+    #dlgBox.dlgStyle-forest {
+      background:
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, .12) 0 3px, transparent 3px 26px),
+        linear-gradient(180deg, #2e4d2a, #3f6b38 55%, #2a5a33);
+      border: 3px solid #1c3318;
+      border-radius: 12px;
+      box-shadow: inset 0 0 24px rgba(0, 0, 0, .35), 0 4px 0 #14250f
+    }
+
+    .dlgStyle-forest #dlgSpeaker {
+      background: #1c3318;
+      border-color: #0e1f0b;
+      border-radius: 999px
+    }
+
+    .dlgStyle-forest #dlgText {
+      color: #eef7d8
+    }
+
+    .dlgStyle-forest #dlgChoices .btn {
+      background: rgba(62, 110, 55, .35);
+      border-color: #1c3318;
+      color: #eef7d8
+    }
+
+    #msgpanel.dlgStyle-forest {
+      background:
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, .12) 0 3px, transparent 3px 26px),
+        linear-gradient(180deg, #2e4d2a, #3f6b38 55%, #2a5a33);
+      border: 3px solid #1c3318;
+      border-radius: 12px;
+      box-shadow: 0 4px 0 #14250f
+    }
+
+    #msgpanel.dlgStyle-forest #msg {
+      color: #eef7d8
+    }
+
+    #msgpanel.dlgStyle-forest #msg::after {
+      color: #b8d84a
+    }
+
+    #toast.toastStyle-forest {
+      background: linear-gradient(180deg, #3f6b38, #2a5a33);
+      border: 2px solid #1c3318;
+      border-radius: 999px;
+      color: #eef7d8
+    }
+
+    /* ★ 樱花（粉嫩花瓣） */
+    #dlgBox.dlgStyle-sakura {
+      background: linear-gradient(180deg, #fff5f8, #ffe3ec 60%, #ffd4e0);
+      border: 2px solid #f78fb0;
+      border-radius: 22px;
+      box-shadow: 0 4px 14px rgba(247, 143, 176, .35), inset 0 0 20px rgba(255, 255, 255, .6)
+    }
+
+    .dlgStyle-sakura #dlgSpeaker {
+      background: linear-gradient(90deg, #f78fb0, #ff9ec4);
+      border-color: #f78fb0;
+      color: #fff;
+      border-radius: 999px
+    }
+
+    .dlgStyle-sakura #dlgText {
+      color: #8c4a5e
+    }
+
+    .dlgStyle-sakura #dlgChoices .btn {
+      background: #fff;
+      border-color: #f78fb0;
+      color: #8c4a5e;
+      border-radius: 999px
+    }
+
+    #msgpanel.dlgStyle-sakura {
+      background: linear-gradient(180deg, #fff5f8, #ffe3ec 60%, #ffd4e0);
+      border: 2px solid #f78fb0;
+      border-radius: 22px;
+      box-shadow: 0 4px 14px rgba(247, 143, 176, .3)
+    }
+
+    #msgpanel.dlgStyle-sakura #msg {
+      color: #8c4a5e
+    }
+
+    #msgpanel.dlgStyle-sakura #msg::after {
+      color: #f78fb0
+    }
+
+    #toast.toastStyle-sakura {
+      background: linear-gradient(90deg, #f78fb0, #ff9ec4);
+      border: 2px solid #ffd4e0;
+      border-radius: 999px;
+      color: #fff
+    }
+
+    /* ★ 幽灵（暗紫鬼火） */
+    #dlgBox.dlgStyle-ghost {
+      background: linear-gradient(180deg, #1a1028, #2b1a45 60%, #1d1030);
+      border: 2px solid #8a6fd0;
+      border-radius: 14px;
+      box-shadow: 0 0 18px rgba(138, 111, 208, .4), inset 0 0 22px rgba(138, 111, 208, .15)
+    }
+
+    .dlgStyle-ghost #dlgSpeaker {
+      background: #8a6fd0;
+      border-color: #6a4fb0;
+      border-radius: 4px 18px 4px 18px
+    }
+
+    .dlgStyle-ghost #dlgText {
+      color: #e4d9f7
+    }
+
+    .dlgStyle-ghost #dlgChoices .btn {
+      background: rgba(138, 111, 208, .18);
+      border-color: rgba(138, 111, 208, .55);
+      color: #e4d9f7;
+      border-radius: 4px 14px 4px 14px
+    }
+
+    #msgpanel.dlgStyle-ghost {
+      background: linear-gradient(180deg, #1a1028, #2b1a45 60%, #1d1030);
+      border: 2px solid #8a6fd0;
+      border-radius: 14px;
+      box-shadow: 0 0 16px rgba(138, 111, 208, .35)
+    }
+
+    #msgpanel.dlgStyle-ghost #msg {
+      color: #e4d9f7
+    }
+
+    #msgpanel.dlgStyle-ghost #msg::after {
+      color: #b79ef0
+    }
+
+    #toast.toastStyle-ghost {
+      background: linear-gradient(90deg, #2b1a45, #1d1030);
+      border: 2px solid #8a6fd0;
+      border-radius: 999px;
+      color: #e4d9f7
+    }
+
+    /* ★ 卡通手绘（蜡笔涂鸦） */
+    #dlgBox.dlgStyle-sketch {
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255, 255, 255, .6) 0 6px, transparent 7px),
+        radial-gradient(circle at 82% 72%, rgba(255, 255, 255, .45) 0 4px, transparent 5px),
+        radial-gradient(circle at 70% 20%, rgba(255, 214, 120, .4) 0 3px, transparent 4px),
+        linear-gradient(180deg, #fffdf0, #fdf3d7 65%, #f9e9c8);
+      border: 3px solid #4a3f2f;
+      border-radius: 28px 14px 30px 12px;
+      box-shadow: 4px 4px 0 rgba(74, 63, 47, .35), inset 0 0 30px rgba(255, 255, 255, .5);
+      transform: rotate(-.4deg)
+    }
+
+    .dlgStyle-sketch #dlgSpeaker {
+      background: #ffd93b;
+      color: #4a3f2f;
+      border: 2px dashed #4a3f2f;
+      border-radius: 50% 40% 55% 45%;
+      transform: rotate(-2deg);
+      box-shadow: 2px 2px 0 rgba(74, 63, 47, .3)
+    }
+
+    .dlgStyle-sketch #dlgText {
+      color: #4a3f2f;
+      font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif;
+      letter-spacing: .5px
+    }
+
+    .dlgStyle-sketch #dlgChoices .btn {
+      background: #fffdf0;
+      border: 2.5px dashed #8a7a5f;
+      border-radius: 18px 8px 20px 10px;
+      color: #4a3f2f;
+      font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif
+    }
+
+    .dlgStyle-sketch #dlgSprite {
+      transform: rotate(3deg);
+      filter: saturate(.95) contrast(1.02)
+    }
+
+    #msgpanel.dlgStyle-sketch {
+      background:
+        radial-gradient(circle at 15% 25%, rgba(255, 255, 255, .55) 0 5px, transparent 6px),
+        linear-gradient(180deg, #fffdf0, #fdf3d7 65%, #f9e9c8);
+      border: 3px solid #4a3f2f;
+      border-radius: 26px 12px 28px 14px;
+      box-shadow: 4px 4px 0 rgba(74, 63, 47, .3)
+    }
+
+    #msgpanel.dlgStyle-sketch #msg {
+      color: #4a3f2f;
+      font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif
+    }
+
+    #msgpanel.dlgStyle-sketch #msg::after {
+      color: #c9971c
+    }
+
+    #toast.toastStyle-sketch {
+      background: #ffd93b;
+      color: #4a3f2f;
+      border: 2.5px dashed #4a3f2f;
+      border-radius: 20px 8px 22px 10px;
+      box-shadow: 3px 3px 0 rgba(74, 63, 47, .35);
+      font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif
+    }
+
+    /* ============ 对战右上角 记录/设置 按钮随对话框风格联动 ============ */
+    /* ★ 基础：回合数字颜色由各主题控制（柔和易读） */
+    #logTurnN {
+      color: #9fe8ff;
+      transition: color .2s
+    }
+
+    #battle.dlgStyle-neon #logBtn,
+    #battle.dlgStyle-neon #bSetBtn {
+      background: rgba(28, 14, 60, .92);
+      border-color: #b07ce0;
+      color: #ffd9a0;
+      box-shadow: 0 0 10px rgba(176, 124, 224, .4), 0 3px 0 rgba(0, 0, 0, .4)
+    }
+
+    #battle.dlgStyle-neon #logTurnN {
+      color: #d9b8f5
+    }
+
+    #battle.dlgStyle-paper #logBtn,
+    #battle.dlgStyle-paper #bSetBtn {
+      background: #f6e6c3;
+      border-color: #b08a4e;
+      color: #4a3318;
+      box-shadow: 2px 2px 0 rgba(120, 90, 50, .4)
+    }
+
+    #battle.dlgStyle-paper #logTurnN {
+      color: #8a6a3a
+    }
+
+    #battle.dlgStyle-glass #logBtn,
+    #battle.dlgStyle-glass #bSetBtn {
+      background: rgba(255, 255, 255, .2);
+      border-color: rgba(255, 255, 255, .65);
+      color: #f2f8ff;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px)
+    }
+
+    #battle.dlgStyle-glass #logTurnN {
+      color: #dceeff
+    }
+
+    #battle.dlgStyle-comic #logBtn,
+    #battle.dlgStyle-comic #bSetBtn {
+      background: #fff;
+      border: 3px solid #111;
+      border-radius: 0;
+      color: #111;
+      box-shadow: 3px 3px 0 #111
+    }
+
+    #battle.dlgStyle-comic #logTurnN {
+      color: #666
+    }
+
+    #battle.dlgStyle-pixel #logBtn,
+    #battle.dlgStyle-pixel #bSetBtn {
+      background: #1e1a30;
+      border: 2px solid #58c8f0;
+      border-radius: 0;
+      color: #8ff0c4;
+      box-shadow: 0 0 0 3px #1e1a30, 0 0 0 6px #58c8f0;
+      font-family: 'Press Start 2P';
+      font-size: 10px
+    }
+
+    #battle.dlgStyle-pixel #logTurnN {
+      color: #8ff0c4
+    }
+
+    #battle.dlgStyle-space #logBtn,
+    #battle.dlgStyle-space #bSetBtn {
+      background: rgba(13, 27, 62, .92);
+      border-color: #5aa8ff;
+      color: #cfe6ff;
+      box-shadow: 0 0 12px rgba(90, 168, 255, .4)
+    }
+
+    #battle.dlgStyle-space #logTurnN {
+      color: #bfdcff
+    }
+
+    #battle.dlgStyle-forest #logBtn,
+    #battle.dlgStyle-forest #bSetBtn {
+      background: rgba(52, 86, 46, .94);
+      border-color: #2c4a26;
+      color: #eef7d8;
+      box-shadow: 0 3px 0 #14250f
+    }
+
+    #battle.dlgStyle-forest #logTurnN {
+      color: #cfe3a0
+    }
+
+    #battle.dlgStyle-sakura #logBtn,
+    #battle.dlgStyle-sakura #bSetBtn {
+      background: rgba(255, 235, 241, .95);
+      border-color: #e88aa8;
+      color: #8c4a5e;
+      box-shadow: 0 3px 0 rgba(232, 138, 168, .4)
+    }
+
+    #battle.dlgStyle-sakura #logTurnN {
+      color: #b96a85
+    }
+
+    #battle.dlgStyle-ghost #logBtn,
+    #battle.dlgStyle-ghost #bSetBtn {
+      background: rgba(43, 26, 69, .94);
+      border-color: #8a6fd0;
+      color: #d8caf5;
+      box-shadow: 0 0 10px rgba(138, 111, 208, .4)
+    }
+
+    #battle.dlgStyle-ghost #logTurnN {
+      color: #c9b8f2
+    }
+
+    #battle.dlgStyle-sketch #logBtn,
+    #battle.dlgStyle-sketch #bSetBtn {
+      background: #ffe9b0;
+      border: 2.5px dashed #7a6a50;
+      border-radius: 14px 6px 16px 8px;
+      color: #5a4a30;
+      box-shadow: 3px 3px 0 rgba(74, 63, 47, .3);
+      font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', sans-serif
+    }
+
+    #battle.dlgStyle-sketch #logTurnN {
+      color: #8a7a5f
+    }
+
+    /* ============ 对战记录面板随对话框风格 ============ */
+    #logOv.dlgStyle-neon {
+      --lg-bg: linear-gradient(180deg, #1c0e3c, #150a2e);
+      --lg-border: #b07ce0;
+      --lg-headbg: rgba(176, 124, 224, .08);
+      --lg-title: #d9b8f5;
+      --lg-text: #d4cdf0;
+      --lg-sub: #9a8fc0;
+      --lg-accent: #c88ff0;
+      --lg-accent-soft: rgba(200, 143, 240, .3);
+      --lg-tabbg: rgba(176, 124, 224, .12);
+      --lg-tabborder: rgba(176, 124, 224, .45);
+      --lg-tabon: linear-gradient(90deg, #b07ce0, #4f9df7);
+      --lg-tabonborder: #b07ce0;
+      --lg-ai: #d9b8f5;
+      --lg-ai-soft: rgba(217, 184, 245, .3);
+      --lg-ai-bg: rgba(217, 184, 245, .06);
+      --lg-ai-body: #c8b8e8;
+      --lg-move: #f0c8ff;
+      --lg-move-soft: rgba(240, 200, 255, .45);
+      --lg-move-bg: rgba(240, 200, 255, .1)
+    }
+
+    #logOv.dlgStyle-paper {
+      --lg-bg: linear-gradient(180deg, #fdf3dc, #efdcae);
+      --lg-border: #b08a4e;
+      --lg-headbg: rgba(176, 138, 78, .1);
+      --lg-title: #8a5a2b;
+      --lg-text: #4a3318;
+      --lg-sub: #8a6a3a;
+      --lg-accent: #8a5a2b;
+      --lg-accent-soft: rgba(138, 90, 43, .3);
+      --lg-tabbg: rgba(176, 138, 78, .14);
+      --lg-tabborder: rgba(176, 138, 78, .5);
+      --lg-tabon: linear-gradient(180deg, #8a5a2b, #6a4020);
+      --lg-tabonborder: #8a5a2b;
+      --lg-ai: #8a5a2b;
+      --lg-ai-soft: rgba(138, 90, 43, .3);
+      --lg-ai-bg: rgba(138, 90, 43, .06);
+      --lg-ai-body: #6a5538;
+      --lg-move: #6a4020;
+      --lg-move-soft: rgba(106, 64, 32, .45);
+      --lg-move-bg: rgba(106, 64, 32, .1)
+    }
+
+    #logOv.dlgStyle-glass {
+      --lg-bg: rgba(255, 255, 255, .18);
+      --lg-border: rgba(255, 255, 255, .55);
+      --lg-headbg: rgba(255, 255, 255, .1);
+      --lg-title: #fff;
+      --lg-text: #eef4ff;
+      --lg-sub: #d3ddf0;
+      --lg-accent: #fff;
+      --lg-accent-soft: rgba(255, 255, 255, .4);
+      --lg-tabbg: rgba(255, 255, 255, .14);
+      --lg-tabborder: rgba(255, 255, 255, .45);
+      --lg-tabon: rgba(255, 255, 255, .85);
+      --lg-tabonborder: #fff;
+      --lg-tabontext: #333;
+      --lg-ai: #e6f2ff;
+      --lg-ai-soft: rgba(255, 255, 255, .35);
+      --lg-ai-bg: rgba(255, 255, 255, .08);
+      --lg-ai-body: #eef4ff;
+      --lg-move: #fff;
+      --lg-move-soft: rgba(255, 255, 255, .5);
+      --lg-move-bg: rgba(255, 255, 255, .14)
+    }
+
+    #logOv.dlgStyle-comic {
+      --lg-bg: #fff;
+      --lg-border: #111;
+      --lg-headbg: #f3f3f3;
+      --lg-title: #111;
+      --lg-text: #333;
+      --lg-sub: #777;
+      --lg-accent: #111;
+      --lg-accent-soft: rgba(17, 17, 17, .3);
+      --lg-tabbg: #f3f3f3;
+      --lg-tabborder: #111;
+      --lg-tabon: #111;
+      --lg-tabonborder: #111;
+      --lg-tabontext: #ffd93b;
+      --lg-ai: #333;
+      --lg-ai-soft: rgba(17, 17, 17, .25);
+      --lg-ai-bg: #f7f7f7;
+      --lg-ai-body: #555;
+      --lg-move: #111;
+      --lg-move-soft: rgba(17, 17, 17, .4);
+      --lg-move-bg: rgba(17, 17, 17, .08)
+    }
+
+    #logOv.dlgStyle-pixel {
+      --lg-bg: linear-gradient(180deg, #1e1a30, #161226);
+      --lg-border: #58c8f0;
+      --lg-headbg: rgba(88, 200, 240, .08);
+      --lg-title: #8ff0c4;
+      --lg-text: #c4d8e8;
+      --lg-sub: #8a93a8;
+      --lg-accent: #8ff0c4;
+      --lg-accent-soft: rgba(143, 240, 196, .3);
+      --lg-tabbg: rgba(88, 200, 240, .1);
+      --lg-tabborder: rgba(88, 200, 240, .45);
+      --lg-tabon: linear-gradient(180deg, #58c8f0, #3a9cc8);
+      --lg-tabonborder: #58c8f0;
+      --lg-ai: #8ff0c4;
+      --lg-ai-soft: rgba(143, 240, 196, .3);
+      --lg-ai-bg: rgba(143, 240, 196, .06);
+      --lg-ai-body: #b8d4e0;
+      --lg-move: #8ff0c4;
+      --lg-move-soft: rgba(143, 240, 196, .45);
+      --lg-move-bg: rgba(143, 240, 196, .1)
+    }
+
+    #logOv.dlgStyle-space {
+      --lg-bg: linear-gradient(180deg, #0d1b3e, #0a1230);
+      --lg-border: #5aa8ff;
+      --lg-headbg: rgba(90, 168, 255, .08);
+      --lg-title: #bfdcff;
+      --lg-text: #cfe6ff;
+      --lg-sub: #93a8cc;
+      --lg-accent: #9fe8ff;
+      --lg-accent-soft: rgba(159, 232, 255, .3);
+      --lg-tabbg: rgba(90, 168, 255, .12);
+      --lg-tabborder: rgba(90, 168, 255, .45);
+      --lg-tabon: linear-gradient(90deg, #5aa8ff, #7a5cf0);
+      --lg-tabonborder: #5aa8ff;
+      --lg-ai: #bfdcff;
+      --lg-ai-soft: rgba(191, 220, 255, .3);
+      --lg-ai-bg: rgba(191, 220, 255, .06);
+      --lg-ai-body: #c8dcf5;
+      --lg-move: #9fe8ff;
+      --lg-move-soft: rgba(159, 232, 255, .45);
+      --lg-move-bg: rgba(159, 232, 255, .1)
+    }
+
+    #logOv.dlgStyle-forest {
+      --lg-bg: linear-gradient(180deg, #2e4d2a, #23401f);
+      --lg-border: #3f6b38;
+      --lg-headbg: rgba(62, 110, 55, .12);
+      --lg-title: #d9e8a8;
+      --lg-text: #eef7d8;
+      --lg-sub: #a8b88a;
+      --lg-accent: #cfe3a0;
+      --lg-accent-soft: rgba(207, 227, 160, .3);
+      --lg-tabbg: rgba(62, 110, 55, .15);
+      --lg-tabborder: rgba(62, 110, 55, .5);
+      --lg-tabon: linear-gradient(180deg, #4a7a40, #35612c);
+      --lg-tabonborder: #4a7a40;
+      --lg-ai: #d9e8a8;
+      --lg-ai-soft: rgba(217, 232, 168, .3);
+      --lg-ai-bg: rgba(217, 232, 168, .06);
+      --lg-ai-body: #d8e4bc;
+      --lg-move: #f2e8b8;
+      --lg-move-soft: rgba(242, 232, 184, .45);
+      --lg-move-bg: rgba(242, 232, 184, .1)
+    }
+
+    #logOv.dlgStyle-sakura {
+      --lg-bg: linear-gradient(180deg, #fff5f8, #ffd9e4);
+      --lg-border: #f78fb0;
+      --lg-headbg: rgba(247, 143, 176, .1);
+      --lg-title: #b96a85;
+      --lg-text: #8c4a5e;
+      --lg-sub: #b07a8d;
+      --lg-accent: #e88aa8;
+      --lg-accent-soft: rgba(232, 138, 168, .35);
+      --lg-tabbg: rgba(247, 143, 176, .14);
+      --lg-tabborder: rgba(247, 143, 176, .5);
+      --lg-tabon: linear-gradient(180deg, #f78fb0, #e5769a);
+      --lg-tabonborder: #f78fb0;
+      --lg-tabontext: #fff;
+      --lg-ai: #b96a85;
+      --lg-ai-soft: rgba(185, 106, 133, .3);
+      --lg-ai-bg: rgba(185, 106, 133, .06);
+      --lg-ai-body: #a06078;
+      --lg-move: #d05a80;
+      --lg-move-soft: rgba(208, 90, 128, .45);
+      --lg-move-bg: rgba(208, 90, 128, .1)
+    }
+
+    #logOv.dlgStyle-ghost {
+      --lg-bg: linear-gradient(180deg, #1a1028, #150b20);
+      --lg-border: #8a6fd0;
+      --lg-headbg: rgba(138, 111, 208, .08);
+      --lg-title: #c9b8f2;
+      --lg-text: #d8caf5;
+      --lg-sub: #9c88c0;
+      --lg-accent: #b79ef0;
+      --lg-accent-soft: rgba(183, 158, 240, .3);
+      --lg-tabbg: rgba(138, 111, 208, .12);
+      --lg-tabborder: rgba(138, 111, 208, .45);
+      --lg-tabon: linear-gradient(180deg, #8a6fd0, #6a4fb0);
+      --lg-tabonborder: #8a6fd0;
+      --lg-ai: #c9b8f2;
+      --lg-ai-soft: rgba(201, 184, 242, .3);
+      --lg-ai-bg: rgba(201, 184, 242, .06);
+      --lg-ai-body: #c8b8e8;
+      --lg-move: #e4d9f7;
+      --lg-move-soft: rgba(228, 217, 247, .45);
+      --lg-move-bg: rgba(228, 217, 247, .1)
+    }
+
+    #logOv.dlgStyle-sketch {
+      --lg-bg: linear-gradient(180deg, #fffdf0, #f9e9c8);
+      --lg-border: #4a3f2f;
+      --lg-headbg: rgba(74, 63, 47, .06);
+      --lg-title: #4a3f2f;
+      --lg-text: #5a4a30;
+      --lg-sub: #8a7a5f;
+      --lg-accent: #8a5a2b;
+      --lg-accent-soft: rgba(138, 90, 43, .3);
+      --lg-tabbg: rgba(74, 63, 47, .08);
+      --lg-tabborder: rgba(74, 63, 47, .35);
+      --lg-tabon: #ffd93b;
+      --lg-tabonborder: #4a3f2f;
+      --lg-tabontext: #4a3f2f;
+      --lg-ai: #6a4a20;
+      --lg-ai-soft: rgba(106, 74, 32, .3);
+      --lg-ai-bg: rgba(106, 74, 32, .06);
+      --lg-ai-body: #6a5a3a;
+      --lg-move: #8a5a2b;
+      --lg-move-soft: rgba(138, 90, 43, .45);
+      --lg-move-bg: rgba(138, 90, 43, .1)
+    }
+
+    /* ============ 记录文字分类配色（按主题柔和适配，避免刺眼） ============ */
+    /* 霓虹 */
+    #logOv.dlgStyle-neon {
+      --lg-super: #ffb08a;
+      --lg-weak: #9cc4f0;
+      --lg-immune: #a89fc8;
+      --lg-crit: #f0cf6a;
+      --lg-ko: #ff9a9a;
+      --lg-stat: #a8f0d0;
+      --lg-status: #dcb8ff;
+      --lg-switch: #9fd0ff;
+      --lg-weather: #ffe9a0;
+      --lg-protect: #c0f0ba;
+      --lg-xp: #f0cf6a;
+      --lg-mega: #ffb0d8;
+      --lg-move: #e0d8ff;
+      --lg-plain: #b8b0d0;
+      --lg-dmg: #ffb0a0
+    }
+
+    /* 羊皮纸 */
+    #logOv.dlgStyle-paper {
+      --lg-super: #c2562a;
+      --lg-weak: #3f6eb0;
+      --lg-immune: #8a7a5f;
+      --lg-crit: #a06a10;
+      --lg-ko: #b83a3a;
+      --lg-stat: #1f7a55;
+      --lg-status: #7a4a9a;
+      --lg-switch: #2a6dd4;
+      --lg-weather: #8a6a10;
+      --lg-protect: #3f7a35;
+      --lg-xp: #a06a10;
+      --lg-mega: #b84a86;
+      --lg-move: #5a4a8a;
+      --lg-plain: #6a6580;
+      --lg-dmg: #b5442c
+    }
+
+    /* 毛玻璃 */
+    #logOv.dlgStyle-glass {
+      --lg-super: #d05a30;
+      --lg-weak: #4a7ab8;
+      --lg-immune: #8a86a0;
+      --lg-crit: #a87818;
+      --lg-ko: #c04444;
+      --lg-stat: #2a8a60;
+      --lg-status: #8a56a8;
+      --lg-switch: #3a76d0;
+      --lg-weather: #9a7a20;
+      --lg-protect: #4a8a40;
+      --lg-xp: #a87818;
+      --lg-mega: #c44a90;
+      --lg-move: #6a5a98;
+      --lg-plain: #7a7690;
+      --lg-dmg: #c24c34
+    }
+
+    /* 漫画 */
+    #logOv.dlgStyle-comic {
+      --lg-super: #d05a28;
+      --lg-weak: #3f6eb0;
+      --lg-immune: #888;
+      --lg-crit: #a06a10;
+      --lg-ko: #c0392b;
+      --lg-stat: #1f8a5a;
+      --lg-status: #8a4fb0;
+      --lg-switch: #2a6dd4;
+      --lg-weather: #96700f;
+      --lg-protect: #3f8f3a;
+      --lg-xp: #a06a10;
+      --lg-mega: #c44a8c;
+      --lg-move: #4a4a6a;
+      --lg-plain: #666;
+      --lg-dmg: #c2412f
+    }
+
+    /* 像素 */
+    #logOv.dlgStyle-pixel {
+      --lg-super: #f0a878;
+      --lg-weak: #8cc0f0;
+      --lg-immune: #9a94b8;
+      --lg-crit: #d8e8a0;
+      --lg-ko: #f0a0a0;
+      --lg-stat: #a0f0c8;
+      --lg-status: #d0b0f0;
+      --lg-switch: #9fd0ff;
+      --lg-weather: #e8d8a0;
+      --lg-protect: #b8f0b0;
+      --lg-xp: #d8e8a0;
+      --lg-mega: #f0b0d8;
+      --lg-move: #d0c8e8;
+      --lg-plain: #a8a4c0;
+      --lg-dmg: #f0b0a0
+    }
+
+    /* 星际 */
+    #logOv.dlgStyle-space {
+      --lg-super: #ffb08a;
+      --lg-weak: #9cc4f0;
+      --lg-immune: #a89fc8;
+      --lg-crit: #f0d08a;
+      --lg-ko: #ff9a9a;
+      --lg-stat: #a0f0d0;
+      --lg-status: #dcb8ff;
+      --lg-switch: #a8d8ff;
+      --lg-weather: #ffe9a8;
+      --lg-protect: #c0f0ba;
+      --lg-xp: #f0d08a;
+      --lg-mega: #ffb0d8;
+      --lg-move: #d8d0f0;
+      --lg-plain: #b0acc8;
+      --lg-dmg: #ffb0a0
+    }
+
+    /* 森林 */
+    #logOv.dlgStyle-forest {
+      --lg-super: #ffc08a;
+      --lg-weak: #a8ccf0;
+      --lg-immune: #b8b098;
+      --lg-crit: #e8d8a0;
+      --lg-ko: #ff9a9a;
+      --lg-stat: #c0f0b8;
+      --lg-status: #e0c0ff;
+      --lg-switch: #b0d8ff;
+      --lg-weather: #fff0a8;
+      --lg-protect: #d8ffc0;
+      --lg-xp: #e8d8a0;
+      --lg-mega: #ffc0e0;
+      --lg-move: #d8d0f0;
+      --lg-plain: #c0b8a0;
+      --lg-dmg: #ffb8a0
+    }
+
+    /* 樱花 */
+    #logOv.dlgStyle-sakura {
+      --lg-super: #c2562a;
+      --lg-weak: #4a72b8;
+      --lg-immune: #a0788c;
+      --lg-crit: #a06a10;
+      --lg-ko: #c03c4c;
+      --lg-stat: #2a8a5a;
+      --lg-status: #9a4a8a;
+      --lg-switch: #3a72d0;
+      --lg-weather: #9a7010;
+      --lg-protect: #4a8a38;
+      --lg-xp: #a06a10;
+      --lg-mega: #c04a8a;
+      --lg-move: #6a5a90;
+      --lg-plain: #8a7084;
+      --lg-dmg: #c2443c
+    }
+
+    /* 幽灵 */
+    #logOv.dlgStyle-ghost {
+      --lg-super: #e8b0a8;
+      --lg-weak: #a0c4f0;
+      --lg-immune: #a89fc8;
+      --lg-crit: #e0c890;
+      --lg-ko: #f0a8a8;
+      --lg-stat: #c0f0d8;
+      --lg-status: #dcb8ff;
+      --lg-switch: #b0d0ff;
+      --lg-weather: #f0e0a8;
+      --lg-protect: #c8f0c0;
+      --lg-xp: #e0c890;
+      --lg-mega: #f0b8e0;
+      --lg-move: #d8d0f0;
+      --lg-plain: #b4acc8;
+      --lg-dmg: #f0b8b0
+    }
+
+    /* 卡通手绘 */
+    #logOv.dlgStyle-sketch {
+      --lg-super: #b85a28;
+      --lg-weak: #4a72b8;
+      --lg-immune: #8a7a5f;
+      --lg-crit: #96700f;
+      --lg-ko: #b03c34;
+      --lg-stat: #2a7a50;
+      --lg-status: #8a4a98;
+      --lg-switch: #2a6dd4;
+      --lg-weather: #8a6a10;
+      --lg-protect: #3f7a35;
+      --lg-xp: #96700f;
+      --lg-mega: #b04a84;
+      --lg-move: #5a4a80;
+      --lg-plain: #6a6050;
+      --lg-dmg: #ad4428
+    }
+
+    /* ============ 对战底部背景：浅色模式 / 跟随对话框风格 ============ */
+    /* ★ 浅色模式 */
+    #battle.buiLight #bui {
+      background-image: linear-gradient(180deg, #e9edf8, #d3dae9), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%234a5570'%20fill-opacity='0.08'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: #9aa5bf
+    }
+
+    /* ★ 深色主题（沿用白色精灵球线稿） */
+    #battle.dlgStyle-neon #bui {
+      background-image: linear-gradient(180deg, #1c0e3c, #150a2e), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%23ffffff'%20fill-opacity='0.2'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: #b07ce0
+    }
+
+    #battle.dlgStyle-pixel #bui {
+      background-image: linear-gradient(180deg, #1e1a30, #161226), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%23ffffff'%20fill-opacity='0.2'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: #58c8f0
+    }
+
+    #battle.dlgStyle-space #bui {
+      background-image: linear-gradient(180deg, #0d1b3e, #0a1230), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%23ffffff'%20fill-opacity='0.2'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: #5aa8ff
+    }
+
+    #battle.dlgStyle-forest #bui {
+      background-image: linear-gradient(180deg, #2e4d2a, #23401f), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%23ffffff'%20fill-opacity='0.2'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: #3f6b38
+    }
+
+    #battle.dlgStyle-ghost #bui {
+      background-image: linear-gradient(180deg, #1a1028, #150b20), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%23ffffff'%20fill-opacity='0.2'%20stroke='%23ffffff'%20stroke-opacity='0.9'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: #8a6fd0
+    }
+
+    /* ★ 浅色主题（深色精灵球线稿） */
+    #battle.dlgStyle-paper #bui {
+      background-image: linear-gradient(180deg, #fdf3dc, #efdcae), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%234a5570'%20fill-opacity='0.08'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: #b08a4e
+    }
+
+    #battle.dlgStyle-glass #bui {
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, .18), rgba(255, 255, 255, .1)), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%234a5570'%20fill-opacity='0.08'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: rgba(255, 255, 255, .55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px)
+    }
+
+    #battle.dlgStyle-comic #bui {
+      background-image: linear-gradient(180deg, #fff, #f0f0f0), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%234a5570'%20fill-opacity='0.08'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: #111
+    }
+
+    #battle.dlgStyle-sakura #bui {
+      background-image: linear-gradient(180deg, #fff5f8, #ffd9e4), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%234a5570'%20fill-opacity='0.08'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: #f78fb0
+    }
+
+    #battle.dlgStyle-sketch #bui {
+      background-image: linear-gradient(180deg, #fffdf0, #f9e9c8), url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='26'%20fill='none'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Cpath%20d='M6%2032h52'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='8'%20fill='%234a5570'%20fill-opacity='0.08'%20stroke='%234a5570'%20stroke-opacity='0.3'%20stroke-width='3.5'/%3E%3C/svg%3E");
+      border-top-color: #4a3f2f
+    }
+
+    /* ============ 全局界面背景：浅色(偏白) / 跟随对话框风格 ============ */
+    /* ★ 浅色模式（偏白，非灰黑） */
+    body.bgLight {
+      background:
+        radial-gradient(1200px 600px at 50% -10%, #ffffff 0%, transparent 60%),
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, .015) 0 2px, transparent 2px 4px),
+        linear-gradient(180deg, #f1eee4 0%, #e8e4d8 55%, #ded9ca 100%)
+    }
+
+    #stage.bgLight {
+      background: #f8f6f0;
+      box-shadow: 0 30px 80px rgba(70, 60, 35, .28), 0 0 0 6px #cbc4b0, 0 0 0 8px #b5ad93
+    }
+
+    #stage.bgLight .scrHead {
+      background: linear-gradient(180deg, #f4f0e4, #e8e2d0);
+      color: #26233a;
+      border-bottom-color: #c9c2ae
+    }
+
+    #stage.bgLight .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.bgLight #factory {
+      background: linear-gradient(180deg, #faf8f2, #f0ece1)
+    }
+
+    #battle.bgLight {
+      background: #f5f2ea
+    }
+
+    /* ★ 跟随对话框风格：各主题的页面背景（body/舞台/页头/对战工厂/战斗） */
+    body.dlgStyle-neon {
+      background: linear-gradient(180deg, #1a0c38, #120828)
+    }
+
+    #stage.dlgStyle-neon {
+      background: linear-gradient(180deg, #1a0c38, #120828);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .7), 0 0 0 6px #0a0418, 0 0 0 8px #4a2a78
+    }
+
+    #stage.dlgStyle-neon .scrHead {
+      background: linear-gradient(180deg, #2b1650, #1c0e3c);
+      color: #fff;
+      border-bottom-color: #b07ce0
+    }
+
+    #stage.dlgStyle-neon .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.dlgStyle-neon #factory {
+      background: linear-gradient(180deg, #1c0e3c, #150a2e)
+    }
+
+    #battle.dlgStyle-neon {
+      background: #120828
+    }
+
+    body.dlgStyle-paper {
+      background: linear-gradient(180deg, #f6e6c3, #e8d5a8)
+    }
+
+    #stage.dlgStyle-paper {
+      background: linear-gradient(180deg, #fdf3dc, #efdcae);
+      box-shadow: 0 30px 80px rgba(120, 90, 50, .3), 0 0 0 6px #b08a4e, 0 0 0 8px #8a6a3a
+    }
+
+    #stage.dlgStyle-paper .scrHead {
+      background: linear-gradient(180deg, #fdf3dc, #efdcae);
+      color: #4a3318;
+      border-bottom-color: #b08a4e
+    }
+
+    #stage.dlgStyle-paper .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.dlgStyle-paper #factory {
+      background: linear-gradient(180deg, #fdf3dc, #efdcae)
+    }
+
+    #battle.dlgStyle-paper {
+      background: #f4e6c8
+    }
+
+    body.dlgStyle-glass {
+      background: linear-gradient(180deg, #e6ebf4, #d3dae6)
+    }
+
+    #stage.dlgStyle-glass {
+      background: rgba(255, 255, 255, .25);
+      backdrop-filter: blur(14px) saturate(1.3);
+      -webkit-backdrop-filter: blur(14px) saturate(1.3);
+      box-shadow: 0 30px 80px rgba(60, 70, 100, .3), 0 0 0 6px rgba(255, 255, 255, .6), 0 0 0 8px rgba(255, 255, 255, .35)
+    }
+
+    #stage.dlgStyle-glass .scrHead {
+      background: rgba(255, 255, 255, .28);
+      color: #fff;
+      border-bottom-color: rgba(255, 255, 255, .55)
+    }
+
+    #stage.dlgStyle-glass .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.dlgStyle-glass #factory {
+      background: rgba(255, 255, 255, .22)
+    }
+
+    #battle.dlgStyle-glass {
+      background: rgba(255, 255, 255, .2)
+    }
+
+    body.dlgStyle-comic {
+      background: #f0f0f0
+    }
+
+    #stage.dlgStyle-comic {
+      background: #fff;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .3), 0 0 0 6px #111, 0 0 0 8px #555
+    }
+
+    #stage.dlgStyle-comic .scrHead {
+      background: #f3f3f3;
+      color: #111;
+      border-bottom-color: #111
+    }
+
+    #stage.dlgStyle-comic .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.dlgStyle-comic #factory {
+      background: linear-gradient(180deg, #fff, #f0f0f0)
+    }
+
+    #battle.dlgStyle-comic {
+      background: #fff
+    }
+
+    body.dlgStyle-pixel {
+      background: #161226
+    }
+
+    #stage.dlgStyle-pixel {
+      background: linear-gradient(180deg, #1e1a30, #161226);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .7), 0 0 0 6px #161226, 0 0 0 8px #58c8f0
+    }
+
+    #stage.dlgStyle-pixel .scrHead {
+      background: linear-gradient(180deg, #262240, #1e1a30);
+      color: #8ff0c4;
+      border-bottom-color: #58c8f0
+    }
+
+    #stage.dlgStyle-pixel .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.dlgStyle-pixel #factory {
+      background: linear-gradient(180deg, #1e1a30, #161226)
+    }
+
+    #battle.dlgStyle-pixel {
+      background: #161226
+    }
+
+    body.dlgStyle-space {
+      background: linear-gradient(160deg, #0d1b3e, #0a1230)
+    }
+
+    #stage.dlgStyle-space {
+      background: linear-gradient(160deg, #0d1b3e, #0a1230);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .7), 0 0 0 6px #081028, 0 0 0 8px #5aa8ff
+    }
+
+    #stage.dlgStyle-space .scrHead {
+      background: linear-gradient(180deg, #14305e, #0d1b3e);
+      color: #cfe6ff;
+      border-bottom-color: #5aa8ff
+    }
+
+    #stage.dlgStyle-space .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.dlgStyle-space #factory {
+      background: linear-gradient(180deg, #0d1b3e, #0a1230)
+    }
+
+    #battle.dlgStyle-space {
+      background: #081028
+    }
+
+    body.dlgStyle-forest {
+      background: linear-gradient(180deg, #23401f, #1a3318)
+    }
+
+    #stage.dlgStyle-forest {
+      background: linear-gradient(180deg, #2e4d2a, #23401f);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 0 6px #14250f, 0 0 0 8px #3f6b38
+    }
+
+    #stage.dlgStyle-forest .scrHead {
+      background: linear-gradient(180deg, #3a6533, #2e4d2a);
+      color: #eef7d8;
+      border-bottom-color: #3f6b38
+    }
+
+    #stage.dlgStyle-forest .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.dlgStyle-forest #factory {
+      background: linear-gradient(180deg, #2e4d2a, #23401f)
+    }
+
+    #battle.dlgStyle-forest {
+      background: #1f381c
+    }
+
+    body.dlgStyle-sakura {
+      background: linear-gradient(180deg, #ffe9f0, #ffd9e4)
+    }
+
+    #stage.dlgStyle-sakura {
+      background: linear-gradient(180deg, #fff5f8, #ffdce6);
+      box-shadow: 0 30px 80px rgba(200, 120, 150, .3), 0 0 0 6px #f78fb0, 0 0 0 8px #e88aa8
+    }
+
+    #stage.dlgStyle-sakura .scrHead {
+      background: linear-gradient(180deg, #ffe9f0, #ffdce6);
+      color: #8c4a5e;
+      border-bottom-color: #f78fb0
+    }
+
+    #stage.dlgStyle-sakura .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.dlgStyle-sakura #factory {
+      background: linear-gradient(180deg, #fff5f8, #ffd9e4)
+    }
+
+    #battle.dlgStyle-sakura {
+      background: #fff0f4
+    }
+
+    body.dlgStyle-ghost {
+      background: linear-gradient(180deg, #150b20, #100818)
+    }
+
+    #stage.dlgStyle-ghost {
+      background: linear-gradient(180deg, #1a1028, #150b20);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .7), 0 0 0 6px #0e0718, 0 0 0 8px #6a4fb0
+    }
+
+    #stage.dlgStyle-ghost .scrHead {
+      background: linear-gradient(180deg, #2b1a45, #1a1028);
+      color: #d8caf5;
+      border-bottom-color: #8a6fd0
+    }
+
+    #stage.dlgStyle-ghost .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.dlgStyle-ghost #factory {
+      background: linear-gradient(180deg, #1a1028, #150b20)
+    }
+
+    #battle.dlgStyle-ghost {
+      background: #120a1c
+    }
+
+    body.dlgStyle-sketch {
+      background: linear-gradient(180deg, #f9e9c8, #f0dfb8)
+    }
+
+    #stage.dlgStyle-sketch {
+      background: linear-gradient(180deg, #fffdf0, #f9e9c8);
+      box-shadow: 0 30px 80px rgba(110, 90, 60, .3), 0 0 0 6px #b8a478, 0 0 0 8px #8a7a5f
+    }
+
+    #stage.dlgStyle-sketch .scrHead {
+      background: linear-gradient(180deg, #fff8e0, #f9e9c8);
+      color: #4a3f2f;
+      border-bottom-color: #4a3f2f
+    }
+
+    #stage.dlgStyle-sketch .scrHead h2 {
+      text-shadow: none
+    }
+
+    #stage.dlgStyle-sketch #factory {
+      background: linear-gradient(180deg, #fffdf0, #f9e9c8)
+    }
+
+    #battle.dlgStyle-sketch {
+      background: #faf0dc
+    }
+
     /* starter cards */
     .starterRow {
       display: flex;
@@ -5462,13 +6958,13 @@
     .pickCell {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       background: #fff;
       border: 2px solid var(--ink);
-      border-radius: 9px;
-      padding: 4px 8px;
+      border-radius: 10px;
+      padding: 7px 10px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700
     }
 
@@ -5477,8 +6973,8 @@
     }
 
     .pickCell img {
-      width: 48px;
-      height: 48px;
+      width: 58px;
+      height: 58px;
       object-fit: contain
     }
 
@@ -6126,7 +7622,7 @@
         right: auto !important;
         transform: translateX(-50%) !important;
         width: auto !important;
-        max-width: calc(100% - 250px) !important;
+        max-width: calc(100% - 90px) !important;
         white-space: normal !important;
         text-align: center !important;
         line-height: 1.8 !important;
@@ -7025,7 +8521,7 @@
               </select>
             </div>
             <div id="freeGrid"
-              style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;overflow:auto;max-height:470px">
+              style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px;overflow:auto;max-height:calc(100vh - 225px);min-height:430px">
             </div>
           </div>
           <div class="panel" style="padding:14px;height:fit-content">
@@ -7161,11 +8657,11 @@
         </div>
         <div id="koFlash"></div>
         <div id="wxchip"></div>
-        <button id="logBtn">📋 记录 <span class="px" style="font-size:7px;color:#9fe8ff" id="logTurnN">回合1</span></button>
+        <button id="logBtn">📋 记录 <span class="px" style="font-size:7px" id="logTurnN">回合1</span></button>
         <button id="bSetBtn" title="游戏设置">⚙</button>
         <div id="logOv">
           <div id="logHead">
-            <div class="lt">📋 对战记录 <span class="px" style="font-size:8px;color:#9fe8ff" id="logTurnBig">回合
+            <div class="lt">📋 对战记录 <span class="px" style="font-size:8px" id="logTurnBig">回合
                 1</span><button id="logClose">✕</button></div>
             <div class="logTabs"><button id="logTabBtn" class="logTab on">📋 记录</button><button id="aiThinkBtn" class="logTab">🤖 AI思考</button></div>
             <div id="logSit"></div>
@@ -7264,7 +8760,7 @@
       window.addEventListener('keydown', keyRm);
       document.getElementById('stage').appendChild(ov);
     }
-    function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 1800); }
+    function toast(t) { const e = $('#toast'); setDlgStyleClass(e, CFG.dlgStyle || 'classic', 'toastStyle'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 1800); }
     function waitKey() { return new Promise(r => { const h = e => { if (['Enter', ' ', 'z', 'Z'].includes(e.key)) { window.removeEventListener('keydown', h); r(); } }; window.addEventListener('keydown', h); }); }
     function waitClick(elm) { return new Promise(r => { const h = () => { elm.removeEventListener('click', h); r(); }; elm.addEventListener('click', h); }); }
     function advance() { // click OR key
@@ -7531,7 +9027,7 @@
     };
     const N = { C2: 65, D2: 73, E2: 82, F2: 87, G2: 98, A2: 110, B2: 123, C3: 131, D3: 147, E3: 165, F3: 175, G3: 196, A3: 220, B3: 247, C4: 262, D4: 294, E4: 330, F4: 349, G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988, C6: 1046 };
 
-    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
+    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false, dlgStyle: 'classic', buiBg: 'dark' }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
     function saveCfg() { localStorage.setItem('pif_cfg', JSON.stringify(CFG)); }
 
 const _ST = (f, s) => f * Math.pow(2, s / 12);
@@ -9980,7 +11476,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(885,'多龙梅西亚','dragon/ghost','28/60/30/40/30/82','clearbody/infiltrator/cursedbodyx',['dragondarts','shadowball','uturn','dragondance','flamethrower'],{evo:1});
     S(886,'多龙奇','dragon/ghost','68/80/50/60/50/102','clearbody/infiltrator/cursedbodyx',['dragondarts','shadowball','uturn','dragondance','flamethrower'],{evo:1});
     S(891,'熊徒弟','fighting','60/90/60/53/50/72','innerfocus/innerfocus',['closecombat','knockoff','swordsdance','machpunch','ironhead'],{evo:1,leg:1});
-    S(893,'萨戮德','dark/grass','105/120/105/70/95/105','leafguard/leafguard',['powerwhip','chloroblast','knockoff','closecombat','swordsdance','uturn', 'junglehealing'],{leg:1});
+    S(893,'萨戮德','dark/grass','105/120/105/70/95/105','leafguard/leafguard',['powerwhip','knockoff','closecombat','swordsdance','uturn', 'junglehealing'],{leg:1});
     S(894,'雷吉艾勒奇','electric','80/100/50/100/50/200','transistor/transistor',['thundercage','thunderbolt','thunder','voltswitch','thunderwave','hyperbeam'],{leg:1});
     S(895,'雷吉铎拉戈','dragon','200/100/50/100/50/80','dragonsmaw/dragonsmaw',['dragonenergy','dragonpulse','outrage','earthquake','hyperbeam','dragonclaw'],{leg:1});
     S(896,'雪暴马','ice','100/145/130/65/110/30','chillingneigh/chillingneigh',['iciclecrash','closecombat','earthquake','swordsdance','highhorsepower'],{leg:1});
@@ -12410,14 +13906,19 @@ return ev;
         if (eHaz.spikes) chips.push(`▲ 对手·菱${'×'.repeat(eHaz.spikes)}`);
         if (eHaz.tspikes) chips.push(`☠ 对手·毒菱${eHaz.tspikes >= 2 ? '²' : '¹'}`);
         /* ★ 超极巨DOT显示 */
-        if (b.gmaxDot) chips.push('🔥 ' + (b.gmaxDot.name || TNAME[b.gmaxDot.type]) + '(' + b.gmaxDot.turns + ')');
+        if (b.gmaxDot) chips.push('🔥 ' + (b.gmaxDot.side === 'e' ? '对方·' : '己方·') + (b.gmaxDot.name || TNAME[b.gmaxDot.type]) + '(' + b.gmaxDot.turns + ')');
         /* ★ 极光幕显示 */
         if (b.auroraveil.p > 0) chips.push(`🌈 己方·极光幕(${b.auroraveil.p})`);
         if (b.auroraveil.e > 0) chips.push(`🌈 对手·极光幕(${b.auroraveil.e})`);
         /* ★ 顺风显示（单方） */
         if (b.tailwind.p > 0) chips.push(`💨 己方·顺风(${b.tailwind.p})`);
         if (b.tailwind.e > 0) chips.push(`💨 对手·顺风(${b.tailwind.e})`);
-        if (chips.length) { wx.textContent = chips.join('  '); wx.classList.add('on'); }
+        if (chips.length) {
+          /* ★ 每个状态渲染为独立胶囊（不换行），整体自然换行排列 */
+          wx.innerHTML = '';
+          chips.forEach(c => { const s = el('span', '', c); s.style.cssText = 'display:inline-block;white-space:nowrap;margin:1px 5px;vertical-align:middle'; wx.appendChild(s); });
+          wx.classList.add('on');
+        }
         else wx.classList.remove('on');
         FX.syncStatusFx(b);
       },
@@ -12746,6 +14247,8 @@ return ev;
         if (LOGFN) LOGFN(text);
         const box = $('#msg'); box.textContent = '';
         const boxEl = $('#msgpanel');
+        /* ★ 战斗消息框应用对话框风格（保留 panel 类，并同步右上角按钮） */
+        setDlgStyleClass(boxEl, CFG.dlgStyle || 'classic');
         let i = 0, done = false;
         const iv = setInterval(() => {
           if (i < text.length) { box.textContent += text[i++]; if (i % 2 === 0) AU.blip(); }
@@ -12799,6 +14302,8 @@ return ev;
         return `<div class="lsRow"><span class="lsNm">${label}</span><div class="lmini"><i style="width:${pct}%;background:${col}"></i></div><span class="lsHp">${cnt}/${arr.length}只 ${pct}%</span></div>`;
       };
       sit.innerHTML = mkRow('我方', b.pp) + mkRow('敌方', b.ep);
+      /* ★ 对战记录面板随对话框风格 */
+      setDlgStyleClass($('#logOv'), CFG.dlgStyle || 'classic');
       const list = $('#logList');
       let html = '', lastT = -1;
       b.log.forEach(e => {
@@ -13984,16 +15489,48 @@ return ev;
       'tackle': {  c: '#d8d8c0', c2: '#ffffff', proj: 'none', snd: 'thud' }
     };
     /* 剧情对话框 */
+    /* ★ 应用对话框风格类（保留原有类；前缀 dlgStyle/toastStyle；并同步到战斗场景根节点供右上角按钮/底部背景联动） */
+    function setDlgStyleClass(el, st, prefix) {
+      prefix = prefix || 'dlgStyle';
+      if (!el) return;
+      const re = new RegExp('(^|\\s)' + prefix + '-\\w+', 'g');
+      el.className = (el.className || '').replace(re, ' ').replace(/\s+/g, ' ').trim() + ' ' + prefix + '-' + st;
+      const br = document.getElementById('battle');
+      if (br && br !== el) {
+        br.className = (br.className || '').replace(/(^|\s)dlgStyle-\w+/g, ' ').replace(/\s+/g, ' ').trim() + ' dlgStyle-' + st;
+        /* ★ 对战底部背景模式：浅色模式打 buiLight 类（跟随对话框模式由上面的 dlgStyle 类驱动） */
+        br.classList.toggle('buiLight', CFG.buiBg === 'light');
+      }
+      /* ★ 全局背景主题：同步到 body 与 #stage（覆盖所有页面的暗色背景：对战工厂/各类图鉴/自由对战/剧情模式） */
+      applyBgTheme();
+    }
+    /* ★ 全局界面背景：dark=暗色 / light=浅色(偏白) / style=跟随对话框风格 */
+    function applyBgTheme() {
+      const mode = CFG.buiBg || 'dark';
+      const style = CFG.dlgStyle || 'classic';
+      const sync = root => {
+        if (!root) return;
+        root.className = (root.className || '').replace(/(^|\s)(dlgStyle|bgLight)-\w+/g, ' ').replace(/\s+/g, ' ').trim();
+        if (mode === 'style') root.classList.add('dlgStyle-' + style);
+        else if (mode === 'light') root.classList.add('bgLight');
+      };
+      sync(document.body);
+      sync(document.getElementById('stage'));
+    }
+    /* ★ 页面加载即应用已保存的主题（刷新后保持所选风格/背景） */
+    applyBgTheme();
     function dlg(speaker, text, spriteId) {
       return new Promise(async res => {
         const d = $('#dlg'); d.classList.add('on');
+        /* ★ 应用对话框风格（设置可切换：10+种风格），保留原有 panel 等类 */
+        const box = $('#dlgBox');
+        setDlgStyleClass(box, CFG.dlgStyle || 'classic');
         $('#dlgSpeaker').textContent = speaker;
         const spr = $('#dlgSprite');
         if (spriteId) { spr.classList.remove('hidden'); setSprite(spr, spriteId); } else spr.classList.add('hidden');
         const t = $('#dlgText'); t.textContent = ''; $('#dlgChoices').innerHTML = '';
         let i = 0, done = false;
         const iv = setInterval(() => { if (i < text.length) { t.textContent += text[i++]; if (i % 2) AU.blip(); } else { clearInterval(iv); done = true; } }, 18);
-        const box = $('#dlgBox');
         const h = async () => {
           if (!done) { clearInterval(iv); t.textContent = text; done = true; return; }
           box.removeEventListener('click', h); window.removeEventListener('keydown', kd);
@@ -14183,6 +15720,9 @@ return ev;
             this.turn++;
             await this.resolvePendingSwitches();
             if (this.over) break;
+            /* ★ 濒死补位登场的宝可梦：已完整在场上待一整回合，清除"本回合替换上场"标记，
+                  使加速等"替换上场当回合不触发"的特性在下一回合末正常触发 */
+            for (const m of [...this.fieldMons('p'), ...this.fieldMons('e')]) m.vol.switchedInThisTurn = false;
             continue;                             // 替换完成后进入新回合的行动阶段
           }
           this.turn++;
@@ -14699,6 +16239,8 @@ return ev;
       async getPlayerActionsDoubles() {
         const acts = [null, null];
         let slot = 0;
+        /* ★ 玩家出招阶段：消息框显示"等待出招中…" */
+        this.showWaitMsg();
         while (slot < 2 && !this.over) {
           const m = this.slotMon('p', slot);
           if (!m || !m.alive()) { slot++; continue; }
@@ -14782,6 +16324,8 @@ return ev;
       /* ---------- 玩家输入 ---------- */
       async getPlayerAction() {
         const m = this.P();
+        /* ★ 玩家出招阶段：消息框显示"等待出招中…" */
+        this.showWaitMsg();
         while (true) {
           this.showMain();
           const sel = await this.waitMenu(['fight', 'poke', 'bag', 'run']);
@@ -14812,6 +16356,11 @@ return ev;
             return { type: 'run' };
           }
         }
+      }
+      /* ★ 玩家出招阶段：消息框显示"等待出招中…" */
+      showWaitMsg() {
+        const box = $('#msg');
+        if (box) box.textContent = '等待出招中…';
       }
       showMain(slot = 0, m = null) {
         $('#menuMoves').classList.add('hidden');
@@ -16356,8 +17905,8 @@ return ev;
           if (f.drop) { for (const f2 of this.foesOf(mon)) await this.changeStat(f2, f.drop, -(f.dropN || 1), mon); }
           if (f.weather) await this.setWeather(f.weather, mon);
           if (f.terrain) await this.setTerrain(f.terrain, mon);
-          /* ★ 超极巨DOT：地狱灭焰/水炮轰坠/灰飞鞭灭/岩石喷发 */
-          if (f.dot && foe.hp > 0 && !foe.types.includes(f.dot)) {
+          /* ★ 超极巨DOT：地狱灭焰/水炮轰坠/灰飞鞭灭/岩石喷发（对全属性生效） */
+          if (f.dot && foe.hp > 0) {
             const dotSide = this.sideOf(foe);
             this.gmaxDot = { type: f.dot, turns: 4, side: dotSide, name: mv.n };
             await say(`${dotSide === 'e' ? '对方' : '己方'}场地上留下了${mv.n}的持续伤害！`);
@@ -17926,13 +19475,18 @@ return ev;
         if (this.gmaxDot) {
           this.gmaxDot.turns--;
           for (const dotM of this.fieldMons(this.gmaxDot.side)) {
-            if (dotM && dotM.alive() && !dotM.types.includes(this.gmaxDot.type)) {
+            if (dotM && dotM.alive()) {
               const dd = Math.max(1, Math.floor(dotM.maxhp / 6));
               dotM.hp = Math.max(0, dotM.hp - dd);
               FX.gmaxDotFx(this.gmaxDot.name, this.gmaxDot.type, this.gmaxDot.side, dotM._slot || 0);
               await say(`${dotM.name} 受到了${this.gmaxDot.name || '超极巨' + TNAME[this.gmaxDot.type]}的持续伤害！`);
               this.addLog(`↳ ${dotM.name} 超极巨DOT -${dd} HP`);
               BUI.dmgPop(this.gmaxDot.side, `-${dd}`, TCOL[this.gmaxDot.type]);
+              /* ★ 被DOT击杀：正常触发濒死演出与换人（死亡动画/立绘消失） */
+              if (dotM.hp <= 0 && !dotM.fainted) {
+                await this.handleKO(this.foeSide(this.sideOf(dotM)), this.foeOf(dotM), dotM);
+                if (this.over) return;
+              }
             }
           }
           if (this.gmaxDot.turns <= 0) { this.gmaxDot = null; await say('超极巨的持续伤害消散了…'); }
@@ -19002,7 +20556,7 @@ return ev;
         for (let i = 0; i < 6; i++) { cum += prob[i]; if (r < cum) return i + 1; }
         return 6;
       },
-      lvl(round, i) { return Math.min(100, 48 + (round - 1) * 7 + Math.floor(i / 2)); },
+      lvl(round, i) { return Math.min(80, 35 + (round - 1) * 7 + Math.floor(i / 2)); },
       pickMoves(sp) {
         /* ★ 单打不分配双打独占技能（帮助/看我嘛/指导/愤怒粉/广域防守/聚光灯/守住） */
         const pool = shuffle(sp.mv.filter(k => MV[k] && k !== 'terablast' && !DOUBLE_ONLY.includes(k)));
@@ -19197,11 +20751,22 @@ return ev;
         }
         const team = [];
         const used = new Set();
+        const usedItems = new Set();
+        /* ★ 工厂规则：敌方不出现重复道具 */
+        const fixDupItem = m => {
+          if (!m.item) return;
+          if (!usedItems.has(m.item)) { usedItems.add(m.item); return; }
+          const alt = ['leftovers', 'sitrus', 'lifeorb', 'expertbelt', 'focussash', 'choiceband', 'choicespecs', 'choicescarf', 'airballoon', 'weaknesspolicy', 'rockyhelmet', 'blacksludge'].find(k => !usedItems.has(k));
+          m.item = alt || 'sitrus';
+          usedItems.add(m.item);
+        };
         while (team.length < 4) {
           const sp = this.drawOne(round);
           if (used.has(sp.id)) continue;
           used.add(sp.id);
-          team.push(this.buildDouble(sp, lvl + (team.length === 0 ? 2 : 0), round));
+          const m = this.buildDouble(sp, lvl + (team.length === 0 ? 2 : 0), round);
+          fixDupItem(m);
+          team.push(m);
         }
         return { head: false, master: false, team };
       },
@@ -19235,12 +20800,21 @@ return ev;
         }
         /* 普通场次 */
         const team = [];
+        const usedItems = new Set();
+        /* ★ 工厂规则：敌方不出现重复道具（重复时替换为其他常用道具） */
+        const fixDupItem = m => {
+          if (!m.item) return;
+          if (!usedItems.has(m.item)) { usedItems.add(m.item); return; }
+          const alt = ['leftovers', 'sitrus', 'lifeorb', 'expertbelt', 'focussash', 'choiceband', 'choicespecs', 'choicescarf', 'airballoon', 'weaknesspolicy', 'rockyhelmet', 'blacksludge'].find(k => !usedItems.has(k));
+          m.item = alt || 'sitrus';
+          usedItems.add(m.item);
+        };
         if (expert && expert.type) {
           const t = this.rollTier(round);
           const typed = shuffle(SP.filter(s => s.t.includes(expert.type) && this.tier(s) === t));
-          for (let k = 0; k < Math.min(2, typed.length); k++) { team.push(this.build(typed[k], lvl, round)); }
+          for (let k = 0; k < Math.min(2, typed.length); k++) { const m = this.build(typed[k], lvl, round); fixDupItem(m); team.push(m); }
         }
-        while (team.length < 3) { const sp = this.drawOne(round); team.push(this.build(sp, lvl, round)); }
+        while (team.length < 3) { const sp = this.drawOne(round); const m = this.build(sp, lvl, round); fixDupItem(m); team.push(m); }
         return { head: false, team, expert };
       },
       /* ============ Mega进化大师 ============ */
@@ -19249,15 +20823,25 @@ return ev;
         const lvl = this.lvl(round, i);
         const pool = SP.filter(s => MEGA[s.id]);
         const team = [];
+        const usedItems = new Set();
+        /* ★ 工厂规则：敌方不出现重复道具 */
+        const fixDupItem = m => {
+          if (!m.item) return;
+          if (!usedItems.has(m.item)) { usedItems.add(m.item); return; }
+          const alt = ['leftovers', 'sitrus', 'lifeorb', 'expertbelt', 'focussash', 'choiceband', 'choicespecs', 'choicescarf', 'airballoon', 'weaknesspolicy', 'rockyhelmet', 'blacksludge'].find(k => !usedItems.has(k));
+          m.item = alt || 'sitrus';
+          usedItems.add(m.item);
+        };
         if (type) {
           let same = pool.filter(s => s.t.includes(type));
           if (same.length >= 2) {
             const t1 = pick(same);
             const t2 = pick(same.filter(s => s.id !== t1.id));
-            team.push(this.build(t1, lvl, round), this.build(t2, lvl, round));
+            const m1 = this.build(t1, lvl, round); fixDupItem(m1); team.push(m1);
+            const m2 = this.build(t2, lvl, round); fixDupItem(m2); team.push(m2);
           }
         }
-        while (team.length < 3) { team.push(this.build(pick(pool), lvl, round)); }
+        while (team.length < 3) { const m = this.build(pick(pool), lvl, round); fixDupItem(m); team.push(m); }
         return team;
       },
       /* ============ 冠军级图鉴 ============ */
@@ -20217,7 +21801,37 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       const genSel = $('#freeGen'), tySel = $('#freeType');
       if (!genSel.options.length || genSel.options.length <= 1) { for (let g = 1; g <= 9; g++)genSel.add(new Option('第' + g + '世代', g)); }
       if (!tySel.options.length || tySel.options.length <= 1) { TYP.forEach(t => tySel.add(new Option(TNAME[t], t))); }
-      let playerTeam = [], enemyTeam = [], editing = 'player', lvl = 50, enemyMode = 'random';
+      let playerTeam = [], enemyTeam = [], editing = 'player', lvl = 50, enemyMode = 'random', championName = null;
+      /* ★ 已遇到的冠军级训练家选择面板（自由对战对手） */
+      const renderChampionSel = () => {
+        const et = $('#freeEnemyTeam'); if (!et) return;
+        const unlocked = FAC.championList().filter(c => GM.fac.champs.includes(c.name));
+        if (!unlocked.length) { et.innerHTML = '<div style="color:#999;font-size:12px">尚未遇到任何冠军级训练家（在对战工厂击败冠军后解锁）</div>'; return; }
+        et.innerHTML = '';
+        const hint = el('div', '', '选择一位已遇到的冠军级训练家作为对手：');
+        hint.style.cssText = 'font-size:12px;color:#888;margin-bottom:8px';
+        et.appendChild(hint);
+        const row = el('div', ''); row.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px';
+        unlocked.forEach(ch => {
+          const c = el('button', 'btn small' + (championName === ch.name ? ' blue' : ''));
+          c.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;min-width:84px';
+          const im = miniSprite(ch.sprite); im.style.width = '48px'; im.style.height = '48px';
+          c.appendChild(im);
+          c.appendChild(el('span', '', ch.name));
+          c.onclick = () => {
+            AU.ok();
+            championName = ch.name;
+            const ids = ch.teams && ch.teams.length ? pick(ch.teams) : ch.team || [];
+            enemyTeam = ids.map(pid => {
+              const sp = SPDB[pid]; if (!sp) return null;
+              return { sp, lvl, nature: NATURES[0], ev: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, ability: pick(sp.ab), moves: sp.mv.slice(0, 4), tera: pick(TYP), item: null, gmax: false };
+            }).filter(Boolean);
+            renderTeam(); render();
+          };
+          row.appendChild(c);
+        });
+        et.appendChild(row);
+      };
       const renderTeam = () => {
         $('#freeCnt').textContent = playerTeam.length + ' / 6';
         const t = $('#freeTeam'); t.innerHTML = '';
@@ -20234,7 +21848,8 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
         const et = $('#freeEnemyTeam'); if (!et) return;
         et.innerHTML = '';
         if (enemyMode === 'random') { et.innerHTML = '<div style="color:#999;font-size:12px">对手队伍：随机生成</div>'; return; }
-        if (!enemyTeam.length) et.innerHTML = '<div style="color:#999;font-size:12px">从左侧点选宝可梦加入对手队伍</div>';
+        if (enemyMode === 'champion' && !enemyTeam.length) { renderChampionSel(); return; }
+        if (!enemyTeam.length) { et.innerHTML = '<div style="color:#999;font-size:12px">从左侧点选宝可梦加入对手队伍</div>'; return; }
         enemyTeam.forEach((cfg, i) => {
           const s = el('div', 'teamSlot'); s.style.cursor = 'pointer';
           const img = new Image(); setSprite(img, cfg.sp.id); s.appendChild(img);
@@ -20243,6 +21858,11 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
           s.onclick = () => openMonConfig(enemyTeam, i, renderTeam);
           et.appendChild(s);
         });
+        if (enemyMode === 'champion') {
+          const back = el('button', 'btn tiny', '✕ 更换冠军');
+          back.onclick = () => { enemyTeam = []; championName = null; renderTeam(); };
+          et.appendChild(back);
+        }
       };
       const render = () => {
         const q = $('#freeSearch').value.trim(), g = +$('#freeGen').value, ty = $('#freeType').value;
@@ -20311,9 +21931,11 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
         emToggle.innerHTML = '';
         const br = el('button', 'btn tiny' + (enemyMode === 'random' ? ' blue' : ''), '随机对手');
         const bc = el('button', 'btn tiny' + (enemyMode === 'custom' ? ' blue' : ''), '自定义对手');
-        br.onclick = () => { enemyMode = 'random'; AU.cursor(); emToggle.querySelectorAll('.btn').forEach(b => b.classList.remove('blue')); br.classList.add('blue'); $('#freeEnemyTeam').innerHTML = '<div style="color:#999;font-size:12px">对手队伍：随机生成</div>'; };
-        bc.onclick = () => { enemyMode = 'custom'; AU.cursor(); emToggle.querySelectorAll('.btn').forEach(b => b.classList.remove('blue')); bc.classList.add('blue'); renderTeam(); };
-        emToggle.appendChild(br); emToggle.appendChild(bc);
+        const bch = el('button', 'btn tiny' + (enemyMode === 'champion' ? ' blue' : ''), '🏆 冠军训练家');
+        br.onclick = () => { enemyMode = 'random'; championName = null; AU.cursor(); emToggle.querySelectorAll('.btn').forEach(b => b.classList.remove('blue')); br.classList.add('blue'); $('#freeEnemyTeam').innerHTML = '<div style="color:#999;font-size:12px">对手队伍：随机生成</div>'; };
+        bc.onclick = () => { enemyMode = 'custom'; championName = null; AU.cursor(); emToggle.querySelectorAll('.btn').forEach(b => b.classList.remove('blue')); bc.classList.add('blue'); renderTeam(); };
+        bch.onclick = () => { enemyMode = 'champion'; AU.cursor(); emToggle.querySelectorAll('.btn').forEach(b => b.classList.remove('blue')); bch.classList.add('blue'); renderTeam(); };
+        emToggle.appendChild(br); emToggle.appendChild(bc); emToggle.appendChild(bch);
       }
       $('#freeGo').onclick = async () => {
         if (!playerTeam.length) { toast('请先选择我方宝可梦！'); AU.no(); return; }
@@ -20331,7 +21953,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
           enemy = enemyTeam.map(cfg => new P(cfg.sp.id, cfg.lvl, { iv: 30, nature: cfg.nature, ev: cfg.ev, ability: cfg.ability, moves: cfg.moves, tera: cfg.tera, item: cfg.item }));
         }
         const r = await startBattle({
-          player, enemy, trainer: '自由对战对手',
+          player, enemy, trainer: championName || '自由对战对手',
           rules: { mega: $('#rMega').checked, dyna: $('#rDyna').checked, tera: $('#rTera').checked, capture: false, run: true }, ai: 1.2,
           doubles: wantDouble
         });
@@ -21387,7 +23009,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       head.appendChild(xBtn);
       box.appendChild(head);
       let offEsc = null;
-      const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); saveCfg(); };
+      const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); saveCfg(); applyBgTheme(); setDlgStyleClass($('#dlgBox'), CFG.dlgStyle || 'classic'); };
       /* ---- 🔊 音频 ---- */
       box.appendChild(settingsGroup('🔊 音频', [
         settingsRow('音效', '攻击、命中、状态、菜单等提示音',
@@ -21414,6 +23036,16 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           () => CFG.fxShake, v => { CFG.fxShake = v; }),
         settingsRow('出场动画', '投球→弹跳→爆开→实体化的出场演出',
           () => CFG.entryAnim, v => { CFG.entryAnim = v; }),
+        settingsSelect('对话框风格', '对话/战斗消息/通知框/右上角按钮的整体视觉风格（11种）：经典、霓虹、羊皮纸、毛玻璃、漫画、像素、星际、森林、樱花、幽灵、卡通手绘',
+          [
+            { n: '经典', v: 'classic' }, { n: '霓虹', v: 'neon' }, { n: '羊皮纸', v: 'paper' }, { n: '毛玻璃', v: 'glass' },
+            { n: '漫画', v: 'comic' }, { n: '像素', v: 'pixel' }, { n: '星际', v: 'space' }, { n: '森林', v: 'forest' },
+            { n: '樱花', v: 'sakura' }, { n: '幽灵', v: 'ghost' }, { n: '卡通手绘', v: 'sketch' }
+          ],
+          () => CFG.dlgStyle, v => { CFG.dlgStyle = v; applyBgTheme(); setDlgStyleClass($('#dlgBox'), v || 'classic'); }),
+        settingsSelect('界面背景', '全局界面背景：暗色（默认）/ 浅色（偏白）/ 跟随对话框风格。覆盖对战底部、对战工厂、宝可梦/技能/特性/道具图鉴、自由对战、剧情模式等所有页面的暗色背景',
+          [{ n: '暗色', v: 'dark' }, { n: '浅色', v: 'light' }, { n: '跟随对话框', v: 'style' }],
+          () => CFG.buiBg, v => { CFG.buiBg = v; applyBgTheme(); }),
       ]));
       /* ---- 📋 信息显示 ---- */
       box.appendChild(settingsGroup('📋 信息显示', [
