@@ -15685,7 +15685,7 @@ return ev;
         if (dmg > 0) foe.lastDmgTaken = dmg;
         foe.vol.rage = (foe.vol.rage || 0) + 1;
         /* ★ 碎裂铠甲：受到物理攻击时防御-1、速度+2 */
-        if (dmg > 0 && mv.c === 'P' && foe.has('weakarmor') && foe.hp > 0 && !mon.has('moldbreaker') && !mv.ignAb) {
+        if (dmg > 0 && mv.c === 'P' && foe.has('weakarmor')  && !mon.has('moldbreaker') && !mv.ignAb) {
           this.abBanner(foe);
           await say(`${foe.name} 的碎裂铠甲发动了！`);
           await this.changeStat(foe, 'def', -1, mon);
@@ -15708,14 +15708,14 @@ return ev;
         /* ★ 新增接触类特性 */
         if (mv.ct && !mon.has('longreach')) {
           /* 黏滑：被接触攻击时降低攻击者速度 */
-          if (foe.has('gooey') && foe.hp > 0 && !mon.has('moldbreaker') && !mv.ignAb) {
+          if (foe.has('gooey')  && !mon.has('moldbreaker') && !mv.ignAb) {
             this.abBanner(foe);
             await say(`${foe.name} 的黏滑发动了！`);
             await this.changeStat(mon, 'spe', -1, foe);
           }
 
           /* 迷人之躯：被接触攻击时可能使攻击者着迷 */
-          if (foe.has('cutecharm') && foe.hp > 0 && !mon.vol.attract && !mon.has('obliviousx') && Math.random() < .3) {
+          if (foe.has('cutecharm')  && !mon.vol.attract && !mon.has('obliviousx') && Math.random() < .3) {
             this.abBanner(foe);
             mon.vol.attract = foe;
             await say(`${mon.vol.illusionName || mon.name} 被${foe.name}的迷人之躯迷住了！`);
@@ -15727,13 +15727,13 @@ return ev;
             await this.inflictStatus(foe, 'psn', mon, mv.t);
           }
           /* ★ 棉絮：受攻击时降对手速度 */
-          if (foe.has('cottondown') && foe.hp > 0 && !mon.has('moldbreaker') && !mv.ignAb) {
+          if (foe.has('cottondown')  && !mon.has('moldbreaker') && !mv.ignAb) {
             this.abBanner(foe);
             await say(`${foe.name} 的棉絮发动了！`);
             await this.changeStat(mon, 'spe', -1, foe);
           }
           /* ★ 一口导弹：受攻击时吐出猎物反击并降防 */
-          if (foe.has('gulpmissile') && foe.hp > 0 && foe.vol.gulpPrey && !mon.has('magicguard')) {
+          if (foe.has('gulpmissile')  && foe.vol.gulpPrey && !mon.has('magicguard')) {
             this.abBanner(foe);
             const gd = Math.max(1, Math.floor(mon.maxhp / 4));
             mon.hp = Math.max(0, mon.hp - gd);
@@ -15744,7 +15744,7 @@ return ev;
           }
         }
         // ★ 顺手牵羊：被接触招式击中时偷走对手道具（自身无道具时；石板无法被偷走）
-        if (mv.ct && foe.has('pickpocket') && !foe.item && mon.item && foe.hp > 0 && !mon.has('stickyhold') && !(mon.id === 493 && PLATES[mon.item])) {
+        if (mv.ct && foe.has('pickpocket') && !foe.item && mon.item  && !mon.has('stickyhold') && !(mon.id === 493 && PLATES[mon.item])) {
           const stolen = mon.item; mon.item = null; foe.item = stolen; this.abBanner(foe);
           await say(`${foe.name} 的顺手牵羊发动了！偷走了${mon.vol.illusionName || mon.name}的${IT[stolen].n}！`);
         }
@@ -15753,28 +15753,28 @@ return ev;
           foe.vol.flinch = true; this.abBanner(mon); await say(`${foe.name} 被恶臭熏得畏缩了！`);
         }
         /* ★ 掉出种子：受攻击时撒草场 */
-        if (dmg > 0 && foe.has('seedsower') && foe.hp > 0 && this.terrain !== 'grassy') {
+        if (dmg > 0 && foe.has('seedsower')  && this.terrain !== 'grassy') {
           this.abBanner(foe); await this.setTerrain('grassy', foe);
         }
         /* ★ 吐沙：受攻击时天气变为沙暴 */
-        if (dmg > 0 && foe.has('sandspit') && foe.hp > 0 && this.wx !== 'sand') {
+        if (dmg > 0 && foe.has('sandspit')  && this.wx !== 'sand') {
           this.abBanner(foe); await this.setWeather('sand', foe);
         }
         /* ★ 辣椒喷发：受到招式伤害时灼伤攻击方 */
-        if (dmg > 0 && foe.has('spicyspray') && foe.hp > 0 && !mon.status && !mon.has('waterbubble')) {
+        if (dmg > 0 && foe.has('spicyspray')  && !mon.status && !mon.has('waterbubble')) {
           this.abBanner(foe); await this.inflictStatus(mon, 'burn', foe, 'fire');
         }
         /* ---- 第六批接触特性 ---- */
         /* ★ 卷发：被接触攻击时降低攻击者速度 */
-        if (mv.ct && foe.has('tanglinghair') && foe.hp > 0 && !mon.has('moldbreaker') && !mv.ignAb) {
+        if (mv.ct && foe.has('tanglinghair')  && !mon.has('moldbreaker') && !mv.ignAb) {
           this.abBanner(foe); await say(`${foe.name} 的卷发发动了！`); await this.changeStat(mon, 'spe', -1, foe);
         }
         /* ★ 甩不掉的香气/游魂：被接触攻击时交换特性 */
-        if (mv.ct && foe.has('wanderingspirit') && foe.hp > 0 && !mon.has('moldbreaker') && !mv.ignAb) {
+        if (mv.ct && foe.has('wanderingspirit')  && !mon.has('moldbreaker') && !mv.ignAb) {
           this.abBanner(foe); const tmp = mon.ability; mon.ability = foe.ability; foe.ability = tmp;
           await say(`${foe.name} 的游魂发动了！与${mon.name}交换了特性！`);
         }
-        if (mv.ct && foe.has('lingeringaroma') && foe.hp > 0 && !mon.has('moldbreaker') && !mv.ignAb) {
+        if (mv.ct && foe.has('lingeringaroma')  && !mon.has('moldbreaker') && !mv.ignAb) {
           this.abBanner(foe); mon.ability = 'lingeringaroma';
           await say(`${foe.name} 的甩不掉的香气发动了！${mon.name}的特性变成了甩不掉的香气！`);
         }
@@ -15783,12 +15783,12 @@ return ev;
           this.abBanner(mon); await this.inflictStatus(foe, 'tox', mon, mv.t);
         }
         /* ★ 热交换：火属性招式击中时攻击+1 */
-        if (dmg > 0 && mv.t === 'fire' && foe.has('thermalexchange') && foe.hp > 0) {
+        if (dmg > 0 && mv.t === 'fire' && foe.has('thermalexchange') ) {
           this.abBanner(foe); await this.changeStat(foe, 'atk', 1, mon);
           await say(`${foe.name} 的热交换发动了！`);
         }
         /* ★ 毒满地：受物理攻击时在对手场地撒下毒菱 */
-        if (dmg > 0 && foe.has('toxicdebris') && mv.c === 'P' && foe.hp > 0) {
+        if (dmg > 0 && foe.has('toxicdebris') && mv.c === 'P' ) {
           const atkSide = this.sideOf(mon);
           if (this.haz[atkSide].tspikes < 2) {
             this.abBanner(foe);
@@ -15798,23 +15798,23 @@ return ev;
           }
         }
         /* ★ 电力转换：受攻击时标记 */
-        if (dmg > 0 && foe.has('electromorphosis') && foe.hp > 0) {
+        if (dmg > 0 && foe.has('electromorphosis') ) {
           foe.vol.emBoost = true; this.abBanner(foe); await say(`${foe.name} 的电力转换发动了！`);
         }
         /* ★ 胆怯：受到恶/幽灵/虫属性攻击时速度+1 */
-        if (dmg > 0 && foe.has('rattled') && foe.hp > 0 && ['dark', 'ghost', 'bug'].includes(mv.t)) {
+        if (dmg > 0 && foe.has('rattled')  && ['dark', 'ghost', 'bug'].includes(mv.t)) {
           this.abBanner(foe);
           await say(`${foe.name} 的胆怯发动了！`);
           await this.changeStat(foe, 'spe', 1, foe);
         }
         /* ★ 木乃伊：被接触攻击时对手特性变为木乃伊 */
-        if (mv.ct && foe.has('mummy') && foe.hp > 0 && !mon.has('mummy') && !mv.ignAb) {
+        if (mv.ct && foe.has('mummy')  && !mon.has('mummy') && !mv.ignAb) {
           this.abBanner(foe);
           mon.ability = 'mummy';
           await say(`${mon.vol.illusionName || mon.name} 的特性变成了木乃伊！`);
         }
         // ★ 诅咒之躯：被击中时30%几率封印对手招式4回合
-        if (foe.has('cursedbodyx') && mv.k !== 'struggle' && !mon.vol.disabled && foe.hp > 0 && Math.random() < 0.3) {
+        if (foe.has('cursedbodyx') && mv.k !== 'struggle' && !mon.vol.disabled  && Math.random() < 0.3) {
           mon.vol.disabled = { k: mv.k, turns: 4 }; this.abBanner(foe);
           await say(`${mon.vol.illusionName || mon.name} 的${mv.n}被${foe.name}的诅咒之躯封印了！`);
         }
@@ -15823,13 +15823,13 @@ return ev;
         if (mv.ct && foe.has('flamebody') && Math.random() < .3 && !mon.status) { this.abBanner(foe); await this.inflictStatus(mon, 'burn', foe, 'fire'); }
         if (mv.ct && foe.has('poisonpoint') && Math.random() < .3 && !mon.status) { this.abBanner(foe); await this.inflictStatus(mon, 'psn', foe, 'poison'); }
         // ★ 正义之心：受恶属性招式攻击时攻击提升
-        if (mv.t === 'dark' && foe.has('justified') && foe.hp > 0 && !mv.ignAb) {
+        if (mv.t === 'dark' && foe.has('justified')  && !mv.ignAb) {
           this.abBanner(foe);
           await say(`${foe.name} 的正义之心发动了！`);
           await this.changeStat(foe, 'atk', 1, foe);
         }
         /* ★ 热交换：受到火系招式时攻击+1且不会灼伤 */
-        if (dmg > 0 && mv.t === 'fire' && foe.has('thermalexchange') && foe.hp > 0 && !mv.ignAb) {
+        if (dmg > 0 && mv.t === 'fire' && foe.has('thermalexchange')  && !mv.ignAb) {
           this.abBanner(foe); await this.changeStat(foe, 'atk', 1, foe);
           await say(`${foe.name} 的热交换发动了！攻击提升了！`);
         }
@@ -15838,13 +15838,13 @@ return ev;
         // ★ 乘风：受飞行属性招式时攻击提升（免疫伤害）
         // 注意：此逻辑在 checkImmunity 中处理
         // ★ 愤怒穴位：受到会心一击时攻击+6
-        if (r.crit && foe.has('angerpoint') && foe.hp > 0) {
+        if (r.crit && foe.has('angerpoint') ) {
           this.abBanner(foe);
           await say(`${foe.name} 的愤怒穴位发动了！`);
           await this.changeStat(foe, 'atk', 6, foe);
         }
         // ★ 持久力：受到攻击时防御+1
-        if (dmg > 0 && foe.has('stamina') && foe.hp > 0) {
+        if (dmg > 0 && foe.has('stamina') ) {
           this.abBanner(foe);
           await this.changeStat(foe, 'def', 1, foe);
         }
