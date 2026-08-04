@@ -10095,6 +10095,39 @@ const MUSIC = {
     M('ragepowder', '愤怒粉', 'bug', 'X', null, null, 20, { pri: 2, followme: 1, powder: 1 });
     M('wideguard', '广域防守', 'rock', 'X', null, null, 10, { pri: 3, wideguard: 1 });
 
+    /* ---- ★ 连续攻击类 ---- */
+    M('armthrust', '猛推', 'fighting', 'P', 15, 100, 20, { ct: 1, multi: [2, 5] });
+    M('furyattack', '乱击', 'normal', 'P', 15, 85, 20, { ct: 1, multi: [2, 5] });
+    M('furyswipes', '乱抓', 'normal', 'P', 18, 80, 15, { ct: 1, multi: [2, 5] });
+    M('doublekick', '二连踢', 'fighting', 'P', 30, 100, 30, { ct: 1, multi: [2, 2] });
+    M('doublehit', '二连击', 'normal', 'P', 35, 90, 10, { ct: 1, multi: [2, 2] });
+    M('dualchop', '二连劈', 'dragon', 'P', 40, 90, 15, { ct: 1, multi: [2, 2] });
+    /* ---- ★ 反制/固定伤害类 ---- */
+    M('counter', '双倍奉还', 'fighting', 'P', null, 100, 20, { ct: 1, counter: 1 });
+    M('mirrorcoat', '镜面反射', 'psychic', 'S', null, 100, 20, { mirrorcoat: 1 });
+    M('metalburst', '金属爆炸', 'steel', 'P', null, 100, 10, { ct: 1, metalburst: 1 });
+    M('nightshade', '黑夜魔影', 'ghost', 'S', null, 100, 15, { nightshade: 1 });
+    M('sonicboom', '音爆', 'normal', 'S', null, 90, 20, { sonicboom: 1 });
+    M('dragonrage', '龙之怒', 'dragon', 'S', null, 100, 10, { dragonrage: 1 });
+    M('psywave', '精神波', 'psychic', 'S', null, 100, 15, { psywave: 1 });
+    /* ---- ★ 可变威力类 ---- */
+    M('flail', '绝处逢生', 'normal', 'P', null, 100, 15, { ct: 1, flail: 1 });
+    M('heatcrash', '高温重压', 'fire', 'P', null, 100, 10, { ct: 1, weight: 1 });
+    M('heavyslam', '重磅冲撞', 'steel', 'P', null, 100, 10, { ct: 1, weight: 1 });
+    M('electroball', '电球', 'electric', 'S', null, 100, 10, { electroball: 1 });
+    M('storedpower', '辅助力量', 'psychic', 'S', 20, 100, 10, { storedpower: 1 });
+    M('rage', '抓狂', 'normal', 'P', 20, 100, 20, { ct: 1, rage: 1 });
+    /* ---- ★ 特殊效果类 ---- */
+    M('present', '礼物', 'normal', 'P', null, 90, 15, { present: 1 });
+    M('beatup', '围攻', 'dark', 'P', null, 100, 10, { beatup: 1 });
+    M('fling', '投掷', 'dark', 'P', null, 100, 10, { fling: 1 });
+    M('endeavor', '蛮干', 'normal', 'P', null, 100, 5, { ct: 1, endeavor: 1 });
+    /* ---- ★ 一击必杀类 ---- */
+    M('sheercold', '绝对零度', 'ice', 'S', null, 30, 5, { ohko: 1 });
+    M('fissure', '地裂', 'ground', 'P', null, 30, 5, { ct: 1, ohko: 1 });
+    M('horndrill', '独角钻', 'normal', 'P', null, 30, 5, { ct: 1, ohko: 1 });
+    M('guillotine', '断头台', 'normal', 'P', null, 30, 5, { ct: 1, ohko: 1 });
+
     /* ★ 范围表：只记录与默认值不同的招式。
        默认：物理/特殊招式=敌方任选，变化招式=自身 */
     const RNGMAP = {
@@ -13621,21 +13654,23 @@ SP.forEach(s => {
       905: [10418],                 // 眷恋云
       902: [10417],                 // 幽尾玄鱼
     };
-    const GMAXLIST = new Set([3, 6, 9, 25, 52, 68, 94, 99, 131, 133, 143, 569, 809, 812, 815, 818, 823, 826, 834, 839, 841, 842, 844, 845, 849, 851, 858, 861, 869, 879, 884, 892]);
+    const GMAXLIST = new Set([3, 6, 9, 12, 25, 52, 68, 94, 99, 131, 133, 143, 569, 809, 812, 815, 818, 823, 826, 834, 839, 841, 842, 844, 845, 849, 851, 858, 861, 869, 879, 884, 892]);
     /* 超极巨化精灵图ID */
-    const GMAXSPRITE = { 3:10195, 6:10196, 9:10197, 25:10199, 52:10200, 68:10201, 94:10202, 99:10203, 131:10204, 133:10205, 143:10206, 569:10207, 809:10208, 812:10209, 815:10210, 818:10211, 823:10212, 826:10213, 834:10214, 839:10215, 841:10216, 842:10217, 844:10218, 849:10219, 851:10220, 858:10221, 861:10222, 869:10223, 879:10224, 884:10225, 892:10226 };
+    const GMAXSPRITE = { 3:10195, 6:10196, 9:10197, 12:10198, 25:10199, 52:10200, 68:10201, 94:10202, 99:10203, 131:10204, 133:10205, 143:10206, 569:10207, 809:10208, 812:10209, 815:10210, 818:10211, 823:10212, 826:10213, 834:10214, 839:10215, 841:10216, 842:10217, 844:10218, 849:10219, 851:10220, 858:10221, 861:10222, 869:10223, 879:10224, 884:10225, 892:10226 };
     /* 厄诡椪面具形态精灵图ID */
     const FORMSPRITE = { wellspringmask:10273, hearthflamemask:10274, cornerstonemask:10275, school:10127, busted:10143, noice:10185 };
     /* ★ 超极巨招式（G-Max）：超极巨化的宝可梦使用对应属性的G-Max招式替代普通极巨招式 */
 const GMAXMOVE = {
        3:  { t: 'grass',   n: '超极巨灰飞鞭灭', fx: {}, dot: 'grass',
              desc: '在对手周围降下灰飞鞭，攻击后4回合内每回合对草属性以外的宝可梦造成最大HP 1/6的伤害' },
-      6:  { t: 'fire',    n: '超极巨地狱灭焰', fx: {}, dot: 'fire',
-            desc: '在对手周围燃起地狱之火，攻击后4回合内每回合对火属性以外的宝可梦造成最大HP 1/6的伤害' },
-      9:  { t: 'water',   n: '超极巨水炮轰坠', fx: {}, dot: 'water',
-            desc: '在对手周围降下激流瀑布，攻击后4回合内每回合对水属性以外的宝可梦造成最大HP 1/6的伤害' },
+       6:  { t: 'fire',    n: '超极巨地狱灭焰', fx: {}, dot: 'fire',
+             desc: '在对手周围燃起地狱之火，攻击后4回合内每回合对火属性以外的宝可梦造成最大HP 1/6的伤害' },
+       9:  { t: 'water',   n: '超极巨水炮轰坠', fx: {}, dot: 'water',
+             desc: '在对手周围降下激流瀑布，攻击后4回合内每回合对水属性以外的宝可梦造成最大HP 1/6的伤害' },
+      12: { t: 'bug',     n: '超极巨蝶影蛊惑', fx: { sec: 'psn_par_sleep' },
+             desc: '让全体对手陷入中毒、麻痹或睡眠状态' },
       25: { t: 'electric',n: '超极巨万雷轰顶', fx: { sec: 'par' },
-            desc: '召唤万钧雷霆轰击对手，使对方所有宝可梦陷入麻痹状态' },
+             desc: '召唤万钧雷霆轰击对手，使对方所有宝可梦陷入麻痹状态' },
       52: { t: 'normal',  n: '超极巨淘金潮', fx: { sec: 'confuse', drop: 'spd' },
             desc: '洒出大量金币攻击对手，使对方陷入混乱并大幅降低特防' },
       68: { t: 'fighting',n: '超极巨会心一击', fx: { critUp: 1 },
@@ -13654,12 +13689,12 @@ const GMAXMOVE = {
             desc: '喷出恶臭的毒气攻击对手，使对方所有宝可梦陷入中毒状态' },
        809:{ t: 'steel',   n: '超极巨液金熔击', fx: { torment: 1 },
              desc: '喷出熔化的液态金属攻击对手，使对方无法连续使用相同的招式' },
-       812:{ t: 'grass',   n: '超极巨鼓擂狂打', fx: {}, dot: 'grass',
-             desc: '用巨大的鼓槌敲打地面，攻击后4回合内每回合对草属性以外的宝可梦造成最大HP 1/6的伤害' },
-       815:{ t: 'fire',    n: '超极巨破阵火球', fx: {}, dot: 'fire',
-             desc: '踢出巨大的火球贯穿对手，攻击后4回合内每回合对火属性以外的宝可梦造成最大HP 1/6的伤害' },
-       818:{ t: 'water',   n: '超极巨狙击神射', fx: {}, dot: 'water',
-             desc: '以惊人的狙击精度射出高压水流，攻击后4回合内每回合对水属性以外的宝可梦造成最大HP 1/6的伤害' },
+       812:{ t: 'grass',   n: '超极巨狂擂乱打', fx: { ignAb: 1 },
+             desc: '用巨大的鼓槌敲打地面，不会受到对手特性的干扰' },
+       815:{ t: 'fire',    n: '超极巨破阵火球', fx: { ignAb: 1 },
+             desc: '踢出巨大的火球贯穿对手，不会受到对手特性的干扰' },
+       818:{ t: 'water',   n: '超极巨狙击神射', fx: { ignAb: 1 },
+             desc: '以惊人的狙击精度射出高压水流，不会受到对手特性的干扰' },
        823:{ t: 'flying',  n: '超极巨旋风袭卷', fx: { clearscreens: 1, clearhaz: 1 },
             desc: '刮起狂风席卷全场，消除双方场地上的反射壁、光墙、极光幕、撒菱、隐形岩等' },
       826:{ t: 'psychic', n: '超极巨天谴雷珠', fx: { terrain: 'psychic' },
@@ -13668,14 +13703,14 @@ const GMAXMOVE = {
             desc: '从巨岩中喷出水柱攻击对手，同时在对方脚下撒下隐形岩' },
       839:{ t: 'rock',    n: '超极巨岩石喷发', fx: {}, dot: 'rock',
             desc: '喷发灼热的岩石雨攻击对手，攻击后4回合内每回合对岩石属性以外的宝可梦造成最大HP 1/6的伤害' },
-      841:{ t: 'grass',   n: '超极巨酸之苹果', fx: { drop: 'spa', dropN: 2, terrain: 'grassy' },
-            desc: '喷出酸性苹果汁攻击对手，使对方闪避率大幅下降（本作简化为特攻降低2级），并变为青草场地' },
-      842:{ t: 'grass',   n: '超极巨甜之苹果', fx: { healStatus: 1, terrain: 'grassy' },
-            desc: '洒出甜美的苹果蜜，治愈我方所有宝可梦的异常状态，并变为青草场地' },
+       841:{ t: 'grass',   n: '超极巨酸不溜丢', fx: { drop: 'eve' },
+             desc: '喷出酸性苹果汁攻击对手，降低全体对手的闪避率' },
+       842:{ t: 'grass',   n: '超极巨琼浆玉液', fx: { healStatus: 1 },
+             desc: '洒出甜美的苹果蜜，治愈我方所有宝可梦的异常状态' },
       844:{ t: 'ground',  n: '超极巨沙尘漫天', fx: { up: 'spd', partialTrap: 1 },
             desc: '扬起漫天沙尘攻击对手，提升自身特防并将对方困在沙尘中，每回合造成束缚伤害' },
-      849:{ t: 'electric',n: '超极巨异毒电场', fx: { terrain: 'electric', sec: 'psn_par' },
-            desc: '释放带毒的高压电流攻击对手，使对方随机陷入中毒或麻痹状态，并变为电气场地' },
+       849:{ t: 'electric',n: '超极巨异毒电场', fx: { sec: 'psn_par' },
+             desc: '释放带毒的高压电流攻击对手，使对方随机陷入中毒或麻痹状态' },
       851:{ t: 'fire',    n: '超极巨百火焚野', fx: {}, dot: 'fire',
             desc: '以百道火焰包围对手，攻击后4回合内每回合对火属性以外的宝可梦造成最大HP 1/6的伤害' },
       858:{ t: 'fairy',   n: '超极巨天降雷嗔', fx: { sec: 'confuse' },
@@ -13717,12 +13752,38 @@ const GMAXMOVE = {
     };
     const TERRNAME = { electric: '电气场地', grassy: '青草场地', psychic: '精神场地', misty: '薄雾场地' };
     function maxPower(mv) {
-      if (!mv.p) return 0; const p = mv.p;
-      if (mv.t === 'fighting' || mv.t === 'poison') { return p <= 40 ? 70 : p <= 50 ? 75 : p <= 60 ? 80 : p <= 70 ? 85 : p <= 100 ? 90 : 95; }
-      return p <= 40 ? 90 : p <= 50 ? 100 : p <= 60 ? 110 : p <= 70 ? 120 : p <= 100 ? 130 : 140;
+      if (!mv) return 0;
+      const fp = mv.t === 'fighting' || mv.t === 'poison';
+      /* ★ 固定威力类：反制/固定伤害招式 */
+      if (mv.counter || mv.seismic) return 75;
+      if (mv.lowkick) return mv.t === 'grass' ? 130 : 100;            // 打草结130 / 踢倒100
+      if (mv.flail || mv.finalgambit) return 100;
+      if (mv.multiattack) return 120;                                 // 多属性攻击：属性受存储碟影响
+      if (mv.mirrorcoat || mv.nightshade || mv.sonicboom || mv.dragonrage || mv.psywave || mv.superfang || mv.metalburst || mv.naturesmad || mv.present || mv.spitup || mv.beatup || mv.fling) return 100;
+      if (mv.weight || mv.gyro || mv.electroball || mv.rage) return 130;   // 高温重压/重磅冲撞/陀螺球/电球/抓狂
+      if (mv.storedpower || mv.powertrip) return 130;                 // 辅助力量/嚣张
+      if (mv.ohko || mv.endeavor) return 130;                         // 一击必杀/蛮干
+      if (mv.crushgrip || mv.risingvolt || mv.k === 'doubleironbash') return 140;  // 捏碎/电力上升/钢拳双击
+      /* ★ 常规招式：按原始威力查表 */
+      let orig = mv.p || 0;
+      if (!orig) return 0;
+      if (mv.multi) {
+        const min = mv.multi[0], max = mv.multi[1];
+        if (min === 2 && max === 2) orig = mv.p * 2;                  // 恰好2次：威力×2
+        else if (min === 1 && max === 3) orig = mv.p * 3;             // 1~3次：取最高次数威力总和
+        else { orig = mv.p * 3; if (mv.p <= 15) orig = 40; }          // 2~5次：取3次总和；每段≤15按低于45档计算
+      }
+      if (orig <= 40) return fp ? 70 : 90;
+      if (orig < 55) return fp ? 75 : 100;
+      if (orig <= 60) return fp ? 80 : 110;
+      if (orig <= 70) return fp ? 85 : 120;
+      if (orig <= 100) return fp ? 90 : 130;
+      if (orig < 110) return fp ? 90 : 130;
+      if (orig <= 140) return fp ? 95 : 140;
+      return fp ? 100 : 150;
     }
 
-    const STN = { atk: '攻击', def: '防御', spa: '特攻', spd: '特防', spe: '速度' };
+    const STN = { atk: '攻击', def: '防御', spa: '特攻', spd: '特防', spe: '速度', eve: '闪避' };
     const STC = { atk: '#e2574c', def: '#3f8fe0', spa: '#8a63d2', spd: '#4caf7d', spe: '#e0912b' };
     /* ============ 对战点数(EV)系统 ============ */
     const EV_RATE = 6, EV_MAX = 66, EV_STAT = 32;
@@ -15383,7 +15444,7 @@ return ev;
             this.p({ cls: 'fxRing fxRingBig', x: B.x, y: B.y, c: '#a8e0ff', an: 'fxRingBigB', dur: .55, delay: .1 });
           }, 300);
           this.extraFx('bub', side, { c: '#4f9df7', c2: '#a8e0ff' });
-        } else if (N.includes('灰飞鞭灭') || N.includes('鼓擂狂打')) {
+        } else if (N.includes('灰飞鞭灭') || N.includes('狂擂乱打')) {
           /* 灰飞鞭灭：草绿鞭影交错 + 飞灰落叶 */
           SND.play('swish');
           this.slash(side, { c: '#7ac74c', c2: '#d8f5b0' });
@@ -17257,6 +17318,11 @@ return ev;
       /* ---------- 命中率统一计算（广角镜/复眼/天气/闪避等全部修饰） ---------- */
       hitAccuracy(mon, foe, useMv) {
         let acc = useMv.a;
+        /* ★ 一击必杀：命中率=30+等级差；对等级更高的对手必定无效 */
+        if (useMv.ohko) {
+          if (foe.lvl > mon.lvl) return 0;
+          return 30 + (mon.lvl - foe.lvl);
+        }
         if (useMv.thunder && (this.wx === 'rain' || this.wx === 'primordial')) acc = 100;
         if (useMv.blizzard && this.wx === 'hail') acc = 100;
         if (mon.has('compoundeyes') && acc) acc = Math.min(100, acc * 1.3);
@@ -17403,7 +17469,9 @@ return ev;
             /* ★ 超极巨化：同属性招式变为专属超极巨招式 */
             if (mon.vol.gmax && GMAXMOVE[mon.id] && mv.t === GMAXMOVE[mon.id].t) {
               const gm = GMAXMOVE[mon.id];
-              useMv = { k: 'maxmv', n: gm.n, p: maxPower({ ...mv, p: effectiveP }), a: null, c: mv.c, t: mv.t, maxfx: { ...gm.fx, dot: gm.dot } };
+              /* ★ 轰擂金刚猩/闪焰王牌/千面避役的超极巨招式威力必定160；不受对手特性干扰的超极巨招式附带ignAb */
+              const gm160 = mon.id === 812 || mon.id === 815 || mon.id === 818;
+              useMv = { k: 'maxmv', n: gm.n, p: gm160 ? 160 : maxPower({ ...mv, p: effectiveP }), a: null, c: mv.c, t: mv.t, maxfx: { ...gm.fx, dot: gm.dot }, ignAb: !!gm.fx.ignAb };
             } else {
               useMv = { k: 'maxmv', n: MAXMV[mv.t] || '极巨攻击', p: maxPower({ ...mv, p: effectiveP }), a: null, c: mv.c, t: mv.t, maxfx: MAXFX[mv.t] };
             }
@@ -17897,6 +17965,16 @@ return ev;
         }
         // 伤害计算
         const r = this.calcDmg(mon, foe, mv);
+        /* ★ 投掷：无道具时失败 */
+        if (r.flingFail) { await say(`${mon.vol.illusionName || mon.name} 的投掷失败了！因为没有任何道具可以投掷！`); this.addLog(`${mon.vol.illusionName || mon.name} 的投掷失败了（无道具）`); return { dmg: 0, immune: true }; }
+        /* ★ 礼物：回复目标HP */
+        if (r.presentHeal) {
+          foe.hp = Math.min(foe.maxhp, foe.hp + r.presentHeal);
+          await say(`${mon.vol.illusionName || mon.name} 的礼物让 ${foe.vol.illusionName || foe.name} 恢复了HP！`);
+          this.addLog(`↳ ${foe.vol.illusionName || foe.name} 收到礼物 +${r.presentHeal} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
+          BUI.dmgPop(this.sideOf(foe), `+${r.presentHeal}`, '#3ecf6c', foe._slot || 0);
+          return { dmg: 0 };
+        }
         let dmg = r.dmg;
         /* ★ 随机光拿出全力：播报提示 */
         if (r.fickle) await say(`${mon.vol.illusionName || mon.name} 拿出了全力！`);
@@ -18268,6 +18346,7 @@ return ev;
               else if (f.sec === 'attract') { if (!f2.vol.attract) { f2.vol.attract = mon; await say(`${f2.name} 着迷了！`); } }
               else if (f.sec === 'psn') await this.inflictStatus(f2, 'psn', mon, 'poison');
               else if (f.sec === 'psn_par') await this.inflictStatus(f2, pick(['psn', 'par']), mon, 'poison');
+              else if (f.sec === 'psn_par_sleep') await this.inflictStatus(f2, pick(['psn', 'par', 'sleep']), mon, 'poison');
               else if (f.sec === 'tri') await this.inflictStatus(f2, pick(['burn', 'par', 'psn']), mon, 'poison');
               else if (f.sec === 'confuse') { if (!f2.vol.confuse) { f2.vol.confuse = rnd(2, 4); await say(`${f2.name} 混乱了！`); } }
               else if (f.sec === 'drowsy') { if (!f2.has('insomnia') && !f2.has('vitalspirit') && !f2.status) { f2.vol.drowsy = 2; await say(`${f2.name} 变得昏昏欲睡了！`); } }
@@ -18285,7 +18364,7 @@ return ev;
           if (f.torment) { foe.vol.gmaxTorment = true; await say(`${foe.name} 被液金困住了，无法连续使用相同招式！`); }
           /* ★ 超极巨夺命一击：无视保护 */
           if (f.bypassProtect) await say('超极巨夺命一击无视一切保护！');
-          /* ★ 超极巨幸福圆满/甜之苹果：回复己方HP或治愈异常 */
+          /* ★ 超极巨幸福圆满/琼浆玉液：回复己方HP或治愈异常 */
           if (f.healTeam) { const h = Math.floor(mon.baseMax / 6); for (const ally of this.fieldMons(allySide).filter(x => x.alive())) { ally.hp = Math.min(ally.maxhp, ally.hp + h); } await say(`己方宝可梦回复了HP！`); }
           if (f.healStatus) { for (const ally of this.fieldMons(allySide).filter(x => x.alive())) { ally.status = null; ally.sleepT = 0; ally.toxicN = 0; } await say(`${mon.name} 的异常状态被治愈了！`); }
           /* ★ 超极巨百火焚野/沙尘漫天：部分束缚 */
@@ -18368,6 +18447,46 @@ return ev;
         if (mv.foulplay) atkK = 'atk';
         if (mv.seismic) { return { dmg: mon.lvl, eff: effMult(mv.t, foe.types), crit: false }; }
         if (mv.naturesmad || mv.ruination || mv.superfang) { return { dmg: Math.max(1, Math.floor(foe.hp * .5)), eff: effMult(mv.t, foe.types), crit: false }; }
+        /* ★ 双倍奉还/镜面反射：将本场受到的伤害以2倍返还（双倍奉还反击物理、镜面反射反击特殊） */
+        if (mv.counter || mv.mirrorcoat) {
+          const taken = mon.lastDmgTaken || 0;
+          return { dmg: taken > 0 ? Math.max(1, Math.floor(taken * 2)) : 0, eff: effMult(mv.t, foe.types), crit: false };
+        }
+        /* ★ 金属爆炸：将受到的伤害以1.5倍返还 */
+        if (mv.metalburst) {
+          const taken = mon.lastDmgTaken || 0;
+          return { dmg: taken > 0 ? Math.max(1, Math.floor(taken * 1.5)) : 0, eff: effMult(mv.t, foe.types), crit: false };
+        }
+        /* ★ 固定伤害类 */
+        if (mv.nightshade) { return { dmg: Math.max(1, mon.lvl), eff: effMult(mv.t, foe.types), crit: false }; }
+        if (mv.sonicboom) { return { dmg: 20, eff: effMult(mv.t, foe.types), crit: false }; }
+        if (mv.dragonrage) { return { dmg: 40, eff: effMult(mv.t, foe.types), crit: false }; }
+        if (mv.psywave) { return { dmg: Math.max(1, Math.floor(mon.lvl * (0.5 + Math.random()))), eff: effMult(mv.t, foe.types), crit: false }; }
+        /* ★ 蛮干：使对手HP降至与自身相同（对手HP高于自身时） */
+        if (mv.endeavor) { const d = foe.hp - mon.hp; return { dmg: d > 0 ? d : 0, eff: effMult(mv.t, foe.types), crit: false }; }
+        /* ★ 礼物：25%回复目标1/4HP，否则造成40/80/120伤害 */
+        if (mv.present) {
+          const roll = Math.random();
+          if (roll < .25) return { dmg: 0, presentHeal: Math.max(1, Math.floor(foe.maxhp / 4)), eff: effMult(mv.t, foe.types), crit: false };
+          mv = { ...mv, p: roll < .65 ? 40 : roll < .9 ? 80 : 120 };
+        }
+        /* ★ 围攻：队伍中每只健康宝可梦追加10威力 */
+        if (mv.beatup) { const n = this.fieldMons(this.sideOf(mon)).filter(x => x && x.alive()).length; mv = { ...mv, p: 10 * n }; }
+        /* ★ 投掷：根据携带道具决定威力（无道具则失败） */
+        if (mv.fling) {
+          if (!mon.item) { return { dmg: 0, flingFail: true, eff: effMult(mv.t, foe.types), crit: false }; }
+          mv = { ...mv, p: ({ ironball: 130, flameorb: 30, toxicorb: 30, sitrus: 10, custap: 100 }[mon.item] || 30) };
+        }
+        /* ★ 绝处逢生：自身HP越低威力越大 */
+        if (mv.flail) { const fr = mon.hp / mon.maxhp; mv = { ...mv, p: fr <= .02 ? 200 : fr <= .125 ? 150 : fr <= .25 ? 100 : fr <= .5 ? 80 : fr <= .75 ? 40 : 20 }; }
+        /* ★ 高温重压/重磅冲撞：体重差越大威力越大 */
+        if (mv.weight) { const ratio = (W[mon.id] ?? 50) / (W[foe.id] ?? 50); mv = { ...mv, p: ratio >= 2 ? 120 : ratio >= 1.5 ? 100 : ratio >= 1 ? 80 : ratio >= .5 ? 60 : 40 }; }
+        /* ★ 电球：速度比对手越快威力越大 */
+        if (mv.electroball) { const ratio = mon.effStat('spe', this) / Math.max(1, foe.effStat('spe', this)); mv = { ...mv, p: ratio >= 4 ? 150 : ratio >= 3 ? 120 : ratio >= 2 ? 80 : ratio >= 1 ? 60 : 40 }; }
+        /* ★ 辅助力量：自身能力提升越多威力越大 */
+        if (mv.storedpower) { const pos = Object.values(mon.stages).reduce((a, v) => a + (v > 0 ? v : 0), 0); mv = { ...mv, p: 20 + 20 * pos }; }
+        /* ★ 抓狂：受到攻击时威力提升 */
+        if (mv.rage) { mv = { ...mv, p: 20 + 2 * (mon.vol.rage || 0) }; }
         if (mv.ragefist) { mv = { ...mv, p: 50 + 50 * (mon.vol.rage || 0) }; }
         if (mv.gyro) { const p = Math.min(150, Math.floor(25 * foe.effStat('spe', this) / Math.max(1, mon.effStat('spe', this)))); mv = { ...mv, p }; }
         /* ★ 喷火/潮旋类：威力随当前HP比例变化 */
@@ -23065,6 +23184,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (fx.sec === 'par') parts.push('使对手麻痹');
       if (fx.sec === 'psn') parts.push('使对手中毒');
       if (fx.sec === 'psn_par') parts.push('使对手随机中毒或麻痹');
+      if (fx.sec === 'psn_par_sleep') parts.push('使对手随机中毒、麻痹或睡眠');
       if (fx.sec === 'tri') parts.push('使对手随机陷入麻痹/灼伤/中毒');
       if (fx.sec === 'confuse') parts.push('使对手混乱');
       if (fx.sec === 'attract') parts.push('使对手着迷');
@@ -23097,6 +23217,23 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (d.recoil) p.push(`受到造成伤害 1/${d.recoil} 的反作用力伤害`);
       if (d.corelight) p.push('基格尔德Mega归无之光：可击中妖精系，200威力');
       if (d.k === 'malignantchain') p.push('桃歹郎的专属招式。50%几率使对手剧毒');
+      if (d.counter) p.push('将本回合受到的物理伤害以2倍返还给攻击者');
+      if (d.mirrorcoat) p.push('将本回合受到的特殊伤害以2倍返还给攻击者');
+      if (d.metalburst) p.push('将本回合受到的伤害以1.5倍返还给攻击者');
+      if (d.nightshade) p.push('造成与自身等级相同的固定伤害');
+      if (d.sonicboom) p.push('必定造成20点固定伤害');
+      if (d.dragonrage) p.push('必定造成40点固定伤害');
+      if (d.psywave) p.push('造成自身等级0.5~1.5倍的随机伤害');
+      if (d.flail) p.push('自身HP越低威力越大（20~200）');
+      if (d.weight) p.push('自身比对手越重威力越大（40~120）');
+      if (d.electroball) p.push('自身速度比对手越快威力越大（40~150）');
+      if (d.storedpower) p.push('自身能力提升越多威力越大（20+20×提升等级）');
+      if (d.rage) p.push('受到攻击时每次威力+2');
+      if (d.present) p.push('随机造成40/80/120伤害，或回复目标1/4HP');
+      if (d.beatup) p.push('己方队伍每只健康宝可梦各追加10威力的一次攻击');
+      if (d.fling) p.push('投掷携带的道具造成伤害（无道具则失败）');
+      if (d.ohko) p.push('一击必杀：命中则直接击倒对手（对等级更高的对手无效）');
+      if (d.endeavor) p.push('使对手HP降至与自身相同（对手HP高于自身时）');
       if (d.helpinghand) p.push('双打独占招式：本回合同伴的招式威力×1.5');
       if (d.followme) p.push('双打独占招式：本回合敌方单体招式全部吸引到自己身上');
       if (d.wideguard) p.push('双打独占招式：本回合己方不受多目标招式影响');
