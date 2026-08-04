@@ -16497,8 +16497,8 @@ return ev;
       async setWeather(w, m) {
         const isPrimal = w === 'desolate' || w === 'primordial';
         const wxNames = { sun: '大晴天', rain: '下雨', sand: '沙暴', hail: '冰雹', delta: '德尔塔气流', desolate: '终结之地', primordial: '始源之海' };
-        // ★ 同种天气已存在：不刷新持续时间，仅提示
-        if (this.wx === w) { await say(`天气已经是${wxNames[w]}，没有发生变化！`); return; }
+        // ★ 同种天气已存在：不刷新持续时间、不提示（静默不叠加）
+        if (this.wx === w) return;
         // ★ 特殊天气（终结之地/始源之海/德尔塔气流）不能被普通天气覆盖
         if ((this.wx === 'delta' || this.wx === 'desolate' || this.wx === 'primordial') && !isPrimal && w !== 'delta') {
           await say(`${wxNames[this.wx]}笼罩着全场，天气无法改变！`);
@@ -16512,8 +16512,8 @@ return ev;
         BUI.refresh(this);   // ★ 天气变化立即刷新背景特效
       }
       async setTerrain(t, m) {
-        // ★ 同种场地已存在：不刷新持续时间，仅提示
-        if (this.terrain === t) { await say(`场地已经是${TERRNAME[t]}，没有发生变化！`); return; }
+        // ★ 同种场地已存在：不刷新持续时间、不提示（静默不叠加）
+        if (this.terrain === t) return;
         this.terrain = t;
         /* ★ 大地薄膜：场地持续8回合 */
         this.terrainT = (m && !m.has('klutz') && m.item === 'terrainextender') ? 8 : 5;
@@ -16902,7 +16902,8 @@ return ev;
                 else {
                   if (isGmaxType) { nm = GMAXMOVE[m.id].n; }
                   else { nm = MAXMV[d.t] || '极巨攻击'; }
-                  info = `<span class="mvtag mvty" style="background:${tcol}">${TNAME[showT] || TNAME[d.t]}</span><span class="mvtag mvcat">特殊</span><span class="mvtag mvpw">威力${maxPower(d)}</span>`;
+                  /* ★ 极巨技能类别显示原技能类别（物理/特殊由原技能决定） */
+                  info = `<span class="mvtag mvty" style="background:${tcol}">${TNAME[showT] || TNAME[d.t]}</span><span class="mvtag mvcat">${d.c === 'P' ? '物理' : '特殊'}</span><span class="mvtag mvpw">威力${maxPower(d)}</span>`;
                 }
               }
               else if (wantTera) {
@@ -17917,6 +17918,15 @@ return ev;
         } catch (e) { }
         return -1;
       }
+      /* ★ 超极巨DOT创建：命中（含被画皮/结冻头抵挡、目标被击杀）即触发，留在对方场地上；
+         ★ 持续时间不可被反复使用刷新（已存在同类型DOT时不再重置回合数） */
+      async setGmaxDot(f, foe, mv) {
+        if (!f || !f.dot) return;
+        if (this.gmaxDot && this.gmaxDot.type === f.dot) return;
+        const dotSide = this.sideOf(foe);
+        this.gmaxDot = { type: f.dot, turns: 4, side: dotSide, name: mv.n };
+        await say(`${dotSide === 'e' ? '对方' : '己方'}场地上留下了${mv.n}的持续伤害！`);
+      }
       /* ---------- 单次伤害结算 ---------- */
       async hitOnce(side, mon, foe, mv, act) {
         const tgtSide = this.sideOf(foe);   // 受击方实际侧（攻击队友时特效/动画朝队友）
@@ -18017,6 +18027,8 @@ return ev;
             if (f.drop && foe.hp > 0) await this.changeStat(foe, f.drop, -1, mon);
             if (f.weather) await this.setWeather(f.weather, mon);
             if (f.terrain) await this.setTerrain(f.terrain, mon);
+            /* ★ 结冻头抵挡也算命中：超极巨DOT照常留在对方场地上 */
+            if (f.dot) await this.setGmaxDot(f, foe, mv);
           }
           BUI.refresh(this);
           return { dmg: 0 };
@@ -18042,6 +18054,8 @@ return ev;
             if (f.drop && foe.hp > 0) await this.changeStat(foe, f.drop, -1, mon);
             if (f.weather) await this.setWeather(f.weather, mon);
             if (f.terrain) await this.setTerrain(f.terrain, mon);
+            /* ★ 画皮抵挡也算命中：超极巨DOT照常留在对方场地上 */
+            if (f.dot) await this.setGmaxDot(f, foe, mv);
           }
           BUI.refresh(this);
           if (foe.hp <= 0) return { dmg: 0, ko: true };
@@ -18323,14 +18337,14 @@ return ev;
           if (f.drop) { for (const f2 of this.foesOf(mon)) await this.changeStat(f2, f.drop, -(f.dropN || 1), mon); }
           if (f.weather) await this.setWeather(f.weather, mon);
           if (f.terrain) await this.setTerrain(f.terrain, mon);
-          /* ★ 超极巨DOT：地狱灭焰/水炮轰坠/灰飞鞭灭/岩石喷发（对全属性生效） */
-          if (f.dot && foe.hp > 0) {
-            const dotSide = this.sideOf(foe);
-            this.gmaxDot = { type: f.dot, turns: 4, side: dotSide, name: mv.n };
-            await say(`${dotSide === 'e' ? '对方' : '己方'}场地上留下了${mv.n}的持续伤害！`);
+          /* ★ 超极巨DOT：地狱灭焰/水炮轰坠/灰飞鞭灭/岩石喷发（对全属性生效）
+             ★ 命中即可触发：目标被一击击杀/画皮抵挡/结冻头抵挡同样留在对方场地上 */
+          if (f.dot) await this.setGmaxDot(f, foe, mv);
+          /* ★ 超极巨极光旋律：5回合极光幕（持续时间不可被反复使用刷新） */
+          if (f.auroraveil) {
+            const s = this.sideOf(mon);
+            if (!(this.auroraveil[s] > 0)) { this.auroraveil[s] = f.auroraveil; await say('极光幕笼罩了己方场地！'); }
           }
-          /* ★ 超极巨极光旋律：5回合极光幕 */
-          if (f.auroraveil) { const s = this.sideOf(mon); this.auroraveil[s] = f.auroraveil; await say('极光幕笼罩了己方场地！'); }
           /* ★ 超极巨钢之残香：撒撒菱 */
           if (f.hazard === 'spikes') { const ts = this.foeSide(side); if (this.haz[ts].spikes < 3) { this.haz[ts].spikes++; await say('撒菱散落在对方场地上！'); } }
           else if (f.hazard === 'sr') { const ts = this.foeSide(side); if (!this.haz[ts].sr) { this.haz[ts].sr = 1; await say('隐形岩散落在对方场地上！'); } }
@@ -18788,7 +18802,10 @@ return ev;
         if (mv.screen) {
           const turns = (!mon.has('klutz') && mon.item === 'lightclay') ? 8 : 5;
           const key = mv.screen === 'reflect' ? 'reflect' : mv.screen === 'light' ? 'lightscreen' : 'auroraveil';
-          for (const ally of this.fieldMons(side).filter(x => x.alive())) ally.vol[key] = turns;
+          const allies = this.fieldMons(side).filter(x => x.alive());
+          /* ★ 屏障已存在：不叠加、不刷新、不提示 */
+          if (allies.some(a => (a.vol[key] || 0) > 0)) return;
+          for (const ally of allies) ally.vol[key] = turns;
           if (mv.screen === 'reflect') await say(`${mon.vol.illusionName || mon.name} 升起了反射壁！物理伤害减半！`);
           else if (mv.screen === 'light') await say(`${mon.vol.illusionName || mon.name} 升起了光墙！特殊伤害减半！`);
           else if (mv.screen === 'aurora') await say(`${mon.vol.illusionName || mon.name} 升起了极光幕！伤害减半！`);
@@ -19020,7 +19037,8 @@ return ev;
           await say(`${mon.name} 清除了对手场上的陷阱和屏障！`); return;
         }
         if (mv.tailwind) {
-          if (this.tailwind[side] > 0) { await say('顺风已经在这边刮起了！'); return; }
+          /* ★ 顺风已存在：不叠加、不刷新、不提示 */
+          if (this.tailwind[side] > 0) return;
           this.tailwind[side] = 4; await say(`${mon.name} 召唤了顺风！己方速度翻倍！`); return;
         }
         /* ★ 双打辅助招式 */
@@ -19522,7 +19540,11 @@ return ev;
         //   （同命双倒时双方都挂起；连锁替换如隐形岩击杀新上场者，会在队列中继续处理）
         if (!this.over) {
           this.pendingSwitches.push({ side: loserSide, slot: this.fieldSlotOf(loser) });
-          if (winner && winner.fainted) { const wSide = this.sideOf(winner); if (wSide !== loserSide) this.pendingSwitches.push({ side: wSide, slot: this.fieldSlotOf(winner) }); }
+          /* ★ 同倒的胜利方：只在胜利方确实在场时才挂起替换（双打中 foeOf 可能指向已阵亡的后备，slot=-1 的假挂起会导致误弹换人框） */
+          if (winner && winner.fainted && winner !== loser) {
+            const wSlot = this.fieldSlotOf(winner);
+            if (wSlot >= 0) { const wSide = this.sideOf(winner); if (wSide !== loserSide) this.pendingSwitches.push({ side: wSide, slot: wSlot }); }
+          }
         }
         BUI.refresh(this);
       }
@@ -19531,9 +19553,10 @@ return ev;
           const batch = [...this.pendingSwitches];
           this.pendingSwitches = [];
           if (this.doubles) {
-            /* ★ 双打：逐槽位补位 */
+            /* ★ 双打：逐槽位补位（防御：跳过非法槽位，杜绝误弹换人框/空引用崩溃） */
             for (const ps of batch) {
               if (this.over) break;
+              if (ps.slot == null || ps.slot < 0 || ps.slot > 1) continue;
               if (ps.side === 'p') {
                 const cur = this.slotMon('p', ps.slot);
                 if (cur && cur.alive()) continue;
@@ -19623,6 +19646,8 @@ return ev;
       }
       /* ---------- 换人 ---------- */
       async doSwitch(side, idx, slot = null) {
+        /* ★ 防御：非法槽位回退到槽位0，避免空引用导致流程卡死 */
+        if (this.doubles && slot != null && (slot < 0 || slot > 1)) slot = 0;
         const arr = side === 'p' ? this.pp : this.ep;
         const old = this.doubles && slot != null ? this.slotMon(side, slot) : (side === 'p' ? this.P() : this.E());
         if (old && old.alive()) {
@@ -20071,8 +20096,8 @@ return ev;
       async callRealAI(messages, noThink) {
         const base = (CFG.aiProvider === 'openai' && CFG.aiBaseUrl) ? CFG.aiBaseUrl.replace(/\/+$/, '') : 'https://api.deepseek.com';
         const ctrl = new AbortController();
-        /* ★ 大幅放开限制：token上限与超时都放大（并行决策下玩家选招期间请求早已完成，超时仅作最后保险） */
-        const to = setTimeout(() => ctrl.abort(), 300000);
+        /* ★ 超时保护：40秒内未响应即中止并回退本地AI，避免API卡住导致战斗永久冻结（此前300秒会卡死5分钟） */
+        const to = setTimeout(() => ctrl.abort(), 40000);
         try {
           const res = await fetch(base + '/chat/completions', {
             method: 'POST',
