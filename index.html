@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -8817,10 +8817,15 @@
             <div style="text-align:center;font-weight:900;color:#777">当前轮次</div>
             <div class="roundBig" id="facRound">1</div>
             <div style="text-align:center" id="facPips"></div>
-            <div style="margin-top:14px;font-size:12px;line-height:1.9;color:#555;font-weight:700">
-              ◆ 每轮连胜 <b>7 场</b> 挑战成功<br>◆ 开局从 3 组租借队伍中选 1 组（或六选三自选）<br>
-              ◆ 每赢一场可挑选对手 1 只宝可梦交换<br>◆ 第 <b>3 轮起奇数轮</b>第 7 场迎战冠军级训练家<br>
-              ◆ 每场 30% 概率可使用极巨化<br>◆ 等级：50 起步，逐轮提升（开放等级）<br>◆ 租借宝可梦每场自动满血
+            <div style="margin-top:14px">
+              <div id="facRulesHead" style="font-weight:900;font-size:14px;color:#ffd93b;cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px">📜 对战工厂规则 <span id="facRulesArrow" style="font-size:11px;color:#aab">▼</span></div>
+              <div id="facRulesBody" style="margin-top:8px;font-size:12px;line-height:1.9;color:#555;font-weight:700">
+                ◆ 每轮连胜 <b>7 场</b> 挑战成功<br>◆ 开局从 3 组租借队伍中选 1 组（或六选三自选 / 六选四·双打）<br>
+                ◆ <b>双打模式</b>胜利获得 <b>BP×2</b><br>◆ 每赢一场可挑选对手 1 只宝可梦交换<br>
+                ◆ 第 <b>3 轮起奇数轮</b>第 7 场迎战冠军级训练家<br>
+                ◆ 每场 30% 概率可使用极巨化<br>◆ 等级：<b>35 起步</b>，每轮 +7，上限 80（开放等级）<br>◆ 租借宝可梦每场自动满血<br>
+                ◆ 道具商店可用 BP 购买道具与专属道具
+              </div>
             </div>
             <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px">
               <span style="font-size:12px;color:#555;font-weight:700">历史最佳：<span id="facBest" class="px"
@@ -9016,6 +9021,18 @@
         this.setVol();
       },
 
+      /* ★ 共享白噪声缓冲：所有噪声音色复用一个预生成的缓冲，按随机偏移切片播放，
+         避免每次音效都重新分配并填充 sampleRate×dur 个随机样本（BGM 鼓组/命中音的高频开销） */
+      _noiseCache: null,
+      _noiseBuf(dur) {
+        const need = Math.max(dur, .5);
+        if (this._noiseCache && this._noiseCache.dur >= need) return this._noiseCache;
+        const len = Math.max(1, Math.ceil(this.ctx.sampleRate * Math.max(2, need * 2)));
+        const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+        return this._noiseCache = { buf, dur: len / this.ctx.sampleRate };
+      },
+
       setVol() {
         if (this.sfx) this.sfx.gain.value = CFG.sfxVol ?? 1;
 
@@ -9049,14 +9066,13 @@
           return fl;
         };
         const mkNoise = (dur2, v2, type, fc) => {
-          const len = Math.max(1, Math.floor(this.ctx.sampleRate * dur2));
-          const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), dd = buf.getChannelData(0);
-          for (let i = 0; i < len; i++) dd[i] = Math.random() * 2 - 1;
+          const nb = this._noiseBuf(dur2);
+          const off = Math.random() * Math.max(0, nb.dur - dur2);
           const s = this._trackMusNode(this.ctx.createBufferSource()), fl = this._trackMusNode(this.ctx.createBiquadFilter()), g = this._trackMusNode(this.ctx.createGain());
-          s.buffer = buf; fl.type = type; fl.frequency.value = fc;
+          s.buffer = nb.buf; fl.type = type; fl.frequency.value = fc;
           g.gain.setValueAtTime(v2, t0);
           g.gain.exponentialRampToValueAtTime(.0001, t0 + dur2);
-          s.connect(fl); fl.connect(g); g.connect(out); s.start(t0);
+          s.connect(fl); fl.connect(g); g.connect(out); s.start(t0, off, dur2);
         };
         if (voice === 'kick') {
           const o = this._trackMusNode(this.ctx.createOscillator()), g = mkGain(.002);
@@ -9150,11 +9166,12 @@
       },
       noise(dur, v = .2, when = 0, fc = 1200) {
         if (this.muted || !this.ctx) return;
-        const t0 = this.t() + when, len = this.ctx.sampleRate * dur, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
-        for (let i = 0; i < len; i++)d[i] = Math.random() * 2 - 1;
+        const t0 = this.t() + when;
+        const nb = this._noiseBuf(dur);
+        const off = Math.random() * Math.max(0, nb.dur - dur);
         const s = this.ctx.createBufferSource(), f = this.ctx.createBiquadFilter(), g = this.ctx.createGain();
-        s.buffer = buf; f.type = 'lowpass'; f.frequency.value = fc; this.env(g, t0, .005, dur, v);
-        s.connect(f); f.connect(g); g.connect(this.sfx); s.start(t0);
+        s.buffer = nb.buf; f.type = 'lowpass'; f.frequency.value = fc; this.env(g, t0, .005, dur, v);
+        s.connect(f); f.connect(g); g.connect(this.sfx); s.start(t0, off, dur);
       },
       blip() { this.tone(1400, .03, 'square', .05); },
       cursor() { this.tone(900, .05, 'square', .12); },
@@ -9207,13 +9224,18 @@
         const secLoops = P.secLoops || 2;
         let secIdx = 0, step = 0, loops = 0;
         const MODERN = new Set(['bass', 'lead', 'pad', 'pluck', 'arp', 'kick', 'snare', 'hat', 'clap', 'bell', 'flute']);
+        /* ★ 音符串→数组只解析一次（原本每个 tick 每条音轨都重新展开字符串） */
+        const secNotes = secs.map(sec => (sec.trks || []).map(trk =>
+          typeof trk.notes === 'string' ? [...trk.notes].map(ch => ch === 'x' ? [trk.f || 1, 1] : [0, 1]) : trk.notes));
         const tick = () => {
           if (this.cur !== name) return;
           const sec = secs[secIdx];
           const len = (sec.bars || 2) * 8;
-          for (const trk of sec.trks) {
-
-            const notes = typeof trk.notes === 'string' ? [...trk.notes].map(ch => ch === 'x' ? [trk.f || 1, 1] : [0, 1]) : trk.notes;
+          const trks = sec.trks || [];
+          const notesAll = secNotes[secIdx];
+          for (let ti = 0; ti < trks.length; ti++) {
+            const trk = trks[ti];
+            const notes = notesAll[ti];
             const n = notes[step % notes.length];
             if (n && n[0]) {
               const dur = spb * (n[1] || 1) * .9;
@@ -11060,7 +11082,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(754,'兰螳花','grass','70/105/90/80/90/45','leafguard/contrary',['leafblade','knockoff','swordsdance','synthesis','xscissor','poisonjab','superpower']);
     S(760,'穿着熊','normal/fighting','120/125/80/55/60/60','klutz/unnerve',['doubleedge','closecombat','knockoff','earthquake','swordsdance','drainpunch']);
     S(768,'具甲武者','bug/water','75/125/140/60/90/40','emergencyexit/emergencyexit',['liquidation','lunge','knockoff','swordsdance','aquajet','leechseed', 'firstimpression']);
-    S(773,'银伴战兽','normal','95/95/95/95/95/59','rkssystem/rkssystem',['multiattack','doubleedge','crunch','swordsdance','uturn','flamethrower','icebeam']);
+    S(773,'银伴战兽','normal','95/95/95/95/95/95','rkssystem/rkssystem',['multiattack','doubleedge','crunch','swordsdance','uturn','flamethrower','icebeam']);
     S(780,'老翁龙','normal/dragon','78/60/85/135/91/36','sapsipper/cloudnine',['dracometeor','hypervoice','flamethrower','thunderbolt','dragonpulse','icebeam']);
     S(781,'破破舵轮','ghost/grass','70/131/100/86/90/40','toughclaws/ironfist',['powerwhip','shadowclaw','knockoff','swordsdance','earthquake','gyroball']);
     S(786,'卡璞蝶蝶','psychic/fairy','70/85/75/130/115/95','telepathy',['naturesmadness','psychic','moonblast','thunderbolt','calmmind','psyshock','dazzlinggleam'],{leg:1});
@@ -13542,6 +13564,8 @@ SP.forEach(s => {
         978: [{ f: 10547, t: 'dragon/water', s: [68,65,90,135,125,92], a: 'stormdrain', stone: '米立龙石Ｘ' }, { f: 10548, t: 'dragon/water', s: [68,65,90,135,125,92], a: 'stormdrain', stone: '米立龙石Ｙ' }, { f: 10549, t: 'dragon/water', s: [68,65,90,135,125,92], a: 'stormdrain', stone: '米立龙石Ｚ' }],
         998: { f: 10550, t: 'dragon/ice', s: [115,175,117,105,101,87], a: 'thermalexchange', stone: '戟脊龙石' },
      };
+    /* ★ Mega形态精灵图ID集合：只构建一次（spriteURLs 每次调用都在重建） */
+    const MEGAIDSET = (() => { const s = new Set(); Object.values(MEGA).flat().forEach(v => { if (v && v.f) s.add(v.f); }); return s; })();
     /* ---- 道具形态表（苍响/藏玛然特：携带专属道具切换形态） ---- */
     const FORMS = {
       888: { f: 10188, t: 'fairy/steel', s: [92, 170, 115, 80, 115, 148], a: 'intrepidsword', name: '苍响(剑之王)', tag: '剑之王', item: 'rustedsword', stone: '腐朽之剑', formTag: '剑之王形态' },
@@ -13969,11 +13993,7 @@ return ev;
     let apiId = id;
     if (!noRegional && REGIONAL_SPRITE[id] !== undefined) { apiId = REGIONAL_SPRITE[id]; }
     /* Mega形态ID直接使用原ID */
-    else {
-      const megaIds = new Set();
-      Object.values(MEGA).flat().forEach(v => { if (v && v.f) megaIds.add(v.f); });
-      if (megaIds.has(id)) { apiId = id; }
-    }
+    else if (MEGAIDSET.has(id)) { apiId = id; }
     const urls = [];
     /* ★ 图片显示模式：动态(GIF优先多源)/静态(仅PNG多源) */
     const statMode = typeof CFG !== 'undefined' && CFG.spriteMode === 'stat';
@@ -14045,6 +14065,7 @@ return ev;
       teraEl(side, slot = 0) { return $(side === 'e' ? (slot ? '#etera2' : '#etera') : (slot ? '#ptera2' : '#ptera')); },
       auraEl(side, slot = 0) { return $(side === 'e' ? (slot ? '#emegaAura2' : '#emegaAura') : (slot ? '#pmegaAura2' : '#pmegaAura')); },
       async refresh(b) {
+        FX.invalidateRects();
         if (!this._koHide) this._koHide = {};
         if (!this._koHidden) this._koHidden = {};
         // ★ 双打：刷新两只宝可梦的卡牌
@@ -14152,7 +14173,7 @@ return ev;
         if (b.auroraveil.e > 0) chips.push(`🌈 对手·极光幕(${b.auroraveil.e})`);
         /* ★ 反射壁/光墙显示（取各侧场上宝可梦的最大剩余回合） */
         const scrMax = side => {
-          const arr = side === 'e' ? b.et : b.pt;
+          const arr = b.fieldMons ? b.fieldMons(side) : [];
           let ref = 0, light = 0;
           arr.forEach(m => { if (m && m.alive()) { if ((m.vol.reflect || 0) > ref) ref = m.vol.reflect; if ((m.vol.lightscreen || 0) > light) light = m.vol.lightscreen; } });
           return { ref, light };
@@ -14239,6 +14260,7 @@ return ev;
       fitSprite(side, slot = 0) {
         const spr = this.sprEl(side, slot);
         if (!spr || !spr.naturalWidth || !spr.naturalHeight) return;
+        FX.invalidateRects();
         if (spr.classList.contains('dyn')) return;
         let refW = 150, refH = 150, refTop = 0;
         try {
@@ -14271,6 +14293,7 @@ return ev;
       async entryAnim(side, m, isWild, slot = 0, silent = false) {
         const layer = $('#fxlayer');
         const spr = this.sprEl(side, slot);
+        FX.invalidateRects();
         /* ★ 先彻底隐藏立绘并禁用过渡，杜绝投球/滑入前的渐隐闪现 */
         spr.style.transition = 'none';
         spr.style.opacity = 0;
@@ -14435,7 +14458,7 @@ return ev;
         }
         this.scene.classList.toggle('dyna', anyDyn);
       },
-      async anim(elm, cls, ms) { elm.classList.add(cls); await sleep(ms); elm.classList.remove(cls); },
+      async anim(elm, cls, ms) { elm.classList.add(cls); FX.invalidateRects(); await sleep(ms); elm.classList.remove(cls); FX.invalidateRects(); },
       dmgPop(side, txt, color, slot = 0) {
         const d = el('div', 'dmgpop', txt); d.style.color = color || '#fff';
         if (side === 'e') { d.style.top = slot ? '170px' : '120px'; d.style.right = slot ? '520px' : '180px'; }
@@ -14444,6 +14467,7 @@ return ev;
       },
       koFx(side, spr) {
         AU.faint();
+        FX.invalidateRects();
         if (CFG.fxShake) {
           /* 柔化闪屏 */
           const fl = $('#koFlash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
@@ -14501,27 +14525,25 @@ return ev;
         const boxEl = $('#msgpanel');
         /* ★ 战斗消息框应用对话框风格（保留 panel 类，并同步右上角按钮） */
         setDlgStyleClass(boxEl, CFG.dlgStyle || 'classic');
-        let i = 0, done = false;
+        let i = 0, done = false, finished = false;
         const iv = setInterval(() => {
           if (i < text.length) { box.textContent += text[i++]; if (i % 2 === 0) AU.blip(); }
-          else { clearInterval(iv); done = true; }
+          else finish();
         }, opts.fast ? 8 : 18);
         // 点击 / 按键：跳过打字动画（立即显示全文），不阻塞流程
-        const skip = () => { if (!done) { clearInterval(iv); box.textContent = text; done = true; } };
+        const skip = () => { if (!done) { done = true; box.textContent = text; } finish(); };
         const kd = e => { if (['Enter', ' ', 'z', 'Z'].includes(e.key)) skip(); };
         boxEl.addEventListener('click', skip);
         window.addEventListener('keydown', kd);
-        // 文字完成后自动停顿并进入下一条
-        const check = setInterval(() => {
-          if (done) {
-            clearInterval(check);
-            setTimeout(() => {
-              boxEl.removeEventListener('click', skip);
-              window.removeEventListener('keydown', kd);
-              res();
-            }, opts.pause ?? 480);
-          }
-        }, 40);
+        // 文字完成后自动停顿并进入下一条（合并原双定时器为单一定时器+一次延迟）
+        function finish() {
+          if (finished) return;
+          finished = true;
+          clearInterval(iv);
+          boxEl.removeEventListener('click', skip);
+          window.removeEventListener('keydown', kd);
+          setTimeout(res, opts.pause ?? 480);
+        }
       }));
       _sayChain = p.catch(() => {});
       return p;
@@ -14542,7 +14564,7 @@ return ev;
       if (/使用了|扔出|吃了|回复/.test(text)) return ['⚔️', 'lg-move'];
       return ['·', 'lg-plain'];
     }
-    function renderBattleLog(b) {
+    function renderBattleLog(b, force = false) {
       $('#logTurnN').textContent = '回合' + b.turn;
       $('#logTurnBig').textContent = '回合 ' + b.turn;
       const sit = $('#logSit');
@@ -14557,13 +14579,20 @@ return ev;
       /* ★ 对战记录面板随对话框风格 */
       setDlgStyleClass($('#logOv'), CFG.dlgStyle || 'classic');
       const list = $('#logList');
-      let html = '', lastT = -1;
-      b.log.forEach(e => {
-        if (e.t !== lastT) { html += `<div class="logTurnH">— 第 ${e.t} 回合 —</div>`; lastT = e.t; }
-        const [ic, cls] = logClassify(e.text);
-        html += `<div class="logE ${cls}"><span class="li">${ic}</span><span>${e.text}</span></div>`;
-      });
-      list.innerHTML = html;
+      /* ★ 增量渲染：只追加新条目，避免每回合全量重建整份日志（O(n²)→O(n)） */
+      let from = b._logRendered || 0;
+      if (force) { list.innerHTML = ''; from = 0; }
+      if (b.log.length > from) {
+        let html = '', lastT = from > 0 ? b.log[from - 1].t : -1;
+        for (let i = from; i < b.log.length; i++) {
+          const e = b.log[i];
+          if (e.t !== lastT) { html += `<div class="logTurnH">— 第 ${e.t} 回合 —</div>`; lastT = e.t; }
+          const [ic, cls] = logClassify(e.text);
+          html += `<div class="logE ${cls}"><span class="li">${ic}</span><span>${e.text}</span></div>`;
+        }
+        list.insertAdjacentHTML('beforeend', html);
+        b._logRendered = b.log.length;
+      }
       /* ★ AI思考面板：显示真实AI的思考内容与实际出招 */
       const thinkList = $('#aiThinkList');
       if (thinkList) {
@@ -14700,13 +14729,13 @@ return ev;
       on() { return CFG.fancyAudio !== false; },
       _noiseSweep(dur, v, fc0, fc1) {
         if (AU.muted || !AU.ctx) return;
-        const t0 = AU.t(), len = AU.ctx.sampleRate * dur;
-        const buf = AU.ctx.createBuffer(1, len, AU.ctx.sampleRate), d = buf.getChannelData(0);
-        for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+        const t0 = AU.t();
+        const nb = AU._noiseBuf(dur);
+        const off = Math.random() * Math.max(0, nb.dur - dur);
         const s = AU.ctx.createBufferSource(), f = AU.ctx.createBiquadFilter(), g = AU.ctx.createGain();
-        s.buffer = buf; f.type = 'lowpass';
+        s.buffer = nb.buf; f.type = 'lowpass';
         f.frequency.setValueAtTime(fc0, t0); f.frequency.exponentialRampToValueAtTime(Math.max(50, fc1), t0 + dur);
-        AU.env(g, t0, .01, dur, v); s.connect(f); f.connect(g); g.connect(AU.sfx); s.start(t0);
+        AU.env(g, t0, .01, dur, v); s.connect(f); f.connect(g); g.connect(AU.sfx); s.start(t0, off, dur);
       },
       _tokens: {
         zap() { AU.tone(1500, .06, 'square', .13, 0, -700); AU.tone(280, .05, 'square', .09, .02, 420); },
@@ -14762,26 +14791,52 @@ return ev;
     }
     /* ★ 旋转/缩放窗口后清掉内联尺寸，按当前 CSS 重新做原生等比缩放 */
     window.addEventListener('resize', () => {
+      FX.invalidateRects();
       [BUI.espr, BUI.pspr].forEach(spr => {
         if (!spr) return;
         spr.style.width = ''; spr.style.height = ''; spr.style.top = '';
         BUI.fitSprite(spr === BUI.espr ? 'e' : 'p');
       });
     });
+    /* ★ 网页字体加载完成后清空粒子尺寸缓存（字体换用后宽度可能变化） */
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => { if (FX._psize) FX._psize = {}; });
+    }
     const FX = {
       on() { return CFG.fancyFx !== false; },
-      layer() { return $('#fxlayer'); },
+      _layerEl: null,
+      layer() { return this._layerEl || (this._layerEl = $('#fxlayer')); },
+      /* ★ 布局缓存：精灵/图层矩形只在出场/换人/尺寸变化/动画开始时改变，
+         缓存后每次技能多阶段演出只读取一次，避免逐个粒子触发强制重排 */
+      _rects: {}, _rectGen: 0, _layerRect: null,
+      invalidateRects() { this._rectGen++; this._layerRect = null; },
+      _layerRectGet() {
+        if (!this._layerRect) this._layerRect = this.layer().getBoundingClientRect();
+        return this._layerRect;
+      },
+      _sprRect(side, slot) {
+        const key = side + slot;
+        const c = this._rects[key];
+        if (c && c.gen === this._rectGen) return c;
+        const spr = side === 'e' ? $(slot ? '#espr2' : '#espr') : $(slot ? '#pspr2' : '#pspr');
+        const lr = this._layerRectGet();
+        if (!spr) return { x: 0, y: 0, w: 0, h: 0, gen: this._rectGen, missing: true };
+        const sr = spr.getBoundingClientRect();
+        return this._rects[key] = { x: sr.left - lr.left, y: sr.top - lr.top, w: sr.width, h: sr.height, gen: this._rectGen };
+      },
       center(side, slot = 0) {
-        const spr = side === 'e' ? $(slot ? '#espr2' : '#espr') : $(slot ? '#pspr2' : '#pspr'), layer = this.layer();
-        if (!spr || !layer) return { x: 220, y: 180 };
-        const sr = spr.getBoundingClientRect(), lr = layer.getBoundingClientRect();
-        return { x: sr.left - lr.left + sr.width / 2, y: sr.top - lr.top + sr.height / 2 };
+        const layer = this.layer();
+        if (!layer) return { x: 220, y: 180 };
+        const r = this._sprRect(side, slot);
+        if (r.missing) return { x: 220, y: 180 };
+        return { x: r.x + r.w / 2, y: r.y + r.h / 2 };
       },
       feet(side, slot = 0) {
-        const spr = side === 'e' ? $(slot ? '#espr2' : '#espr') : $(slot ? '#pspr2' : '#pspr'), layer = this.layer();
-        if (!spr || !layer) return { x: 220, y: 320 };
-        const sr = spr.getBoundingClientRect(), lr = layer.getBoundingClientRect();
-        return { x: sr.left - lr.left + sr.width / 2, y: sr.top - lr.top + sr.height };
+        const layer = this.layer();
+        if (!layer) return { x: 220, y: 320 };
+        const r = this._sprRect(side, slot);
+        if (r.missing) return { x: 220, y: 320 };
+        return { x: r.x + r.w / 2, y: r.y + r.h };
       },
       _shaking: false,
       /* 低频场景震动：单次、≤4px */
@@ -14812,8 +14867,17 @@ return ev;
         if (opts.dy) d.style.setProperty('--dy', opts.dy + 'px');
         if (opts.rot) d.style.setProperty('--rot', opts.rot + 'deg');
         if (opts.an) d.style.animation = `${opts.an} ${opts.dur || .5}s ${opts.ease || 'ease-out'} ${opts.delay || 0}s forwards`;
-        this.layer().appendChild(d);
-        if (opts.center !== false) { d.style.left = (opts.x - d.offsetWidth / 2) + 'px'; d.style.top = (opts.y - d.offsetHeight / 2) + 'px'; }
+        const layer = this.layer();
+        layer.appendChild(d);
+        if (opts.center !== false) {
+          /* ★ 尺寸缓存：同 class+char 的粒子尺寸恒定，首测后复用，
+             避免每个粒子都触发一次强制同步布局 */
+          const k = (opts.cls || '') + '|' + (opts.char || '');
+          let sz = this._psize && this._psize[k];
+          if (!sz) { sz = [d.offsetWidth, d.offsetHeight]; (this._psize = this._psize || {})[k] = sz; }
+          d.style.left = (opts.x - sz[0] / 2) + 'px';
+          d.style.top = (opts.y - sz[1] / 2) + 'px';
+        }
         setTimeout(() => d.remove(), (opts.dur || .5) * 1000 + (opts.delay || 0) * 1000 + 220);
         return d;
       },
@@ -15898,6 +15962,7 @@ return ev;
         else if (CFG.aiReal && !CFG.aiApiKey) { this.addLog('🤖 已开启真实AI但未填写API Key，本场回退内置AI'); }
         preloadSprites([...this.pp, ...this.ep]);
         this.log = [];
+        this._logRendered = 0;   // ★ 新开局重置日志增量计数
         LOGFN = t => this.addLog(t);
         $('#logOv').classList.remove('on');
         $('#logList').innerHTML = '';
@@ -19811,7 +19876,20 @@ return ev;
         // 低HP提示音
         if (this.fieldMons('p').some(m => m.alive() && m.hpPct() <= .2)) AU.lowhp();
       }
-      addLog(text) { this.log.push({ t: this.turn, text }); renderBattleLog(this); }
+      addLog(text) {
+        /* ★ 敌方宝可梦名称前加「敌方的」，避免双方同种宝可梦分不清（已加过前缀的不重复） */
+        const seen = {};
+        for (const m of this.ep) {
+          if (!m) continue;
+          const nm = m.vol.illusionName || m.name;
+          if (!nm || seen[nm]) continue;
+          seen[nm] = true;
+          const pfx = '敌方的' + nm;
+          if (text.indexOf(pfx) === -1) text = text.split(nm).join(pfx);
+        }
+        this.log.push({ t: this.turn, text });
+        renderBattleLog(this);
+      }
       finish() { this.over = true; }
       /* ---------- AI ---------- */
       aiScore() {
@@ -20509,8 +20587,8 @@ return ev;
     /* ============ 对战工厂存档（持久化） ============ */
     function serializeMon(m) { return { id: m.id, lvl: m.lvl, xp: m.xp, iv: m.iv, ev: m.ev, nature: m.nature, item: m.item, tera: m.teraType, ability: m.ability, moves: m.moves.map(x => x.k), shiny: m.shiny, battles: m.battles }; }
     function deserializeMon(d) { return new P(d.id, d.lvl, { iv: d.iv, ev: d.ev, nature: d.nature, item: d.item, tera: d.tera, ability: d.ability, moves: d.moves, shiny: d.shiny, battles: d.battles, xp: d.xp }); }
-    function saveFac() { localStorage.setItem('pif_fac', JSON.stringify({ round: GM.fac.round, win: GM.fac.win, bp: GM.fac.bp, best: GM.fac.best, revives: GM.fac.revives, bag: GM.fac.bag, mode: GM.fac.mode, nextExpert: GM.fac.nextExpert, champs: GM.fac.champs, party: GM.fac.party ? GM.fac.party.map(serializeMon) : null })); }
-    function loadFac() { try { const d = JSON.parse(localStorage.getItem('pif_fac') || 'null'); if (d) { GM.fac.round = d.round || 1; GM.fac.win = d.win || 0; GM.fac.bp = d.bp || 0; if (d.best != null) GM.fac.best = d.best; GM.fac.revives = d.revives || 0; GM.fac.bag = d.bag || {}; GM.fac.mode = d.mode || 'rent3'; GM.fac.nextExpert = d.nextExpert || null; GM.fac.champs = d.champs || []; GM.fac.party = d.party ? d.party.map(deserializeMon) : null; } } catch (e) { } }
+    function saveFac() { localStorage.setItem('pif_fac', JSON.stringify({ round: GM.fac.round, win: GM.fac.win, bp: GM.fac.bp, best: GM.fac.best, revives: GM.fac.revives, bag: GM.fac.bag, mode: GM.fac.mode, nextExpert: GM.fac.nextExpert, champs: GM.fac.champs, rulesCollapsed: GM.fac.rulesCollapsed, party: GM.fac.party ? GM.fac.party.map(serializeMon) : null })); }
+    function loadFac() { try { const d = JSON.parse(localStorage.getItem('pif_fac') || 'null'); if (d) { GM.fac.round = d.round || 1; GM.fac.win = d.win || 0; GM.fac.bp = d.bp || 0; if (d.best != null) GM.fac.best = d.best; GM.fac.revives = d.revives || 0; GM.fac.bag = d.bag || {}; GM.fac.mode = d.mode || 'rent3'; GM.fac.nextExpert = d.nextExpert || null; GM.fac.champs = d.champs || []; GM.fac.rulesCollapsed = !!d.rulesCollapsed; GM.fac.party = d.party ? d.party.map(deserializeMon) : null; } } catch (e) { } }
 
     /* ============================================================
        9. 对战入口（通用）
@@ -21482,6 +21560,17 @@ return ev;
       async lobby() {
         show('#factory'); AU.playMusic('factory');
         this.ui();
+        /* ★ 规则说明可折叠（折叠状态记忆；历史连胜/冠军图鉴不受影响） */
+        const rh = $('#facRulesHead'), rb = $('#facRulesBody'), ra = $('#facRulesArrow');
+        if (rh && rb) {
+          const applyRules = () => {
+            const folded = !!GM.fac.rulesCollapsed;
+            rb.style.display = folded ? 'none' : 'block';
+            if (ra) ra.textContent = folded ? '▶' : '▼';
+          };
+          rh.onclick = () => { AU.cursor(); GM.fac.rulesCollapsed = !GM.fac.rulesCollapsed; saveFac(); applyRules(); };
+          applyRules();
+        }
         const mid = $('#facMid');
         if (!GM.fac.party) {
           if (GM.fac.round === 1) {
@@ -21535,9 +21624,11 @@ return ev;
             area.insertAdjacentHTML('beforeend', '<div style="color:#aab;font-size:13px;text-align:center;margin-bottom:8px">第 ' + GM.fac.round + ' 轮 · 从6只中选择' + pickN + '只组队（可调整顺序）' + (isDbl ? ' · <b style="color:#ffd93b">双打对战</b>' : '') + '</div>');
             const pool = isDbl ? this.pickPoolDouble(GM.fac.round) : this.pickPool(GM.fac.round);
             const picked = [];
+            /* ★ 卡片可收缩以适配多列（窄列2列/宽列3-4列），不再一行一个 */
             const grid = el('div', ''); grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;justify-content:center';
             pool.forEach((m, pi) => {
               const c = el('div', 'rentCard');
+              c.style.cssText = 'flex:1 1 160px;max-width:190px;width:auto';
               c.appendChild(miniSprite(m.id)); c.children[0].style.width = '84px'; c.children[0].style.height = '84px';
               c.insertAdjacentHTML('beforeend', `<div class="rn">${m.name}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
 <div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${Math.max(m.st.atk, m.st.spa)}</span></div><div class="statMini"><span>防 ${Math.max(m.st.def, m.st.spd)}</span><span>速 ${m.st.spe}</span></div>
@@ -21647,7 +21738,7 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b clas
         if (r.result === 'win') {
           /* ★ 双打模式 BP×2（单打×1） */
           const bpMult = GM.fac.mode === 'pick4double' ? 2 : 1;
-          GM.fac.win++; GM.fac.bp += GM.fac.round * bpMult;
+          GM.fac.win++; const bpGain = GM.fac.round * bpMult; GM.fac.bp += bpGain;
           /* ★ 冠军图鉴：战胜冠军后点亮 */
           if (et.head) this.unlockChampion(et.champion.name);
           /* ★ 击败隐藏冠军·灭天：额外获得1000 BP（单打/双打通用） */
@@ -21665,7 +21756,7 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b clas
             /* ★ 提前决定下一场对手类型，在交换界面同步提示，方便玩家针对性选宝可梦 */
             const nextExpert = this.rollExpert(GM.fac.round, GM.fac.win);
             GM.fac.nextExpert = nextExpert;
-            await dlg('广播', '胜利！获得 ' + GM.fac.round + ' BP！可以选择交换对手的宝可梦。', 132);
+            await dlg('广播', `胜利！获得 ${bpGain} BP${bpMult === 2 ? '（双打×2）' : ''}！可以选择交换对手的宝可梦。`, 132);
             await this.swapScreen(et.team, nextExpert);
           }
           /* ★ 每3场分配对战点数 */
@@ -22926,7 +23017,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       AU.cursor(); const ov = $('#logOv'); ov.classList.toggle('on');
       if (ov.classList.contains('on')) {
         /* ★ 打开面板时强制刷新（确保AI思考等最新内容已渲染） */
-        if (window.curBattle) renderBattleLog(window.curBattle);
+        if (window.curBattle) renderBattleLog(window.curBattle, true);
         const l = $('#logList'); l.scrollTop = l.scrollHeight;
       }
     };
@@ -23485,6 +23576,9 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       box.appendChild(head);
       let offEsc = null;
       const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); saveCfg(); applyBgTheme(); setDlgStyleClass($('#dlgBox'), CFG.dlgStyle || 'classic'); };
+      /* ★ 点击弹窗空白处关闭 */
+      ov.onclick = () => { AU.no(); close(); };
+      box.onclick = e => e.stopPropagation();
       /* ---- 🔊 音频 ---- */
       box.appendChild(settingsGroup('🔊 音频', [
         settingsRow('音效', '攻击、命中、状态、菜单等提示音',
@@ -23497,7 +23591,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           () => CFG.musVol, v => { CFG.musVol = v; }),
         settingsRow('精良音效', '每个技能专属实时合成的出招/命中音效。关闭后使用简约通用音效',
           () => CFG.fancyAudio, v => { CFG.fancyAudio = v; }),
-      ], true));
+      ]));
       /* ---- ✨ 画面与演出 ---- */
       box.appendChild(settingsGroup('✨ 画面与演出', [
         settingsRow('华丽特效', '每个技能专属多阶段演出（投射/光束/冲击/残余），以及异常状态、Mega、极巨、太晶的丰富特效。关闭后回到朴素通用特效',
