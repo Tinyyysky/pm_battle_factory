@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -2169,11 +2169,11 @@
       align-items: center;
       gap: 8px;
       cursor: pointer;
-      transition: transform .12s, box-shadow .12s
+      position: relative;
+      transition: transform .12s
     }
 
     #targetOv .targetCard:hover {
-      transform: translateY(-2px);
       box-shadow: 0 5px 0 rgba(20, 16, 40, .35)
     }
 
@@ -2183,33 +2183,91 @@
       filter: grayscale(.7)
     }
 
-    #targetOv .targetCard.selectable {
-      outline: 3px solid #3ecf6c;
-      box-shadow: 0 0 12px rgba(62, 207, 108, .5);
-      position: relative
+    /* ★ 确认后目标框选：白框从外向内收缩 + 强白光 + 目标弹跳放大 + 白闪，其余卡片压暗虚化（视觉暂留，强烈对比） */
+    #targetOv .targetCard.targetFx {
+      position: relative;
+      z-index: 3;
+      outline: 3px solid #fff;
+      outline-offset: 1px;
+      box-shadow: 0 0 26px 6px rgba(255, 255, 255, .95), 0 0 64px 22px rgba(255, 255, 255, .45);
+      filter: brightness(1.22);
+      animation: targetPop .18s ease-out
     }
 
-    #targetOv .targetCard.selectable::after {
-      content: "✓";
+    #targetOv .targetCard.targetFx::before {
+      content: '';
       position: absolute;
-      top: -9px;
-      right: -9px;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #3ecf6c;
-      color: #fff;
-      font-weight: 900;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid var(--ink);
-      box-shadow: 0 3px 0 rgba(20, 16, 40, .35)
+      inset: 0;
+      border-radius: 8px;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .55), transparent 65%);
+      animation: targetFlashA .2s ease-out forwards;
+      pointer-events: none
     }
 
-    #targetOv .targetCard.picked {
-      outline: 4px solid #ffd93b
+    #targetOv .targetCard.targetFx::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border: 3px solid #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 18px 4px rgba(255, 255, 255, .85);
+      animation: targetFxA .2s ease-out forwards
+    }
+
+    /* ★ 悬停预览范围：白色柔光光晕聚集在卡片周围（无边框，确认时的强效框选为 targetFx） */
+    #targetOv .targetCard.targetHover {
+      box-shadow: 0 0 20px 8px rgba(255, 255, 255, .55), 0 0 46px 20px rgba(255, 255, 255, .3);
+      filter: brightness(1.08)
+    }
+
+    #targetOv .targetCard.targetHover::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 13px;
+      background: radial-gradient(ellipse at center, rgba(255, 255, 255, .42) 0%, rgba(255, 255, 255, .2) 55%, transparent 82%);
+      pointer-events: none
+    }
+
+    #targetOv .targetCard.targetFxDim {
+      opacity: .3;
+      filter: grayscale(.75) blur(1.5px)
+    }
+
+    @keyframes targetFxA {
+      0% {
+        inset: -16px;
+        opacity: 0
+      }
+
+      35% {
+        opacity: 1
+      }
+
+      100% {
+        inset: -2px;
+        opacity: 1
+      }
+    }
+
+    @keyframes targetPop {
+      0% {
+        transform: scale(1.07)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    @keyframes targetFlashA {
+      0% {
+        opacity: 1
+      }
+
+      100% {
+        opacity: 0
+      }
     }
 
     #targetOv .targetCard img {
@@ -5218,7 +5276,7 @@
 
     #facLobby {
       display: grid;
-      grid-template-columns: 250px 1fr 240px;
+      grid-template-columns: 250px 1fr 320px;
       gap: 16px;
       height: 100%
     }
@@ -5309,6 +5367,12 @@
       gap: 10px;
       justify-content: center;
       flex-wrap: wrap
+    }
+
+    /* ★ 租借队伍槽：名字区最少宽度，一行至少显示约6个字，避免长名字挤成每行两字 */
+    #facParty .facSlotInfo {
+      flex: 1;
+      min-width: 120px
     }
 
     .statMini {
@@ -6512,6 +6576,153 @@
     }
 
     /* ============ 全局界面背景：浅色(偏白) / 跟随对话框风格 ============ */
+    /* ★ 对战工厂文字主题变量（轮次/场次/标题/警告等） */
+    #stage {
+      --fac-title: #ffd93b;
+      --fac-text: #aab;
+      --fac-text-b: #fff;
+      --fac-warn: #ff6b6b;
+      --fac-accent: #ffd93b;
+      --fac-gold: #f2b705;
+      --fac-goldsh: #6b4c00
+    }
+
+    #factory .facReadyTitle {
+      color: var(--fac-title)
+    }
+
+    #factory .facReadyInfo {
+      color: var(--fac-text)
+    }
+
+    #factory .facReadyInfo b {
+      color: var(--fac-text-b)
+    }
+
+    #factory .facReadyWarn {
+      color: var(--fac-warn)
+    }
+
+    #factory .facReadyAccent {
+      color: var(--fac-accent)
+    }
+
+    #factory .roundBig {
+      color: var(--fac-gold);
+      text-shadow: 0 3px 0 var(--fac-goldsh)
+    }
+
+    /* 浅色模式（偏白） */
+    #stage.bgLight {
+      --fac-title: #b8860b;
+      --fac-text: #6a6580;
+      --fac-text-b: #26233a;
+      --fac-warn: #c0392b;
+      --fac-accent: #a06a10;
+      --fac-gold: #b8860b;
+      --fac-goldsh: rgba(255, 255, 255, .5)
+    }
+
+    /* ★ 各主题的对战工厂文字配色（轮次/场次/标题/警告） */
+    #stage.dlgStyle-neon {
+      --fac-title: #f0c8ff;
+      --fac-text: #9a8fc0;
+      --fac-text-b: #e8e0ff;
+      --fac-warn: #ffb0a0;
+      --fac-accent: #d9b8f5;
+      --fac-gold: #d9b8f5;
+      --fac-goldsh: rgba(0, 0, 0, .6)
+    }
+
+    #stage.dlgStyle-paper {
+      --fac-title: #8a5a2b;
+      --fac-text: #8a6a3a;
+      --fac-text-b: #4a3318;
+      --fac-warn: #b83a3a;
+      --fac-accent: #8a5a2b;
+      --fac-gold: #a06a10;
+      --fac-goldsh: rgba(255, 255, 255, .6)
+    }
+
+    #stage.dlgStyle-glass {
+      --fac-title: #fff;
+      --fac-text: #c8d4e8;
+      --fac-text-b: #fff;
+      --fac-warn: #ffb0a0;
+      --fac-accent: #fff;
+      --fac-gold: #f0e6ff;
+      --fac-goldsh: rgba(0, 0, 0, .35)
+    }
+
+    #stage.dlgStyle-comic {
+      --fac-title: #111;
+      --fac-text: #666;
+      --fac-text-b: #111;
+      --fac-warn: #c0392b;
+      --fac-accent: #111;
+      --fac-gold: #b8860b;
+      --fac-goldsh: rgba(255, 255, 255, .6)
+    }
+
+    #stage.dlgStyle-pixel {
+      --fac-title: #8ff0c4;
+      --fac-text: #8a93a8;
+      --fac-text-b: #c4d8e8;
+      --fac-warn: #f0a0a0;
+      --fac-accent: #8ff0c4;
+      --fac-gold: #8ff0c4;
+      --fac-goldsh: rgba(0, 0, 0, .6)
+    }
+
+    #stage.dlgStyle-space {
+      --fac-title: #bfdcff;
+      --fac-text: #93a8cc;
+      --fac-text-b: #e6f0ff;
+      --fac-warn: #ffb0a0;
+      --fac-accent: #9fe8ff;
+      --fac-gold: #bfdcff;
+      --fac-goldsh: rgba(0, 0, 0, .6)
+    }
+
+    #stage.dlgStyle-forest {
+      --fac-title: #d9e8a8;
+      --fac-text: #a8b88a;
+      --fac-text-b: #f2fae0;
+      --fac-warn: #ffb0a0;
+      --fac-accent: #cfe3a0;
+      --fac-gold: #e8d8a0;
+      --fac-goldsh: rgba(0, 0, 0, .55)
+    }
+
+    #stage.dlgStyle-sakura {
+      --fac-title: #b96a85;
+      --fac-text: #b07a8d;
+      --fac-text-b: #8c4a5e;
+      --fac-warn: #c03c4c;
+      --fac-accent: #d05a80;
+      --fac-gold: #c05a80;
+      --fac-goldsh: rgba(255, 255, 255, .6)
+    }
+
+    #stage.dlgStyle-ghost {
+      --fac-title: #c9b8f2;
+      --fac-text: #9c88c0;
+      --fac-text-b: #e8e0ff;
+      --fac-warn: #f0a8a8;
+      --fac-accent: #b79ef0;
+      --fac-gold: #c9b8f2;
+      --fac-goldsh: rgba(0, 0, 0, .6)
+    }
+
+    #stage.dlgStyle-sketch {
+      --fac-title: #8a5a2b;
+      --fac-text: #8a7a5f;
+      --fac-text-b: #4a3f2f;
+      --fac-warn: #b03c34;
+      --fac-accent: #8a5a2b;
+      --fac-gold: #a06a10;
+      --fac-goldsh: rgba(255, 255, 255, .6)
+    }
     /* ★ 浅色模式（偏白，非灰黑） */
     body.bgLight {
       background:
@@ -10369,6 +10580,12 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     I('mistyseed', '薄雾种子', '薄雾场地上特防+1（消耗）');
     I('bigroot', '大根茎', '吸取HP类招式的回复量×1.3');
     I('rockyhelmet', '凹凸头盔', '受到接触类招式攻击时，攻击者损失最大HP的1/6');
+    /* ---- 专属道具（对战工厂对应宝可梦概率携带） ---- */
+    I('thickclub', '粗骨头', '卡拉卡拉/嘎啦嘎啦携带时攻击×2');
+    I('lightball', '电珠', '皮卡丘携带时物攻与特攻×2');
+    I('leek', '大葱', '大葱鸭/葱油兵携带时会心率等级+1');
+    I('deepseatooth', '深海之牙', '珍珠贝携带时特攻×2');
+    I('deepseascale', '深海鳞片', '珍珠贝携带时特防×2');
     I('throatspray', '爽喉喷雾', '使用声音招式后特攻+1（消耗）');
     I('boosterenergy', '驱劲能量', '消耗后发动古代活性/夸克充能');
     I('powerherb', '强力香草', '携带后使用蓄力招式时立刻完成蓄力并攻击；使用后消耗，战斗结束后还原');
@@ -13633,6 +13850,9 @@ return ev;
         const ab = this.ability;
         if (k === 'atk') {
           if (ab === 'hugepower' || ab === 'purepower') v *= 2;
+          /* ★ 专属道具：粗骨头（卡拉卡拉/嘎啦嘎啦）、电珠（皮卡丘）攻击×2 */
+          if (!this.has('klutz') && this.item === 'thickclub' && (this.id === 104 || this.id === 105)) v *= 2;
+          if (!this.has('klutz') && this.item === 'lightball' && this.id === 25) v *= 2;
           if (this.status === 'burn' && !this.has('guts') && !this.has('waterbubble')) v *= .5;
           if (this.has('guts') && this.status) v *= 1.5;
           if (this.has('solarpower') && b && (b.wxActive() === 'sun' || b.wxActive() === 'desolate')) v *= 1.5;
@@ -13650,6 +13870,9 @@ return ev;
         if (k === 'spa') {
           if (this.has('solarpower') && b && (b.wxActive() === 'sun' || b.wxActive() === 'desolate')) v *= 1.5;
           if (this.has('hadronengine') && b && b.terrain === 'electric') v *= 1.3;
+          /* ★ 专属道具：电珠（皮卡丘）、深海之牙（珍珠贝）特攻×2 */
+          if (!this.has('klutz') && this.item === 'lightball' && this.id === 25) v *= 2;
+          if (!this.has('klutz') && this.item === 'deepseatooth' && this.id === 366) v *= 2;
           if (!this.has('klutz') && this.item === 'choicespecs' && !this.dyn) v *= 1.5;
           if (b && b.foeOf(this) && b.foeOf(this).has('vesselofruin') && !b.foeOf(this).fainted) v *= .75;
           /* ★ 正电/负电：同伴有对应特性时特攻×1.5（双打） */
@@ -13683,6 +13906,8 @@ return ev;
           /* ★ 笨拙：进化奇石 / 突击背心等道具加成无效 */
           if (!this.has('klutz') && this.item === 'eviolite' && this.sp.evo) v *= 1.5;
           if (!this.has('klutz') && k === 'spd' && this.item === 'assaultvest') v *= 1.5;
+          /* ★ 专属道具：深海鳞片（珍珠贝）特防×2 */
+          if (!this.has('klutz') && k === 'spd' && this.item === 'deepseascale' && this.id === 366) v *= 2;
           if (k === 'spd' && b && b.foeOf(this) && b.foeOf(this).has('beadsofruin') && !b.foeOf(this).fainted) v *= .75;
         }
         // ★ 古代活性（晴天/终结之地）/夸克充能（电场）：最高项×1.3，速度×1.5（HP除外）；驱劲能量可无视条件启动
@@ -16597,7 +16822,7 @@ return ev;
           const multiRng = ['enemy-all', 'all-except-self', 'self', 'all', 'ally-all'].includes(rng);
           const nm = displayName || mv.n;
           box.appendChild(el('h3', 'disp', '选择目标'));
-          box.appendChild(el('div', 'rangeNote', `「${nm}」· 范围：${RNGN[rng]}${multiRng ? ' · 影响目标已全部高亮' : ''} · 正在操作：${mon.vol.illusionName || mon.name}`));
+          box.appendChild(el('div', 'rangeNote', `「${nm}」 · 正在操作：${mon.vol.illusionName || mon.name}`));
           const pickable = (m, isEnemy) => {
             if (!m || !m.alive()) return false;
             if (rng === 'enemy-any') return isEnemy;
@@ -16642,6 +16867,16 @@ return ev;
             if (this.wxActive() === 'delta' && tgt.types.includes('flying') && ['rock', 'electric', 'ice'].includes(effType)) e /= 2;
             return e;
           };
+          /* ★ 确认选取：目标卡片套上从外向内收缩的白框（视觉暂留），0.2s 后再关闭界面 */
+          const cards = [];
+          const finishPick = (val, pickedCard) => {
+            AU.ok();
+            const tgs = multiRng ? cards.filter(c => !c.classList.contains('disabled')) : [pickedCard];
+            /* 其余卡片压暗虚化，突出实际被命中的目标 */
+            cards.forEach(c => { if (!tgs.includes(c)) c.classList.add('targetFxDim'); });
+            tgs.forEach(c => c.classList.add('targetFx'));
+            setTimeout(() => close(val), 200);
+          };
           const buildZone = (label, arr, isEnemy) => {
             const zone = el('div', 'targetZone');
             zone.appendChild(el('h4', '', label));
@@ -16650,6 +16885,7 @@ return ev;
             slots.forEach(s => {
               const m = isEnemy ? this.slotMon('e', s) : this.slotMon('p', s);
               const c = el('div', 'targetCard');
+              cards.push(c);
               if (!m) { c.classList.add('disabled'); c.innerHTML = '<div style="color:#999;font-weight:900">— 无 —</div>'; row.appendChild(c); return; }
               c.appendChild(miniSprite(m.vol.illusion || m.id));
               const hpTxt = m.alive() ? `${Math.round(m.hpPct() * 100)}% HP` : '濒死';
@@ -16663,9 +16899,15 @@ return ev;
               const ok = pickable(m, isEnemy);
               if (!ok) { c.classList.add('disabled'); c.onclick = e => { e.stopPropagation(); AU.no(); }; }
               else {
-                c.classList.add('selectable');
+                /* ★ 悬停预览：淡淡柔光白框显示本技能实际覆盖的目标（群体技能高亮全部受影响目标） */
+                const hoverFx = on => {
+                  const hov = multiRng ? cards.filter(x => !x.classList.contains('disabled')) : [c];
+                  hov.forEach(x => x.classList.toggle('targetHover', on));
+                };
+                c.onmouseenter = () => hoverFx(true);
+                c.onmouseleave = () => hoverFx(false);
                 /* ★ 群体/自身/全场：点任意受影响目标即确认；单体：点目标完成选取 */
-                c.onclick = () => { AU.ok(); close(multiRng ? true : m); };
+                c.onclick = () => finishPick(multiRng ? true : m, c);
               }
               row.appendChild(c);
             });
@@ -16676,7 +16918,7 @@ return ev;
           buildZone('我方宝可梦', null, false);
           if (multiRng) {
             const confirm = el('button', 'btn blue', `确认使用「${nm}」`); confirm.style.cssText = 'width:100%;margin-top:4px';
-            confirm.onclick = () => { AU.ok(); close(true); };
+            confirm.onclick = () => finishPick(true, null);
             box.appendChild(confirm);
           }
           const back = el('button', 'btn small', '◀ 返回'); back.style.cssText = 'width:100%;margin-top:8px';
@@ -17150,13 +17392,7 @@ return ev;
           await say(`${mon.vol.illusionName || mon.name} 的迎头一击只能在出场时使用！`);
           return;
         }
-        /* ★ 爽喉喷雾：使用声音招式后特攻+1（消耗） */
-        if (useMv.sound && !mon.has('klutz') && mon.item === 'throatspray') {
-          mon.item = null;
-          await this.changeStat(mon, 'spa', 1, mon);
-          await say(`${mon.name} 的爽喉喷雾发动了！`);
-        }
-        // 突击背心
+        /* ★ 突击背心 */
         if (mon.item === 'assaultvest' && useMv.c === 'X') { await say('突击背心挡住了变化招式！'); return; }
         // ★ 讲究系列锁招/一猩一意：锁定第一个成功进入执行的招式（挣扎不锁；换下/拍落/戏法时解锁）
         if ((['choiceband', 'choicespecs', 'choicescarf'].includes(mon.item) || mon.has('gorillatactics')) && !mon.vol.choiceLock && !mon.dyn && mvk !== 'struggle') {
@@ -17202,6 +17438,12 @@ return ev;
             return;
           }
           await this.statusMove(side, mon, t0, useMv, act);
+          /* ★ 爽喉喷雾：变化类声音招式使用后特攻+1（消耗） */
+          if (useMv.sound && !mon.has('klutz') && mon.item === 'throatspray' && mon.alive()) {
+            mon.item = null;
+            await this.changeStat(mon, 'spa', 1, mon);
+            await say(`${mon.name} 的爽喉喷雾发动了！`);
+          }
           return;
         }
         // ---- 攻击招式 ----
@@ -17244,6 +17486,12 @@ return ev;
           if (r.ko) { koed = true; await this.handleKO(side, mon, r.foe); if (this.over) return; }
         }
         this._helpingHand = false;
+        /* ★ 爽喉喷雾：使用声音招式后特攻+1（消耗）——攻击类声音招式在结算后触发 */
+        if (useMv.sound && !mon.has('klutz') && mon.item === 'throatspray' && mon.alive()) {
+          mon.item = null;
+          await this.changeStat(mon, 'spa', 1, mon);
+          await say(`${mon.name} 的爽喉喷雾发动了！`);
+        }
         /* ★ 上菜（吃吼霸）：造成伤害后攻击+1 */
         if (useMv.orderup && connected && totalDmg > 0 && mon.alive()) {
           await this.changeStat(mon, 'atk', 1, mon);
@@ -18047,7 +18295,7 @@ return ev;
         let fickle = false;
         if (mv.ficklebeam && Math.random() < 0.3) { fickle = true; mv = { ...mv, p: mv.p * 2 }; }
         // 会心
-        let cs = (mv.crit ? 1 : 0) + (mv.alwaysCrit ? 2 : 0) + (mon.has('superluck') ? 1 : 0) + (mon.item === 'scopelens' ? 1 : 0) + (mon.vol.gmaxCrit ? 2 : 0) + (mon.vol.cheerCrit ? 1 : 0);
+        let cs = (mv.crit ? 1 : 0) + (mv.alwaysCrit ? 2 : 0) + (mon.has('superluck') ? 1 : 0) + (mon.item === 'scopelens' ? 1 : 0) + (mon.vol.gmaxCrit ? 2 : 0) + (mon.vol.cheerCrit ? 1 : 0) + (!mon.has('klutz') && mon.item === 'leek' && (mon.id === 83 || mon.id === 865) ? 1 : 0);
         const crit = mv.alwaysCrit || (mon.has('merciless') && (foe.status === 'psn' || foe.status === 'tox')) || (!foe.has('shellarmor') && !foe.has('battlearmor') && Math.random() < [1 / 24, 1 / 8, 1 / 2, 1][Math.min(cs, 3)]);
         let A = mon.effStat(atkK, this), D = foe.effStat(defK, this);
         if (foe.has('unaware') && !crit) { A = mon.st[atkK]; }
@@ -20524,6 +20772,18 @@ return ev;
         { k: 'lightclay', price: 20 }, { k: 'terrainextender', price: 20 },
         { k: 'grassseed', price: 10 }, { k: 'electricseed', price: 10 }, { k: 'psychicseed', price: 10 }, { k: 'mistyseed', price: 10 },
       ],
+      /* ★ 专属道具栏：各宝可梦专属/传说专属道具（对战工厂对应宝可梦概率携带） */
+      SHOP_SPECIAL: [
+        { k: 'thickclub', price: 15 }, { k: 'lightball', price: 20 }, { k: 'leek', price: 15 },
+        { k: 'deepseatooth', price: 20 }, { k: 'deepseascale', price: 20 },
+        { k: 'souldew', price: 30 }, { k: 'adamantorb', price: 25 }, { k: 'lustrousorb', price: 25 }, { k: 'griseousorb', price: 25 },
+        { k: 'rustedsword', price: 30 }, { k: 'rustedshield', price: 30 },
+        { k: 'redorb', price: 30 }, { k: 'blueorb', price: 30 },
+        { k: 'legendplate', price: 100 },
+        { k: 'burndrive', price: 15 }, { k: 'chilldrive', price: 15 }, { k: 'dousedrive', price: 15 }, { k: 'shockdrive', price: 15 },
+        { k: 'wellspringmask', price: 15 }, { k: 'hearthflamemask', price: 15 }, { k: 'cornerstonemask', price: 15 },
+        ...Object.keys(MEMORYDISC).map(k => ({ k, price: 15 })),
+      ],
       /* ============ 基础工具 ============ */
       /* ★ 六档位：一档≥610 / 二档550~609 / 三档500~549 / 四档450~499（含百变怪/勾魂眼/大嘴娃）/ 五档400~449 / 六档<400 */
       /* ★ 进化奇石提档：三~六档非最终进化型提升一档 */
@@ -20564,10 +20824,21 @@ return ev;
         const out = dmg.slice(0, st.length ? 3 : 4);
         if (st.length) out.push(st[0]);
         if (Math.random() < 0.2) { if (out.length >= 4) out[3] = 'terablast'; else out.push('terablast'); }
+        /* ★ 加速特性（含Mega后为加速）宝可梦必定携带保护（保护不在单打池中，单独补入） */
+        if (this.needsProtect(sp) && !out.includes('protect')) { if (out.length >= 4) out[3] = 'protect'; else out.unshift('protect'); }
         /* ★ 工厂规则：不携带两个保护类技能（极巨防壁除外） */
         return this.dedupeProtect(out.slice(0, 4), pool);
       },
+      /* ★ 加速特性（含Mega后为加速特性）的宝可梦：对战工厂中无论单打双打必定携带保护 */
+      needsProtect(sp) {
+        return sp.ab.includes('speedboost') || (MEGA[sp.id] && MEGA[sp.id].a === 'speedboost');
+      },
       pickItem(sp, moves, ability) {
+        /* ★ 专属道具：对应宝可梦概率携带（粗骨头/电珠/大葱/深海之牙/深海鳞片） */
+        if ((sp.id === 104 || sp.id === 105) && Math.random() < 0.6) return 'thickclub';
+        if (sp.id === 25 && Math.random() < 0.5) return 'lightball';
+        if ((sp.id === 83 || sp.id === 865) && Math.random() < 0.6) return 'leek';
+        if (sp.id === 366) { const r = Math.random(); if (r < 0.35) return 'deepseatooth'; if (r < 0.7) return 'deepseascale'; }
         /* ★ 苍响/藏玛然特：80%携带专属道具（剑之王/盾之王），20%百战勇者 */
         if (sp.id === 888) {
           if (Math.random() < 0.8) return 'rustedsword';
@@ -20605,8 +20876,8 @@ return ev;
         if (moves.some(k => MV[k] && MV[k].sound) && Math.random() < 0.3) return 'throatspray';
         /* ★ 驱劲能量：古代活性/夸克充能宝可梦 30% */
         if ((sp.ab.includes('protosynthesis') || sp.ab.includes('quarkdrive')) && Math.random() < 0.3) return 'boosterenergy';
-        /* ★ 机变骰子：只出现在拥有2~5连击招式的宝可梦身上 30%（固定连击数/三旋击/鼠数儿不触发） */
-        if (moves.some(k => MV[k] && MV[k].multi && MV[k].multi[0] >= 2 && MV[k].multi[1] === 5) && Math.random() < 0.3) return 'loadeddice';
+        /* ★ 机变骰子：只出现在拥有2~5连击招式的宝可梦身上 30%（固定连击数/三旋击/鼠数儿不触发；连续攻击特性除外——本身必满连击，无需骰子） */
+        if (moves.some(k => MV[k] && MV[k].multi && MV[k].multi[0] >= 2 && MV[k].multi[1] === 5) && !sp.ab.includes('skilllink') && Math.random() < 0.3) return 'loadeddice';
         /* ★ 强力香草：拥有蓄力招式的宝可梦 35%（只出现在有蓄力招式的宝可梦身上） */
         if (moves.some(k => MV[k] && MV[k].charge) && Math.random() < 0.35) return 'powerherb';
         /* ★ 打空保险：≥3个命中不满招式 30% */
@@ -20654,6 +20925,8 @@ return ev;
         if (sup.length > 1 && Math.random() < 0.55) out.push(sup[1]);
         for (const k of dmg) { if (out.length >= 4) break; if (!out.includes(k)) out.push(k); }
         for (const k of st) { if (out.length >= 4) break; if (!out.includes(k)) out.push(k); }
+        /* ★ 加速特性（含Mega后为加速）宝可梦必定携带保护 */
+        if (this.needsProtect(sp) && !out.includes('protect')) { if (out.length >= 4) out[3] = 'protect'; else out.unshift('protect'); }
         /* ★ 图图犬：双打携带看我嘛的概率非常大（90%） */
         if (sp.id === 235 && !out.includes('followme') && Math.random() < 0.9) {
           if (out.length >= 4) out[3] = 'followme'; else out.push('followme');
@@ -20669,9 +20942,9 @@ return ev;
       buildDouble(sp, lvl, round) {
         const moves = this.pickMovesDouble(sp);
         const ability = pick(sp.ab);
-        /* 双打环境更倾向文柚果/气势腰带/剩饭等生存道具 */
+        /* 双打环境更倾向文柚果/气势腰带/剩饭等生存道具（专属道具保留，不被替换） */
         let item = this.pickItem(sp, moves, ability);
-        if (!['leftovers', 'sitrus', 'focussash', 'lifeorb', 'expertbelt', 'choiceband', 'choicespecs', 'choicescarf', 'airballoon', 'weaknesspolicy', 'rockyhelmet'].includes(item) && Math.random() < 0.3) {
+        if (!['leftovers', 'sitrus', 'focussash', 'lifeorb', 'expertbelt', 'choiceband', 'choicespecs', 'choicescarf', 'airballoon', 'weaknesspolicy', 'rockyhelmet', 'thickclub', 'lightball', 'leek', 'deepseatooth', 'deepseascale', 'souldew', 'adamantorb', 'lustrousorb', 'griseousorb', 'rustedsword', 'rustedshield', 'redorb', 'blueorb'].includes(item) && Math.random() < 0.3) {
           item = pick(['sitrus', 'focussash', 'leftovers', 'lifeorb', 'rockyhelmet']);
         }
         return new P(sp.id, lvl, { moves, ability, item, iv: 28, tera: pick(TYP), ev: genEV(sp, round || 1, moves) });
@@ -20966,7 +21239,7 @@ return ev;
         if (GM.fac.party) {
           GM.fac.party.forEach((m, idx) => {
             const c = el('div', 'slot'); c.appendChild(miniSprite(m.id));
-            c.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x => MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : '无道具'} · 晶${TNAME[m.teraType]}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span></div></div>`);
+            c.insertAdjacentHTML('beforeend', `<div class="facSlotInfo"><b>${m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x => MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : '无道具'} · 晶${TNAME[m.teraType]}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span></div></div>`);
             const btnCol = el('div', ''); btnCol.style.cssText = 'display:flex;flex-direction:column;gap:4px;margin-left:auto;flex:none';
             const det = el('button', 'btn tiny', '详情'); det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(m, null); }; btnCol.appendChild(det);
             const itemBtn = el('button', 'btn tiny', '道具'); itemBtn.onclick = e => { e.stopPropagation(); AU.cursor(); this.equipItem(idx); }; btnCol.appendChild(itemBtn);
@@ -21024,6 +21297,51 @@ return ev;
         shopHead.appendChild(shopClose);
         box.appendChild(shopHead);
         box.insertAdjacentHTML('beforeend', `<div style="font-size:12px;color:#888;margin-bottom:8px">当前 BP：<b style="color:#f2b705">${GM.fac.bp}</b> · 购买的道具存入局外背包，可在匹配前给队伍携带</div>`);
+        /* ★ 顶部切换标签：专属道具（默认置顶）/ 普通道具，平滑切换 */
+        const tabBar = el('div', ''); tabBar.style.cssText = 'display:flex;gap:8px;margin-bottom:10px';
+        const mkTab = (label, blue) => {
+          const t = el('button', 'btn small' + (blue ? ' blue' : ''));
+          t.textContent = label;
+          t.style.flex = '1';
+          t.style.transition = 'all .2s ease';
+          return t;
+        };
+        const tabNorm = mkTab('🛒 普通道具', true);
+        const tabSpec = mkTab('🏆 专属道具', false);
+        tabBar.appendChild(tabNorm); tabBar.appendChild(tabSpec);
+        box.appendChild(tabBar);
+        const specWrap = el('div', ''); specWrap.style.cssText = 'display:none;transition:opacity .18s ease,transform .18s ease';
+        const normWrap = el('div', ''); normWrap.style.cssText = 'transition:opacity .18s ease,transform .18s ease';
+        const switchTab = (toSpec) => {
+          if (toSpec) { if (specWrap.style.display === 'block') return; } else if (normWrap.style.display === 'block') return;
+          tabSpec.classList.toggle('blue', toSpec);
+          tabNorm.classList.toggle('blue', !toSpec);
+          const show = toSpec ? specWrap : normWrap, hide = toSpec ? normWrap : specWrap;
+          hide.style.opacity = '0'; hide.style.transform = 'translateY(-6px)';
+          setTimeout(() => { hide.style.display = 'none'; }, 180);
+          show.style.display = 'block'; show.style.opacity = '0'; show.style.transform = 'translateY(8px)';
+          setTimeout(() => { show.style.opacity = '1'; show.style.transform = 'translateY(0)'; }, 20);
+        };
+        tabSpec.onclick = () => { AU.cursor(); switchTab(true); };
+        tabNorm.onclick = () => { AU.cursor(); switchTab(false); };
+        box.appendChild(specWrap);
+        box.appendChild(normWrap);
+        this.SHOP_SPECIAL.forEach(s => {
+          const it = IT[s.k]; if (!it) return;
+          const owned = GM.fac.bag[s.k] || 0;
+          const r = el('div', 'itemRow');
+          r.style.cssText = 'background:linear-gradient(180deg,#fff8e8,#ffe9c8)';
+          r.innerHTML = `<div style="flex:1"><b>${it.n}</b> ${owned ? `<span style="font-size:10px;color:#999">已有×${owned}</span>` : ''}<div style="font-size:11px;color:#777">${it.d}</div></div><span class="px" style="font-size:9px;color:#c07a2a">${s.price}BP</span>`;
+          const buy = el('button', 'btn tiny', '购买'); buy.style.marginLeft = '8px';
+          buy.disabled = GM.fac.bp < s.price;
+          buy.onclick = () => {
+            if (GM.fac.bp < s.price) { toast('BP不足！'); AU.no(); return; }
+            GM.fac.bp -= s.price; GM.fac.bag[s.k] = (GM.fac.bag[s.k] || 0) + 1;
+            AU.ok(); saveFac(); close(); this.openShop();
+          };
+          r.appendChild(buy);
+          specWrap.appendChild(r);
+        });
         this.SHOP.forEach(s => {
           const it = IT[s.k]; if (!it) return;
           const owned = GM.fac.bag[s.k] || 0;
@@ -21037,7 +21355,7 @@ return ev;
             AU.ok(); saveFac(); close(); this.openShop();
           };
           r.appendChild(buy);
-          box.appendChild(r);
+          normWrap.appendChild(r);
         });
       },
       /* ============ 大厅 ============ */
@@ -21147,10 +21465,10 @@ return ev;
           }
         } else {
           /* ★ 已有队伍：准备匹配 */
-          const expertInfo = GM.fac.nextExpert ? `<br><span style="color:#ffd93b">下一场对手：<b>${GM.fac.nextExpert.name}</b></span>` : '';
-          mid.innerHTML = `<h3 class="disp" style="color:#ffd93b;font-size:24px;text-align:center;margin:10px">准备就绪</h3>
-<div style="color:#aab;font-size:14px;text-align:center;line-height:2">第 <b style="color:#fff">${GM.fac.round}</b> 轮 · 第 <b style="color:#fff">${GM.fac.win + 1}</b> / 7 场${expertInfo}
-${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b style="color:#ff6b6b">⚠ 下一场：冠军级训练家！' + (GM.fac.mode === 'pick4double' ? '（双打·双方统一 Lv50 标准赛制）' : '') + '</b>' : ''}</div>
+          const expertInfo = GM.fac.nextExpert ? `<br><span class="facReadyAccent">下一场对手：<b>${GM.fac.nextExpert.name}</b></span>` : '';
+          mid.innerHTML = `<h3 class="disp facReadyTitle" style="font-size:24px;text-align:center;margin:10px">准备就绪</h3>
+<div class="facReadyInfo" style="font-size:14px;text-align:center;line-height:2">第 <b>${GM.fac.round}</b> 轮 · 第 <b>${GM.fac.win + 1}</b> / 7 场${expertInfo}
+${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b class="facReadyWarn">⚠ 下一场：冠军级训练家！' + (GM.fac.mode === 'pick4double' ? '（双打·双方统一 Lv50 标准赛制）' : '') + '</b>' : ''}</div>
 <div style="text-align:center;margin-top:10px"><button class="btn" id="facShopBtn">🛒 道具商店</button></div>`;
           $('#facShopBtn').onclick = () => { AU.cursor(); this.openShop(); };
         }
@@ -21207,7 +21525,9 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b styl
           restoreLvls = null;
         }
         if (r.result === 'win') {
-          GM.fac.win++; GM.fac.bp += GM.fac.round;
+          /* ★ 双打模式 BP×2（单打×1） */
+          const bpMult = GM.fac.mode === 'pick4double' ? 2 : 1;
+          GM.fac.win++; GM.fac.bp += GM.fac.round * bpMult;
           /* ★ 冠军图鉴：战胜冠军后点亮 */
           if (et.head) this.unlockChampion(et.champion.name);
           /* ★ 击败隐藏冠军·灭天：额外获得1000 BP（单打/双打通用） */
@@ -21487,8 +21807,8 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
        12. 图鉴 / 自由对战 / 标题
     ============================================================ */
     function statBar(v) { return `<div class="statRow"><span style="width:34px;color:#888;font-weight:900">${''}</span></div>`; }
-    /* ★ 双打独占技能标记：图鉴招式池中标注「双打独占」 */
-    function dblTag(k) { return DOUBLE_ONLY.includes(k) ? ' <span class="dblOnly">双打独占</span>' : ''; }
+    /* ★ 双打独占技能标记：图鉴招式池中标注「双打独占」（加速特性宝可梦的保护除外——工厂中单打也必带） */
+    function dblTag(k, sp) { return DOUBLE_ONLY.includes(k) && !(k === 'protect' && sp && (sp.ab.includes('speedboost') || (MEGA[sp.id] && MEGA[sp.id].a === 'speedboost'))) ? ' <span class="dblOnly">双打独占</span>' : ''; }
     /* 图鉴预览：50级、中性性格、无对战点数，用于展示完整详情 */
     function previewMon(sp) {
       const p = new P(sp.id, 50, { iv: 25, ev: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, nature: NATURES[0], moves: sp.mv.slice(0, 4) });
@@ -21507,7 +21827,7 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
     <div style="font-size:11px;color:#888;font-weight:700">第 ${genOf(sp.id)} 世代 · 总和 ${bst(sp)}${sp.leg ? ' · 传说' : ''}${MEGA[sp.id] ? ' · 可Mega' : ''}${GMAXLIST.has(sp.id) ? ` · 可超极巨（${GMAXMOVE[sp.id]?.n || ''}）` : ''}</div></div>
     ${sp.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:900;color:#777;font-size:11px">${names[i]}</span><span class="px" style="font-size:8px;width:26px;text-align:right">${v}</span><div class="bar"><div class="fill" style="width:${Math.min(100, v / 1.8)}%;background:${v >= 100 ? '#3ecf6c' : v >= 70 ? '#8bc34a' : v >= 45 ? '#f2c230' : '#ef4444'}"></div></div></div>`).join('')}
     <div style="margin-top:8px;font-size:12px"><b>特性：</b>${sp.ab.map(a => AB[a]?.n || a).join(' / ')}</div>
-        <div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}${dblTag(k)}</span>`).join('')}</div>`);
+        <div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}${dblTag(k, sp)}</span>`).join('')}</div>`);
       /* ★ 点开完整详情（全屏） */
       const detBtn = el('button', 'btn blue', '📋 完整详情');
       detBtn.style.cssText = 'width:100%;margin-top:12px';
@@ -21529,7 +21849,7 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
 ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:900;color:#777;font-size:11px">${names[i]}</span><span class="px" style="font-size:8px;width:26px;text-align:right">${v}</span><div class="bar"><div class="fill" style="width:${Math.min(100, v / 1.8)}%;background:${v >= 100 ? '#3ecf6c' : v >= 70 ? '#8bc34a' : v >= 45 ? '#f2c230' : '#ef4444'}"></div></div></div>`).join('')}
 <div style="margin-top:8px;font-size:12px"><b>特性：</b>${AB[cfg.a]?.n || cfg.a}（${AB[cfg.a]?.d || ''}）</div>
 <div style="margin-top:6px;font-size:11px;color:#888;font-weight:700">进化石：${cfg.stone}</div>
-<div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}${dblTag(k)}</span>`).join('')}</div>`);
+<div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}${dblTag(k, sp)}</span>`).join('')}</div>`);
       /* 点开完整详情 */
       const detBtn = el('button', 'btn blue', '📋 完整详情');
       detBtn.style.cssText = 'width:100%;margin-top:12px';
@@ -21556,7 +21876,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
 ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:900;color:#777;font-size:11px">${names[i]}</span><span class="px" style="font-size:8px;width:26px;text-align:right">${v}</span><div class="bar"><div class="fill" style="width:${Math.min(100, v / 1.8)}%;background:${v >= 100 ? '#3ecf6c' : v >= 70 ? '#8bc34a' : v >= 45 ? '#f2c230' : '#ef4444'}"></div></div></div>`).join('')}
 <div style="margin-top:8px;font-size:12px"><b>特性：</b>${AB[cfg.a]?.n || cfg.a}（${AB[cfg.a]?.d || ''}）</div>
 <div style="margin-top:6px;font-size:11px;color:#c07a2a;font-weight:900">专属道具：${cfg.stone}（携带后切换为此形态）</div>
-<div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}${dblTag(k)}</span>`).join('')}</div>`);
+<div style="margin-top:6px"><b style="font-size:12px">招式池：</b><br>${sp.mv.map(k => `<span class="movChip"><i style="background:${TCOL[MV[k].t]}">${TNAME[MV[k].t]}</i>${MV[k].n}${MV[k].p ? ' ' + MV[k].p : ''}${dblTag(k, sp)}</span>`).join('')}</div>`);
       const detBtn = el('button', 'btn blue', '📋 完整详情');
       detBtn.style.cssText = 'width:100%;margin-top:12px';
       detBtn.onclick = () => {
@@ -21801,7 +22121,23 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
       const genSel = $('#freeGen'), tySel = $('#freeType');
       if (!genSel.options.length || genSel.options.length <= 1) { for (let g = 1; g <= 9; g++)genSel.add(new Option('第' + g + '世代', g)); }
       if (!tySel.options.length || tySel.options.length <= 1) { TYP.forEach(t => tySel.add(new Option(TNAME[t], t))); }
-      let playerTeam = [], enemyTeam = [], editing = 'player', lvl = 50, enemyMode = 'random', championName = null;
+      let playerTeam = [], enemyTeam = [], editing = 'player', lvl = 50, enemyMode = 'random', championName = null, championDbl = null;
+      /* ★ 冠军训练家阵容构建（单打取随机队伍；双打取冠军双打配置：招式/道具/特性/努力值/性格） */
+      const buildChampionTeam = (ch, dblMode) => {
+        if (dblMode) {
+          const t = ch.dbl && ch.dbl.length ? pick(ch.dbl) : null;
+          if (!t) return null;
+          return t.ids.map((id, idx) => {
+            const sp = SPDB[id]; if (!sp) return null;
+            return { sp, lvl, nature: NATURES.find(n => n.n === t.natures[idx].n) || NATURES[0], ev: t.evs[idx] || { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, ability: t.abilities ? t.abilities[idx] : pick(sp.ab), moves: (t.moves && t.moves[idx]) || sp.mv.slice(0, 4), tera: pick(TYP), item: t.items ? t.items[idx] : null, gmax: false };
+          }).filter(Boolean);
+        }
+        const ids = ch.teams && ch.teams.length ? pick(ch.teams) : ch.team || [];
+        return ids.map(pid => {
+          const sp = SPDB[pid]; if (!sp) return null;
+          return { sp, lvl, nature: NATURES[0], ev: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, ability: pick(sp.ab), moves: sp.mv.slice(0, 4), tera: pick(TYP), item: null, gmax: false };
+        }).filter(Boolean);
+      };
       /* ★ 已遇到的冠军级训练家选择面板（自由对战对手） */
       const renderChampionSel = () => {
         const et = $('#freeEnemyTeam'); if (!et) return;
@@ -21821,11 +22157,8 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
           c.onclick = () => {
             AU.ok();
             championName = ch.name;
-            const ids = ch.teams && ch.teams.length ? pick(ch.teams) : ch.team || [];
-            enemyTeam = ids.map(pid => {
-              const sp = SPDB[pid]; if (!sp) return null;
-              return { sp, lvl, nature: NATURES[0], ev: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }, ability: pick(sp.ab), moves: sp.mv.slice(0, 4), tera: pick(TYP), item: null, gmax: false };
-            }).filter(Boolean);
+            championDbl = ch.dbl || null;
+            enemyTeam = buildChampionTeam(ch, false);
             renderTeam(); render();
           };
           row.appendChild(c);
@@ -21937,9 +22270,31 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
         bch.onclick = () => { enemyMode = 'champion'; AU.cursor(); emToggle.querySelectorAll('.btn').forEach(b => b.classList.remove('blue')); bch.classList.add('blue'); renderTeam(); };
         emToggle.appendChild(br); emToggle.appendChild(bc); emToggle.appendChild(bch);
       }
+      /* ★ 双打勾选：冠军模式下切换为冠军的双打阵容 */
+      const rD = $('#rDoubles');
+      if (rD) rD.addEventListener('change', () => {
+        if (enemyMode !== 'champion' || !championName) return;
+        const ch = FAC.championList().find(c => c.name === championName);
+        if (!ch) return;
+        if (rD.checked) {
+          if (ch.dbl && ch.dbl.length) { enemyTeam = buildChampionTeam(ch, true); }
+          else { toast('该冠军没有双打阵容！'); AU.no(); rD.checked = false; return; }
+        } else enemyTeam = buildChampionTeam(ch, false);
+        renderTeam(); render();
+      });
       $('#freeGo').onclick = async () => {
         if (!playerTeam.length) { toast('请先选择我方宝可梦！'); AU.no(); return; }
         const wantDouble = $('#rDoubles') ? $('#rDoubles').checked : false;
+        /* ★ 冠军训练家：按单/双打模式加载对应阵容 */
+        if (enemyMode === 'champion' && championName) {
+          const ch = FAC.championList().find(c => c.name === championName);
+          if (ch) {
+            if (wantDouble) {
+              if (!ch.dbl || !ch.dbl.length) { toast('该冠军没有双打阵容！'); AU.no(); return; }
+              enemyTeam = buildChampionTeam(ch, true);
+            } else enemyTeam = buildChampionTeam(ch, false);
+          }
+        }
         if (wantDouble && playerTeam.length < 2) { toast('双打至少需要2只宝可梦！'); AU.no(); return; }
         const player = playerTeam.map(cfg => { const p = new P(cfg.sp.id, cfg.lvl, { iv: 30, nature: cfg.nature, ev: cfg.ev, ability: cfg.ability, moves: cfg.moves, tera: cfg.tera, item: cfg.item }); if (GMAXLIST.has(cfg.sp.id)) { p.vol.canGmax = !!cfg.gmax; p._userGmax = !!cfg.gmax; } return p; });
         let enemy;
@@ -22780,7 +23135,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
             showDesc = '极巨招式 · 完全守住所有攻击';
           }
           const c = el('div', 'dMove'); c.style.borderLeftColor = TCOL[showT];
-          c.innerHTML = `<div class="dmTop">${tyBadge(showT)}<b>${showN}</b>${dblTag(mv.k)}<span class="dmCat">${showC === 'P' ? '物理' : showC === 'S' ? '特殊' : '变化'}</span></div>
+          c.innerHTML = `<div class="dmTop">${tyBadge(showT)}<b>${showN}</b>${dblTag(mv.k, m.sp)}<span class="dmCat">${showC === 'P' ? '物理' : showC === 'S' ? '特殊' : '变化'}</span></div>
         <div class="dmNums">${showP != null ? '威力 ' + showP + ' · ' : ''}命中 ${showA ?? '必中'} · PP ${mv.pp}/${mv.maxpp}${d.pri ? ` · 先制 ${d.pri > 0 ? '+' : ''}${d.pri}` : ''}</div>
         <div class="dmDesc">${showDesc}</div>`;
           moveWrap.appendChild(c);
