@@ -3430,6 +3430,23 @@
       }
     }
 
+    /* 群聚变形：绿光凝聚（中心光球亮起并膨胀消散） */
+    @keyframes fxGlowA {
+      0% {
+        transform: scale(.15);
+        opacity: 0
+      }
+
+      35% {
+        opacity: 1
+      }
+
+      100% {
+        transform: scale(2.6);
+        opacity: 0
+      }
+    }
+
     /* ============ 华丽特效 2.0：大尺寸球体 / 天际闪电 / 加粗光束 ============ */
     .fxOrbBig {
       position: absolute;
@@ -15237,6 +15254,8 @@ return ev;
         if (opts.c) d.style.color = opts.c;
         if (opts.bg) d.style.background = opts.bg;
         const w = opts.w || 10, h = opts.h || 10;
+        if (opts.w) d.style.width = opts.w + 'px';
+        if (opts.h) d.style.height = opts.h + 'px';
         d.style.left = (opts.x - w / 2) + 'px';
         d.style.top = (opts.y - h / 2) + 'px';
         if (opts.dx) d.style.setProperty('--dx', opts.dx + 'px');
@@ -15840,16 +15859,33 @@ return ev;
         const B = this.center(side, slot);
         const ft = this.feet(side, slot);
         if (kind === 'power') {
-          /* 群聚变形：细胞粒子汇聚 → 低闪 → 爆发环 */
+          /* 群聚变形：四面八方大量绿色粒子聚集 → 汇聚成绿光 → 变身完全体爆发 */
           SND.play('mega');
-          const colors = ['#4caf7d', '#2fbf8f', '#8af0d0', '#ffffff'];
-          for (let i = 0; i < 22; i++) setTimeout(() => {
-            const a = Math.random() * Math.PI * 2, d = rnd(130, 230);
-            this.p({ cls: 'fxTeraChip', x: B.x + Math.cos(a) * d, y: B.y + Math.sin(a) * d, c: pick(colors), dx: -Math.cos(a) * d, dy: -Math.sin(a) * d, an: 'fxTeraChipA', dur: .5 });
-          }, i * 18);
-          setTimeout(() => this.flash(.16, 420), 420);
-          setTimeout(() => { for (let i = 0; i < 3; i++) this.p({ cls: 'fxRing', x: B.x, y: B.y, c: pick(colors), an: 'fxRingB', dur: .5, delay: i * .12 }); }, 440);
-          setTimeout(() => { for (let i = 0; i < 10; i++) this.p({ cls: 'fxp', x: B.x + rnd(-40, 40), y: B.y + rnd(-30, 30), char: '✦', c: pick(colors), fs: rnd(14, 26), dx: rnd(-40, 40), dy: rnd(-60, -10), an: 'fxRise', dur: rnd(6, 9) / 10, delay: i * .05 }); }, 460);
+          const colors = ['#4caf7d', '#2fbf8f', '#8af0d0', '#a5e8c8', '#ffffff'];
+          /* 阶段1：大量粒子从四面八方涌向基格尔德（三大波次，越聚越密） */
+          for (let i = 0; i < 64; i++) setTimeout(() => {
+            const a = Math.random() * Math.PI * 2, d = rnd(150, 340);
+            this.p({ cls: 'fxTeraChip', x: B.x + Math.cos(a) * d, y: B.y + Math.sin(a) * d, c: pick(colors), w: rnd(6, 13), h: rnd(6, 13), dx: -Math.cos(a) * d, dy: -Math.sin(a) * d, an: 'fxTeraChipA', dur: rnd(45, 75) / 100 });
+          }, i * 10);
+          /* 阶段2：内圈粒子收拢，越靠近中心越密集 */
+          for (let i = 0; i < 30; i++) setTimeout(() => {
+            const a = Math.random() * Math.PI * 2, d = rnd(80, 170);
+            this.p({ cls: 'fxTeraChip', x: B.x + Math.cos(a) * d, y: B.y + Math.sin(a) * d, c: pick(['#4caf7d', '#8af0d0', '#eafff4']), w: rnd(5, 10), h: rnd(5, 10), dx: -Math.cos(a) * d, dy: -Math.sin(a) * d, an: 'fxTeraChipA', dur: .4 });
+          }, 380 + i * 9);
+          /* 阶段3：汇聚成绿光——中心光球亮起膨胀 */
+          setTimeout(() => {
+            this.p({ cls: 'fxp', x: B.x, y: B.y, w: 34, h: 34, bg: 'radial-gradient(circle, rgba(255,255,255,.95), rgba(140,240,208,.85) 40%, rgba(76,175,125,.45) 70%, transparent 80%)', an: 'fxGlowA', dur: .55 });
+          }, 640);
+          this.flash(.16, 400);
+          /* 阶段4：变身爆发——绿色冲击环 + 星光迸溅 + 顶部粒子光环 */
+          setTimeout(() => {
+            for (let i = 0; i < 4; i++) this.p({ cls: 'fxRing', x: B.x, y: B.y, c: pick(['#4caf7d', '#8af0d0']), an: 'fxRingB', dur: .55, delay: i * .1 });
+            for (let i = 0; i < 16; i++) this.p({ cls: 'fxp', x: B.x + rnd(-38, 38), y: B.y + rnd(-32, 32), char: '✦', c: pick(colors), fs: rnd(14, 26), dx: rnd(-50, 50), dy: rnd(-72, -8), an: 'fxRise', dur: rnd(6, 9) / 10, delay: i * .04 });
+            for (let i = 0; i < 12; i++) {
+              const a = i / 12 * Math.PI * 2, d = rnd(46, 78);
+              this.p({ cls: 'fxTeraChip', x: B.x + Math.cos(a) * d, y: B.y + Math.sin(a) * d, c: pick(['#8af0d0', '#eafff4', '#ffffff']), w: 6, h: 6, dx: rnd(-18, 18), dy: rnd(-22, 6), an: 'fxTeraChipA', dur: .5 });
+            }
+          }, 800);
         } else if (kind === 'school') {
           /* 鱼群成形：水流粒子汇聚 → 溅射环 → 气泡 */
           SND.play('splash');
@@ -21506,8 +21542,13 @@ return ev;
       build(sp, lvl, round) {
         const moves = this.pickMoves(sp);
         /* ★ 先确定实际特性再抽道具，确保毒疗/中毒激升宝可梦才携带剧毒宝珠 */
-        const ability = pick(sp.ab);
+        const ability = this.rollAbility(sp);
         return new P(sp.id, lvl, { moves, ability, item: this.pickItem(sp, moves, ability), iv: 28, tera: pick(TYP), ev: genEV(sp, round || 1, moves) });
+      },
+      /* ★ 工厂特性抽取：基格尔德（含10%形态）的群聚变形出现概率为90% */
+      rollAbility(sp) {
+        if ((sp.id === 718 || sp.id === 10340) && Math.random() < 0.9) return 'powerconstruct';
+        return pick(sp.ab);
       },
       /* ★ 双打招式池：优先保留双打辅助招式，再补输出 */
       pickMovesDouble(sp) {
@@ -21537,7 +21578,7 @@ return ev;
       },
       buildDouble(sp, lvl, round) {
         const moves = this.pickMovesDouble(sp);
-        const ability = pick(sp.ab);
+        const ability = this.rollAbility(sp);
         /* 双打环境更倾向文柚果/气势腰带/剩饭等生存道具（专属道具保留，不被替换） */
         let item = this.pickItem(sp, moves, ability);
         if (!['leftovers', 'sitrus', 'focussash', 'lifeorb', 'expertbelt', 'choiceband', 'choicespecs', 'choicescarf', 'airballoon', 'weaknesspolicy', 'rockyhelmet', 'thickclub', 'lightball', 'leek', 'deepseatooth', 'deepseascale', 'souldew', 'adamantorb', 'lustrousorb', 'griseousorb', 'rustedsword', 'rustedshield', 'redorb', 'blueorb'].includes(item) && Math.random() < 0.3) {
