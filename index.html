@@ -7827,11 +7827,15 @@
         height: 200px !important;
       }
 
-      /* 状态/天气条：居中限宽自动换行，避免遮挡角落的信息卡 */
-      #wxchip {
+      /* 状态/天气条：居中限宽自动换行，避免遮挡角落的信息卡；flex换行贴合内容宽度 */
+      #wxchip.on {
         left: 50% !important;
         right: auto !important;
         transform: translateX(-50%) !important;
+        display: inline-flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        align-items: center !important;
         width: auto !important;
         max-width: calc(100% - 90px) !important;
         white-space: normal !important;
@@ -9238,7 +9242,7 @@
     };
     const N = { C2: 65, D2: 73, E2: 82, F2: 87, G2: 98, A2: 110, B2: 123, C3: 131, D3: 147, E3: 165, F3: 175, G3: 196, A3: 220, B3: 247, C4: 262, D4: 294, E4: 330, F4: 349, G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988, C6: 1046 };
 
-    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false, dlgStyle: 'classic', buiBg: 'dark' }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
+    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false, dlgStyle: 'classic', buiBg: 'dark', spriteMode: 'dyn' }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
     function saveCfg() { localStorage.setItem('pif_cfg', JSON.stringify(CFG)); }
 
 const _ST = (f, s) => f * Math.pow(2, s / 12);
@@ -13971,6 +13975,8 @@ return ev;
       if (megaIds.has(id)) { apiId = id; }
     }
     const urls = [];
+    /* ★ 图片显示模式：动态(GIF优先多源)/静态(仅PNG多源) */
+    const statMode = typeof CFG !== 'undefined' && CFG.spriteMode === 'stat';
     for (const base of SPRBASES) {
       if (base.includes('pokemonshowdown')) {
         urls.push(base + (back ? 'ani-back/' : 'ani/') + apiId + '.gif');
@@ -13987,10 +13993,15 @@ return ev;
         urls.push(base + 'other/official-artwork/' + apiId + '.png');
       }
     }
+    if (statMode) return urls.filter(u => u.endsWith('.png'));
     return urls;
     }
+    /* ★ 已注册精灵图：设置切换动态/静态时实时重载 */
+    const SPRITE_REGS = new Set();
     /* ★ 精灵图加载：逐源尝试 + 7秒超时换源，避免单源故障导致图片空白 */
     function setSprite(img, id, back, noRegional) {
+      img._setArgs = [id, back, noRegional];
+      SPRITE_REGS.add(img);
       img._urls = spriteURLs(id, back, noRegional);
       img._ui = 0;
       const advance = () => {
@@ -14002,6 +14013,10 @@ return ev;
       img.onload = () => { clearTimeout(img._t); if (img._side && window.BUI && BUI.fitSprite) BUI.fitSprite(img._side); };
       img.onerror = advance;
       advance();
+    }
+    /* ★ 设置切换精灵模式（动态/静态）时实时重载所有已显示图片 */
+    function applySpriteMode() {
+      SPRITE_REGS.forEach(img => { try { if (img._setArgs) setSprite(img, ...img._setArgs); } catch (e) { /* 忽略个别失败 */ } });
     }
     /* ★ 预加载清单：后台预取一批宝可梦的正背面精灵图（含Mega形态），开战时提前命中缓存 */
     function preloadSprites(monList) {
@@ -14130,11 +14145,23 @@ return ev;
         if (eHaz.sr) chips.push(`🪨 对手·岩(${eHaz.sr})`);
         if (eHaz.spikes) chips.push(`▲ 对手·菱${'×'.repeat(eHaz.spikes)}`);
         if (eHaz.tspikes) chips.push(`☠ 对手·毒菱${eHaz.tspikes >= 2 ? '²' : '¹'}`);
-        /* ★ 超极巨DOT显示 */
-        if (b.gmaxDot) chips.push('🔥 ' + (b.gmaxDot.side === 'e' ? '对方·' : '己方·') + (b.gmaxDot.name || TNAME[b.gmaxDot.type]) + '(' + b.gmaxDot.turns + ')');
+        /* ★ 超极巨DOT显示（名称去掉「超极巨」前缀，如 超极巨地狱灭焰→地狱灭焰） */
+        if (b.gmaxDot) chips.push('🔥 ' + (b.gmaxDot.side === 'e' ? '对方·' : '己方·') + ((b.gmaxDot.name || TNAME[b.gmaxDot.type]) + '').replace(/^超极巨/, '') + '(' + b.gmaxDot.turns + ')');
         /* ★ 极光幕显示 */
         if (b.auroraveil.p > 0) chips.push(`🌈 己方·极光幕(${b.auroraveil.p})`);
         if (b.auroraveil.e > 0) chips.push(`🌈 对手·极光幕(${b.auroraveil.e})`);
+        /* ★ 反射壁/光墙显示（取各侧场上宝可梦的最大剩余回合） */
+        const scrMax = side => {
+          const arr = side === 'e' ? b.et : b.pt;
+          let ref = 0, light = 0;
+          arr.forEach(m => { if (m && m.alive()) { if ((m.vol.reflect || 0) > ref) ref = m.vol.reflect; if ((m.vol.lightscreen || 0) > light) light = m.vol.lightscreen; } });
+          return { ref, light };
+        };
+        const pScr = scrMax('p'), eScr = scrMax('e');
+        if (pScr.ref) chips.push(`🛡 己方·反射壁(${pScr.ref})`);
+        if (pScr.light) chips.push(`✨ 己方·光墙(${pScr.light})`);
+        if (eScr.ref) chips.push(`🛡 对手·反射壁(${eScr.ref})`);
+        if (eScr.light) chips.push(`✨ 对手·光墙(${eScr.light})`);
         /* ★ 顺风显示（单方） */
         if (b.tailwind.p > 0) chips.push(`💨 己方·顺风(${b.tailwind.p})`);
         if (b.tailwind.e > 0) chips.push(`💨 对手·顺风(${b.tailwind.e})`);
@@ -19520,18 +19547,18 @@ return ev;
             const d = Math.max(1, Math.floor(B / (['water', 'steel'].includes(m.types[0]) ? 4 : 8)));
             m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'salt', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#e8e8f0', m._slot || 0); await say(`盐腌正在侵蚀 ${m.name}！`); this.addLog(`↳ ${m.name} 盐腌伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`);
           }
-          // 异常状态
-          if (m.status === 'burn') { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'burn', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#ff7a2f', m._slot || 0); await say(`${m.name} 被灼伤伤害了！`); this.addLog(`↳ ${m.name} 灼伤伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (m.status === 'psn') { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'psn', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#b56fd8', m._slot || 0); await say(`${m.name} 受到了毒素伤害！`); this.addLog(`↳ ${m.name} 中毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (m.status === 'tox') { m.toxicN++; const d = Math.floor(B * m.toxicN / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'tox', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#8a2fa3', m._slot || 0); await say(`${m.name} 受到了剧毒伤害！`); this.addLog(`↳ ${m.name} 剧毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (m.has('poisonheal') && (m.status === 'psn' || m.status === 'tox')) { this.abBanner(m); const h = Math.floor(B / 8); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的毒疗发动了，回复了HP！`); this.addLog(`↳ ${m.name} 毒疗回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          // 道具回复
+          // ★ 道具回复：先于扣血异常结算（回血在先，再承受灼伤/中毒等回合末伤害）
           /* ★ 笨拙：道具回复效果无效 */
           if (!m.has('klutz') && m.item === 'leftovers') { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.name} 吃剩的东西回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           if (!m.has('klutz') && m.item === 'blacksludge') {
             if (m.types.includes('poison')) { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.name} 黑色污泥回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
             else if (!m.has('magicguard')) { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'sludge', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#b56fd8', m._slot || 0); this.addLog(`↳ ${m.name} 黑色污泥伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           }
+          // 异常状态
+          if (m.status === 'burn') { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'burn', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#ff7a2f', m._slot || 0); await say(`${m.name} 被灼伤伤害了！`); this.addLog(`↳ ${m.name} 灼伤伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.status === 'psn') { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'psn', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#b56fd8', m._slot || 0); await say(`${m.name} 受到了毒素伤害！`); this.addLog(`↳ ${m.name} 中毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.status === 'tox') { m.toxicN++; const d = Math.floor(B * m.toxicN / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'tox', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#8a2fa3', m._slot || 0); await say(`${m.name} 受到了剧毒伤害！`); this.addLog(`↳ ${m.name} 剧毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.has('poisonheal') && (m.status === 'psn' || m.status === 'tox')) { this.abBanner(m); const h = Math.floor(B / 8); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的毒疗发动了，回复了HP！`); this.addLog(`↳ ${m.name} 毒疗回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           /* ★ 火焰宝珠/剧毒宝珠：回合末附加异常状态 */
           if (!m.has('klutz') && m.item === 'flameorb' && !m.status && !m.has('magicguard')) { await this.inflictStatus(m, 'burn', null, 'fire'); }
           if (!m.has('klutz') && m.item === 'toxicorb' && !m.status && !m.has('magicguard')) { await this.inflictStatus(m, 'tox', null, 'poison'); }
@@ -19727,7 +19754,7 @@ return ev;
               const dd = Math.max(1, Math.floor(dotM.maxhp / 6));
               dotM.hp = Math.max(0, dotM.hp - dd);
               FX.gmaxDotFx(this.gmaxDot.name, this.gmaxDot.type, this.gmaxDot.side, dotM._slot || 0);
-              await say(`${dotM.name} 受到了${this.gmaxDot.name || '超极巨' + TNAME[this.gmaxDot.type]}的持续伤害！`);
+              await say(`${dotM.name} 受到了${((this.gmaxDot.name || '') + '').replace(/^超极巨/, '') || '超极巨' + TNAME[this.gmaxDot.type]}的持续伤害！`);
               this.addLog(`↳ ${dotM.name} 超极巨DOT -${dd} HP`);
               BUI.dmgPop(this.gmaxDot.side, `-${dd}`, TCOL[this.gmaxDot.type]);
               /* ★ 被DOT击杀：正常触发濒死演出与换人（死亡动画/立绘消失） */
@@ -20771,6 +20798,23 @@ return ev;
         { k: 'widelens', price: 15 }, { k: 'throatspray', price: 15 },
         { k: 'lightclay', price: 20 }, { k: 'terrainextender', price: 20 },
         { k: 'grassseed', price: 10 }, { k: 'electricseed', price: 10 }, { k: 'psychicseed', price: 10 }, { k: 'mistyseed', price: 10 },
+        /* ★ 属性增强道具 */
+        { k: 'charcoal', price: 10 }, { k: 'mysticwater', price: 10 }, { k: 'magnet', price: 10 }, { k: 'miracleseed', price: 10 }, { k: 'nevermeltice', price: 10 },
+        { k: 'blackbelt', price: 10 }, { k: 'poisonbarb', price: 10 }, { k: 'softsand', price: 10 }, { k: 'sharpbeak', price: 10 }, { k: 'twistedspoon', price: 10 },
+        { k: 'silverpowder', price: 10 }, { k: 'hardstone', price: 10 }, { k: 'spelltag', price: 10 }, { k: 'dragonfang', price: 10 }, { k: 'blackglasses', price: 10 },
+        { k: 'metalcoat', price: 10 }, { k: 'silkscarf', price: 10 }, { k: 'fairyfeather', price: 10 },
+        /* ★ 场景/效果道具 */
+        { k: 'bigroot', price: 15 }, { k: 'rockyhelmet', price: 20 }, { k: 'boosterenergy', price: 15 }, { k: 'powerherb', price: 15 },
+        { k: 'loadeddice', price: 15 }, { k: 'blunderpolicy', price: 15 }, { k: 'smokeball', price: 10 },
+        { k: 'flameorb', price: 12 }, { k: 'toxicorb', price: 12 },
+      ],
+      /* ★ 普通道具分类（商店与背包共用） */
+      SHOP_GROUPS: [
+        { n: '🍒 回复', ks: ['sitrus', 'grassseed', 'electricseed', 'psychicseed', 'mistyseed', 'bigroot'] },
+        { n: '🛡 生存', ks: ['leftovers', 'blacksludge', 'focussash', 'eviolite', 'assaultvest', 'airballoon', 'weaknesspolicy', 'rockyhelmet', 'smokeball', 'quickclaw'] },
+        { n: '⚔ 输出', ks: ['lifeorb', 'expertbelt', 'choiceband', 'choicespecs', 'choicescarf', 'throatspray', 'loadeddice', 'blunderpolicy', 'powerherb', 'boosterenergy', 'widelens', 'scopelens'] },
+        { n: '🔥 属性', ks: ['charcoal', 'mysticwater', 'magnet', 'miracleseed', 'nevermeltice', 'blackbelt', 'poisonbarb', 'softsand', 'sharpbeak', 'twistedspoon', 'silverpowder', 'hardstone', 'spelltag', 'dragonfang', 'blackglasses', 'metalcoat', 'silkscarf', 'fairyfeather'] },
+        { n: '⚡ 状态', ks: ['flameorb', 'toxicorb', 'lightclay', 'terrainextender'] },
       ],
       /* ★ 专属道具栏：各宝可梦专属/传说专属道具（对战工厂对应宝可梦概率携带） */
       SHOP_SPECIAL: [
@@ -20780,6 +20824,11 @@ return ev;
         { k: 'rustedsword', price: 30 }, { k: 'rustedshield', price: 30 },
         { k: 'redorb', price: 30 }, { k: 'blueorb', price: 30 },
         { k: 'legendplate', price: 100 },
+        /* ★ 阿尔宙斯其余石板 */
+        { k: 'flameplate', price: 15 }, { k: 'splashplate', price: 15 }, { k: 'zapplate', price: 15 }, { k: 'meadowplate', price: 15 }, { k: 'icicleplate', price: 15 },
+        { k: 'fistplate', price: 15 }, { k: 'toxicplate', price: 15 }, { k: 'earthplate', price: 15 }, { k: 'skyplate', price: 15 }, { k: 'mindplate', price: 15 },
+        { k: 'insectplate', price: 15 }, { k: 'stoneplate', price: 15 }, { k: 'spookyplate', price: 15 }, { k: 'dracoplate', price: 15 }, { k: 'dreadplate', price: 15 },
+        { k: 'ironplate', price: 15 }, { k: 'pixieplate', price: 15 },
         { k: 'burndrive', price: 15 }, { k: 'chilldrive', price: 15 }, { k: 'dousedrive', price: 15 }, { k: 'shockdrive', price: 15 },
         { k: 'wellspringmask', price: 15 }, { k: 'hearthflamemask', price: 15 }, { k: 'cornerstonemask', price: 15 },
         ...Object.keys(MEMORYDISC).map(k => ({ k, price: 15 })),
@@ -21268,10 +21317,21 @@ return ev;
         const none = el('div', 'itemRow'); none.innerHTML = `<div><b>无道具</b><div style="font-size:11px;color:#777">卸下当前道具</div></div>`;
         none.onclick = () => { if (m.item) { GM.fac.bag[m.item] = (GM.fac.bag[m.item] || 0) + 1; } m.item = null; m.recalc(); m.hp = Math.min(m.hp, m.maxhp); AU.ok(); saveFac(); close(); };
         box.appendChild(none);
-        /* 背包中的道具 */
+        /* 背包中的道具（分类导航栏 + 点击切换） */
         const bagKeys = Object.keys(GM.fac.bag).filter(k => GM.fac.bag[k] > 0);
         if (!bagKeys.length) box.insertAdjacentHTML('beforeend', '<div style="color:#999;font-size:12px;padding:8px">背包为空，请先在商店购买道具</div>');
-        bagKeys.forEach(k => {
+        const bagNav = el('div', ''); bagNav.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px';
+        const bagList = el('div', '');
+        box.appendChild(bagNav);
+        box.appendChild(bagList);
+        const bagCatDefs = this.SHOP_GROUPS.map(g => ({ n: g.n, test: k => g.ks.includes(k) }));
+        const spKeysAll = this.SHOP_SPECIAL.map(s => s.k);
+        if (bagKeys.some(k => spKeysAll.includes(k))) bagCatDefs.push({ n: '🏆 专属道具', test: k => spKeysAll.includes(k) });
+        if (bagKeys.some(k => !spKeysAll.includes(k) && !this.SHOP.some(x => x.k === k))) bagCatDefs.push({ n: '📦 其他', test: k => !spKeysAll.includes(k) && !this.SHOP.some(x => x.k === k) });
+        let bagCat = null;
+        const bagTabBtns = [];
+        const bagLabel = n => { const lab = el('div', ''); lab.style.cssText = 'font-weight:900;font-size:13px;color:#c0a968;margin:8px 0 2px'; lab.textContent = n; bagList.appendChild(lab); };
+        const bagRow = k => {
           const it = IT[k]; if (!it) return;
           const r = el('div', 'itemRow');
           r.innerHTML = `<div><b>${it.n}</b> <span style="font-size:10px;color:#999">×${GM.fac.bag[k]}</span><div style="font-size:11px;color:#777">${it.d}</div></div>`;
@@ -21280,8 +21340,33 @@ return ev;
             GM.fac.bag[k]--; if (GM.fac.bag[k] <= 0) delete GM.fac.bag[k];
             m.item = k; m.recalc(); m.hp = Math.min(m.hp, m.maxhp); AU.ok(); saveFac(); close();
           };
-          box.appendChild(r);
+          bagList.appendChild(r);
+        };
+        const renderBag = () => {
+          bagList.style.transition = 'opacity .14s ease, transform .14s ease';
+          bagList.style.opacity = '0'; bagList.style.transform = 'translateY(6px)';
+          setTimeout(() => {
+            bagList.innerHTML = '';
+            if (!bagCat) {
+              bagCatDefs.forEach(cd => {
+                const list = bagKeys.filter(cd.test);
+                if (!list.length) return;
+                bagLabel(cd.n);
+                list.forEach(bagRow);
+              });
+            } else bagKeys.filter(k => bagCat(k)).forEach(bagRow);
+            bagList.style.opacity = '1'; bagList.style.transform = 'translateY(0)';
+          }, 140);
+        };
+        [{ n: '全部', test: null }].concat(bagCatDefs).forEach(cd => {
+          const b = el('button', 'btn tiny' + (cd.test === bagCat ? ' blue' : ''));
+          b.textContent = cd.n;
+          b.style.cssText += 'flex:none;font-size:11px';
+          b.onclick = () => { if (cd.test === bagCat) return; bagCat = cd.test; AU.cursor(); bagTabBtns.forEach(x => x.classList.remove('blue')); b.classList.add('blue'); renderBag(); };
+          bagTabBtns.push(b);
+          bagNav.appendChild(b);
         });
+        renderBag();
       },
       /* ★ 道具商店面板 */
       openShop() {
@@ -21342,7 +21427,17 @@ return ev;
           r.appendChild(buy);
           specWrap.appendChild(r);
         });
-        this.SHOP.forEach(s => {
+        /* ★ 普通道具：分类导航栏（全部 + 各分类），点击切换，柔和过渡 */
+        const normNav = el('div', ''); normNav.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px';
+        const normListWrap = el('div', '');
+        normWrap.appendChild(normNav);
+        normWrap.appendChild(normListWrap);
+        let normCat = null;
+        const normTabs = [{ n: '全部', g: null }].concat(this.SHOP_GROUPS.map(g => ({ n: g.n, g })));
+        const normTabBtns = [];
+        const normLabel = n => { const lab = el('div', ''); lab.style.cssText = 'font-weight:900;font-size:13px;color:#c0a968;margin:8px 0 2px'; lab.textContent = n; normListWrap.appendChild(lab); };
+        const buildNormRow = k => {
+          const s = this.SHOP.find(x => x.k === k); if (!s) return;
           const it = IT[s.k]; if (!it) return;
           const owned = GM.fac.bag[s.k] || 0;
           const r = el('div', 'itemRow');
@@ -21355,8 +21450,33 @@ return ev;
             AU.ok(); saveFac(); close(); this.openShop();
           };
           r.appendChild(buy);
-          normWrap.appendChild(r);
+          normListWrap.appendChild(r);
+        };
+        const renderNorm = () => {
+          normListWrap.style.transition = 'opacity .14s ease, transform .14s ease';
+          normListWrap.style.opacity = '0'; normListWrap.style.transform = 'translateY(6px)';
+          setTimeout(() => {
+            normListWrap.innerHTML = '';
+            if (!normCat) {
+              this.SHOP_GROUPS.forEach(g => {
+                const list = g.ks.filter(k => this.SHOP.some(x => x.k === k));
+                if (!list.length) return;
+                normLabel(g.n);
+                list.forEach(buildNormRow);
+              });
+            } else normCat.ks.filter(k => this.SHOP.some(x => x.k === k)).forEach(buildNormRow);
+            normListWrap.style.opacity = '1'; normListWrap.style.transform = 'translateY(0)';
+          }, 140);
+        };
+        normTabs.forEach(t => {
+          const b = el('button', 'btn tiny' + (t.g === normCat ? ' blue' : ''));
+          b.textContent = t.n;
+          b.style.cssText += 'flex:none;font-size:11px';
+          b.onclick = () => { if (t.g === normCat) return; normCat = t.g; AU.cursor(); normTabBtns.forEach(x => x.classList.remove('blue')); b.classList.add('blue'); renderNorm(); };
+          normTabBtns.push(b);
+          normNav.appendChild(b);
         });
+        renderNorm();
       },
       /* ============ 大厅 ============ */
       async lobby() {
@@ -23391,6 +23511,9 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           () => CFG.fxShake, v => { CFG.fxShake = v; }),
         settingsRow('出场动画', '投球→弹跳→爆开→实体化的出场演出',
           () => CFG.entryAnim, v => { CFG.entryAnim = v; }),
+        settingsSelect('精灵图片', '宝可梦图片显示方式：动态GIF动画（默认，多源加载优先动画）/ 静态PNG（更省流量、加载更快），切换后立即生效',
+          [{ n: '动态（GIF动画）', v: 'dyn' }, { n: '静态（PNG）', v: 'stat' }],
+          () => CFG.spriteMode, v => { CFG.spriteMode = v; applySpriteMode(); }),
         settingsSelect('对话框风格', '对话/战斗消息/通知框/右上角按钮的整体视觉风格（11种）：经典、霓虹、羊皮纸、毛玻璃、漫画、像素、星际、森林、樱花、幽灵、卡通手绘',
           [
             { n: '经典', v: 'classic' }, { n: '霓虹', v: 'neon' }, { n: '羊皮纸', v: 'paper' }, { n: '毛玻璃', v: 'glass' },
