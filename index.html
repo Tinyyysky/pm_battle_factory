@@ -22075,7 +22075,7 @@ return ev;
         shopClose.onclick = () => { AU.no(); close(); };
         shopHead.appendChild(shopClose);
         box.appendChild(shopHead);
-        box.insertAdjacentHTML('beforeend', `<div style="font-size:12px;color:#888;margin-bottom:8px">当前 BP：<b style="color:#f2b705">${GM.fac.bp}</b> · 购买的道具存入局外背包，可在匹配前给队伍携带</div>`);
+        box.insertAdjacentHTML('beforeend', `<div style="font-size:12px;color:#888;margin-bottom:8px">当前 BP：<b id="facBpNow" style="color:#f2b705">${GM.fac.bp}</b> · 购买的道具存入局外背包，可在匹配前给队伍携带</div>`);
         /* ★ 顶部切换标签：专属道具（默认置顶）/ 普通道具，平滑切换 */
         const tabBar = el('div', ''); tabBar.style.cssText = 'display:flex;gap:8px;margin-bottom:10px';
         const mkTab = (label, blue) => {
@@ -22105,22 +22105,26 @@ return ev;
         tabNorm.onclick = () => { AU.cursor(); switchTab(false); };
         box.appendChild(specWrap);
         box.appendChild(normWrap);
-        this.SHOP_SPECIAL.forEach(s => {
-          const it = IT[s.k]; if (!it) return;
-          const owned = GM.fac.bag[s.k] || 0;
-          const r = el('div', 'itemRow');
-          r.style.cssText = 'background:linear-gradient(180deg,#fff8e8,#ffe9c8)';
-          r.innerHTML = `<div style="flex:1"><b>${it.n}</b> ${owned ? `<span style="font-size:10px;color:#999">已有×${owned}</span>` : ''}<div style="font-size:11px;color:#777">${it.d}</div></div><span class="px" style="font-size:9px;color:#c07a2a">${s.price}BP</span>`;
-          const buy = el('button', 'btn tiny', '购买'); buy.style.marginLeft = '8px';
-          buy.disabled = GM.fac.bp < s.price;
-          buy.onclick = () => {
-            if (GM.fac.bp < s.price) { toast('BP不足！'); AU.no(); return; }
-            GM.fac.bp -= s.price; GM.fac.bag[s.k] = (GM.fac.bag[s.k] || 0) + 1;
-            AU.ok(); saveFac(); close(); this.openShop();
-          };
-          r.appendChild(buy);
-          specWrap.appendChild(r);
-        });
+        const renderSpec = () => {
+          specWrap.innerHTML = '';
+          this.SHOP_SPECIAL.forEach(s => {
+            const it = IT[s.k]; if (!it) return;
+            const owned = GM.fac.bag[s.k] || 0;
+            const r = el('div', 'itemRow');
+            r.style.cssText = 'background:linear-gradient(180deg,#fff8e8,#ffe9c8)';
+            r.innerHTML = `<div style="flex:1"><b>${it.n}</b> ${owned ? `<span style="font-size:10px;color:#999">已有×${owned}</span>` : ''}<div style="font-size:11px;color:#777">${it.d}</div></div><span class="px" style="font-size:9px;color:#c07a2a">${s.price}BP</span>`;
+            const buy = el('button', 'btn tiny', '购买'); buy.style.marginLeft = '8px';
+            buy.disabled = GM.fac.bp < s.price;
+            buy.onclick = () => {
+              if (GM.fac.bp < s.price) { toast('BP不足！'); AU.no(); return; }
+              GM.fac.bp -= s.price; GM.fac.bag[s.k] = (GM.fac.bag[s.k] || 0) + 1;
+              AU.ok(); saveFac(); refresh();
+            };
+            r.appendChild(buy);
+            specWrap.appendChild(r);
+          });
+        };
+        renderSpec();
         /* ★ 普通道具：分类导航栏（全部 + 各分类），点击切换，柔和过渡 */
         const normNav = el('div', ''); normNav.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px';
         const normListWrap = el('div', '');
@@ -22141,7 +22145,7 @@ return ev;
           buy.onclick = () => {
             if (GM.fac.bp < s.price) { toast('BP不足！'); AU.no(); return; }
             GM.fac.bp -= s.price; GM.fac.bag[s.k] = (GM.fac.bag[s.k] || 0) + 1;
-            AU.ok(); saveFac(); close(); this.openShop();
+            AU.ok(); saveFac(); refresh();
           };
           r.appendChild(buy);
           normListWrap.appendChild(r);
@@ -22170,6 +22174,12 @@ return ev;
           normTabBtns.push(b);
           normNav.appendChild(b);
         });
+        /* ★ 购买后原地刷新（不关闭面板，避免闪烁）：更新BP显示与当前列表 */
+        const refresh = () => {
+          const bpB = $('#facBpNow'); if (bpB) bpB.textContent = GM.fac.bp;
+          if (normWrap.style.display !== 'none') renderNorm();
+          if (specWrap.style.display !== 'none') renderSpec();
+        };
         renderNorm();
       },
       /* ============ 大厅 ============ */
