@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -4471,7 +4471,8 @@
       z-index: 7;
       font-size: 12px;
       font-weight: 900;
-      background: rgba(255, 255, 255, .92);
+      color: #fff;
+      background: rgba(40, 38, 60, .4);
       border: 2px solid var(--ink);
       border-radius: 8px;
       padding: 2px 12px;
@@ -5454,8 +5455,7 @@
       z-index: 40;
       display: flex;
       align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(2px)
+      justify-content: center
     }
 
     .ovBox {
@@ -9551,7 +9551,7 @@
     };
     const N = { C2: 65, D2: 73, E2: 82, F2: 87, G2: 98, A2: 110, B2: 123, C3: 131, D3: 147, E3: 165, F3: 175, G3: 196, A3: 220, B3: 247, C4: 262, D4: 294, E4: 330, F4: 349, G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988, C6: 1046 };
 
-    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false, dlgStyle: 'classic', buiBg: 'dark', spriteMode: 'dyn' }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
+    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false, dlgStyle: 'classic', buiBg: 'dark', spriteMode: 'dyn', wxchipShow: false }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
     function saveCfg() { localStorage.setItem('pif_cfg', JSON.stringify(CFG)); }
 
 const _ST = (f, s) => f * Math.pow(2, s / 12);
@@ -11375,7 +11375,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     /* 5代 ×12 */
     S(505,'步哨鼠','normal','60/85/69/60/69/77','illuminate/keeneye',['facade','knockoff','uturn','swordsdance','hypnosis','crunch']);
     S(521,'高傲雉鸡','normal/flying','80/115/80/65/55/93','bigpecks/superluck',['bravebird','facade','uturn','roost','quickattack','swordsdance']);
-    S(526,'庞岩怪','rock','85/135/130/60/80/25','sturdy/sandforce',['earthquake','stoneedge','explosion','stealthrock','superpower','ironhead']);
+    S(526,'庞岩怪','rock','85/135/130/60/80/25','sturdy/sandforce/sandstream',['earthquake','stoneedge','explosion','stealthrock','superpower','ironhead']);
     S(531,'差不多娃娃','normal','103/60/86/60/86/50','healer/regenerator',['softboiled','seismictoss','thunderwave','stealthrock','toxic','knockoff']);
     S(549,'裙儿小姐','grass','70/60/75/110/75/90','chlorophyll/owntempo',['gigadrain','quiverdance','sleeppowder','synthesis','energyball','moonblast']);
     S(558,'岩殿居蟹','bug/rock','70/105/125/65/75/45','sturdy/shellarmor',['xscissor','stoneedge','earthquake','shellsmash','knockoff','stealthrock']);
@@ -14411,93 +14411,174 @@ return ev;
     /* ============================================================
        6. 对战 UI
     ============================================================ */
-    /* ★ 状态详情：点击顶部天气/场地状态栏打开，展示当前所有状态的具体效果 */
+    /* ★ 全场状态详情：点击顶部状态栏打开（仅天气/场地/戏法空间，无表情） */
     function openStatusDetail(b) {
       if (!b) return;
       const ov = $('#partyOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
       const box = el('div', 'ovBox panel'); box.style.maxWidth = '560px'; ov.appendChild(box);
       let offEsc = null;
-      const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); };
+      const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); ov.onclick = null; };
       offEsc = onEsc(() => { AU.no(); close(); });
       const head = el('div', ''); head.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:6px';
-      head.appendChild(el('h3', 'disp', '📋 状态详情'));
+      head.appendChild(el('h3', 'disp', '全场状态'));
       const xBtn = el('button', 'btn small', '✕'); xBtn.style.cssText = 'width:36px;height:36px;padding:0;font-size:16px;line-height:1;border-radius:9px'; xBtn.onclick = () => { AU.no(); close(); };
       head.appendChild(xBtn);
       box.appendChild(head);
-      const addRow = (nm, desc, side) => {
+      const addRow = (nm, desc) => {
         const r = el('div', 'itemRow');
         r.style.cssText = 'align-items:flex-start';
-        r.innerHTML = `<div style="flex:1"><b>${nm}</b>${side ? ` <span style="font-size:10px;color:#999">${side}</span>` : ''}<div style="font-size:11px;color:#777">${desc}</div></div>`;
+        r.innerHTML = `<div style="flex:1"><b>${nm}</b><div style="font-size:11px;color:#777">${desc}</div></div>`;
         box.appendChild(r);
       };
-      const S = { p: '己方', e: '对手' };
       const WX = {
-        sun: ['☀ 大晴天', '火属性招式威力×1.5，草属性招式威力×1.5，阳光烈焰/光合作用等不再蓄力'],
-        rain: ['🌧 下雨', '水属性招式威力×1.5，火属性招式威力×0.5，打雷/暴风必定命中'],
-        sand: ['🌪 沙暴', '岩/地/钢属性免疫，其余宝可梦每回合损失最大HP的1/16，沙隐闪避提升'],
-        hail: ['🌨 冰雹', '冰属性免疫，其余宝可梦每回合损失最大HP的1/16，暴风雪必定命中'],
-        delta: ['🌪️ 德尔塔气流', '飞行属性的弱点消除（受到克制减半），天气不会自然消散'],
-        desolate: ['🌋 终结之地', '大晴天效果强化：火属性招式威力×1.5，水属性招式无法使用，天气不会自然消散'],
-        primordial: ['🌊 始源之海', '下雨效果强化：水属性招式威力×1.5，火属性招式无法使用，天气不会自然消散']
+        sun: ['大晴天', '火属性招式威力×1.5，草属性招式威力×1.5，阳光烈焰/光合作用等不再蓄力'],
+        rain: ['下雨', '水属性招式威力×1.5，火属性招式威力×0.5，打雷/暴风必定命中'],
+        sand: ['沙暴', '岩/地/钢属性免疫，其余宝可梦每回合损失最大HP的1/16，沙隐闪避提升'],
+        hail: ['冰雹', '冰属性免疫，其余宝可梦每回合损失最大HP的1/16，暴风雪必定命中'],
+        delta: ['德尔塔气流', '飞行属性的弱点消除（受到克制减半），天气不会自然消散'],
+        desolate: ['终结之地', '大晴天效果强化：火属性招式威力×1.5，水属性招式无法使用，天气不会自然消散'],
+        primordial: ['始源之海', '下雨效果强化：水属性招式威力×1.5，火属性招式无法使用，天气不会自然消散']
       };
       const TER = {
-        electric: ['⚡ 电气场地', '地面上的宝可梦电属性招式威力×1.3，无法睡眠'],
-        grassy: ['🌿 青草场地', '地面上的宝可梦每回合回复最大HP的1/16，草属性招式威力×1.3，地震/重踏威力减半'],
-        psychic: ['🔮 精神场地', '地面上的宝可梦超能力属性招式威力×1.3，先制招式无效'],
-        misty: ['🌫 薄雾场地', '地面上的宝可梦免疫异常状态，龙属性招式伤害减半']
+        electric: ['电气场地', '地面上的宝可梦电属性招式威力×1.3，无法睡眠'],
+        grassy: ['青草场地', '地面上的宝可梦每回合回复最大HP的1/16，草属性招式威力×1.3，地震/重踏威力减半'],
+        psychic: ['精神场地', '地面上的宝可梦超能力属性招式威力×1.3，先制招式无效'],
+        misty: ['薄雾场地', '地面上的宝可梦免疫异常状态，龙属性招式伤害减半']
       };
       if (b.wx) { const w = WX[b.wx]; if (w) addRow(w[0] + (b.wx === 'delta' || b.wx === 'desolate' || b.wx === 'primordial' ? '' : `（剩余 ${b.wxT} 回合）`), w[1]); }
       if (b.terrain) { const t = TER[b.terrain]; if (t) addRow(t[0] + `（剩余 ${b.terrainT} 回合）`, t[1]); }
-      if (b.trickT > 0) addRow('🌀 戏法空间（剩余 ' + b.trickT + ' 回合）', '5回合内速度慢的宝可梦先出手');
-      for (const side of ['p', 'e']) {
-        if (b.tailwind[side] > 0) addRow('💨 顺风（' + S[side] + '，剩余 ' + b.tailwind[side] + ' 回合）', S[side] + '宝可梦速度×2');
+      if (b.trickT > 0) addRow('戏法空间（剩余 ' + b.trickT + ' 回合）', '5回合内速度慢的宝可梦先出手');
+      box.appendChild(el('div', '', ''));
+      ov.onclick = () => { AU.no(); close(); };
+      box.onclick = e => e.stopPropagation();
+    }
+    /* ★ 宝可梦状态详情：点击宝可梦信息卡打开——能力变化（含倍率）、单人所受状态、单方状态、全场状态 */
+    function openMonStatusDetail(m, side, b) {
+      if (!m || !b) return;
+      const ov = $('#partyOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
+      const box = el('div', 'ovBox panel'); box.style.maxWidth = '540px'; ov.appendChild(box);
+      let offEsc = null;
+      const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); ov.onclick = null; };
+      offEsc = onEsc(() => { AU.no(); close(); });
+      /* ---- 头部横幅：头像 + 名字 + 阵营 + HP（浅色渐变底，深色文字） ---- */
+      const banner = el('div', ''); banner.style.cssText = 'display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,#fdf6e3,#f2e8d0);border:2px solid rgba(120,100,60,.35)';
+      const img = miniSprite(m.id); img.style.width = '58px'; img.style.height = '58px'; img.style.imageRendering = 'pixelated';
+      banner.appendChild(img);
+      const info = el('div', ''); info.style.flex = '1';
+      const nmRow = el('div', ''); nmRow.style.cssText = 'display:flex;align-items:center;gap:8px';
+      nmRow.appendChild(el('b', '', m.vol.illusionName || m.name)); nmRow.children[0].style.fontSize = '17px'; nmRow.children[0].style.color = '#2b2440';
+      const sideTag = el('span', ''); sideTag.style.cssText = `font-size:10px;font-weight:900;color:#fff;padding:2px 8px;border-radius:20px;background:${side === 'p' ? '#2f9e63' : '#c0392b'}`;
+      sideTag.textContent = side === 'p' ? '己方' : '对手';
+      nmRow.appendChild(sideTag);
+      if (m.status) {
+        const sc = el('span', 'stchip', { burn: '灼', par: '麻', psn: '毒', tox: '剧', sleep: '眠', frz: '冰' }[m.status]);
+        sc.style.background = { burn: '#e2574c', par: '#e0912b', psn: '#a33ea1', tox: '#a33ea1', sleep: '#666', frz: '#63c5c2' }[m.status];
+        sc.style.marginLeft = '0';
+        nmRow.appendChild(sc);
       }
-      const scrMax = side => {
+      info.appendChild(nmRow);
+      const hpBar = el('div', ''); hpBar.style.cssText = 'margin-top:7px';
+      hpBar.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:10px;color:#6a6348;font-weight:700"><span>HP</span><span>${m.hp} / ${m.maxhp}</span></div><div class="hpbar" style="height:12px;margin-top:2px"><div class="hpfill ${m.hpPct() > .5 ? '' : m.hpPct() > .2 ? 'mid' : 'low'}" style="width:${Math.round(m.hpPct() * 100)}%"></div></div>`;
+      info.appendChild(hpBar);
+      banner.appendChild(info);
+      const xBtn = el('button', 'btn small', '✕'); xBtn.style.cssText = 'width:34px;height:34px;padding:0;font-size:15px;line-height:1;border-radius:9px;flex:none'; xBtn.onclick = () => { AU.no(); close(); };
+      banner.appendChild(xBtn);
+      box.appendChild(banner);
+      /* ---- 区块容器 ---- */
+      const sec = (title) => {
+        const s = el('div', ''); s.style.cssText = 'margin-top:10px;border:2px solid rgba(120,100,60,.3);border-radius:12px;padding:10px 12px;background:linear-gradient(180deg,#fdf8ec,#f6efdc)';
+        const h = el('div', ''); h.style.cssText = 'font-weight:900;color:#6b4a12;font-size:13px;letter-spacing:1px;margin-bottom:6px';
+        h.textContent = title;
+        s.appendChild(h);
+        box.appendChild(s);
+        return s;
+      };
+      const chip = (txt, color) => {
+        const c = el('span', ''); c.style.cssText = `display:inline-block;font-size:11px;font-weight:900;color:#fff;background:${color};padding:2px 9px;border-radius:20px;margin:2px 5px 2px 0`;
+        c.textContent = txt;
+        return c;
+      };
+      const descLine = (txt) => {
+        const d = el('div', ''); d.style.cssText = 'font-size:11px;color:#7a7355;margin:2px 0 2px 2px';
+        d.textContent = txt;
+        return d;
+      };
+      /* ---- 能力变化（含倍率） ---- */
+      const stSec = sec('能力变化');
+      const MULT = { 1: '×1.5', 2: '×2', 3: '×2.5', 4: '×3', 5: '×3.5', 6: '×4', '-1': '×2/3', '-2': '×1/2', '-3': '×2/5', '-4': '×1/3', '-5': '×2/7', '-6': '×1/4' };
+      const SNM = { atk: '攻击', def: '防御', spa: '特攻', spd: '特防', spe: '速度' };
+      const SCOL = { atk: '#e2574c', def: '#3f8fe0', spa: '#8a63d2', spd: '#4caf7d', spe: '#e0912b' };
+      const stages = STATKEYS.filter(k => m.stages[k] !== 0);
+      if (!stages.length) stSec.appendChild(descLine('无能力变化'));
+      stages.forEach(k => {
+        const v = m.stages[k];
+        const row = el('div', ''); row.style.cssText = 'display:flex;align-items:center;gap:8px;margin:4px 0';
+        row.appendChild(el('span', '', SNM[k])); row.children[0].style.cssText = `width:40px;font-weight:900;font-size:12px;color:${SCOL[k]}`;
+        const badge = el('span', 'stg ' + (v > 0 ? 'up' : 'dn'), (v > 0 ? '+' : '') + v);
+        row.appendChild(badge);
+        const mult = el('span', ''); mult.style.cssText = 'font-size:11px;font-weight:900;color:#a06a10';
+        mult.textContent = '实际' + (MULT[String(v)] || '?');
+        row.appendChild(mult);
+        stSec.appendChild(row);
+      });
+      /* ---- 单人所受状态 ---- */
+      const sttSec = sec('单人所受状态');
+      const pushSt = (nm, color, desc) => { sttSec.appendChild(chip(nm, color)); sttSec.appendChild(descLine(desc)); };
+      const ST = {
+        burn: ['灼伤', '#e2574c', '每回合损失最大HP的1/16，物理招式威力减半'],
+        psn: ['中毒', '#a33ea1', '每回合损失最大HP的1/8'],
+        tox: ['剧毒', '#8a2fa3', '每回合损失最大HP的1/16，伤害随回合递增'],
+        par: ['麻痹', '#e0912b', '速度×0.5，行动时有25%几率无法出手'],
+        sleep: ['睡眠', '#5f6b7a', '无法行动（最多数回合），受到攻击可提前醒来'],
+        frz: ['冰冻', '#63c5c2', '无法行动，受到火属性攻击或使用火焰招式可解冻']
+      };
+      let hasSt = false;
+      if (m.status && ST[m.status]) { const s = ST[m.status]; pushSt(s[0], s[1], s[2]); hasSt = true; }
+      if (m.vol.confuse > 0) { pushSt('混乱 ' + m.vol.confuse, '#e0912b', '攻击时有1/3几率打到自己'); hasSt = true; }
+      if (m.vol.binding > 0) { pushSt('束缚 ' + m.vol.binding, '#8b4513', '每回合损失最大HP的1/8，无法换人'); hasSt = true; }
+      if (m.vol.gmaxTrap) { pushSt('踩影', '#6a0dad', '无法替换宝可梦'); hasSt = true; }
+      if (m.vol.drowsy) { pushSt('瞌睡', '#5f6b7a', '回合末进入睡眠'); hasSt = true; }
+      if (m.vol.attract) { pushSt('着迷', '#e06aa0', '攻击时有50%几率失败'); hasSt = true; }
+      if (m.vol.flinch) { pushSt('畏缩', '#8a7a4f', '本回合无法行动'); hasSt = true; }
+      if (m.vol.encore) { pushSt('再来一次', '#b07ce0', '只能重复使用上一招式'); hasSt = true; }
+      if (m.vol.seed) { pushSt('寄生种子', '#7ac74c', '每回合被吸取最大HP的1/8'); hasSt = true; }
+      if (m.vol.salt) { pushSt('盐腌', '#e8e8f0', '每回合损失最大HP的1/8（水/钢属性1/4）'); hasSt = true; }
+      if (m.vol.gmaxTorment) { pushSt('液金', '#888', '无法连续使用相同招式'); hasSt = true; }
+      if (!hasSt) sttSec.appendChild(descLine('无异常状态'));
+      /* ---- 单方状态 ---- */
+      const sdSec = sec('单方状态（' + (side === 'p' ? '己方' : '对手') + '）');
+      let hasSd = false;
+      if (b.tailwind[side] > 0) { sdSec.appendChild(chip('顺风 ' + b.tailwind[side], '#4f9df7')); sdSec.appendChild(descLine('速度×2')); hasSd = true; }
+      const scr = (() => {
         const arr = b.fieldMons ? b.fieldMons(side) : [];
         let ref = 0, light = 0, aur = 0;
-        arr.forEach(m => { if (m && m.alive()) { if ((m.vol.reflect || 0) > ref) ref = m.vol.reflect; if ((m.vol.lightscreen || 0) > light) light = m.vol.lightscreen; if ((m.vol.auroraveil || 0) > aur) aur = m.vol.auroraveil; } });
+        arr.forEach(x => { if (x && x.alive()) { if ((x.vol.reflect || 0) > ref) ref = x.vol.reflect; if ((x.vol.lightscreen || 0) > light) light = x.vol.lightscreen; if ((x.vol.auroraveil || 0) > aur) aur = x.vol.auroraveil; } });
         return { ref, light, aur };
-      };
-      for (const side of ['p', 'e']) {
-        const s = scrMax(side);
-        if (s.ref) addRow('🛡 反射壁（' + S[side] + '，剩余 ' + s.ref + ' 回合）', '受到物理招式伤害减半');
-        if (s.light) addRow('✨ 光墙（' + S[side] + '，剩余 ' + s.light + ' 回合）', '受到特殊招式伤害减半');
-        if (s.aur) addRow('🌈 极光幕（' + S[side] + '，剩余 ' + s.aur + ' 回合）', '受到所有招式伤害减半');
+      })();
+      if (scr.ref) { sdSec.appendChild(chip('反射壁 ' + scr.ref, '#f2b705')); sdSec.appendChild(descLine('物理招式伤害减半')); hasSd = true; }
+      if (scr.light) { sdSec.appendChild(chip('光墙 ' + scr.light, '#f2b705')); sdSec.appendChild(descLine('特殊招式伤害减半')); hasSd = true; }
+      if (scr.aur) { sdSec.appendChild(chip('极光幕 ' + scr.aur, '#9fe8f5')); sdSec.appendChild(descLine('所有招式伤害减半')); hasSd = true; }
+      const h = b.haz[side];
+      if (h) {
+        if (h.sr) { sdSec.appendChild(chip('隐形岩', '#b0a060')); sdSec.appendChild(descLine('替换上场受到最大HP 1/8伤害（钢系隐形岩为克制伤害）')); hasSd = true; }
+        if (h.spikes) { sdSec.appendChild(chip('撒菱×' + h.spikes, '#8a9a5a')); sdSec.appendChild(descLine('替换上场受到 1/8 / 1/6 / 1/4 最大HP伤害（飞行/飘浮免疫）')); hasSd = true; }
+        if (h.tspikes) { sdSec.appendChild(chip('毒菱', '#b56fd8')); sdSec.appendChild(descLine('替换上场中毒（2层为剧毒）；毒属性会清除')); hasSd = true; }
       }
-      if (b.gmaxDot) addRow('🔥 ' + ((b.gmaxDot.name || TNAME[b.gmaxDot.type]) + '').replace(/^超极巨/, '') + '（' + S[b.gmaxDot.side] + '，剩余 ' + b.gmaxDot.turns + ' 回合）', '每回合结束时对场上宝可梦造成最大HP 1/6的持续伤害（与DOT同属性的宝可梦免疫此伤害）');
-      for (const side of ['p', 'e']) {
-        const h = b.haz[side];
-        if (h.sr) addRow('🪨 隐形岩（' + S[side] + '场地）', '替换上场的宝可梦受到最大HP 1/8（钢系隐形岩为克制伤害）的伤害');
-        if (h.spikes) addRow('▲ 撒菱 ×' + h.spikes + '（' + S[side] + '场地）', '替换上场的宝可梦受到 1/8 / 1/6 / 1/4 最大HP伤害（飞行/飘浮免疫）');
-        if (h.tspikes) addRow('☠ 毒菱（' + S[side] + '场地）', '替换上场的宝可梦中毒（2层则为剧毒）；毒属性会清除毒菱');
+      if (b.gmaxDot && b.gmaxDot.side === side) {
+        sdSec.appendChild(chip(((b.gmaxDot.name || TNAME[b.gmaxDot.type]) + '').replace(/^超极巨/, '') + ' ' + b.gmaxDot.turns, '#ff6b4a'));
+        sdSec.appendChild(descLine('每回合造成最大HP 1/6持续伤害（同属性免疫）'));
+        hasSd = true;
       }
-      /* 场上宝可梦状态 */
-      for (const side of ['p', 'e']) {
-        b.fieldMons(side).forEach(m => {
-          if (!m || !m.alive()) return;
-          const sts = [];
-          const ST = {
-            burn: ['灼伤', '每回合损失最大HP的1/16，物理招式威力减半'],
-            psn: ['中毒', '每回合损失最大HP的1/8'],
-            tox: ['剧毒', '每回合损失最大HP的1/16，伤害随回合递增'],
-            par: ['麻痹', '速度×0.5，行动时有25%几率无法出手'],
-            sleep: ['睡眠', '无法行动（最多数回合），受到攻击可提前醒来'],
-            frz: ['冰冻', '无法行动，受到火属性攻击或使用火焰招式可解冻']
-          };
-          if (m.status && ST[m.status]) { const s = ST[m.status]; sts.push(s[0] + '：' + s[1]); }
-          if (m.vol.confuse > 0) sts.push('混乱（剩余 ' + m.vol.confuse + ' 回合）：攻击时有1/3几率打到自己');
-          if (m.vol.binding > 0) sts.push('束缚（剩余 ' + m.vol.binding + ' 回合）：每回合损失最大HP的1/8，无法换人');
-          if (m.vol.gmaxTrap) sts.push('踩影：无法替换宝可梦');
-          if (m.vol.drowsy) sts.push('瞌睡：回合末进入睡眠');
-          if (m.vol.attract) sts.push('着迷：攻击时有50%几率失败');
-          if (m.vol.flinch) sts.push('畏缩：本回合无法行动');
-          if (m.vol.encore) sts.push('再来一次：只能重复使用上一招式');
-          if (m.vol.seed) sts.push('寄生种子：每回合被吸取最大HP的1/8');
-          if (m.vol.salt) sts.push('盐腌：每回合损失最大HP的1/8（水/钢属性1/4）');
-          if (m.vol.gmaxTorment) sts.push('液金：无法连续使用相同招式');
-          if (sts.length) addRow((m.vol.illusionName || m.name) + '（' + S[side] + '）', sts.join('<br>'));
-        });
-      }
+      if (!hasSd) sdSec.appendChild(descLine('无单方状态'));
+      /* ---- 全场状态 ---- */
+      const fdSec = sec('全场状态');
+      const WXN = { sun: ['大晴天', '#ffb300'], rain: ['下雨', '#4f9df7'], sand: ['沙暴', '#d8b26a'], hail: ['冰雹', '#9fd8f0'], delta: ['德尔塔气流', '#7f9c94'], desolate: ['终结之地', '#e2574c'], primordial: ['始源之海', '#2f8f8f'] };
+      const TERN = { electric: ['电气场地', '#ffd93b'], grassy: ['青草场地', '#7ac74c'], psychic: ['精神场地', '#e06ad8'], misty: ['薄雾场地', '#f2a0c8'] };
+      let hasFd = false;
+      if (b.wx) { const w = WXN[b.wx]; if (w) { fdSec.appendChild(chip(w[0] + (b.wx === 'delta' || b.wx === 'desolate' || b.wx === 'primordial' ? '' : ' ' + b.wxT), w[1])); hasFd = true; } }
+      if (b.terrain) { const t = TERN[b.terrain]; if (t) { fdSec.appendChild(chip(t[0] + ' ' + b.terrainT, t[1])); hasFd = true; } }
+      if (b.trickT > 0) { fdSec.appendChild(chip('戏法空间 ' + b.trickT, '#845ef7')); fdSec.appendChild(descLine('5回合内速度慢的宝可梦先出手')); hasFd = true; }
+      if (!hasFd) fdSec.appendChild(descLine('无全场状态'));
       box.appendChild(el('div', '', ''));
       ov.onclick = () => { AU.no(); close(); };
       box.onclick = e => e.stopPropagation();
@@ -14506,6 +14587,21 @@ return ev;
     const BUI = {
       scene: $('#bscene'), espr: $('#espr'), pspr: $('#pspr'), espr2: $('#espr2'), pspr2: $('#pspr2'),
       card(side, slot = 0) { return side === 'e' ? $(slot ? '#ecard2' : '#ecard') : $(slot ? '#pcard2' : '#pcard'); },
+      /* ★ 点击宝可梦信息卡：打开该宝可梦的状态详情（能力变化/单人所受状态/单方状态/全场状态） */
+      bindCardClick() {
+        if (this._cardClickBound) return;
+        this._cardClickBound = true;
+        const bind = (side, slot) => {
+          const c = this.card(side, slot);
+          c.style.cursor = 'pointer';
+          c.addEventListener('click', () => {
+            const b = window.curBattle; if (!b) return;
+            const m = b.slotMon(side, slot);
+            if (m && m.alive()) { AU.cursor(); openMonStatusDetail(m, side, b); }
+          });
+        };
+        bind('e', 0); bind('e', 1); bind('p', 0); bind('p', 1);
+      },
       sprEl(side, slot = 0) { return side === 'e' ? $(slot ? '#espr2' : '#espr') : $(slot ? '#pspr2' : '#pspr'); },
       shadowEl(side, slot = 0) { return side === 'e' ? $(slot ? '#eshadow2' : '#eshadow') : $(slot ? '#pshadow2' : '#pshadow'); },
       platEl(side, slot = 0) { return $('.plat.' + side); },
@@ -14513,6 +14609,7 @@ return ev;
       auraEl(side, slot = 0) { return $(side === 'e' ? (slot ? '#emegaAura2' : '#emegaAura') : (slot ? '#pmegaAura2' : '#pmegaAura')); },
       async refresh(b) {
         FX.invalidateRects();
+        this.bindCardClick();
         if (!this._koHide) this._koHide = {};
         if (!this._koHidden) this._koHidden = {};
         // ★ 双打：刷新两只宝可梦的卡牌
@@ -14597,7 +14694,7 @@ return ev;
           if (b.wx) this.scene.classList.add('wx-' + sceneWx);
           if (b.terrain) this.scene.classList.add('tr-' + b.terrain);
         }
-        // 天气 / 场地 / 戏法空间 / 场地陷阱 实时指示
+        // 天气 / 场地 / 戏法空间 实时指示（★ 精简：单方场地与状态移入各宝可梦状态详情，此处只显示全场状态）
         const wx = $('#wxchip');
         const chips = [];
         if (b.wx) {
@@ -14606,46 +14703,18 @@ return ev;
         }
         if (b.terrain) chips.push({ electric: '⚡ 电气场地', grassy: '🌿 青草场地', psychic: '🔮 精神场地', misty: '🌫 薄雾场地' }[b.terrain] + `(${b.terrainT})`);
         if (b.trickT > 0) chips.push(`🌀 戏法空间(${b.trickT})`);
-        /* ★ 场地陷阱显示 */
-        const pHaz = b.haz.p, eHaz = b.haz.e;
-        if (pHaz.sr) chips.push(`🪨 己方·岩(${pHaz.sr})`);
-        if (pHaz.spikes) chips.push(`▲ 己方·菱${'×'.repeat(pHaz.spikes)}`);
-        if (pHaz.tspikes) chips.push(`☠ 己方·毒菱${pHaz.tspikes >= 2 ? '²' : '¹'}`);
-        if (eHaz.sr) chips.push(`🪨 对手·岩(${eHaz.sr})`);
-        if (eHaz.spikes) chips.push(`▲ 对手·菱${'×'.repeat(eHaz.spikes)}`);
-        if (eHaz.tspikes) chips.push(`☠ 对手·毒菱${eHaz.tspikes >= 2 ? '²' : '¹'}`);
-        /* ★ 超极巨DOT显示（名称去掉「超极巨」前缀，如 超极巨地狱灭焰→地狱灭焰） */
-        if (b.gmaxDot) chips.push('🔥 ' + (b.gmaxDot.side === 'e' ? '对方·' : '己方·') + ((b.gmaxDot.name || TNAME[b.gmaxDot.type]) + '').replace(/^超极巨/, '') + '(' + b.gmaxDot.turns + ')');
-        /* ★ 极光幕显示 */
-        if (b.auroraveil.p > 0) chips.push(`🌈 己方·极光幕(${b.auroraveil.p})`);
-        if (b.auroraveil.e > 0) chips.push(`🌈 对手·极光幕(${b.auroraveil.e})`);
-        /* ★ 反射壁/光墙显示（取各侧场上宝可梦的最大剩余回合） */
-        const scrMax = side => {
-          const arr = b.fieldMons ? b.fieldMons(side) : [];
-          let ref = 0, light = 0;
-          arr.forEach(m => { if (m && m.alive()) { if ((m.vol.reflect || 0) > ref) ref = m.vol.reflect; if ((m.vol.lightscreen || 0) > light) light = m.vol.lightscreen; } });
-          return { ref, light };
-        };
-        const pScr = scrMax('p'), eScr = scrMax('e');
-        if (pScr.ref) chips.push(`🛡 己方·反射壁(${pScr.ref})`);
-        if (pScr.light) chips.push(`✨ 己方·光墙(${pScr.light})`);
-        if (eScr.ref) chips.push(`🛡 对手·反射壁(${eScr.ref})`);
-        if (eScr.light) chips.push(`✨ 对手·光墙(${eScr.light})`);
-        /* ★ 顺风显示（单方） */
-        if (b.tailwind.p > 0) chips.push(`💨 己方·顺风(${b.tailwind.p})`);
-        if (b.tailwind.e > 0) chips.push(`💨 对手·顺风(${b.tailwind.e})`);
-        if (chips.length) {
+        if (CFG.wxchipShow && chips.length) {
           /* ★ 每个状态渲染为独立胶囊（不换行），整体自然换行排列 */
           wx.innerHTML = '';
           chips.forEach(c => { const s = el('span', '', c); s.style.cssText = 'display:inline-block;white-space:nowrap;margin:1px 5px;vertical-align:middle'; wx.appendChild(s); });
           wx.classList.add('on');
         }
         else wx.classList.remove('on');
-        /* ★ 点击状态栏打开状态详情（只绑定一次） */
+        /* ★ 点击状态栏打开全场状态详情（只绑定一次；默认关闭时不显示也不响应） */
         if (!wx._stDetailBound) {
           wx._stDetailBound = true;
           wx.style.cursor = 'pointer';
-          wx.onclick = () => { AU.cursor(); openStatusDetail(window.curBattle || b); };
+          wx.onclick = () => { if (!CFG.wxchipShow) return; AU.cursor(); openStatusDetail(window.curBattle || b); };
         }
         FX.syncStatusFx(b);
       },
@@ -15343,29 +15412,30 @@ return ev;
         const cx = ft.x, cy = ft.y - (cfg.big ? 110 : 70);
         this.p({ cls: cfg.big ? 'fxRing fxRingBig2' : 'fxRing', x: cx, y: cy, c: cfg.c, an: cfg.big ? 'fxRingBigB2' : 'fxRingB', dur: cfg.big ? .65 : .55 });
         if (cfg.big) this.p({ cls: 'fxRing', x: cx, y: cy, c: cfg.c2 || cfg.c, an: 'fxRingB', dur: .5, delay: .12 });
-        const n = cfg.big ? 40 : 26;
+        /* ★ 性能优化：削减粒子数量（与天气/场地动画层重叠时避免重绘风暴） */
+        const n = cfg.big ? 22 : 15;
         const chars = cfg.chars || ['◆', '✦', '●', '✧'];
         for (let i = 0; i < n; i++) {
           const a = Math.random() * Math.PI * 2;
-          const dist = rnd(30, cfg.big ? 120 : 76);
-          const ddx = Math.cos(a) * dist, ddy = Math.sin(a) * dist - (cfg.big ? 44 : 24);
+          const dist = rnd(30, cfg.big ? 104 : 66);
+          const ddx = Math.cos(a) * dist, ddy = Math.sin(a) * dist - (cfg.big ? 40 : 22);
           const shard = i % 4 === 0;
           this.p({
             cls: shard ? 'fxShard' : 'fxp',
             x: cx, y: cy, char: shard ? '' : pick(chars),
             c: i % 3 ? cfg.c : (cfg.c2 || cfg.c),
             bg: shard ? `linear-gradient(135deg, #fff, ${cfg.c})` : null,
-            fs: rnd(14, cfg.big ? 36 : 30),
+            fs: rnd(13, cfg.big ? 30 : 26),
             dx: ddx, dy: ddy, rot: rnd(0, 220),
             an: shard ? 'fxShardA' : (i % 2 ? 'fxBurst' : 'fxSplash'),
             dur: rnd(4, 9) / 10
           });
         }
         /* 星芒四射 */
-        const sn = cfg.big ? 8 : 5;
+        const sn = cfg.big ? 6 : 4;
         for (let i = 0; i < sn; i++) {
           const a = i / sn * Math.PI * 2 + rnd(-.15, .15);
-          this.p({ cls: 'fxStarBurst', x: cx, y: cy, bg: `linear-gradient(135deg, #fff, ${cfg.c})`, dx: Math.cos(a) * (cfg.big ? 130 : 84), dy: Math.sin(a) * (cfg.big ? 130 : 84), an: 'fxStarBurstA', dur: .6, delay: i * .02 });
+          this.p({ cls: 'fxStarBurst', x: cx, y: cy, bg: `linear-gradient(135deg, #fff, ${cfg.c})`, dx: Math.cos(a) * (cfg.big ? 118 : 78), dy: Math.sin(a) * (cfg.big ? 118 : 78), an: 'fxStarBurstA', dur: .6, delay: i * .02 });
         }
         if (cfg.arc) this.slash(side, cfg);
       },
@@ -17069,7 +17139,7 @@ return ev;
           const sel = await this.waitMenu(['fight', 'poke', 'bag', 'run'], slot, m);
           if (sel === '__back__') return null;
           if (sel === 'fight') {
-            /* ★ 第一只已选形态变化时，第二只不能再选 */
+            /* ★ 第一只已选形态变化时，第二只不能再选（玩家按正常规则：一回合一个形态） */
             const formTaken = acts.some(a => a && a.type === 'move' && (a.mega || a.dyn || a.tera));
             const mv = await this.chooseMove(m, slot, formTaken);
             if (mv) return mv;
@@ -17274,7 +17344,9 @@ return ev;
             m.moves.forEach(mv => {
               const d = MV[mv.k];
               const isForced = effForced === mv.k;
-              const dis = (effForced && !isForced) || (effChoiceLock && effChoiceLock !== mv.k) || (mv.pp <= 0 && !isForced) || (m.item === 'assaultvest' && d.c === 'X' && !isForced) || (!isForced && m.vol.disabled && m.vol.disabled.k === mv.k);
+              /* ★ 不能连续使用的技能（巨力锤/血月等）：上一回合用过则本回合不可选择 */
+              const noRepeatBlock = d.noRepeat && m.vol.lastMove === mv.k && !isForced;
+              const dis = (effForced && !isForced) || (effChoiceLock && effChoiceLock !== mv.k) || (mv.pp <= 0 && !isForced) || (m.item === 'assaultvest' && d.c === 'X' && !isForced) || (!isForced && m.vol.disabled && m.vol.disabled.k === mv.k) || noRepeatBlock;
               /* ★ 显示属性：太晶爆发/制裁光砾/皮肤类特性 按实际生效属性着色 */
                let showT = d.t, showNm = null;
               /* ★ 基格尔德Mega：核心惩罚者→归无之光 */
@@ -20500,8 +20572,8 @@ return ev;
           if (choiceLock && choiceLock !== mv.k) continue;
           if (m.item === 'assaultvest' && d.c === 'X') continue;
           let s = 0;
-          /* ★ 击掌奇袭/迎头一击：仅出场首回合可用，其余回合AI绝不选择 */
-          const noUse = (d.fakeout || d.firstimpression) && m.vol.turnsActive > 0;
+          /* ★ 击掌奇袭/迎头一击：仅出场首回合可用；巨力锤/血月等：不能连续使用——AI绝不选择 */
+          const noUse = ((d.fakeout || d.firstimpression) && m.vol.turnsActive > 0) || (d.noRepeat && m.vol.lastMove === mv.k);
           if (noUse) s = -999;
           if (!noUse && d.c !== 'X') {
             /* ★ 阿尔宙斯制裁光砾：AI按石板对应属性评估 */
@@ -20747,7 +20819,7 @@ return ev;
           if (this.doubles) {
             const acts = [null, null];
             const moves = [];
-            let formTaken = false;   // ★ 双打每回合最多一个槽位使用形态
+            let formTaken = false;   // ★ 双打每回合最多一个槽位使用形态（Mega进化大师场：Mega不限次数，可双槽同时Mega）
             for (let s = 0; s < 2; s++) {
               const m = this.slotMon('e', s);
               if (!m || !m.alive()) { acts[s] = { type: 'skip' }; continue; }
@@ -20755,8 +20827,8 @@ return ev;
               if (!entry) continue;   // 该槽位未给出 → 留空由本地AI接管
               const act = this.realAIAct(m, s, entry);
               if (act) {
-                if (formTaken) { act.mega = false; act.dyn = false; act.tera = false; }
-                if (act.mega || act.dyn || act.tera) formTaken = true;
+                if (formTaken) { if (!this.rules.megaMaster) act.mega = false; act.dyn = false; act.tera = false; }
+                if ((act.mega && !this.rules.megaMaster) || act.dyn || act.tera) formTaken = true;
                 acts[s] = act;
                 moves.push({ slot: s, name: m.name, k: act.move.k, target: act.target ? act.target.name : null });
               }
@@ -20863,7 +20935,7 @@ return ev;
             if (last && last.type === 'move' && last.move) m.vol.plannedMove = last.move.k;
             continue;
           }
-          const formTaken = acts.some(a => a && a.type === 'move' && (a.mega || a.dyn || a.tera));
+          const formTaken = acts.some(a => a && a.type === 'move' && (a.dyn || a.tera || (a.mega && !this.rules.megaMaster)));
           acts.push(this.aiActionFor(m, s, formTaken));
           /* ★ 记录队友已决定的招式（供广域防守等评分参考：队友用地震等全场招式时开广域防守保护自己） */
           const last = acts[acts.length - 1];
@@ -20934,8 +21006,8 @@ return ev;
           if (choiceLock && choiceLock !== mv.k) continue;
           if (m.item === 'assaultvest' && d.c === 'X') continue;
           let s = 0, target = null;
-          /* ★ 击掌奇袭/迎头一击：仅出场首回合可用，其余回合AI绝不选择 */
-          const noUse = (d.fakeout || d.firstimpression) && m.vol.turnsActive > 0;
+          /* ★ 击掌奇袭/迎头一击：仅出场首回合可用；巨力锤/血月等：不能连续使用——AI绝不选择 */
+          const noUse = ((d.fakeout || d.firstimpression) && m.vol.turnsActive > 0) || (d.noRepeat && m.vol.lastMove === mv.k);
           if (noUse) s = -999;
           const simMv = { ...d, k: mv.k };
           if (mv.k === 'judgment' && PLATES[m.item] && PLATES[m.item] !== 'legend') simMv.t = PLATES[m.item];
@@ -21655,7 +21727,10 @@ return ev;
         const moves = this.pickMoves(sp);
         /* ★ 先确定实际特性再抽道具，确保毒疗/中毒激升宝可梦才携带剧毒宝珠 */
         const ability = this.rollAbility(sp);
-        return new P(sp.id, lvl, { moves, ability, item: this.pickItem(sp, moves, ability), iv: 28, tera: pick(TYP), ev: genEV(sp, round || 1, moves) });
+        /* ★ 超极巨化名单内的宝可梦：可以超极巨化的概率为70% */
+        const mon = new P(sp.id, lvl, { moves, ability, item: this.pickItem(sp, moves, ability), iv: 28, tera: pick(TYP), ev: genEV(sp, round || 1, moves) });
+        if (GMAXLIST.has(sp.id)) mon.vol.canGmax = Math.random() < 0.7;
+        return mon;
       },
       /* ★ 工厂特性抽取：基格尔德（含10%形态）的群聚变形出现概率为90% */
       rollAbility(sp) {
@@ -21696,7 +21771,10 @@ return ev;
         if (!['leftovers', 'sitrus', 'focussash', 'lifeorb', 'expertbelt', 'choiceband', 'choicespecs', 'choicescarf', 'airballoon', 'weaknesspolicy', 'rockyhelmet', 'thickclub', 'lightball', 'leek', 'deepseatooth', 'deepseascale', 'souldew', 'adamantorb', 'lustrousorb', 'griseousorb', 'rustedsword', 'rustedshield', 'redorb', 'blueorb', 'wellspringmask', 'hearthflamemask', 'cornerstonemask'].includes(item) && Math.random() < 0.3) {
           item = pick(['sitrus', 'focussash', 'leftovers', 'lifeorb', 'rockyhelmet']);
         }
-        return new P(sp.id, lvl, { moves, ability, item, iv: 28, tera: pick(TYP), ev: genEV(sp, round || 1, moves) });
+        /* ★ 超极巨化名单内的宝可梦：可以超极巨化的概率为70% */
+        const mon = new P(sp.id, lvl, { moves, ability, item, iv: 28, tera: pick(TYP), ev: genEV(sp, round || 1, moves) });
+        if (GMAXLIST.has(sp.id)) mon.vol.canGmax = Math.random() < 0.7;
+        return mon;
       },
       /* ★ 按档位抽取：先掷档位，再从该档位随机 */
       drawOne(round) {
@@ -23591,10 +23669,12 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
         if (!a || a.type !== 'move') return;
         const Pm = this.doubles ? this.slotMon(side, slot) : (side === 'p' ? this.P() : this.E());
         if (!Pm || Pm.fainted) return;
-        if (a.mega && this.rules.mega && MEGA[Pm.id] && (this.rules.megaMaster || !this.usedForm[side]) && !Pm.dyn && !(Pm.mega && Pm.mega.stone) && (Pm.id !== 718 || Pm.vol.completeForm)) {
+        /* ★ Mega进化大师场：仅敌方无限制Mega，玩家仍受本场一次限制 */
+        const megaFree = this.rules.megaMaster && side === 'e';
+        if (a.mega && this.rules.mega && MEGA[Pm.id] && (megaFree || !this.usedForm[side]) && !Pm.dyn && !(Pm.mega && Pm.mega.stone) && (Pm.id !== 718 || Pm.vol.completeForm)) {
           let idx = a.megaIdx || 0;
           if (Array.isArray(MEGA[Pm.id]) && side === 'p') { idx = await dlgChoices('超级进化', Pm.name + ' 可以进化成两种形态，选择哪一种？', MEGA[Pm.id].map(c => c.stone)); }
-          if (!this.rules.megaMaster) this.usedForm[side] = true;
+          if (!megaFree) this.usedForm[side] = true;
           this.doMega(side, Pm, idx); await sleep(700);
         } else if (a.dyn && this.rules.dyna && !this.usedForm[side] && !Pm.dyn && !(Pm.mega && Pm.mega.stone) && ![888, 889, 890].includes(Pm.id)) {
           this.usedForm[side] = true; Pm.dyn = true; Pm.dynT = 3; Pm.recalc(); Pm.hp *= 2;
@@ -24262,6 +24342,8 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
         settingsSelect('精灵图片', '宝可梦图片显示方式：动态GIF动画（默认，多源加载优先动画）/ 静态PNG（更省流量、加载更快），切换后立即生效',
           [{ n: '动态（GIF动画）', v: 'dyn' }, { n: '静态（PNG）', v: 'stat' }],
           () => CFG.spriteMode, v => { CFG.spriteMode = v; applySpriteMode(); }),
+        settingsRow('顶部状态栏', '战斗中顶部显示天气/四大场地/戏法空间指示条（默认关闭；单方状态请点击宝可梦信息卡查看）',
+          () => CFG.wxchipShow, v => { CFG.wxchipShow = v; }),
         settingsSelect('对话框风格', '对话/战斗消息/通知框/右上角按钮的整体视觉风格（11种）：经典、霓虹、羊皮纸、毛玻璃、漫画、像素、星际、森林、樱花、幽灵、卡通手绘',
           [
             { n: '经典', v: 'classic' }, { n: '霓虹', v: 'neon' }, { n: '羊皮纸', v: 'paper' }, { n: '毛玻璃', v: 'glass' },
