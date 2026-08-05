@@ -973,26 +973,15 @@
       background: rgba(84, 94, 116, .9)
     }
 
-    /* --- 晴天光轮（元素放大避免旋转时光线被裁剪，光心重定位到原视觉位置） --- */
+    /* --- 晴天光轮（固定在左上角太阳处，不旋转，完整显示） --- */
     .atmo-sunray {
-      left: -50%;
-      top: -50%;
-      right: -50%;
-      bottom: -50%;
-      transform-origin: 31% 30%;
-      background: radial-gradient(circle at 31% 30%, rgba(255, 242, 170, .5), transparent 40%),
-        repeating-conic-gradient(from 0deg at 31% 30%, rgba(255, 236, 150, .14) 0deg 5deg, transparent 5deg 14deg)
+      transform-origin: 12% 10%;
+      background: radial-gradient(circle at 12% 10%, rgba(255, 242, 170, .5), transparent 40%),
+        repeating-conic-gradient(from 0deg at 12% 10%, rgba(255, 236, 150, .14) 0deg 5deg, transparent 5deg 14deg)
     }
 
     #bscene.wx-sun .atmo-sunray {
-      opacity: 1;
-      animation: raySpin 46s linear infinite
-    }
-
-    @keyframes raySpin {
-      to {
-        transform: rotate(360deg)
-      }
+      opacity: 1
     }
 
     /* --- 飞雪 --- */
@@ -1194,9 +1183,8 @@
 
     #bscene.wx-desolate .atmo-sunray {
       opacity: 1;
-      background: radial-gradient(circle at 31% 30%, rgba(255, 200, 110, .75), transparent 42%),
-        repeating-conic-gradient(from 0deg at 31% 30%, rgba(255, 190, 90, .3) 0deg 5deg, transparent 5deg 12deg);
-      animation: raySpin 16s linear infinite
+      background: radial-gradient(circle at 12% 10%, rgba(255, 200, 110, .75), transparent 42%),
+        repeating-conic-gradient(from 0deg at 12% 10%, rgba(255, 190, 90, .3) 0deg 5deg, transparent 5deg 12deg)
     }
 
     /* 灼热空气扭曲：热浪上升 */
