@@ -21878,8 +21878,8 @@ return ev;
       openCodex() {
         const ov = $('#partyOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
         const box = el('div', 'ovBox codexWrap codexMode-single'); box.style.cssText = 'max-width:820px'; ov.appendChild(box);
-        let offEsc = null;
-        const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); };
+      let offEsc = null;
+      const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); ov.onclick = null; };
         offEsc = onEsc(() => { AU.no(); close(); });
         const list = this.championList();
         const total = list.length;
@@ -22419,7 +22419,9 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b clas
       async swapScreen(enemyTeam, nextExpert) {
         return new Promise(res => {
           const ov = $('#partyOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
+          ov.onclick = null;   // ★ 清除残留的空白点击关闭处理器，防止点卡片误关面板
           const box = el('div', 'ovBox panel'); ov.appendChild(box);
+          box.onclick = e => e.stopPropagation();
           box.appendChild(el('h3', 'disp', '宝可梦交换 — 点选想要的对手宝可梦'));
           /* ★ 下一场对手类型提示：帮助玩家针对性选择交换宝可梦 */
           if (nextExpert) {
@@ -24208,7 +24210,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       head.appendChild(xBtn);
       box.appendChild(head);
       let offEsc = null;
-      const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); saveCfg(); applyBgTheme(); setDlgStyleClass($('#dlgBox'), CFG.dlgStyle || 'classic'); };
+      const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); saveCfg(); applyBgTheme(); setDlgStyleClass($('#dlgBox'), CFG.dlgStyle || 'classic'); ov.onclick = null; };
       /* ★ 点击弹窗空白处关闭 */
       ov.onclick = () => { AU.no(); close(); };
       box.onclick = e => e.stopPropagation();
