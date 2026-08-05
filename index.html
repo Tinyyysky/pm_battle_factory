@@ -973,11 +973,15 @@
       background: rgba(84, 94, 116, .9)
     }
 
-    /* --- 晴天光轮 --- */
+    /* --- 晴天光轮（元素放大避免旋转时光线被裁剪，光心重定位到原视觉位置） --- */
     .atmo-sunray {
-      transform-origin: 12% 10%;
-      background: radial-gradient(circle at 12% 10%, rgba(255, 242, 170, .5), transparent 40%),
-        repeating-conic-gradient(from 0deg at 12% 10%, rgba(255, 236, 150, .14) 0deg 5deg, transparent 5deg 14deg)
+      left: -50%;
+      top: -50%;
+      right: -50%;
+      bottom: -50%;
+      transform-origin: 31% 30%;
+      background: radial-gradient(circle at 31% 30%, rgba(255, 242, 170, .5), transparent 40%),
+        repeating-conic-gradient(from 0deg at 31% 30%, rgba(255, 236, 150, .14) 0deg 5deg, transparent 5deg 14deg)
     }
 
     #bscene.wx-sun .atmo-sunray {
@@ -1190,8 +1194,8 @@
 
     #bscene.wx-desolate .atmo-sunray {
       opacity: 1;
-      background: radial-gradient(circle at 12% 10%, rgba(255, 200, 110, .75), transparent 42%),
-        repeating-conic-gradient(from 0deg at 12% 10%, rgba(255, 190, 90, .3) 0deg 5deg, transparent 5deg 12deg);
+      background: radial-gradient(circle at 31% 30%, rgba(255, 200, 110, .75), transparent 42%),
+        repeating-conic-gradient(from 0deg at 31% 30%, rgba(255, 190, 90, .3) 0deg 5deg, transparent 5deg 12deg);
       animation: raySpin 16s linear infinite
     }
 
@@ -11413,6 +11417,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(832,'毛毛角羊','normal','72/80/100/60/90/88','bulletproof/sturdy',['facade','knockoff','swordsdance','uturn','earthquake','doubleedge']);
     S(836,'逐电犬','electric','69/90/60/90/60/121','strongjaw/competitive',['wildcharge','playrough','firefang','thunderfang','crunch','voltswitch']);
     S(841,'苹裹龙','grass/dragon','70/110/80/95/60/70','gluttony/overgrow',['powerwhip','dragonclaw','knockoff','swordsdance','earthquake','seedbomb', 'gravapple']);
+    S(842,'丰蜜龙','grass/dragon','110/85/80/100/80/30','thickfat/gluttony/overgrow',['appleacid','bodypress','dragonpulse','gigadrain','earthquake','recover','leechseed']);
     S(844,'沙螺蟒','ground','72/107/125/65/70/71','sandstream/shedskin',['earthquake','stoneedge','knockoff','swordsdance','stealthrock','glare']);
     S(847,'戽斗尖梭','water','61/63/60/78/50/136','swiftswim/sniper',['liquidation','drillpeck','knockoff','swordsdance','aquajet','uturn']);
     S(853,'八爪武师','fighting','80/118/90/70/80/42','limber/technician',['closecombat','knockoff','suckerpunch','drainpunch','swordsdance','poisonjab']);
@@ -12061,7 +12066,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(961,'三海地鼠','water','35/100/50/50/70/120','gooey/rattled/sandveil',['tripledive','waterfall','earthquake','knockoff','swordsdance','aquajet','suckerpunch']);
     S(963,'波普海豚','water','70/45/40/45/40/75','waterveil/waterveil',['liquidation','aquajet','knockoff','swordsdance','drainpunch'],{evo:1});
     S(965,'噗隆隆','poison/steel','40/50/60/50/40/60','overcoatx/poisontouch/sturdy',['gunkshot','ironhead','knockoff','swordsdance','poisonjab'],{evo:1});
-    S(966,'普隆隆姆','poison/steel','80/119/90/54/67/90','overcoatx/poisontouch/sturdy',['gunkshot','gigatonhammer','knockoff','swordsdance','poisonjab']);
+    S(966,'普隆隆姆','poison/steel','80/119/90/54/67/90','overcoatx/poisontouch/sturdy',['gunkshot','knockoff','swordsdance','poisonjab']);
     S(969,'晶光芽','rock/poison','48/35/42/105/60/60','toxicdebris/corrosion',['powergem','sludgewave','earthpower','stealthrock','energyball'],{evo:1});
     S(971,'墓仔狗','ghost','50/61/60/30/55/34','intimidate/pickup/stakeout',['shadowclaw','crunch','playrough','swordsdance','willowisp'],{evo:1});
     S(972,'墓扬犬','ghost','72/101/100/50/97/68','intimidate/pickup/stakeout',['shadowclaw','crunch','playrough','swordsdance','willowisp']);
@@ -15791,15 +15796,11 @@ return ev;
         const B = this.center(side, slot);
         const colors = { burn: '#ff7a2f', fire: '#ff5f2f', psn: '#b56fd8', tox: '#8a2fa3', sludge: '#b56fd8', salt: '#e8e8f0', grass: '#7ac74c', water: '#4f9df7', rock: '#b0a060', binding: '#9fe8f5' };
         const c = colors[kind] || '#fff';
-        const cfg = { c, c2: '#fff' };
-        if (kind === 'burn' || kind === 'fire') this.extraFx('ember', side, cfg, slot);
-        else if (kind === 'psn' || kind === 'tox' || kind === 'sludge') this.extraFx('bub', side, { c, c2: '#e8b8ff' }, slot);
-        else if (kind === 'salt') this.extraFx('metal', side, { c, c2: '#fff' }, slot);
-        else if (kind === 'grass') this.extraFx('leaves', side, { c, c2: '#d8f5b0' }, slot);
-        else if (kind === 'water') this.extraFx('bub', side, { c, c2: '#a8e0ff' }, slot);
-        else if (kind === 'rock') this.extraFx('dust', side, { c, c2: '#e0d09a' }, slot);
-        else if (kind === 'binding') for (let i = 0; i < 3; i++) this.wave(side, { c: '#9fe8f5' }, slot);
-        this.p({ cls: 'fxRing', x: B.x, y: B.y, c, an: 'fxRingB', dur: .4 });
+        /* ★ 精简：一次小型受击光环 + 少量微粒（触发时才出现） */
+        this.p({ cls: 'fxRing', x: B.x, y: B.y, c, an: 'fxRingB', dur: .35 });
+        for (let i = 0; i < 4; i++) setTimeout(() => {
+          this.p({ cls: 'fxp', x: B.x + rnd(-24, 24), y: B.y + rnd(-20, 20), char: pick(['✦', '•']), c, fs: rnd(10, 16), dx: rnd(-26, 26), dy: rnd(-30, 6), an: 'fxRise', dur: rnd(4, 6) / 10 });
+        }, i * 45);
       },
       /* ---- 超极巨 DOT 专属演出（按技能名匹配，华丽且对应招式意象） ---- */
       gmaxDotFx(name, type, side, slot = 0) {
@@ -15889,9 +15890,8 @@ return ev;
       },
       /* ---- 持续状态浮层同步 ---- */
       syncStatusFx(b) {
-        if (!this.on()) { this.clearSt(); return; }
-        this.setSt('e', b.E());
-        this.setSt('p', b.P());
+        /* ★ 异常状态特效改为只在触发（dotFx）时显示：移除常驻火焰/毒泡等覆盖层 */
+        this.clearSt();
       },
       clearSt() {
         ['e', 'p'].forEach(s => { const l = $(s === 'e' ? '#estfx' : '#pstfx'); if (l) l.innerHTML = ''; });
@@ -16976,9 +16976,9 @@ return ev;
       }
       grounded(m) { return !m.types.includes('flying') && !m.has('levitate') && !m.has('eelevate'); }
       wxActive() {
-        const P = this.P(), E = this.E();
-        if ((P && (P.has('airlock') || P.has('cloudnine')))
-          || (E && (E.has('airlock') || E.has('cloudnine')))) return null;
+        /* ★ 气闸/无天气：任一在场宝可梦持有则天气效果无效（双打全槽位检查） */
+        const neutral = m => m && m.alive() && (m.has('airlock') || m.has('cloudnine'));
+        if ([...this.fieldMons('p'), ...this.fieldMons('e')].some(neutral)) return null;
         return this.wx;
       }
       /* ---------- 回合 ---------- */
@@ -19922,11 +19922,10 @@ return ev;
         BUI.koFx(lSide, BUI.sprEl(lSide, this.fieldSlotOf(loser)));
         await sleep(760);
         await say(`${loser.name} 倒下了！`);
-        /* ★ 德尔塔气流/终结之地/始源之海随携带者倒下而消散 */
+        /* ★ 德尔塔气流/终结之地/始源之海：持有者在场才存在（双打全槽位检查，防止误消散） */
         if (this.wx === 'delta' || this.wx === 'desolate' || this.wx === 'primordial') {
-          const P = this.P(), E = this.E();
           const still = (m) => m && m.alive() && ((this.wx === 'delta' && m.has('deltastream')) || (this.wx === 'desolate' && m.has('desolateland')) || (this.wx === 'primordial' && m.has('primordialsea')));
-          if (!still(P) && !still(E)) {
+          if (![...this.fieldMons('p'), ...this.fieldMons('e')].some(still)) {
             const names = { delta: '德尔塔气流', desolate: '终结之地', primordial: '始源之海' };
             const name = names[this.wx];
             this.wx = null; this.wxT = 0;
@@ -19995,6 +19994,7 @@ return ev;
                 const cur = this.slotMon('p', ps.slot);
                 if (cur && cur.alive()) continue;
                 if (!this.pp.some((x, i) => x.alive() && !this.pt.includes(i))) continue;
+                await sleep(500);   // ★ 我方阵亡后0.5s延迟再弹出替换上场页面
                 const idx = await this.chooseParty(false, false, ps.slot, cur);
                 if (idx != null) await this.doSwitch('p', idx, ps.slot);
               } else {
@@ -20010,6 +20010,7 @@ return ev;
           const eNeeds = batch.some(ps => ps.side === 'e');
           if (pNeeds && eNeeds) {
             /* ★ 双方同时濒死：按上场宝可梦速度决定出场顺序（受戏法空间影响） */
+            await sleep(500);   // ★ 我方阵亡后0.5s延迟再弹出替换上场页面
             const pIdx = await this.chooseParty(false, false);
             const eIdx = this.aiBestSwitch();
             const pMon = pIdx != null ? this.pp[pIdx] : null;
@@ -20026,7 +20027,7 @@ return ev;
           } else {
             for (const ps of batch) {
               if (this.over) break;
-              if (ps.side === 'p') { const idx = await this.chooseParty(false, false); if (idx != null) await this.doSwitch('p', idx); }
+              if (ps.side === 'p') { await sleep(500); const idx = await this.chooseParty(false, false); if (idx != null) await this.doSwitch('p', idx); }
               else { const to = this.aiBestSwitch(); if (to > -1) await this.doSwitch('e', to); }
             }
           }
@@ -20102,13 +20103,17 @@ return ev;
             BUI.refresh(this);
           }
         }
-        /* ★ 德尔塔气流/终结之地/始源之海随携带者离场而消散 */
+        /* ★ 德尔塔气流/终结之地/始源之海随携带者离场而消散（双打：另一槽位仍有持有者则不消散） */
         if ((old.has('deltastream') && this.wx === 'delta') || (old.has('desolateland') && this.wx === 'desolate') || (old.has('primordialsea') && this.wx === 'primordial')) {
-          const names = { delta: '德尔塔气流', desolate: '终结之地', primordial: '始源之海' };
-          const name = names[this.wx];
-          this.wx = null; this.wxT = 0;
-          await say(`${name}消散了，天气恢复了正常。`);
-          BUI.refresh(this);
+          const still = (m) => m && m.alive() && ((this.wx === 'delta' && m.has('deltastream')) || (this.wx === 'desolate' && m.has('desolateland')) || (this.wx === 'primordial' && m.has('primordialsea')));
+          const others = [...this.fieldMons('p'), ...this.fieldMons('e')].filter(x => x !== old);
+          if (!others.some(still)) {
+            const names = { delta: '德尔塔气流', desolate: '终结之地', primordial: '始源之海' };
+            const name = names[this.wx];
+            this.wx = null; this.wxT = 0;
+            await say(`${name}消散了，天气恢复了正常。`);
+            BUI.refresh(this);
+          }
         }
         await this.sendOut(side, idx, false, false, this.doubles ? (slot != null ? slot : 0) : null);
         this.syncBattleMusic();
@@ -20142,6 +20147,8 @@ return ev;
             if (wx === 'sun') { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); await say(`${m.name} 的干燥皮肤在晴天受到了伤害！`); }
             if (wx === 'rain') { const h = Math.floor(B / 8); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的干燥皮肤在雨天回复了HP！`); }
           }
+          /* ★ 天气扣血致死：立即判死，不等回合末 */
+          if (m.hp <= 0 && !m.fainted) { await this.handleKO(this.foeSide(side), this.foeOf(m), m); if (this.over) return; continue; }
           /* ★ 收获：晴天时文柚果可重复使用（简化） */
           if (m.has('harvest') && wx === 'sun' && !m.item && m.vol.usedBerry && m.hpPct() <= .5) {
             m.item = 'sitrus'; m.vol.usedBerry = false;
@@ -20192,11 +20199,15 @@ return ev;
               }
             }
           }
+          /* ★ 寄生种子致死：立即判死 */
+          if (m.hp <= 0 && !m.fainted) { await this.handleKO(this.foeSide(side), this.foeOf(m), m); if (this.over) return; continue; }
           // 盐腌
           if (m.vol.salt && m.hp > 0) {
             const d = Math.max(1, Math.floor(B / (['water', 'steel'].includes(m.types[0]) ? 4 : 8)));
             m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'salt', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#e8e8f0', m._slot || 0); await say(`盐腌正在侵蚀 ${m.name}！`); this.addLog(`↳ ${m.name} 盐腌伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`);
           }
+          /* ★ 盐腌致死：立即判死 */
+          if (m.hp <= 0 && !m.fainted) { await this.handleKO(this.foeSide(side), this.foeOf(m), m); if (this.over) return; continue; }
           // ★ 道具回复：先于扣血异常结算（回血在先，再承受灼伤/中毒等回合末伤害）
           /* ★ 笨拙：道具回复效果无效 */
           if (!m.has('klutz') && m.item === 'leftovers') { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.name} 吃剩的东西回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
@@ -20209,6 +20220,8 @@ return ev;
           if (m.status === 'psn') { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'psn', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#b56fd8', m._slot || 0); await say(`${m.name} 受到了毒素伤害！`); this.addLog(`↳ ${m.name} 中毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           if (m.status === 'tox') { m.toxicN++; const d = Math.floor(B * m.toxicN / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'tox', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#8a2fa3', m._slot || 0); await say(`${m.name} 受到了剧毒伤害！`); this.addLog(`↳ ${m.name} 剧毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           if (m.has('poisonheal') && (m.status === 'psn' || m.status === 'tox')) { this.abBanner(m); const h = Math.floor(B / 8); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的毒疗发动了，回复了HP！`); this.addLog(`↳ ${m.name} 毒疗回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          /* ★ 异常状态致死：立即判死（灼伤/中毒/剧毒），不再等回合末统一结算 */
+          if (m.hp <= 0 && !m.fainted) { await this.handleKO(this.foeSide(side), this.foeOf(m), m); if (this.over) return; continue; }
           /* ★ 火焰宝珠/剧毒宝珠：回合末附加异常状态 */
           if (!m.has('klutz') && m.item === 'flameorb' && !m.status && !m.has('magicguard')) { await this.inflictStatus(m, 'burn', null, 'fire'); }
           if (!m.has('klutz') && m.item === 'toxicorb' && !m.status && !m.has('magicguard')) { await this.inflictStatus(m, 'tox', null, 'poison'); }
