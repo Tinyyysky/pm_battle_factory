@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -3501,6 +3501,26 @@
         transform: scale(2.6);
         opacity: 0
       }
+    }
+
+    /* 发号施令：米立龙被吞入时的缩小消失动画 */
+    @keyframes cmdHideA {
+      0% {
+        transform: scale(1);
+        opacity: 1
+      }
+
+      100% {
+        transform: scale(.1);
+        opacity: 0
+      }
+    }
+
+    #espr.cmdHide,
+    #espr2.cmdHide,
+    #pspr.cmdHide,
+    #pspr2.cmdHide {
+      animation: cmdHideA .4s ease-in forwards
     }
 
     /* ============ 华丽特效 2.0：大尺寸球体 / 天际闪电 / 加粗光束 ============ */
@@ -8952,11 +8972,11 @@
       <div class="flyPoke" style="top:60px"></div>
       <div class="grass"></div>
       <div id="titleInner">
-        <div class="logo">宝可梦<em>·</em>无限工厂</div>
+        <div class="logo">宝可梦<em>·</em>无限</div>
         <div class="logoSub">POKÉMON INFINITE FACTORY · TURN-BASED BATTLE</div>
         <div id="menuList">
           <button class="menuItem" id="mStory"><span class="ball"></span>剧情模式<small>关都之旅</small></button>
-          <button class="menuItem" id="mFactory"><span class="ball"></span>对战工厂<small>绿宝石规则</small></button>
+          <button class="menuItem" id="mFactory"><span class="ball"></span>对战工厂<small>无限战斗</small></button>
           <button class="menuItem" id="mFree"><span class="ball"></span>自由对战<small>自选队伍</small></button>
           <button class="menuItem" id="mDex"><span class="ball"></span>宝可梦图鉴<small id="dexCount"></small></button>
           <button class="menuItem" id="mAbilityDex"><span class="ball"></span>特性图鉴<small id="abCount"></small></button>
@@ -11302,7 +11322,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(701, '摔角鹰人', 'fighting/flying', '78/92/75/74/63/118', 'limber/moldbreaker', ['closecombat', 'bravebird', 'stoneedge', 'swordsdance', 'roost', 'uturn']);
     /* 7代 */
     S(733, '铳嘴大鸟', 'normal/flying', '80/120/75/75/75/60', 'keeneye/skilllink', ['beakblast', 'bravebird', 'rockblast', 'bulletseed', 'roost', 'uturn', 'knockoff']);
-    S(740, '好胜毛蟹', 'fighting', '97/132/77/62/67/43', 'hyperCutterx/angerpoint', ['closecombat', 'icepunch', 'stoneedge', 'xscissor', 'bulkup', 'knockoff']);
+    S(740, '好胜毛蟹', 'fighting', '97/132/77/62/67/43', 'angershell/shellarmor/regenerator', ['closecombat', 'icepunch', 'stoneedge', 'xscissor', 'bulkup', 'knockoff']);
     S(750, '重泥挽马', 'ground', '100/125/100/55/85/35', 'owntempo/stamina', ['earthquake', 'stoneedge', 'stealthrock', 'icepunch', 'superpower', 'rockslide']);
     S(777, '托戈德玛尔', 'electric/steel', '65/98/63/40/73/96', 'ironbarbs/sturdy', ['wildcharge', 'ironhead', 'voltswitch', 'thunderwave', 'knockoff', 'toxic']);
     /* 8代 */
@@ -12054,7 +12074,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(904,'万针鱼','dark/poison','65/115/95/65/65/85','poisonpoint/swiftswim/intimidate',['waterfall','poisonjab','swordsdance','aquajet','crunch']);
     S(905,'眷恋云','fairy/flying','74/115/70/135/80/106','cutecharm/contrary',['springtidestorm','moonblast','hurricane','earthpower','nastyplot','tailwind','superpower'],{leg:1});
     S(947,'怖纳噬草','grass/ghost','55/115/70/80/70/90','windrider/infiltrator',['powerwhip','shadowclaw','knockoff','swordsdance','willowisp']);
-    S(949,'陆地水母','ground/grass','40/40/35/50/100/70','myceliummight/myceliummight',['earthpower','gigadrain','energyball','stealthrock','toxic']);
+    S(949,'陆地水母','ground/grass','40/40/35/50/100/70','myceliummight/myceliummight',['earthpower','gigadrain','energyball','stealthrock','toxic','spore']);
     S(955,'超能艳鸵','psychic','95/60/60/101/60/105','opportunist/frisk/speedboost',['psychic','shadowball','calmmind','psyshock','dazzlinggleam']);
     S(957,'小锻匠','fairy/steel','50/45/45/35/64/58','moldbreaker/owntempo/pickpocket',['playrough','knockoff','stealthrock','swordsdance','firefang'],{evo:1});
     S(958,'巧锻匠','fairy/steel','65/55/55/45/82/78','moldbreaker/owntempo/pickpocket',['playrough','knockoff','stealthrock','swordsdance'],{evo:1});
@@ -12065,12 +12085,14 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(966,'普隆隆姆','poison/steel','80/119/90/54/67/90','overcoatx/poisontouch/sturdy',['gunkshot','knockoff','swordsdance','poisonjab']);
     S(969,'晶光芽','rock/poison','48/35/42/105/60/60','toxicdebris/corrosion',['powergem','sludgewave','earthpower','stealthrock','energyball'],{evo:1});
     S(971,'墓仔狗','ghost','50/61/60/30/55/34','intimidate/pickup/stakeout',['shadowclaw','crunch','playrough','swordsdance','willowisp'],{evo:1});
-    S(972,'墓扬犬','ghost','72/101/100/50/97/68','intimidate/pickup/stakeout',['shadowclaw','crunch','playrough','swordsdance','willowisp']);
+    S(972,'墓扬犬','ghost','72/101/100/50/97/68','intimidate/pickup/stakeout',['shadowclaw','crunch','playrough','swordsdance','willowisp','lastrespects']);
     S(974,'走鲸','ice','108/68/45/30/40/43','thickfat/snowcloak/sheerforce',['iciclecrash','waterfall','earthquake','swordsdance','iceshard'],{evo:1});
     S(975,'浩大鲸','ice','170/113/65/45/55/73','thickfat/snowcloak/sheerforce',['iciclecrash','waterfall','earthquake','swordsdance','iceshard']);
     S(976,'轻身鳕','psychic/water','70/75/60/120/80/100','moldbreaker/owntempo/analytic',['psychic','hydropump','icebeam','calmmind','thunderbolt']);
     S(978,'米立龙','dragon/water','68/50/60/120/95/82','commander/stormdrain',['dragonpulse','hydropump','icebeam','calmmind','recover']);
-    S(981,'奇麒麟','normal/psychic','103/90/70/110/75/65','armortail/cudchew',['psychic','hypervoice','shadowball','thunderbolt','calmmind','agility', 'twinbeam']);
+    S(10427,'米立龙(下垂)','dragon/water','68/50/60/120/95/82','commander/stormdrain',['dragonpulse','hydropump','icebeam','calmmind','recover']);
+    S(10428,'米立龙(平挺)','dragon/water','68/50/60/120/95/82','commander/stormdrain',['dragonpulse','hydropump','icebeam','calmmind','recover']);
+    S(981,'奇麒麟','normal/psychic','103/90/70/110/75/65','armortail/cudchew',['psychic','hypervoice','shadowball','thunderbolt','calmmind','agility', 'twinbeam','trickroom','helpinghand']);
     S(982,'土龙节节','normal','125/100/80/85/75/55','serenegrace/runaway/rattled',['hyperdrill','bodyslam','earthquake','rockslide','thunderwave','roost','stealthrock']);
     S(985,'吼叫尾','fairy/psychic','115/65/99/65/115/111','protosynthesis/protosynthesis',['moonblast','psychic','thunderbolt','calmmind','dazzlinggleam'],{leg:1});
     S(986,'猛恶菇','grass/dark','111/127/99/79/99/55','protosynthesis/protosynthesis',['spore','powerwhip','knockoff','swordsdance','earthquake','synthesis'],{leg:1});
@@ -13940,8 +13962,9 @@ SP.forEach(s => {
       876: [10355],                 // 爱管侍
       711: [10126, 10127, 10128],   // 南瓜怪人
       905: [10418],                 // 眷恋云
-      902: [10417],                 // 幽尾玄鱼
-    };
+       902: [10417],                 // 幽尾玄鱼
+       978: [10427, 10428],          // 米立龙（上弓/下垂/平挺）
+     };
     const GMAXLIST = new Set([3, 6, 9, 12, 25, 52, 68, 94, 99, 131, 133, 143, 569, 809, 812, 815, 818, 823, 826, 834, 839, 841, 842, 844, 845, 849, 851, 858, 861, 869, 879, 884, 892]);
     /* 超极巨化精灵图ID */
     const GMAXSPRITE = { 3:10195, 6:10196, 9:10197, 12:10198, 25:10199, 52:10200, 68:10201, 94:10202, 99:10203, 131:10204, 133:10205, 143:10206, 569:10207, 809:10208, 812:10209, 815:10210, 818:10211, 823:10212, 826:10213, 834:10214, 839:10215, 841:10216, 842:10217, 844:10218, 849:10219, 851:10220, 858:10221, 861:10222, 869:10223, 879:10224, 884:10225, 892:10226 };
@@ -14343,7 +14366,8 @@ return ev;
        10355:10186,
        10417:10248,
        10418:10249,
-       10126:10027,10127:10028,10128:10029
+       10126:10027,10127:10028,10128:10029,
+       10427:10258,10428:10259
      };
     let apiId = id;
     if (!noRegional && REGIONAL_SPRITE[id] !== undefined) { apiId = REGIONAL_SPRITE[id]; }
@@ -14923,7 +14947,7 @@ return ev;
           const eSpr = this.sprEl('e', s), pSpr = this.sprEl('p', s);
           if (E && !E.fainted) {
             const eid = E.vol.illusion || E.id;
-            const eForm = E.formSprite || (E.dyn && GMAXSPRITE[E.id] ? GMAXSPRITE[E.id] : null) || (FORMS[E.id] && E.item === FORMS[E.id].item ? FORMS[E.id].f : null); const fid = E.mega ? E.mega.f : (eForm || eid); eSpr._side = 'e'; if (eSpr._cur !== fid + '' + E.dyn) { setSprite(eSpr, fid, false, !!(E.mega || eForm)); eSpr._cur = fid + '' + E.dyn; } eSpr.classList.toggle('dyn', E.dyn); eSpr.classList.toggle('shiny', E.shiny); eSpr.style.opacity = 1;
+            const eForm = E.formSprite || (E.dyn && GMAXSPRITE[E.id] ? GMAXSPRITE[E.id] : null) || (FORMS[E.id] && E.item === FORMS[E.id].item ? FORMS[E.id].f : null); const fid = E.mega ? E.mega.f : (eForm || eid); eSpr._side = 'e'; if (eSpr._cur !== fid + '' + E.dyn) { setSprite(eSpr, fid, false, !!(E.mega || eForm)); eSpr._cur = fid + '' + E.dyn; } eSpr.classList.toggle('dyn', E.dyn); eSpr.classList.toggle('shiny', E.shiny); eSpr.style.opacity = E.vol.commanderIn ? 0 : 1;
             const et = this.teraEl('e', s); et.classList.toggle('hidden', !E.tera); if (E.tera) { this.teraPos('e', s); et.classList.toggle('stellar', E.teraType === 'stellar'); }
           }
           else if (E && E.fainted) {
@@ -14940,7 +14964,7 @@ return ev;
           else { eSpr.style.opacity = 0; this.shadowEl('e', s).classList.add('gone'); }
           if (Pm && !Pm.fainted) {
             const pid = Pm.vol.illusion || Pm.id;
-            const pForm = Pm.formSprite || (Pm.dyn && GMAXSPRITE[Pm.id] ? GMAXSPRITE[Pm.id] : null) || (FORMS[Pm.id] && Pm.item === FORMS[Pm.id].item ? FORMS[Pm.id].f : null); const fid = Pm.mega ? Pm.mega.f : (pForm || pid); pSpr._side = 'p'; if (pSpr._cur !== fid + '' + Pm.dyn) { setSprite(pSpr, fid, true, !!(Pm.mega || pForm)); pSpr._cur = fid + '' + Pm.dyn; } pSpr.classList.toggle('dyn', Pm.dyn); pSpr.classList.toggle('shiny', Pm.shiny); pSpr.style.opacity = 1;
+            const pForm = Pm.formSprite || (Pm.dyn && GMAXSPRITE[Pm.id] ? GMAXSPRITE[Pm.id] : null) || (FORMS[Pm.id] && Pm.item === FORMS[Pm.id].item ? FORMS[Pm.id].f : null); const fid = Pm.mega ? Pm.mega.f : (pForm || pid); pSpr._side = 'p'; if (pSpr._cur !== fid + '' + Pm.dyn) { setSprite(pSpr, fid, true, !!(Pm.mega || pForm)); pSpr._cur = fid + '' + Pm.dyn; } pSpr.classList.toggle('dyn', Pm.dyn); pSpr.classList.toggle('shiny', Pm.shiny); pSpr.style.opacity = Pm.vol.commanderIn ? 0 : 1;
             const pt = this.teraEl('p', s); pt.classList.toggle('hidden', !Pm.tera); if (Pm.tera) { this.teraPos('p', s); pt.classList.toggle('stellar', Pm.teraType === 'stellar'); }
           }
           else if (Pm && Pm.fainted) {
@@ -16424,6 +16448,7 @@ return ev;
       if (foe.has('magnetpull') && m.types.includes('steel')) return '磁力';
       if (foe.has('arenatrap') && battle.grounded(m)) return '沙穴';
       if (m.vol.gmaxTrap) return '超极巨幽灵陷阱';
+      if (m.vol.commanderLock) return '发号施令';
       return null;
     }
 
@@ -16724,6 +16749,32 @@ return ev;
         /* ★ 气球：出场时漂浮在空中（免疫地面系招式，被攻击时破裂） */
         if (!m.has('klutz') && m.item === 'airballoon') {
           await say(`${m.vol.illusionName || m.name} 浮在了空中！`);
+        }
+        /* ★ 发号施令：米立龙出场时若同伴为吃吼霸则被吞入其口中；
+           吃吼霸出场时若场上已有未被吞入的指挥官米立龙同样触发（本场已吞入过且吞入者阵亡则不再触发） */
+        if (!this.commanderFainted) this.commanderFainted = { p: false, e: false };
+        if ((ab === 'commander' && !m.vol.commanderIn) || m.id === 977) {
+          const isTatsu = ab === 'commander';
+          if (!this.commanderFainted[side]) {
+            const dondo = isTatsu ? this.alliesOf(m).find(x => x.id === 977 && x.alive() && !x.vol.commanderTatsu) : m;
+            const tatsu = isTatsu ? m : this.alliesOf(m).find(x => x.has('commander') && x.alive() && !x.vol.commanderIn);
+            if (dondo && dondo.alive() && tatsu && tatsu.alive()) {
+              tatsu.vol.commanderIn = true;
+              tatsu.vol.hidden = true;
+              tatsu.vol.commanderInDondo = dondo.vol.illusionName || dondo.name;
+              dondo.vol.commanderTatsu = tatsu;
+              dondo.vol.commanderLock = true;
+              for (const k of ['atk', 'def', 'spa', 'spd', 'spe']) dondo.stages[k] = clamp((dondo.stages[k] || 0) + 2, -6, 6);
+              this.abBanner(tatsu);
+              await say(`${tatsu.vol.illusionName || tatsu.name}作为发号施令的要员而被${dondo.vol.illusionName || dondo.name}吞下去了！`);
+              /* ★ 简单动画：绿色粒子 + 米立龙缩小消失 */
+              const tSlot = this.fieldSlotOf(tatsu);
+              FX.dotFx(side, 'grass', tSlot);
+              const tspr = BUI.sprEl(side, tSlot);
+              if (tspr) { await BUI.anim(tspr, 'cmdHide', 400); tspr.style.opacity = 0; }
+              BUI.refresh(this);
+            }
+          }
         }
         /* ★ 场地种子：出场时若处于对应场地则立即触发 */
         await this.maybeSeed(m);
@@ -17116,7 +17167,8 @@ return ev;
         this.showWaitMsg();
         while (slot < 2 && !this.over) {
           const m = this.slotMon('p', slot);
-          if (!m || !m.alive()) { slot++; continue; }
+          /* ★ 发号施令：口中的米立龙无法下达指令 */
+          if (!m || !m.alive() || m.vol.commanderIn) { slot++; continue; }
           const a = await this.getPlayerActionFor(m, slot, acts);
           if (this.over) return acts;
           if (a === null) {
@@ -17480,7 +17532,7 @@ return ev;
           box.appendChild(el('h3', 'disp', '选择目标'));
           box.appendChild(el('div', 'rangeNote', `「${nm}」 · 正在操作：${mon.vol.illusionName || mon.name}`));
           const pickable = (m, isEnemy) => {
-            if (!m || !m.alive()) return false;
+            if (!m || !m.alive()) return false;   // ★ 发号施令：口中的米立龙仍可选为目标（但无法命中）
             if (rng === 'enemy-any') return isEnemy;
             if (rng === 'ally-any') return !isEnemy && m !== mon;
             if (rng === 'any') return m !== mon;
@@ -17758,11 +17810,11 @@ return ev;
         let acts = [];
         pList.forEach((a, slot) => {
           const m = this.doubles ? this.slotMon('p', slot) : this.P();
-          if (a && a.type === 'move' && m && m.alive()) { m.vol.plannedMove = a.move ? a.move.k : null; acts.push({ side: 'p', mon: m, slot, ...a }); }
+          if (a && a.type === 'move' && m && m.alive() && !m.vol.commanderIn) { m.vol.plannedMove = a.move ? a.move.k : null; acts.push({ side: 'p', mon: m, slot, ...a }); }
         });
         eList.forEach((a, slot) => {
           const m = this.doubles ? this.slotMon('e', slot) : this.E();
-          if (a && a.type === 'move' && m && m.alive()) { m.vol.plannedMove = a.move ? a.move.k : null; acts.push({ side: 'e', mon: m, slot, ...a }); }
+          if (a && a.type === 'move' && m && m.alive() && !m.vol.commanderIn) { m.vol.plannedMove = a.move ? a.move.k : null; acts.push({ side: 'e', mon: m, slot, ...a }); }
         });
         // 排序：优先级 → 速度
         const prio = a => {
@@ -18155,10 +18207,14 @@ return ev;
           await this.changeStat(mon, 'spa', 1, mon);
           await say(`${mon.name} 的爽喉喷雾发动了！`);
         }
-        /* ★ 上菜（吃吼霸）：造成伤害后攻击+1 */
+        /* ★ 上菜（吃吼霸）：只有发号施令被吞入的米立龙在场时才有效果（按形态决定提升项：上弓=攻击/下垂=防御/平挺=速度）；否则没有效果也不提示 */
         if (useMv.orderup && connected && totalDmg > 0 && mon.alive()) {
-          await this.changeStat(mon, 'atk', 1, mon);
-          await say(`${mon.name} 吃到了上菜，攻击提升了！`);
+          const tatsu = mon.vol.commanderTatsu;
+          if (tatsu && tatsu.alive()) {
+            const up = tatsu.id === 10427 ? 'def' : tatsu.id === 10428 ? 'spe' : 'atk';
+            await this.changeStat(mon, up, 1, mon);
+            await say(`${mon.name} 吃到了上菜，${STN[up]}提升了！`);
+          }
         }
         // ★ 吸取/反伤/命玉：只要造成伤害就结算（击倒对手也要付反伤）
         //   坚硬脑袋/魔法防守免疫反伤；强行+命玉不扣血
@@ -18433,6 +18489,12 @@ return ev;
       /* ---------- 单次伤害结算 ---------- */
       async hitOnce(side, mon, foe, mv, act) {
         const tgtSide = this.sideOf(foe);   // 受击方实际侧（攻击队友时特效/动画朝队友）
+        /* ★ 发号施令：吃吼霸口中的米立龙无法被命中（即使无防守特性） */
+        if (foe.vol.commanderIn) {
+          await say(`在${foe.vol.commanderInDondo || '吃吼霸'}的口中，招式无法命中${foe.vol.illusionName || foe.name}！`);
+          this.addLog(`对 ${foe.vol.illusionName || foe.name} 没有效果（在吃吼霸口中）`);
+          return { dmg: 0, immune: true };
+        }
         /* ★ 巨剑突击破绽：必定命中并清除标记 */
         if (foe.vol.glaiveRush) { foe.vol.glaiveRush = false; }
         // 免疫检查（特性/属性）
@@ -19963,6 +20025,13 @@ return ev;
       /* ---------- 击倒 ---------- */
       async handleKO(winSide, winner, loser) {
         loser.fainted = true; loser.hp = 0;
+        /* ★ 发号施令：吃吼霸阵亡时口中的米立龙回到原位置；口中的米立龙阵亡后本场不再触发发号施令 */
+        const dondoTatsu = loser.vol.commanderTatsu;
+        if (dondoTatsu) { dondoTatsu.vol.commanderIn = false; dondoTatsu.vol.hidden = false; }
+        if (loser.vol.commanderIn) {
+          if (!this.commanderFainted) this.commanderFainted = { p: false, e: false };
+          this.commanderFainted[this.sideOf(loser)] = true;
+        }
         const lSide = this.sideOf(loser);
         // 同命（双倒各自播放演出）
         if (loser.vol.destiny && winner && winner.hp > 0) {
@@ -20276,10 +20345,10 @@ return ev;
           }
           /* ★ 盐腌致死：立即判死 */
           if (m.hp <= 0 && !m.fainted) { await this.handleKO(this.foeSide(side), this.foeOf(m), m); if (this.over) return; continue; }
-          // ★ 道具回复：先于扣血异常结算（回血在先，再承受灼伤/中毒等回合末伤害）
+          // ★ 道具回复：先于扣血异常结算（回血在先，再承受灼伤/中毒等回合末伤害；发号施令口中的米立龙不吃道具回复）
           /* ★ 笨拙：道具回复效果无效 */
-          if (!m.has('klutz') && m.item === 'leftovers') { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.name} 吃剩的东西回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (!m.has('klutz') && m.item === 'blacksludge') {
+          if (!m.vol.commanderIn && !m.has('klutz') && m.item === 'leftovers') { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.name} 吃剩的东西回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (!m.vol.commanderIn && !m.has('klutz') && m.item === 'blacksludge') {
             if (m.types.includes('poison')) { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.name} 黑色污泥回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
             else if (!m.has('magicguard')) { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'sludge', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#b56fd8', m._slot || 0); this.addLog(`↳ ${m.name} 黑色污泥伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           }
@@ -20822,7 +20891,7 @@ return ev;
             let formTaken = false;   // ★ 双打每回合最多一个槽位使用形态（Mega进化大师场：Mega不限次数，可双槽同时Mega）
             for (let s = 0; s < 2; s++) {
               const m = this.slotMon('e', s);
-              if (!m || !m.alive()) { acts[s] = { type: 'skip' }; continue; }
+              if (!m || !m.alive() || m.vol.commanderIn) { acts[s] = { type: 'skip' }; continue; }
               const entry = obj['slot' + s];
               if (!entry) continue;   // 该槽位未给出 → 留空由本地AI接管
               const act = this.realAIAct(m, s, entry);
@@ -20928,7 +20997,7 @@ return ev;
         const acts = [];
         for (let s = 0; s < 2; s++) {
           const m = this.slotMon('e', s);
-          if (!m || !m.alive()) { acts.push({ type: 'skip' }); continue; }
+          if (!m || !m.alive() || m.vol.commanderIn) { acts.push({ type: 'skip' }); continue; }
           if (realActs && realActs[s]) {
             acts.push(realActs[s]);
             const last = acts[acts.length - 1];
@@ -21044,8 +21113,9 @@ return ev;
               if (canKO) allyPen *= 0.5;   // ★ 能确杀敌方时仍可能误伤队友
               s = en - allyPen + allySynergy;
             } else {
-              /* ★ 单体攻击：AI 只从敌方中选目标，绝不主动攻击队友（即使对队友克制度更高） */
-              const list = realFoes;
+              /* ★ 单体攻击：AI 只从敌方中选目标，绝不主动攻击队友（即使对队友克制度更高）；
+                 发号施令：不选择被吃吼霸吞入的米立龙（选了也打不中） */
+              const list = realFoes.filter(f => !f.vol.commanderIn);
               let bf = null, bfs = -1e9;
               for (const foeReal of list) {
                 const foe = this.seenFoe(foeReal);
@@ -21860,6 +21930,24 @@ return ev;
           m.item = alt || 'sitrus';
           usedItems.add(m.item);
         };
+        /* ★ 0.5%概率：对手首发为 吃吼霸+米立龙（强制发号施令）组合 */
+        if (Math.random() < 0.005) {
+          const dondo = this.buildDouble(SPDB[977], lvl + 2, round);
+          const tatsu = this.buildDouble(SPDB[978], lvl, round);
+          tatsu.ability = 'commander';   // ★ 强制发号施令特性，出场即触发吞入
+          fixDupItem(dondo); fixDupItem(tatsu);
+          used.add(977); used.add(978);
+          team.push(dondo, tatsu);
+          while (team.length < 4) {
+            const sp = this.drawOne(round);
+            if (used.has(sp.id)) continue;
+            used.add(sp.id);
+            const m = this.buildDouble(sp, lvl, round);
+            fixDupItem(m);
+            team.push(m);
+          }
+          return { head: false, master: false, team };
+        }
         while (team.length < 4) {
           const sp = this.drawOne(round);
           if (used.has(sp.id)) continue;
