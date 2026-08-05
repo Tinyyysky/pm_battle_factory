@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
@@ -10540,7 +10540,7 @@ const MUSIC = {
     A('protosynthesis', '古代活性', '晴天下最高能力×1.3（速度×1.5，HP除外）');
     A('hadronengine', '强子引擎', '出场开启电场，电场下特攻×1.3');
     A('orichalcumpulse', '绯红脉动', '出场开启晴天，晴天下物攻×1.3');
-    A('fairyaura', '妖精气场', '全场妖精招式×1.33'); A('darkaura', '暗黑光环', '全场恶属性招式×1.33');
+    A('fairyaura', '妖精气场', '全场妖精招式×1.33'); A('darkaura', '暗黑气场', '全场恶属性招式×1.33');
     A('intrepidsword', '不挠之剑', '出场时攻击提升'); A('dauntlessshield', '不屈之盾', '出场时防御提升');
     A('multitype', '多属性', '根据石板变换属性');
     A('keeneye', '锐利目光', '命中率不会降低'); A('runaway', '逃跑', '一定能从野生宝可梦逃走'); A('tangledfeet', '蹒跚', '混乱时回避率提升');
@@ -10553,7 +10553,7 @@ const MUSIC = {
     A('obliviousx', '迟钝', '不会陷入着迷或被挑衅'); A('shellarmor', '硬壳盔甲', '不会受到会心一击');
     A('bulletproof', '防弹', '免疫弹类和球类招式'); A('infiltrator', '穿透', '无视对手的屏障和替身');
     A('overcoatx', '防尘', '免疫天气和粉末类伤害');
-    A('swordofruin', '灾祸之剑', '降低全体1/3防御')
+    A('swordofruin', '灾祸之剑', '降低全场除自己外所有宝可梦的防御，即防御×0.75')
     A('merciless', '不仁不义', '对中毒的对手必定会心一击');
     A('grassysurge', '青草制造者', '出场时场地变为青草场地');
     /* ---- 新增30只宝可梦的补充特性 ---- */
@@ -10693,7 +10693,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     A('costar','同台共演','出场时复制同伴的能力变化（单打中无实际效果）');
     A('commander','发号施令','出场时若同伴有吃吼霸则进入其口中（单打中无实际效果）');
     A('angershell','愤怒甲壳','HP降至一半以下时攻击/特攻/速度+1，防御/特防-1');
-    A('tabletsofruin','灾祸之简','降低全场除自己外所有宝可梦的攻击×0.75');
+    A('tabletsofruin','灾祸之简','降低全场除自己外所有宝可梦的攻击，即攻击×0.75');
     A('vesselofruin','灾祸之鼎','降低全场除自己外所有宝可梦的特攻×0.75');
     A('beadsofruin','灾祸之玉','降低全场除自己外所有宝可梦的特防×0.75');
     A('hospitality','款待','出场时回复同伴HP（单打中回复自身1/4HP）');
@@ -10717,7 +10717,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     A('slowstart','慢启动','出场后5回合内攻击和速度减半');
     A('badcompany','坏伙伴','（简化为无效果）');
     A('lingeringaroma','甩不掉的香气','被接触攻击时对手特性变为甩不掉的香气');
-    A('aurabreak','气场破坏','妖精气场和暗黑光环的效果反转（×0.75）');
+    A('aurabreak','气场破坏','妖精气场和暗黑气场的效果反转（×0.75）');
     A('comatose','绝对睡眠','始终处于睡眠状态，不会醒来，但可以使用招式');
     A('dazzling','耀眼','对手无法使用先制招式攻击自己');
     A('steelyspirit','钢之意志','己方钢属性招式威力×1.5');
@@ -12088,7 +12088,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(972,'墓扬犬','ghost','72/101/100/50/97/68','intimidate/pickup/stakeout',['shadowclaw','crunch','playrough','swordsdance','willowisp','lastrespects']);
     S(974,'走鲸','ice','108/68/45/30/40/43','thickfat/snowcloak/sheerforce',['iciclecrash','waterfall','earthquake','swordsdance','iceshard'],{evo:1});
     S(975,'浩大鲸','ice','170/113/65/45/55/73','thickfat/snowcloak/sheerforce',['iciclecrash','waterfall','earthquake','swordsdance','iceshard']);
-    S(976,'轻身鳕','psychic/water','70/75/60/120/80/100','moldbreaker/owntempo/analytic',['psychic','hydropump','icebeam','calmmind','thunderbolt']);
+    S(976,'轻身鳕','water/psychic','90/102/73/78/65/70','moldbreaker/reckless/sharpness',['filletaway','psychic','hydropump','icebeam','liquidation','crunch','swordsdance']);
     S(978,'米立龙','dragon/water','68/50/60/120/95/82','commander/stormdrain',['dragonpulse','hydropump','icebeam','calmmind','recover']);
     S(10427,'米立龙(下垂)','dragon/water','68/50/60/120/95/82','commander/stormdrain',['dragonpulse','hydropump','icebeam','calmmind','recover']);
     S(10428,'米立龙(平挺)','dragon/water','68/50/60/120/95/82','commander/stormdrain',['dragonpulse','hydropump','icebeam','calmmind','recover']);
@@ -14268,8 +14268,10 @@ return ev;
           if (this.has('gorillatactics')) v *= 1.5;
           /* ★ 笨拙：自身道具的能力加成无效 */
           if (!this.has('klutz') && this.item === 'choiceband' && !this.dyn) v *= 1.5;
-          if (b && b.foeOf(this) && b.foeOf(this).has('swordofruin') && !b.foeOf(this).fainted) v *= .75;
-          if (b && b.foeOf(this) && b.foeOf(this).has('tabletsofruin') && !b.foeOf(this).fainted) v *= .75;
+          /* ★ 灾祸之宝：持有相同灾祸特性的宝可梦免疫该特性影响（灾祸之简→攻击×0.75） */
+          /* ★ 灾祸之宝：降低除自己外全场（含队友）对应能力×0.75；持有相同灾祸特性的宝可梦免疫（灾祸之简→攻击） */
+          if (b && b.fieldMons && [...b.fieldMons('p'), ...b.fieldMons('e')].some(x => x && x !== this && x.alive() && x.has('tabletsofruin')) && !this.has('tabletsofruin')) v *= .75;
+          
           /* ★ 慢启动：出场后5回合内攻击减半 */
           if (ab === 'slowstart' && (this.vol.slowStartTurns === undefined || this.vol.slowStartTurns < 5)) v *= .5;
         }
@@ -14280,7 +14282,8 @@ return ev;
           if (!this.has('klutz') && this.item === 'lightball' && this.id === 25) v *= 2;
           if (!this.has('klutz') && this.item === 'deepseatooth' && this.id === 366) v *= 2;
           if (!this.has('klutz') && this.item === 'choicespecs' && !this.dyn) v *= 1.5;
-          if (b && b.foeOf(this) && b.foeOf(this).has('vesselofruin') && !b.foeOf(this).fainted) v *= .75;
+          /* ★ 灾祸之鼎：降低除自己外全场（含队友）特攻×0.75（持有相同灾祸特性的宝可梦免疫） */
+          if (b && b.fieldMons && [...b.fieldMons('p'), ...b.fieldMons('e')].some(x => x && x !== this && x.alive() && x.has('vesselofruin')) && !this.has('vesselofruin')) v *= .75;
           /* ★ 正电/负电：同伴有对应特性时特攻×1.5（双打） */
           if (b && b.doubles && (ab === 'plus' || ab === 'minus')) {
             const ally = b.alliesOf(this).find(a => a.alive() && (a.has('plus') || a.has('minus')) && a.ability !== ab);
@@ -14314,7 +14317,9 @@ return ev;
           if (!this.has('klutz') && k === 'spd' && this.item === 'assaultvest') v *= 1.5;
           /* ★ 专属道具：深海鳞片（珍珠贝）特防×2 */
           if (!this.has('klutz') && k === 'spd' && this.item === 'deepseascale' && this.id === 366) v *= 2;
-          if (k === 'spd' && b && b.foeOf(this) && b.foeOf(this).has('beadsofruin') && !b.foeOf(this).fainted) v *= .75;
+          /* ★ 灾祸之宝：灾祸之剑→防御×0.75、灾祸之玉→特防×0.75（降低除自己外全场含队友；持有相同灾祸特性的宝可梦免疫） */
+          if (k === 'def' && b && b.fieldMons && [...b.fieldMons('p'), ...b.fieldMons('e')].some(x => x && x !== this && x.alive() && x.has('swordofruin')) && !this.has('swordofruin')) v *= .75;
+          if (k === 'spd' && b && b.fieldMons && [...b.fieldMons('p'), ...b.fieldMons('e')].some(x => x && x !== this && x.alive() && x.has('beadsofruin')) && !this.has('beadsofruin')) v *= .75;
         }
         // ★ 古代活性（晴天/终结之地）/夸克充能（电场）：最高项×1.3，速度×1.5（HP除外）；驱劲能量可无视条件启动
         if (b && ((ab === 'protosynthesis' && (b.wx === 'sun' || b.wx === 'desolate')) || (ab === 'quarkdrive' && b.terrain === 'electric') || this.vol.booster)) {
@@ -14455,17 +14460,17 @@ return ev;
         box.appendChild(r);
       };
       const WX = {
-        sun: ['大晴天', '火属性招式威力×1.5，草属性招式威力×1.5，阳光烈焰/光合作用等不再蓄力'],
-        rain: ['下雨', '水属性招式威力×1.5，火属性招式威力×0.5，打雷/暴风必定命中'],
-        sand: ['沙暴', '岩/地/钢属性免疫，其余宝可梦每回合损失最大HP的1/16，沙隐闪避提升'],
-        hail: ['冰雹', '冰属性免疫，其余宝可梦每回合损失最大HP的1/16，暴风雪必定命中'],
-        delta: ['德尔塔气流', '飞行属性的弱点消除（受到克制减半），天气不会自然消散'],
-        desolate: ['终结之地', '大晴天效果强化：火属性招式威力×1.5，水属性招式无法使用，天气不会自然消散'],
-        primordial: ['始源之海', '下雨效果强化：水属性招式威力×1.5，火属性招式无法使用，天气不会自然消散']
+        sun: ['大晴天', '火属性招式威力×1.5，水属性招式威力×0.5'],
+        rain: ['下雨', '水属性招式威力×1.5，火属性招式威力×0.5'],
+        sand: ['沙暴', '岩/地/钢属性不受影响，其余宝可梦每回合损失最大HP的1/16'],
+        hail: ['冰雹', '冰属性免疫（冰系防御×1.5），其余宝可梦每回合损失最大HP的1/16'],
+        delta: ['德尔塔气流', '飞行属性的弱点消除（受到克制伤害减半）'],
+        desolate: ['终结之地', '火属性招式威力×1.5，水属性招式威力×0.5，水属性招式无法使用'],
+        primordial: ['始源之海', '水属性招式威力×1.5，火属性招式威力×0.5，火属性招式无法使用']
       };
       const TER = {
         electric: ['电气场地', '地面上的宝可梦电属性招式威力×1.3，无法睡眠'],
-        grassy: ['青草场地', '地面上的宝可梦每回合回复最大HP的1/16，草属性招式威力×1.3，地震/重踏威力减半'],
+        grassy: ['青草场地', '地面上的宝可梦每回合回复最大HP的1/16，草属性招式威力×1.3，地震威力减半'],
         psychic: ['精神场地', '地面上的宝可梦超能力属性招式威力×1.3，先制招式无效'],
         misty: ['薄雾场地', '地面上的宝可梦免疫异常状态，龙属性招式伤害减半']
       };
@@ -14541,7 +14546,9 @@ return ev;
         const badge = el('span', 'stg ' + (v > 0 ? 'up' : 'dn'), (v > 0 ? '+' : '') + v);
         row.appendChild(badge);
         const mult = el('span', ''); mult.style.cssText = 'font-size:11px;font-weight:900;color:#a06a10';
-        mult.textContent = '实际' + (MULT[String(v)] || '?');
+        /* ★ 直接显示受影响后的当前数值（含灾祸之宝×0.75等特性修正） */
+        const curVal = b ? m.effStat(k, b) : m.st[k];
+        mult.textContent = '实际' + (MULT[String(v)] || '?') + '（' + curVal + '）';
         row.appendChild(mult);
         stSec.appendChild(row);
       });
@@ -14552,9 +14559,9 @@ return ev;
         burn: ['灼伤', '#e2574c', '每回合损失最大HP的1/16，物理招式威力减半'],
         psn: ['中毒', '#a33ea1', '每回合损失最大HP的1/8'],
         tox: ['剧毒', '#8a2fa3', '每回合损失最大HP的1/16，伤害随回合递增'],
-        par: ['麻痹', '#e0912b', '速度×0.5，行动时有25%几率无法出手'],
-        sleep: ['睡眠', '#5f6b7a', '无法行动（最多数回合），受到攻击可提前醒来'],
-        frz: ['冰冻', '#63c5c2', '无法行动，受到火属性攻击或使用火焰招式可解冻']
+        par: ['麻痹', '#e0912b', '速度×0.5，行动时有12.5%几率无法出手'],
+        sleep: ['睡眠', '#5f6b7a', '无法行动，持续1~3回合后自然醒来'],
+        frz: ['冰冻', '#63c5c2', '无法行动，每回合20%解冻，第三回合必定解冻，受到火属性攻击或使用火焰招式可解冻']
       };
       let hasSt = false;
       if (m.status && ST[m.status]) { const s = ST[m.status]; pushSt(s[0], s[1], s[2]); hasSt = true; }
@@ -14568,6 +14575,13 @@ return ev;
       if (m.vol.seed) { pushSt('寄生种子', '#7ac74c', '每回合被吸取最大HP的1/8'); hasSt = true; }
       if (m.vol.salt) { pushSt('盐腌', '#e8e8f0', '每回合损失最大HP的1/8（水/钢属性1/4）'); hasSt = true; }
       if (m.vol.gmaxTorment) { pushSt('液金', '#888', '无法连续使用相同招式'); hasSt = true; }
+      /* ★ 灾祸之宝：除自己外全场（含队友）持有对应灾祸特性的宝可梦时，自身能力受到影响（持有相同灾祸特性的宝可梦免疫，不显示） */
+      const allFieldRuin = b.fieldMons ? [...b.fieldMons('p'), ...b.fieldMons('e')] : [];
+      const ruinOn = ab => allFieldRuin.some(x => x && x !== m && x.alive() && x.has(ab)) && !m.has(ab);
+      if (ruinOn('swordofruin')) { pushSt('灾祸之剑', '#8a6a2a', '灾祸之剑（全场）：防御×0.75'); hasSt = true; }
+      if (ruinOn('tabletsofruin')) { pushSt('灾祸之简', '#8a6a2a', '灾祸之简（全场）：攻击×0.75'); hasSt = true; }
+      if (ruinOn('vesselofruin')) { pushSt('灾祸之鼎', '#8a6a2a', '灾祸之鼎（全场）：特攻×0.75'); hasSt = true; }
+      if (ruinOn('beadsofruin')) { pushSt('灾祸之玉', '#8a6a2a', '灾祸之玉（全场）：特防×0.75'); hasSt = true; }
       if (!hasSt) sttSec.appendChild(descLine('无异常状态'));
       /* ---- 单方状态 ---- */
       const sdSec = sec('单方状态（' + (side === 'p' ? '己方' : '对手') + '）');
@@ -14584,9 +14598,9 @@ return ev;
       if (scr.aur) { sdSec.appendChild(chip('极光幕 ' + scr.aur, '#9fe8f5')); sdSec.appendChild(descLine('所有招式伤害减半')); hasSd = true; }
       const h = b.haz[side];
       if (h) {
-        if (h.sr) { sdSec.appendChild(chip('隐形岩', '#b0a060')); sdSec.appendChild(descLine('替换上场受到最大HP 1/8伤害（钢系隐形岩为克制伤害）')); hasSd = true; }
+        if (h.sr) { sdSec.appendChild(chip('隐形岩', '#b0a060')); sdSec.appendChild(descLine('替换上场受到最大HP 1/8伤害')); hasSd = true; }
         if (h.spikes) { sdSec.appendChild(chip('撒菱×' + h.spikes, '#8a9a5a')); sdSec.appendChild(descLine('替换上场受到 1/8 / 1/6 / 1/4 最大HP伤害（飞行/飘浮免疫）')); hasSd = true; }
-        if (h.tspikes) { sdSec.appendChild(chip('毒菱', '#b56fd8')); sdSec.appendChild(descLine('替换上场中毒（2层为剧毒）；毒属性会清除')); hasSd = true; }
+        if (h.tspikes) { sdSec.appendChild(chip('毒菱', '#b56fd8')); sdSec.appendChild(descLine('替换上场中毒（2层为剧毒）；上场毒属性会清除')); hasSd = true; }
       }
       if (b.gmaxDot && b.gmaxDot.side === side) {
         sdSec.appendChild(chip(((b.gmaxDot.name || TNAME[b.gmaxDot.type]) + '').replace(/^超极巨/, '') + ' ' + b.gmaxDot.turns, '#ff6b4a'));
@@ -14594,14 +14608,18 @@ return ev;
         hasSd = true;
       }
       if (!hasSd) sdSec.appendChild(descLine('无单方状态'));
-      /* ---- 全场状态 ---- */
+      /* ---- 全场状态（含效果描述） ---- */
       const fdSec = sec('全场状态');
-      const WXN = { sun: ['大晴天', '#ffb300'], rain: ['下雨', '#4f9df7'], sand: ['沙暴', '#d8b26a'], hail: ['冰雹', '#9fd8f0'], delta: ['德尔塔气流', '#7f9c94'], desolate: ['终结之地', '#e2574c'], primordial: ['始源之海', '#2f8f8f'] };
-      const TERN = { electric: ['电气场地', '#ffd93b'], grassy: ['青草场地', '#7ac74c'], psychic: ['精神场地', '#e06ad8'], misty: ['薄雾场地', '#f2a0c8'] };
+      const WXN = { sun: ['大晴天', '#ffb300', '火属性招式威力×1.5，水属性招式威力×0.5'], rain: ['下雨', '#4f9df7', '水属性招式威力×1.5，火属性招式威力×0.5'], sand: ['沙暴', '#d8b26a', '岩/地/钢属性不受影响，其余宝可梦每回合损失最大HP的1/16'], hail: ['冰雹', '#9fd8f0', '冰属性免疫（冰系防御×1.5），其余宝可梦每回合损失最大HP的1/16'], delta: ['德尔塔气流', '#7f9c94', '飞行属性的弱点消除（受到克制伤害减半）'], desolate: ['终结之地', '#e2574c', '火属性招式威力×1.5，水属性招式威力×0.5，水属性招式无法使用'], primordial: ['始源之海', '#2f8f8f', '水属性招式威力×1.5，火属性招式威力×0.5，火属性招式无法使用'] };
+      const TERN = { electric: ['电气场地', '#ffd93b', '地面上的宝可梦电属性招式威力×1.3，无法睡眠'], grassy: ['青草场地', '#7ac74c', '地面上的宝可梦每回合回复最大HP的1/16，草属性招式威力×1.3，地震威力减半'], psychic: ['精神场地', '#e06ad8', '地面上的宝可梦超能力属性招式威力×1.3，先制招式无效'], misty: ['薄雾场地', '#f2a0c8', '地面上的宝可梦免疫异常状态，龙属性招式伤害减半'] };
       let hasFd = false;
-      if (b.wx) { const w = WXN[b.wx]; if (w) { fdSec.appendChild(chip(w[0] + (b.wx === 'delta' || b.wx === 'desolate' || b.wx === 'primordial' ? '' : ' ' + b.wxT), w[1])); hasFd = true; } }
-      if (b.terrain) { const t = TERN[b.terrain]; if (t) { fdSec.appendChild(chip(t[0] + ' ' + b.terrainT, t[1])); hasFd = true; } }
+      if (b.wx) { const w = WXN[b.wx]; if (w) { fdSec.appendChild(chip(w[0] + (b.wx === 'delta' || b.wx === 'desolate' || b.wx === 'primordial' ? '' : ' ' + b.wxT), w[1])); fdSec.appendChild(descLine(w[2])); hasFd = true; } }
+      if (b.terrain) { const t = TERN[b.terrain]; if (t) { fdSec.appendChild(chip(t[0] + ' ' + b.terrainT, t[1])); fdSec.appendChild(descLine(t[2])); hasFd = true; } }
       if (b.trickT > 0) { fdSec.appendChild(chip('戏法空间 ' + b.trickT, '#845ef7')); fdSec.appendChild(descLine('5回合内速度慢的宝可梦先出手')); hasFd = true; }
+      /* ★ 妖精气场/暗黑气场：全场状态（任一宝可梦持有则全场生效） */
+      const allField = b.fieldMons ? [...b.fieldMons('p'), ...b.fieldMons('e')] : [];
+      if (allField.some(x => x && x.alive() && x.has('fairyaura'))) { fdSec.appendChild(chip('妖精气场', '#f2a0d8')); fdSec.appendChild(descLine('全场妖精属性招式威力×1.33')); hasFd = true; }
+      if (allField.some(x => x && x.alive() && x.has('darkaura'))) { fdSec.appendChild(chip('暗黑气场', '#6a5a8a')); fdSec.appendChild(descLine('全场恶属性招式威力×1.33')); hasFd = true; }
       if (!hasFd) fdSec.appendChild(descLine('无全场状态'));
       box.appendChild(el('div', '', ''));
       ov.onclick = () => { AU.no(); close(); };
@@ -16797,7 +16815,7 @@ return ev;
         const willTrigger = (ab === 'intimidate' && this.foesOf(m).length)
           || ((['drought', 'drizzle', 'sandstream', 'snowwarning', 'deltastream'].includes(ab) && !wxAlready))
           || ((ab === 'grassysurge' || ab === 'electricsurge' || ab === 'psychicsurge' || ab === 'mistysurge') && !trAlready)
-          || ['orichalcumpulse', 'hadronengine', 'intrepidsword', 'dauntlessshield', 'swordofruin',
+          || ['orichalcumpulse', 'hadronengine', 'intrepidsword', 'dauntlessshield', 'swordofruin', 'tabletsofruin', 'vesselofruin', 'beadsofruin',
             'fairyaura', 'darkaura'].includes(ab)
           || (ab === 'download' && this.foesOf(m).length) || (ab === 'trace' && this.foesOf(m).length) || (ab === 'frisk' && this.foesOf(m).length)
           || (ab === 'quarkdrive' && this.terrain === 'electric')
@@ -16958,11 +16976,11 @@ return ev;
           else if (newAb === 'download') { const foes2 = this.foesOf(m); const boost = foes2.reduce((a, f) => a + f.st.def, 0) >= foes2.reduce((a, f) => a + f.st.spd, 0) ? 'spa' : 'atk'; await this.changeStat(m, boost, 1, m); }
           else if (newAb === 'swordofruin') { await say(`${m.name} 的灾祸之剑发动了！对手的防御下降了！`); AU.statDn(); }
           else if (newAb === 'fairyaura') await say('妖精气场笼罩了全场！');
-          else if (newAb === 'darkaura') await say('暗黑光环笼罩了全场！');
+          else if (newAb === 'darkaura') await say('暗黑气场笼罩了全场！');
         }
         /* ★ 注意：复制/Mega改变的特性在战斗结束时由 baseAbility 统一还原 */
         if (ab === 'swordofruin') { await say(`${m.name} 的灾祸之剑发动了！对手的防御下降了！`); AU.statDn(); }
-        if (ab === 'fairyaura') { await say('妖精气场笼罩了全场！'); } if (ab === 'darkaura') { await say('暗黑光环笼罩了全场！'); }
+        if (ab === 'fairyaura') { await say('妖精气场笼罩了全场！'); } if (ab === 'darkaura') { await say('暗黑气场笼罩了全场！'); }
         if (ab === 'quarkdrive' && this.terrain === 'electric') { await say(`${m.name} 的夸克充能发动了！${STN[m.bestStat()]}提升了！`); }
         if (ab === 'protosynthesis' && this.wx === 'sun') { await say(`${m.name} 的古代活性发动了！${STN[m.bestStat()]}提升了！`); }
         /* ---- 第六批入场特性 ---- */
@@ -19288,7 +19306,7 @@ return ev;
         /* ★ 神经之力：效果绝佳的招式×1.25 */
         if (mon.has('neuroforce') && eff > 1) dmg = Math.floor(dmg * 1.25);
         /* 灾祸系特性已在 effStat 中通过能力值降低实现 */
-        /* ★ 气场破坏：妖精气场和暗黑光环的效果反转 */
+        /* ★ 气场破坏：妖精气场和暗黑气场的效果反转 */
         if (mon.has('aurabreak')) {
           if (mv.t === 'fairy' && (this.P().has('fairyaura') || this.E().has('fairyaura'))) dmg = Math.floor(dmg * 0.75);
           if (mv.t === 'dark' && (this.P().has('darkaura') || this.E().has('darkaura'))) dmg = Math.floor(dmg * 0.75);
@@ -23923,7 +23941,9 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (d.followme) p.push('双打独占招式：本回合敌方单体招式全部吸引到自己身上');
       if (d.wideguard) p.push('双打独占招式：本回合己方不受多目标招式影响');
       if (d.coaching) p.push('双打独占招式：必中，提升1名队友的攻击与防御（格斗系宝可梦可学会）');
-      if (d.powder) p.push('双打独占招式：本回合敌方单体招式全部吸引到自己身上；粉尘类招式对草属性宝可梦和防尘特性宝可梦无效');
+      /* ★ 吸引类粉末（愤怒粉/看我嘛）与攻击性粉末（催眠粉/麻痹粉等）描述区分 */
+      if (d.powder && (d.followme || d.k === 'ragepowder')) p.push('双打独占招式：本回合敌方单体招式全部吸引到自己身上；粉尘类招式对草属性宝可梦和防尘特性宝可梦无效');
+      if (d.powder && !(d.followme || d.k === 'ragepowder')) p.push('粉尘类招式：对草属性、防尘特性、防尘罩特性的宝可梦无效');
 
       if (d.recharge) p.push('使用后下一回合无法行动');
       if (d.noRepeat) p.push('不能连续使用（连续使用时会失败）');
@@ -24207,6 +24227,8 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       const r = el('div', 'setRow');
       r.innerHTML = `<div><b>${label}</b><div style="font-size:11px;color:#888;font-weight:400">${desc}</div></div>`;
       const b = el('button', 'btn small', get() ? '已开启' : '已关闭');
+      /* ★ 按钮文字强制单行不换行 */
+      b.style.cssText = 'white-space:nowrap;flex:none';
       if (get()) b.classList.add('blue');
       b.onclick = () => { set(!get()); b.textContent = get() ? '已开启' : '已关闭'; b.classList.toggle('blue', get()); AU.cursor(); };
       r.appendChild(b);
