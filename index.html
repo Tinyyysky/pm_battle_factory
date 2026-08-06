@@ -1442,6 +1442,42 @@
       }
     }
 
+    /* ============ 性能优化：隐藏态暂停空转动画 ============ */
+    /* 极巨风暴 / 太晶光环 / 天气氛围等常驻动画层平时 opacity 为 0 却仍在逐帧空转，
+       此处仅在真正显示时恢复播放（原特效与动画本身完全不变） */
+    #bscene .atmo-sand,
+    #bscene .atmo-deltamote,
+    #bscene .atmo-heat,
+    #bscene .atmo-rain,
+    #bscene .atmo-rain2,
+    #bscene .atmo-electric,
+    #bscene .atmo-delta,
+    #bscene #dynastorm::before,
+    #bscene #dynastorm::after,
+    #bscene .teraring,
+    #bscene .megaAura {
+      animation-play-state: paused
+    }
+
+    #bscene.wx-sand .atmo-sand,
+    #bscene.wx-delta .atmo-deltamote,
+    #bscene.wx-delta .atmo-delta,
+    #bscene.wx-desolate .atmo-deltamote,
+    #bscene.wx-desolate .atmo-heat,
+    #bscene.wx-rain .atmo-rain,
+    #bscene.wx-rain .atmo-rain2,
+    #bscene.wx-primordial .atmo-rain,
+    #bscene.wx-primordial .atmo-rain2,
+    #bscene.wx-primordial .atmo-heat,
+    #bscene.tr-electric .atmo-electric,
+    #bscene.tr-psychic .atmo-deltamote,
+    #bscene.dyna #dynastorm::before,
+    #bscene.dyna #dynastorm::after,
+    #bscene .plat.teraOn .teraring,
+    #bscene .megaAura.on {
+      animation-play-state: running
+    }
+
     /* ============ 濒死瞬间演出 ============ */
     #koFlash {
       position: absolute;
