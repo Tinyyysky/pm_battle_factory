@@ -16959,6 +16959,81 @@ return ev;
     const STATKEYS = ['atk', 'def', 'spa', 'spd', 'spe'];
     function effMult(mt, types) { let m = 1; for (const t of types) { const c = TCH[mt]?.[t]; if (c !== undefined) m *= c; } return m; }
 
+    /* ★ AI特殊招式条件评分表：通用评分覆盖不到的特殊效果招式，按"何时使用+分值"配置。
+       c(b, m, f)：条件函数（b=战斗对象，m=使用招式者，f=候选目标[敌方或队友]，队友招式传己方队友）；
+       s：条件满足时的分值；miss：条件不满足时的分值（默认-12）。
+       攻击招式仍走通用伤害评分（calcDmg已含条件威力），此表主要覆盖变化类战术招式与高价值特殊攻击。 */
+    const AI_MOVE_SCORE = {
+      /* ---- 回复/续航类 ---- */
+      'substitute': { c: (b, m) => !m.vol.substitute && m.hp > m.maxhp / 4, s: 12, miss: -10 },
+      'wish': { c: (b, m) => !m.vol.wish && m.hpPct() < .6, s: 12, miss: -12 },
+      'yawn': { c: (b, m, f) => f && b.foesOf(m).includes(f) && !f.status && !f.vol.drowsy, s: 10, miss: -15 },
+      'roar': { c: (b, m, f) => f && b.foesOf(m).includes(f) && b.ep.filter(x => x.alive()).length > 1 && f.stages.atk + f.stages.spa > 0, s: 10, miss: -8 },
+      'refresh': { c: (b, m) => !!m.status, s: 12, miss: -12 },
+      'healbell': { c: (b, m) => b.fieldMons(b.sideOf(m)).some(x => x.status), s: 14, miss: -10 },
+      'aromatherapy': { c: (b, m) => b.fieldMons(b.sideOf(m)).some(x => x.status), s: 14, miss: -10 },
+      'ingrain': { c: (b, m) => !m.vol.ingrain && m.hpPct() < .7, s: 10, miss: -8 },
+      'aquaring': { c: (b, m) => !m.vol.aquaRing && m.hpPct() < .75, s: 8, miss: -8 },
+      'recycle': { c: (b, m) => m.vol.usedBerry && !m.item, s: 8, miss: -10 },
+      'memento': { c: (b, m) => m.hpPct() < .3, s: 8, miss: -10 },
+      'healingwish': { c: (b, m) => m.hpPct() < .35, s: 10, miss: -12 },
+      'lunardance': { c: (b, m) => m.hpPct() < .35, s: 10, miss: -12 },
+      'finalgambit': { c: (b, m, f) => f && b.foesOf(m).includes(f) && m.hp >= f.hp, s: 25, miss: -12 },
+      /* ---- 强化/场地/天气 ---- */
+      'geomancy': { c: (b, m) => m.vol.turnsActive === 0 || m.stages.spa + m.stages.spd + m.stages.spe < 3, s: 12, miss: -8 },
+      'trickroom': { c: (b, m) => b.trickT <= 0 && m.effStat('spe', b) < b.foeOf(m).effStat('spe', b), s: 14, miss: -15 },
+      'reflect': { c: (b, m) => !m.vol.reflect, s: 13, miss: -8 },
+      'lightscreen': { c: (b, m) => !m.vol.lightscreen, s: 13, miss: -8 },
+      'auroraveil': { c: (b, m) => !b.auroraveil[b.sideOf(m)], s: 14, miss: -8 },
+      'tailwind': { c: (b, m) => b.tailwind[b.sideOf(m)] <= 0, s: 14, miss: -8 },
+      'psychicterrain': { c: (b, m) => b.terrain !== 'psychic', s: 10, miss: -5 },
+      'electricterrain': { c: (b, m) => b.terrain !== 'electric', s: 10, miss: -5 },
+      'grassyterrain': { c: (b, m) => b.terrain !== 'grassy', s: 10, miss: -5 },
+      'mistyterrain': { c: (b, m) => b.terrain !== 'misty', s: 8, miss: -5 },
+      'haze': { c: (b, m, f) => !!f && b.foesOf(m).includes(f) && (STATKEYS.some(k => f.stages[k] > 0) || STATKEYS.some(k => m.stages[k] < 0)), s: 14, miss: -5 },
+      /* ---- 状态/削弱类 ---- */
+      'strengthsap': { c: (b, m, f) => f && b.foesOf(m).includes(f) && (f.stages.atk > 0 || m.hpPct() < .7), s: 12, miss: -8 },
+      'tearfullook': { c: (b, m, f) => f && b.foesOf(m).includes(f) && f.stages.atk >= 0 && f.stages.spa >= 0, s: 10, miss: -8 },
+      'toxicthread': { c: (b, m, f) => f && b.foesOf(m).includes(f) && !f.status, s: 10, miss: -10 },
+      'flatter': { c: (b, m, f) => f && b.foesOf(m).includes(f) && f.moves.some(x => MV[x.k]?.c === 'S'), s: 6, miss: -8 },
+      'swagger': { c: (b, m, f) => f && b.foesOf(m).includes(f) && f.moves.some(x => MV[x.k]?.c === 'P'), s: 6, miss: -8 },
+      'tarshot': { c: (b, m, f) => f && b.foesOf(m).includes(f) && !f.vol.tarshot, s: 8, miss: -8 },
+      'octolock': { c: (b, m, f) => f && b.foesOf(m).includes(f) && !f.vol.octolock, s: 10, miss: -8 },
+      'magicpowder': { c: (b, m, f) => f && b.foesOf(m).includes(f) && !f.vol.mpTypes, s: 6, miss: -8 },
+      'telekinesis': { c: (b, m, f) => f && b.foesOf(m).includes(f) && !f.vol.telekinesis, s: 6, miss: -6 },
+      'quash': { c: (b, m, f) => f && b.foesOf(m).includes(f) && f.effStat('spe', b) > m.effStat('spe', b), s: 8, miss: -6 },
+      'meanlook': { c: (b, m, f) => f && b.foesOf(m).includes(f) && !f.vol.gmaxTrap, s: 8, miss: -6 },
+      'spiderweb': { c: (b, m, f) => f && b.foesOf(m).includes(f) && !f.vol.gmaxTrap, s: 8, miss: -6 },
+      'block': { c: (b, m, f) => f && b.foesOf(m).includes(f) && !f.vol.gmaxTrap, s: 8, miss: -6 },
+      'trick': { c: (b, m, f) => f && b.foesOf(m).includes(f) && !!f.item && !m.item, s: 8, miss: -8 },
+      'teatime': { c: (b, m) => b.fieldMons(b.sideOf(m)).some(x => x.item), s: 10, miss: -8 },
+      'corrosivegas': { c: (b, m) => [...b.fieldMons('p'), ...b.fieldMons('e')].some(x => x.item), s: 12, miss: -8 },
+      'magiccoat': { c: (b, m) => !m.vol.magicCoat, s: 6, miss: -6 },
+      'snatch': { c: (b, m) => !m.vol.snatch, s: 6, miss: -6 },
+      'craftyshield': { c: (b, m) => !m.vol.craftyShield, s: 8, miss: -8 },
+      'magnetrise': { c: (b, m) => m.vol.magnetRise <= 0, s: 8, miss: -6 },
+      /* ---- 复制/偷取/变化类 ---- */
+      'sketch': { c: (b, m, f) => f && b.foesOf(m).includes(f) && f.vol.lastMove && MV[f.vol.lastMove] && !m.moves.some(x => x.k === f.vol.lastMove), s: 16, miss: -12 },
+      'doodle': { c: (b, m, f) => f && b.foesOf(m).includes(f) && f.ability && !m.has(f.ability), s: 12, miss: -8 },
+      'powerswap': { c: (b, m, f) => f && b.foesOf(m).includes(f) && f.stages.atk + f.stages.spa > 0, s: 10, miss: -8 },
+      'guardswap': { c: (b, m, f) => f && b.foesOf(m).includes(f) && f.stages.def + f.stages.spd > 0, s: 10, miss: -8 },
+      'heartswap': { c: (b, m, f) => f && b.foesOf(m).includes(f) && STATKEYS.some(k => f.stages[k] > 0), s: 12, miss: -8 },
+      'speedswap': { c: (b, m, f) => f && b.foesOf(m).includes(f) && m.effStat('spe', b) < f.effStat('spe', b), s: 12, miss: -8 },
+      'spectralthief': { c: (b, m, f) => f && b.foesOf(m).includes(f) && STATKEYS.some(k => f.stages[k] > 0), s: 45, miss: -10 },
+      'clearsmog': { c: (b, m, f) => f && b.foesOf(m).includes(f) && STATKEYS.some(k => f.stages[k] > 0), s: 15, miss: -8 },
+      /* ---- 双打队友配合类 ---- */
+      'instruct': { c: (b, m, f) => f && f !== m && !b.foesOf(m).includes(f) && f.vol.lastMove && MV[f.vol.lastMove]?.c !== 'X', s: 18, miss: -10 },
+      'pollenpuff': { c: (b, m, f) => f && f !== m && !b.foesOf(m).includes(f) && f.hpPct() < .7, s: 14, miss: -8 },
+      'decor': { c: (b, m, f) => f && f !== m && !b.foesOf(m).includes(f) && f.moves.some(x => MV[x.k]?.c === 'P'), s: 12, miss: -8 },
+      'purify': { c: (b, m, f) => f && f !== m && !b.foesOf(m).includes(f) && (f.status === 'psn' || f.status === 'tox'), s: 10, miss: -10 },
+      'floralhealing': { c: (b, m, f) => f && !b.foesOf(m).includes(f) && f.hpPct() < .7, s: 10, miss: -8 },
+      'dragoncheer': { c: (b, m, f) => f && f !== m && !b.foesOf(m).includes(f), s: 10, miss: -6 },
+      'gearup': { c: (b, m) => true, s: 12 },
+      'spotlight': { c: (b, m, f) => f && f !== m && !b.foesOf(m).includes(f) && f.hpPct() > .5, s: 14, miss: -8 },
+      'wideguard': { c: (b, m) => !b.wideGuard[b.sideOf(m)], s: 14, miss: -8 },
+      'allyswitch': { c: (b, m, f) => f && f !== m && !b.foesOf(m).includes(f) && f.hpPct() < m.hpPct(), s: 10, miss: -10 },
+    };
+
     /* ============ 新增特性战斗接入辅助 ============ */
 
     /* 锋锐：切割类招式标记 */
@@ -17855,15 +17930,18 @@ return ev;
         if (m.vol.encore) { const em = m.moves.find(x => x.k === m.vol.encore.k); if (!em || em.pp <= 0) m.vol.encore = null; }
         /* ★ 强制锁定：蓄力/暗影潜袭/再来一次/逆鳞 状态下只能选择指定招式（极巨化期间免疫锁招） */
         const forcedK = m.dyn ? null : (m.vol.charge || m.vol.shadowCharge || (m.vol.encore ? m.vol.encore.k : null) || (m.vol.lock ? m.vol.lock.k : null));
+        /* ★ 再来一次锁定的首回合限定招式（击掌奇袭/迎头一击）在非首回合视为不可用：只能使用挣扎（再来一次状态持续，直至回合结束或换场解除） */
+        const lockedBad = m.vol.encore && !m.dyn && m.vol.turnsActive > 0 && (MV[m.vol.encore.k]?.fakeout || MV[m.vol.encore.k]?.firstimpression);
+        const effForcedK = lockedBad ? null : forcedK;
         const choiceLock = (['choiceband', 'choicespecs', 'choicescarf'].includes(m.item) && !m.dyn) ? m.vol.choiceLock : null;
         let wantMega = false, wantDyn = false, wantTera = false;
         const canMega = !formTaken && this.rules.mega && !!MEGA[m.id] && !this.usedForm.p && !m.dyn && (m.id !== 718 || m.vol.completeForm) && !(m.mega && m.mega.stone);
         /* ★ 没有可用招式（PP耗尽/封印/突击背心）时无法极巨化 */
-        const hasUsableMove = forcedK ? true : m.moves.some(mv => mv.pp > 0 && (!m.vol.disabled || m.vol.disabled.k !== mv.k) && !(m.item === 'assaultvest' && MV[mv.k].c === 'X'));
+        const hasUsableMove = lockedBad ? false : (forcedK ? true : m.moves.some(mv => mv.pp > 0 && (!m.vol.disabled || m.vol.disabled.k !== mv.k) && !(m.item === 'assaultvest' && MV[mv.k].c === 'X')));
         const canDyn = !formTaken && this.rules.dyna && !this.usedForm.p && !m.dyn && !(m.mega && m.mega.stone) && ![888, 889, 890].includes(m.id) && hasUsableMove;
         const canTera = !formTaken && this.rules.tera && !this.usedForm.p && !m.tera;
         /* ★ 无任何可用招式时：点击战斗自动使用挣扎（不打开技能菜单） */
-        if (!forcedK && !hasUsableMove) { return { type: 'move', move: { k: 'struggle' } }; }
+        if (!effForcedK && !hasUsableMove) { return { type: 'move', move: { k: 'struggle' } }; }
         const mm = $('#menuMoves'); mm.classList.remove('hidden');
         return new Promise(res => {
           let backs = [], offEsc = null;
@@ -18632,6 +18710,15 @@ return ev;
           useMv = { ...useMv, t: mon.types[0] };
         }
         const displayName = mon.vol.illusionName || mon.name;
+        /* ★ 击掌奇袭/迎头一击：仅限出场首回合使用（失败判定在PP扣除之前，不消耗PP） */
+        if (useMv.fakeout && mon.vol.turnsActive > 0) {
+          await say(`${mon.vol.illusionName || mon.name} 的击掌奇袭只能在出场时使用！`);
+          return;
+        }
+        if (useMv.firstimpression && mon.vol.turnsActive > 0) {
+          await say(`${mon.vol.illusionName || mon.name} 的迎头一击只能在出场时使用！`);
+          return;
+        }
         // ★ 播报使用的招式（对话框 + 对战记录同步显示）
         await say(`${displayName} 使用了 ${useMv.n}！`);
         // 消耗PP
@@ -18642,16 +18729,6 @@ return ev;
         /* ★ 超极巨液金熔击（Torment）：不能连续使用相同招式 */
         if (mon.vol.gmaxTorment && mon.vol.lastMove === mvk && mvk !== 'struggle') {
           await say(`${mon.vol.illusionName || mon.name} 受到液金熔击的影响，无法连续使用相同的招式！`);
-          return;
-        }
-        /* ★ 击掌奇袭：仅限出场首回合使用 */
-        if (useMv.fakeout && mon.vol.turnsActive > 0) {
-          await say(`${mon.vol.illusionName || mon.name} 的击掌奇袭只能在出场时使用！`);
-          return;
-        }
-        /* ★ 迎头一击：仅限出场首回合使用 */
-        if (useMv.firstimpression && mon.vol.turnsActive > 0) {
-          await say(`${mon.vol.illusionName || mon.name} 的迎头一击只能在出场时使用！`);
           return;
         }
         /* ★ 电光双击：已经失去电属性时使用失败 */
@@ -18820,6 +18897,20 @@ return ev;
         if (useMv.core && connected && targets[0] && targets[0].alive() && targets[0].vol.actedThisTurn && !targets[0].vol.coreSuppress) {
           targets[0].vol.coreSuppress = true;
           await say(`${targets[0].vol.illusionName || targets[0].name} 的特性被核心惩罚者无效化了！`);
+          BUI.refresh(this);
+        }
+        /* ★ 暗影偷盗：命中后夺取目标的能力提升（目标能力提升清空） */
+        if (useMv.steal && connected && targets[0] && targets[0].alive()) {
+          const t0 = targets[0];
+          let stole = false;
+          for (const s of STATKEYS) {
+            if (t0.stages[s] > 0) {
+              mon.stages[s] = Math.min(6, mon.stages[s] + t0.stages[s]);
+              t0.stages[s] = 0;
+              stole = true;
+            }
+          }
+          await say(stole ? `${mon.vol.illusionName || mon.name} 偷走了对手的能力提升！` : '对手没有能力提升…');
           BUI.refresh(this);
         }
         /* ★ 爽喉喷雾：使用声音招式后特攻+1（消耗）——攻击类声音招式在结算后触发 */
@@ -20182,10 +20273,6 @@ return ev;
           await say('双方分担了痛楚！'); BUI.refresh(this); return;
         }
         if (mv.clearsmog) { foe.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; await say(`${foe.name} 的能力变化消失了！`); return; }
-        if (mv.steal) { /* 暗影偷盗：夺取强化 */ let stole = false;
-          for (const s of STATKEYS) { if (foe.stages[s] > 0) { mon.stages[s] = Math.min(6, mon.stages[s] + foe.stages[s]); foe.stages[s] = 0; stole = true; } }
-          await say(stole ? `${mon.vol.illusionName || mon.name} 偷走了对手的能力提升！` : '对手没有能力提升…'); AU.statUp(); return;
-        }
         if (mv.parting) {
           await this.changeStat(foe, 'atk', -1, mon); await this.changeStat(foe, 'spa', -1, mon, true);
           if (this.sideAliveCount(side) > 1) await this.uturnSwitch(side, mon); return;
@@ -20583,8 +20670,12 @@ return ev;
         if (mv.encore) {
           /* ★ 极巨化的宝可梦不会被再来一次 */
           if (foe.dyn) { await say(`${foe.name} 正在极巨化，无法被再来一次！`); return; }
+          /* ★ 已经处于再来一次状态的宝可梦，无法再被再来一次 */
+          if (foe.vol.encore) { await say(`${foe.name} 已经被再来一次困住了！`); return; }
           const lastK = foe.vol.lastMove;
           if (!lastK || !foe.moves.some(m => m.k === lastK)) { await say('没有可以再来一次的招式…'); return; }
+          /* ★ 再来一次不能让「再来一次」再来一次 */
+          if (lastK === 'encore') { await say(`${foe.name} 的再来一次无法被再来一次！`); return; }
           foe.vol.encore = { k: lastK, t: 3 }; await say(`${foe.name} 被再来一次困住了！`); return;
         }
         if (mv.craftyshield) {
@@ -21525,6 +21616,14 @@ return ev;
           /* ★ 击掌奇袭/迎头一击：仅出场首回合可用；巨力锤/血月等：不能连续使用——AI绝不选择 */
           const noUse = ((d.fakeout || d.firstimpression) && m.vol.turnsActive > 0) || (d.noRepeat && m.vol.lastMove === mv.k);
           if (noUse) s = -999;
+          /* ★ 特殊招式条件评分表（优先于通用评分） */
+          const spc = AI_MOVE_SCORE[mv.k];
+          if (spc && !noUse) {
+            s = spc.c(this, m, realFoe) ? spc.s : (spc.miss != null ? spc.miss : -12);
+            s += Math.random() * 6 * this.aiLevel;
+            if (s > bestS) { bestS = s; best = mv.k; }
+            continue;
+          }
           if (!noUse && d.c !== 'X') {
             /* ★ 阿尔宙斯制裁光砾：AI按石板对应属性评估 */
             const simMv = { ...d, k: mv.k };
@@ -21545,6 +21644,22 @@ return ev;
             if (d.recoil && m.hpPct() < .3) s -= 8;
             if (d.self && d.self.n < 0) s -= 6;
             if (m.hpPct() < .35 && d.p < 50) s -= 5;
+            /* ★ 攻击招式附加效果价值（异常/吸血/拍落/盐腌/束缚/清能力/追击等） */
+            if (d.sec) {
+              if (d.sec.st && !foe.status) s += d.sec.st === 'sleep' ? 10 : d.sec.st === 'burn' ? 8 : d.sec.st === 'par' ? 7 : d.sec.st === 'psn' ? 6 : d.sec.st === 'frz' ? 6 : 5;
+              if (d.sec.flinch && !foe.vol.flinch) s += 4;
+              if (d.sec.drop) s += 5;
+            }
+            if (d.drain && m.hpPct() < .8) s += Math.min(10, (1 - m.hpPct()) * 14);
+            if (d.knockoff && foe.item) s += 10;
+            if (d.salt && !foe.vol.salt) s += 8;
+            if (d.partialTrap && !foe.vol.binding) s += 5;
+            if (d.hex && foe.status) s += 12;
+            if (d.poltergeist && !foe.item) s -= 15;
+            if (d.trap && this.ep.filter(x => x.alive()).length > 1) s += 6;
+            if (d.uturn && m.hpPct() < .5 && this.ep.filter(x => x.alive()).length > 1) s += 8;
+            if (d.se2 && sim.eff < 1.5) s -= 10;
+            if (d.ignAb && (foe.has('unaware') || foe.has('multiscale') || foe.has('sturdy'))) s += 6;
             }
             }
           } else if (!noUse) {
@@ -21560,6 +21675,10 @@ return ev;
             else if (d.encore) { const lm = foe.vol.lastMove; s = lm && foe.moves.some(x => x.k === lm) ? 8 : -15; }
             else if (d.trickroom) { s = -10; }
             else if (d.parting) { s = m.hpPct() < .4 && this.ep.filter(x => x.alive()).length > 1 ? 15 : -15; }
+            else if (d.setDrop) { s = foe.stages[d.setDrop.drop] >= 0 ? 10 : -10; }
+            else if (d.screen) { s = m.vol.reflect || m.vol.lightscreen ? -10 : 12; }
+            else if (d.weather) { s = -6; }
+            else if (d.terrain) { s = -5; }
             else s = -5;
           }
           s += Math.random() * 6 * this.aiLevel;
@@ -21959,6 +22078,22 @@ return ev;
           /* ★ 击掌奇袭/迎头一击：仅出场首回合可用；巨力锤/血月等：不能连续使用——AI绝不选择 */
           const noUse = ((d.fakeout || d.firstimpression) && m.vol.turnsActive > 0) || (d.noRepeat && m.vol.lastMove === mv.k);
           if (noUse) s = -999;
+          /* ★ 特殊招式条件评分表（优先）：遍历敌方与队友目标，取条件满足时的最高分并记录目标 */
+          const spc = AI_MOVE_SCORE[mv.k];
+          if (spc && !noUse) {
+            let bs = -1e9, bt = null;
+            const cands = [...realFoes, ...allies];
+            for (const t of cands) {
+              if (spc.c(this, m, t)) {
+                const sc = spc.s + Math.random() * 6 * this.aiLevel;
+                if (sc > bs) { bs = sc; bt = t; }
+              }
+            }
+            if (bs > -1e9) { s = bs; target = bt; }
+            else s = spc.miss != null ? spc.miss : -12;
+            if (s > bestS) { bestS = s; best = mv.k; bestTarget = target; }
+            continue;
+          }
           const simMv = { ...d, k: mv.k };
           if (mv.k === 'judgment' && PLATES[m.item] && PLATES[m.item] !== 'legend') simMv.t = PLATES[m.item];
           const rng = rngOf(mv.k);
@@ -22012,6 +22147,18 @@ return ev;
             if (d.recoil && m.hpPct() < .3) s -= 8;
             if (d.self && d.self.n < 0) s -= 6;
             if (m.hpPct() < .35 && d.p < 50) s -= 5;
+            /* ★ 攻击招式附加效果价值（异常/吸血/拍落/盐腌/束缚/清能力/追击等） */
+            if (d.sec) {
+              if (d.sec.st) s += d.sec.st === 'sleep' ? 10 : d.sec.st === 'burn' ? 8 : d.sec.st === 'par' ? 7 : d.sec.st === 'psn' ? 6 : d.sec.st === 'frz' ? 6 : 5;
+              if (d.sec.flinch) s += 4;
+              if (d.sec.drop) s += 5;
+            }
+            if (d.drain && m.hpPct() < .8) s += Math.min(10, (1 - m.hpPct()) * 14);
+            if (d.knockoff && target && target.item) s += 10;
+            if (d.salt && target && !target.vol.salt) s += 8;
+            if (d.partialTrap && target && !target.vol.binding) s += 5;
+            if (d.hex && target && target.status) s += 12;
+            if (d.uturn && m.hpPct() < .5 && this.ep.filter(x => x.alive()).length > 2) s += 8;
           } else if (!noUse) {
             if (d.coaching) {
               /* ★ 指导：收益按队友最佳物理招式的伤害占比评估；队友能力等级越高收益越衰减（每级-8，强化满大幅降低） */
