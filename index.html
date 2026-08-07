@@ -10063,7 +10063,7 @@
     };
     const N = { C2: 65, D2: 73, E2: 82, F2: 87, G2: 98, A2: 110, B2: 123, C3: 131, D3: 147, E3: 165, F3: 175, G3: 196, A3: 220, B3: 247, C4: 262, D4: 294, E4: 330, F4: 349, G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988, C6: 1046 };
 
-    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false, dlgStyle: 'classic', buiBg: 'dark', battleBg: 'depth', spriteMode: 'dyn', wxchipShow: false }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
+    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, showTypeP: true, showTypeE: true, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false, dlgStyle: 'classic', buiBg: 'dark', battleBg: 'depth', spriteMode: 'dyn', wxchipShow: false }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
     function saveCfg() { localStorage.setItem('pif_cfg', JSON.stringify(CFG)); }
 
 const _ST = (f, s) => f * Math.pow(2, s / 12);
@@ -10748,7 +10748,7 @@ const MUSIC = {
     /* ---- 新增技能（第四批） ---- */
     M('selfdestruct', '自爆', 'normal', 'P', 200, 100, 5, { selfko: 1 });
     M('explosion', '大爆炸', 'normal', 'P', 250, 100, 5, { selfko: 1 });
-    M('psychocut', '精神切割', 'psychic', 'P', 70, 100, 20, { crit: 1 });
+    M('psychocut', '精神利刃', 'psychic', 'P', 70, 100, 20, { crit: 1 });
     M('lunge', '猛扑', 'bug', 'P', 80, 100, 15, { ct: 1, selfDropT: { drop: 'atk', n: -1 } });
     /* ---- 新增招式（第五批） ---- */
     M('lovelykiss','恶魔之吻','normal','X',null,75,10,{setSt:'sleep'});
@@ -14988,6 +14988,11 @@ return ev;
       const info = el('div', ''); info.style.flex = '1';
       const nmRow = el('div', ''); nmRow.style.cssText = 'display:flex;align-items:center;gap:8px';
       nmRow.appendChild(el('b', '', m.vol.illusionName || m.name)); nmRow.children[0].style.fontSize = '17px'; nmRow.children[0].style.color = '#2b2440';
+      /* ★ 属性：紧跟名称后（与战斗卡片一致，幻觉时显示伪装属性） */
+      const dTypes = m.vol.illusion ? (SPDB[m.vol.illusion]?.t.split('/') || m.types) : m.types;
+      const dTypesEl = el('span', '', dTypes.map(tyBadge).join(' '));
+      dTypesEl.style.cssText = 'display:inline-flex;gap:3px;align-items:center';
+      nmRow.appendChild(dTypesEl);
       const sideTag = el('span', ''); sideTag.style.cssText = `font-size:10px;font-weight:900;color:#fff;padding:2px 8px;border-radius:20px;background:${side === 'p' ? '#2f9e63' : '#c0392b'}`;
       sideTag.textContent = side === 'p' ? '己方' : '对手';
       nmRow.appendChild(sideTag);
@@ -15024,6 +15029,48 @@ return ev;
         d.textContent = txt;
         return d;
       };
+      /* ---- 特性 ---- */
+      {
+        const abSec = sec('特性');
+        const cand = (m.sp.ab || []).map(k => AB[k]).filter(a => a);
+        const curAb = AB[m.ability];
+        const abRow = el('div', ''); abRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;align-items:center;cursor:pointer';
+        abRow.title = '点击展开' + (side === 'e' ? '查看所有可能特性的描述' : '查看特性描述');
+        const mkChip = (a, cur) => {
+          const c = el('span', ''); c.style.cssText = `font-size:11px;font-weight:900;color:#fff;background:${cur ? '#2f9e63' : '#8a7b5a'};padding:2px 9px;border-radius:20px`;
+          c.textContent = a.n;
+          return c;
+        };
+        /* ★ 仅当"敌方特性显示"开关打开时，才高亮标出敌方当前真实特性；否则所有候选颜色一致 */
+        const isCur = a => side === 'e' ? (CFG.enemyAbility && a.k === m.ability) : a.k === m.ability;
+        if (side === 'e') {
+          (cand.length ? cand : (curAb ? [curAb] : [])).forEach(a => abRow.appendChild(mkChip(a, isCur(a))));
+        } else if (curAb) {
+          abRow.appendChild(mkChip(curAb, true));
+        } else {
+          abRow.appendChild(mkChip({ n: '—' }, false));
+        }
+        const caret = el('span', ''); caret.textContent = '▾'; caret.style.cssText = 'font-size:11px;color:#8a7b5a;margin-left:auto';
+        abRow.appendChild(caret);
+        abSec.appendChild(abRow);
+        const abExpand = el('div', ''); abExpand.style.cssText = 'display:none;margin-top:6px;padding-top:6px;border-top:1px dashed rgba(120,100,60,.35)';
+        const mkDesc = (a) => {
+          const line = el('div', ''); line.style.cssText = 'font-size:11px;color:#7a7355;margin:3px 0';
+          const nm = el('b', '', a.n); nm.style.color = isCur(a) ? '#2f9e63' : '#6b4a12';
+          line.appendChild(nm);
+          line.appendChild(el('span', '', (isCur(a) ? '（当前）' : '') + '：' + (a.d || '无描述')));
+          abExpand.appendChild(line);
+        };
+        if (side === 'e') (cand.length ? cand : (curAb ? [curAb] : [])).forEach(mkDesc);
+        else if (curAb) mkDesc(curAb);
+        abSec.appendChild(abExpand);
+        abRow.onclick = () => {
+          AU.cursor();
+          const show = abExpand.style.display !== 'block';
+          abExpand.style.display = show ? 'block' : 'none';
+          caret.textContent = show ? '▴' : '▾';
+        };
+      }
       /* ---- 能力变化（含倍率） ---- */
       const stSec = sec('能力变化');
       const MULT = { 1: '×1.5', 2: '×2', 3: '×2.5', 4: '×3', 5: '×3.5', 6: '×4', '-1': '×2/3', '-2': '×1/2', '-3': '×2/5', '-4': '×1/3', '-5': '×2/7', '-6': '×1/4' };
@@ -15267,7 +15314,8 @@ return ev;
         const confCh = m.vol.confuse > 0 ? `<span class="stchip" style="background:#e0912b">乱${m.vol.confuse}</span>` : '';
         const tags = ((m.mega && m.mega.stone) ? '<span class="formtag" style="color:#e040fb">◆Mega</span>' : '') + (m.dyn ? '<span class="formtag" style="color:#d21f3c">极巨</span>' : '') + (m.tera ? `<span class="formtag" style="color:#0aa">⬡晶(${TNAME[m.teraType]})</span>` : '') + (m.vol.transformed ? '<span class="formtag" style="color:#888">◈变身</span>' : '') + (m.id === 778 && m.disguiseUsed ? '<span class="formtag" style="color:#999;text-decoration:line-through">画皮</span>' : '') + (m.id === 778 && !m.disguiseUsed ? '<span class="formtag" style="color:#c8a0e8">画皮</span>' : '');
         const illusTypes = m.vol.illusion ? (SPDB[m.vol.illusion]?.t.split('/') || m.types) : m.types;
-        const types = illusTypes.map(tyBadge).join(' ');
+        /* ★ 属性显示开关（分敌我，默认开） */
+        const types = (side === 'p' ? CFG.showTypeP : CFG.showTypeE) ? illusTypes.map(tyBadge).join(' ') : '';
         let pips = '';
         if (side === 'e') { const arr = b.ep; pips = '<div class="pips">' + arr.map(x => `<span class="pip ${x.alive() ? '' : 'down'}"></span>`).join('') + '</div>'; }
         const hpnum = side === 'p' ? `<div class="hpnum">${m.hp} / ${m.maxhp}</div>` : (CFG.enemyHpPct ? `<div class="hpnum">${m.hp > 0 ? Math.max(1, Math.ceil(m.hpPct() * 100)) : 0}%</div>` : '');
@@ -15300,7 +15348,7 @@ return ev;
         const protoChip = protoActive ? `<span class="stg up" style="background:#fff3c4;color:#c07a2a;border-color:#f2c230">⚡${AB[m.ability]?.n || ''} ${STN[m.bestStat()]}↑</span>` : '';
         const stgrow = (stgs || protoChip) ? `<div class="stgrow">${protoChip}${stgs}</div>` : '';
         return `<div class="row1"><span class="nm">${displayName}${m.shiny ? ' ✦' : ''}</span><span class="lv">${m.lvl}</span>${stch}${gmaxChips}${confCh}${tags}</div>
-      <div style="margin-top:2px">${types}</div>
+      ${types ? `<div style="margin-top:2px">${types}</div>` : ''}
       <div class="hpwrap"><span class="hplabel">HP</span><div class="hpbar"><div class="hpfill ${cls}" style="width:${pct}%"></div></div></div>
       ${hpnum}${xp}${pips}${it}${abRow}${speLine}${mySpe}${stgrow}`;
       },
@@ -17278,7 +17326,7 @@ return ev;
       /* ★ 出场前的状态重置（换人/开局的统一处理） */
       _prepSendOut(m, side) {
         const keepSwitched = m.vol?.wasSwitchedOut || false;
-        m.vol = {}; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; if (m.id === 875 && !m.iceHeadUsed) m.vol.iceHead = true; m.vol.switchedInThisTurn = true; m.vol.wasSwitchedOut = keepSwitched; m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; m.fainted = false;
+        m.vol = {}; m.vol.turnsActive = 0; if (m.id === 778 && !m.disguiseUsed) m.vol.disguise = true; if (m.id === 875 && !m.iceHeadUsed) m.vol.iceHead = true; m.vol.switchedInThisTurn = true; m.vol.wasSwitchedOut = keepSwitched; m.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; m.fainted = false;
         m._stgSig = null;   // 换人时重置能力变化动画记录，避免误触发
         if (m._transformed) { m.id = m._originalId; m.sp = m._originalSp; m.name = m._originalName; m.types = m._originalTypes; m.baseTypes = m._originalBaseTypes; m.ability = m._originalAbility; m.baseAbility = m._originalBaseAbility; m.moves = m._originalMoves; m.mega = null; m._transformed = false; m.recalc(); if (m.hp > m.maxhp) m.hp = m.maxhp; }
         /* ★ 幻觉：上场前即设置伪装（显示伪装宝可梦的外观与名称） */
@@ -19101,7 +19149,7 @@ return ev;
           case RNG.ENEMY_ANY: { const rd = redirectFoe(foes); return rd ? [rd] : this.singleTarget(mon, mv, act, foes, foes[0]); }
           case RNG.ANY: {
             /* ★ 广域战力：精神场地上攻击敌方全体 */
-            if (mv.expanding && this.terrain === 'psychic') return foes.slice();
+            if (mv.expanding && this.terrain === 'psychic' && this.grounded(mon)) return foes.slice();
             /* 吸引只作用于以敌方为目标的招式；明确指向队友的招式不受吸引 */
             const tgtIsAlly = act && act.target && act.target !== mon && this.sideOf(act.target) === side;
             if (!tgtIsAlly) { const rd = redirectFoe(foes); if (rd) return [rd]; }
@@ -19862,6 +19910,8 @@ return ev;
         if (mv.fishious && !foe.vol.actedThisTurn) { mv = { ...mv, p: mv.p * 2 }; }
         /* ★ 硬压：威力随目标当前HP比例变化（100×剩余HP比例） */
         if (mv.hardpress) { mv = { ...mv, p: Math.max(1, Math.floor(100 * foe.hp / foe.maxhp)) }; }
+        /* ★ 广域战力：精神场地上威力提升至120（120再享受精神场地加成），且攻击敌方全体 */
+        if (mv.expanding && this.terrain === 'psychic' && this.grounded(mon)) mv = { ...mv, p: 120 };
         /* ★ 泄愤：本回合自身能力被降低过时威力翻倍 */
         if (mv.lashout && mon.vol.loweredThisTurn) { mv = { ...mv, p: mv.p * 2 }; }
         /* ★ 踢到/打草结：威力随对手体重变化（轻金属减半、重金属翻倍） */
@@ -19973,9 +20023,7 @@ return ev;
           if (this.terrain === 'electric' && mv.psyblade) dmg = Math.floor(dmg * 1.5);
           if (this.terrain === 'grassy' && mv.t === 'grass' && this.grounded(mon)) dmg = Math.floor(dmg * 1.3);
           if (this.terrain === 'grassy' && mv.k === 'earthquake') dmg = Math.floor(dmg * 0.5);   // ★ 青草场地：地震伤害减半（不限攻击者是否接地；其他地面技能不受影响）
-          if (this.terrain === 'psychic' && mv.t === 'psychic' && this.grounded(mon) && !mv.expanding) dmg = Math.floor(dmg * 1.3);
-        /* ★ 广域战力：精神场地上威力×1.5 */
-        if (mv.expanding && this.terrain === 'psychic' && this.grounded(mon)) dmg = Math.floor(dmg * 1.5);
+          if (this.terrain === 'psychic' && mv.t === 'psychic' && this.grounded(mon)) dmg = Math.floor(dmg * 1.3);
           if (this.terrain === 'misty' && mv.t === 'dragon' && this.grounded(foe)) dmg = Math.floor(dmg * .5);
         }
         // 光环
@@ -21215,6 +21263,8 @@ return ev;
         for (const m of order) {
           const side = this.sideOf(m);
           const B = m.baseMax;   // ★ 百分比扣血/回血按未翻倍HP计算（回血上限仍用m.maxhp）
+          /* ★ 在场回合计数：出场回合为0，每回合结束+1（供击掌奇袭/迎头一击等首回合限定招式判定） */
+          m.vol.turnsActive = (m.vol.turnsActive || 0) + 1;
           // 天气伤害
           const wx = this.wxActive();
           if (wx === 'sand' && !m.has('overcoatx') && !['rock', 'ground', 'steel'].includes(m.types[0]) && !['rock', 'ground', 'steel'].includes(m.types[1] || '')) {
@@ -25530,6 +25580,10 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       box.appendChild(settingsGroup('📋 信息显示', [
         settingsRow('敌方HP百分比', '在敌方信息卡上显示HP百分比',
           () => CFG.enemyHpPct, v => { CFG.enemyHpPct = v; }),
+        settingsRow('敌方属性显示', '在敌方信息卡上显示宝可梦属性',
+          () => CFG.showTypeE, v => { CFG.showTypeE = v; }),
+        settingsRow('我方属性显示', '在我方信息卡上显示宝可梦属性',
+          () => CFG.showTypeP, v => { CFG.showTypeP = v; }),
         settingsRow('敌方特性显示', '在敌方信息卡上显示特性名称',
           () => CFG.enemyAbility, v => { CFG.enemyAbility = v; }),
         settingsRow('敌方道具显示', '在敌方信息卡上显示持有道具名称',
