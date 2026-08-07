@@ -11675,7 +11675,9 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(727, '炽焰咆哮虎', 'fire/dark', '95/115/90/80/90/60', 'blaze/intimidate', ['flareblitz','knockoff','partingshot','fakeout','drainpunch','powertrip'].filter(m => MV[m] || m === 'flareblitz'));
     S(730, '西狮海壬', 'water/fairy', '80/74/74/126/116/60', 'torrent/torrent', ['hydropump', 'moonblast', 'icebeam', 'energyball', 'psychic']);
     S(738, '锹农炮虫', 'bug/electric', '77/70/90/145/75/43', 'levitate/levitate', ['thunderbolt', 'bugbuzz', 'energyball', 'voltswitch']);
-    S(745, '鬃岩狼人(黑夜)', 'rock', '85/115/75/55/75/82', 'keeneye/vitalspirit', ['stoneedge', 'closecombat', 'suckerpunch', 'stealthrock', 'firepunch', 'accelerock']);
+    S(745, '鬃岩狼人(白昼)', 'rock', '75/115/65/55/65/112', 'keeneye/sandrush/steadfastx', ['stoneedge', 'closecombat', 'suckerpunch', 'stealthrock', 'firepunch', 'accelerock']);
+    S(10228, '鬃岩狼人(黑夜)', 'rock', '85/115/75/55/75/82', 'keeneye/vitalspirit/steadfastx', ['stoneedge', 'closecombat', 'suckerpunch', 'stealthrock', 'firepunch', 'accelerock']);
+    S(10311, '鬃岩狼人(黄昏)', 'rock', '75/117/65/55/65/110', 'keeneye/toughclaws/steadfastx', ['stoneedge', 'closecombat', 'suckerpunch', 'stealthrock', 'firepunch', 'accelerock', 'thunderfang']);
     S(748, '超坏星', 'poison/water', '50/63/152/53/142/35', 'merciless/regenerator', ['scald', 'toxic', 'recover', 'banefulbunker', 'knockoff']);
     S(758, '焰后蜥', 'poison/fire', '68/64/60/111/60/117', 'corrosion/obliviousx', ['flamethrower','sludgewave','nastyplot','dragonpulse','firelash']);
     S(763, '甜冷美后', 'grass', '72/120/98/50/98/72', 'queenmajesty/queenmajesty', ['powerwhip', 'highjumpkick', 'knockoff', 'uturn', 'taunt']);
@@ -13783,7 +13785,7 @@ const THIRD_ABILITY_PATCH = {
 
   740: 'ironfist',
   743: 'sweetveil',
-  745: 'noguard',
+
   748: 'limber',
   750: 'innerfocus',
 
@@ -14449,6 +14451,7 @@ SP.forEach(s => {
       670: [10163],                 // 花叶蒂
       876: [10355],                 // 爱管侍
       711: [10126, 10127, 10128],   // 南瓜怪人
+      745: [10228, 10311],          // 鬃岩狼人（黑夜/黄昏）
       905: [10418],                 // 眷恋云
        902: [10417],                 // 幽尾玄鱼
        978: [10427, 10428],          // 米立龙（上弓/下垂/平挺）
@@ -14851,7 +14854,7 @@ return ev;
        10079:10019,10080:10020,10081:10021,
        10082:10022,10083:10023,
        10163:10061,
-       10188:10086,
+       10188:10188,
        10360:10191,
        10441:10272,
        10362:10193,10363:10194,
@@ -14859,7 +14862,8 @@ return ev;
        10355:10186,
        10417:10248,
        10418:10249,
-       10126:10027,10127:10028,10128:10029,
+       10126:10030,10127:10031,10128:10032,
+       10228:10126,10311:10152,
        10427:10258,10428:10259
      };
     let apiId = id;
@@ -18535,7 +18539,9 @@ return ev;
           } else {
             mon.vol.charge = mvk;
             FX.chargeFx(side, mv.t, mon._slot || 0);
-            await say(`${mon.vol.illusionName || mon.name} 吸收了光能！`);
+            /* ★ 蓄力提示按招式区分（日光束/日光刃吸收光能、大地掌控积蓄大地之力、流星光束吸收星光、电光束充电） */
+            const chargeMsg = { geomancy: '开始积蓄大地之力！', solarbeam: '吸收了光能！', solarblade: '吸收了光能！', meteorbeam: '吸收星光能量！', electroshot: '开始充电！' }[mvk] || '开始蓄力！';
+            await say(`${mon.vol.illusionName || mon.name} ${chargeMsg}`);
             if (mv.meteorbeam) { await this.changeStat(mon, 'spa', 1, mon); }
             if (mvObj && mvk !== 'struggle') { let cost = foe.has('pressure') ? 2 : 1; mvObj.pp = Math.max(0, mvObj.pp - cost); }
             return;
