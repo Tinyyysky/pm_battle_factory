@@ -10692,7 +10692,7 @@ const MUSIC = {
     M('psystrike', '精神击破', 'psychic', 'S', 100, 100, 10, { psyshock: 1 }); M('zenheadbutt', '意念头锤', 'psychic', 'P', 80, 90, 15, { ct: 1, sec: { flinch: 1, ch: 20 } });
     M('hypnosis', '催眠术', 'psychic', 'X', null, 60, 20, { setSt: 'sleep' }); M('agility', '高速移动', 'psychic', 'X', null, null, 30, { selfUp: { drop: 'spe', n: 2 } });
     M('calmmind', '冥想', 'psychic', 'X', null, null, 20, { selfUp: { drop: 'spa', n: 1 }, selfUp2: { drop: 'spd', n: 1 } });
-    M('moonblast', '月亮之力', 'fairy', 'S', 95, 100, 15, { sec: { drop: 'spa', n: -1, ch: 30 } }); M('dazzlinggleam', '魔法闪耀', 'fairy', 'S', 80, 100, 10, {});
+    M('moonblast', '月亮之力', 'fairy', 'S', 95, 100, 15, { sec: { drop: 'spa', n: -1, ch: 30 } }); M('dazzlinggleam', '魔法闪耀', 'fairy', 'S', 80, 100, 10, {}); M('geomancy', '大地掌控', 'fairy', 'X', null, null, 10, { charge: 1, selfUp: { drop: 'spa', n: 2 }, selfUp2: { drop: 'spd', n: 2 }, selfUp3: { drop: 'spe', n: 2 } });
     M('playrough', '嬉闹', 'fairy', 'P', 90, 90, 10, { ct: 1, sec: { drop: 'atk', n: -1, ch: 10 } }); M('drainingkiss', '吸取之吻', 'fairy', 'S', 50, 100, 10, { drain: 75, ct: 1 });
     M('spiritbreak', '灵魂冲击', 'fairy', 'P', 75, 100, 15, { ct: 1, selfDropT: { drop: 'spa', n: -1 } });
     M('swordsdance', '剑舞', 'normal', 'X', null, null, 20, { selfUp: { drop: 'atk', n: 2 }, dance: 1 }); M('nastyplot', '诡计', 'dark', 'X', null, null, 20, { selfUp: { drop: 'spa', n: 2 } });
@@ -11669,7 +11669,7 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
     S(700, '仙子伊布', 'fairy', '95/65/65/110/130/60', 'pixilate/pixilate', ['hypervoice', 'shadowball', 'calmmind', 'quickattack', 'moonblast']);
     S(706, '黏美龙', 'dragon', '90/100/70/110/150/80', 'sapsipper/sapsipper', ['dragonpulse', 'flamethrower', 'thunderbolt', 'sludgebomb', 'icebeam', 'raindance']);
     S(707, '钥圈儿', 'steel/fairy', '57/80/91/80/87/75', 'prankster/prankster', ['flashcannon', 'playrough', 'thunderwave', 'spikes', 'foulplay']);
-    S(716, '哲尔尼亚斯', 'fairy', '126/131/95/131/98/99', 'fairyaura/fairyaura', ['moonblast', 'thunder', 'focusblast', 'closecombat', 'thunderbolt'], { leg: 1 });
+    S(716, '哲尔尼亚斯', 'fairy', '126/131/95/131/98/99', 'fairyaura/fairyaura', ['geomancy', 'moonblast', 'thunder', 'focusblast', 'closecombat', 'thunderbolt'], { leg: 1 });
     S(717, '伊裴尔塔尔', 'dark/flying', '126/131/95/131/98/99', 'darkaura/darkaura', ['oblivionwing', 'darkpulse', 'heatwave', 'focusblast', 'suckerpunch', 'hurricane', 'roost'], { leg: 1 });
     /* --- 第7世代 --- */
     S(727, '炽焰咆哮虎', 'fire/dark', '95/115/90/80/90/60', 'blaze/intimidate', ['flareblitz','knockoff','partingshot','fakeout','drainpunch','powertrip'].filter(m => MV[m] || m === 'flareblitz'));
@@ -15892,19 +15892,25 @@ return ev;
         return { x: r.x + r.w / 2, y: r.y + r.h };
       },
       _shaking: false,
-      /* 低频场景震动：单次、≤4px */
+      /* ★ 竖屏判定：窄屏/竖屏时降低爆炸特效强度（常驻天气/场地/极巨化特效不动） */
+      isPortrait() {
+        return (window.matchMedia && window.matchMedia('(orientation: portrait)').matches) || window.innerHeight > window.innerWidth;
+      },
+      /* 低频场景震动：单次、≤4px（竖屏时跳过，避免带动场景上的天气/场地/极巨化常驻特效一起抖） */
       shake(power, dur) {
         if (!this.on() || this._shaking) return;
+        if (this.isPortrait()) return;
         const sc = $('#bscene'); if (!sc) return;
         this._shaking = true;
         sc.classList.remove('fxShk'); void sc.offsetWidth; sc.classList.add('fxShk');
         setTimeout(() => { sc.classList.remove('fxShk'); this._shaking = false; }, dur || 360);
       },
-      /* 低频全屏闪光：单次淡出 */
+      /* 低频全屏闪光：单次淡出（竖屏时减半强度，且已有闪光层时跳过，避免连续命中多层闪光叠加闪烁） */
       flash(opacity, dur) {
         if (!this.on()) return;
+        if (this.isPortrait() && this.layer().querySelector('.fxFlash')) return;
         const d = el('div', 'fxFlash');
-        d.style.setProperty('--fo', opacity || .16);
+        d.style.setProperty('--fo', this.isPortrait() ? (opacity || .16) * .5 : (opacity || .16));
         this.layer().appendChild(d);
         setTimeout(() => d.remove(), (dur || 450) + 80);
       },
@@ -15942,8 +15948,8 @@ return ev;
         const cx = ft.x, cy = ft.y - (cfg.big ? 110 : 70);
         this.p({ cls: cfg.big ? 'fxRing fxRingBig2' : 'fxRing', x: cx, y: cy, c: cfg.c, an: cfg.big ? 'fxRingBigB2' : 'fxRingB', dur: cfg.big ? .65 : .55 });
         if (cfg.big) this.p({ cls: 'fxRing', x: cx, y: cy, c: cfg.c2 || cfg.c, an: 'fxRingB', dur: .5, delay: .12 });
-        /* ★ 性能优化：削减粒子数量（与天气/场地动画层重叠时避免重绘风暴） */
-        const n = cfg.big ? 22 : 15;
+        /* ★ 性能优化：削减粒子数量（与天气/场地动画层重叠时避免重绘风暴）；竖屏时进一步减半 */
+        const n = Math.ceil((cfg.big ? 22 : 15) * (this.isPortrait() ? 0.5 : 1));
         const chars = cfg.chars || ['◆', '✦', '●', '✧'];
         for (let i = 0; i < n; i++) {
           const a = Math.random() * Math.PI * 2;
@@ -15962,7 +15968,7 @@ return ev;
           });
         }
         /* 星芒四射 */
-        const sn = cfg.big ? 6 : 4;
+        const sn = Math.ceil((cfg.big ? 6 : 4) * (this.isPortrait() ? 0.5 : 1));
         for (let i = 0; i < sn; i++) {
           const a = i / sn * Math.PI * 2 + rnd(-.15, .15);
           this.p({ cls: 'fxStarBurst', x: cx, y: cy, bg: `linear-gradient(135deg, #fff, ${cfg.c})`, dx: Math.cos(a) * (cfg.big ? 118 : 78), dy: Math.sin(a) * (cfg.big ? 118 : 78), an: 'fxStarBurstA', dur: .6, delay: i * .02 });
@@ -18340,6 +18346,13 @@ return ev;
             a.targetSlot = ts >= 0 ? ts : null;
           }
         }
+        /* ★ 先制之爪：回合开始时统一判定一次（20%触发并播报提示），排序时使用判定结果 */
+        for (const a of acts) {
+          if (a.type !== 'move') continue;
+          const qc = !a.mon.has('klutz') && a.mon.item === 'quickclaw' && Math.random() < 0.2;
+          a.mon.vol.quickClaw = qc;
+          if (qc) await say(`${a.mon.vol.illusionName || a.mon.name} 的先制之爪发动了！`);
+        }
         // 排序：优先级 → 速度
         const prio = a => {
           const mv = MV[a.move.k]; const m = a.mon;
@@ -18359,7 +18372,7 @@ return ev;
           /* ★ 慢出：同优先级内必定最后出手 */
           if (x.mon.has('stall') && !y.mon.has('stall')) return 1;
           if (!x.mon.has('stall') && y.mon.has('stall')) return -1;
-          const qx = x.mon.item === 'quickclaw' && Math.random() < .2, qy = y.mon.item === 'quickclaw' && Math.random() < .2;
+          const qx = x.mon.vol.quickClaw === true, qy = y.mon.vol.quickClaw === true;
           if (qx && !qy) return -1; if (qy && !qx) return 1;
           const sx = x.mon.effStat('spe', this), sy = y.mon.effStat('spe', this);
           if (sx !== sy) return this.trickT > 0 ? sx - sy : sy - sx;
@@ -20823,8 +20836,15 @@ return ev;
         const applied = [];
         for (const [k, n] of changes) {
           if (n === 0) continue;
+          /* ★ 白雾：能力不会被同伴/对手降低 */
+          if (n < 0 && src && src !== m && m.vol.mist > 0) continue;
+          /* ★ 单纯/唱反调：与 changeStat 一致（蛮力等多项自降能力招式走本方法） */
+          let nn = n;
+          if (m.has('simple')) nn *= 2;
+          if (m.has('contrary')) nn = -nn;
+          if (m.vol) { if (nn > 0) m.vol.buffedThisTurn = true; if (nn < 0) m.vol.loweredThisTurn = true; }
           const before = m.stages[k];
-          m.stages[k] = clamp(before + n, -6, 6);
+          m.stages[k] = clamp(before + nn, -6, 6);
           const real = m.stages[k] - before;
           if (real !== 0) applied.push({ k, n: real });
         }
@@ -23391,11 +23411,16 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b clas
           restoreLvls = null;
         }
         if (r.result === 'win') {
-          /* ★ 双打模式 BP×2（单打×1） */
-          const bpMult = GM.fac.mode === 'pick4double' ? 2 : 1;
+          /* ★ 取消双打BP翻倍：单双打统一结算 */
+          const bpMult = 1;
           GM.fac.win++; const bpGain = GM.fac.round * bpMult; GM.fac.bp += bpGain;
           /* ★ 冠军图鉴：战胜冠军后点亮 */
           if (et.head) this.unlockChampion(et.champion.name);
+          /* ★ 击败Mega进化大师：额外获得40 BP */
+          if (et.master) {
+            GM.fac.bp += 40;
+            await dlg('广播', `🏆 击败Mega进化大师·${et.name || ''}！额外获得 <b style="color:#ffd93b">40 BP</b>！`, 94);
+          }
           /* ★ 击败隐藏冠军·灭天：额外获得1000 BP（单打/双打通用） */
           if (et.head && et.champion.name === '灭天') {
             GM.fac.bp += 1000;
@@ -23424,10 +23449,10 @@ ${GM.fac.round >= 3 && GM.fac.round % 2 === 1 && GM.fac.win === 6 ? '<br><b clas
             if (et.head && et.champion) {
               await dlg(et.champion.name, et.champion.lines.lose, et.champion.sprite);
             }
-            GM.fac.bp += 10; GM.fac.round++; GM.fac.win = 0; GM.fac.party = null;
+            GM.fac.bp += 50; GM.fac.round++; GM.fac.win = 0; GM.fac.party = null;
             GM.fac.nextExpert = this.rollExpert(GM.fac.round, 0);
             // AU.jingle('badge');
-            await dlg('广播', '🎉 本轮 7 连胜达成！额外获得 10 BP！进入第 ' + GM.fac.round + ' 轮，请重新选择租借队伍。', 132);
+            await dlg('广播', '🎉 本轮 7 连胜达成！额外获得 50 BP！进入第 ' + GM.fac.round + ' 轮，请重新选择租借队伍。', 132);
           }
           saveFac(); this.ui(); this.lobby();
         } else if (r.result === 'lose' || r.result === 'run') {
@@ -24910,6 +24935,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (d.terrainpulse) p.push('属性随场地变化');
       if (d.photon) p.push('以攻击或特攻中较高的一方计算伤害');
       if (d.shellside) p.push('以对手防御或特防中较低的一方计算伤害');
+      if (d.k === 'geomancy') p.push('大地掌控：蓄力后特攻、特防和速度各提升2级');
       if (d.k === 'eeriespell') p.push('降低对手最后使用招式的PP');
       if (d.burnup) p.push('攻击后自身失去火属性（已无火属性时使用失败）');
       if (d.syrupbomb) p.push('目标速度每回合降低1级（共3回合）');
