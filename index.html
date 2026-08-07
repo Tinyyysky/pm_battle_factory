@@ -1452,6 +1452,8 @@
     #bscene .atmo-rain2,
     #bscene .atmo-electric,
     #bscene .atmo-delta,
+    #bscene .atmo-snow,
+    #bscene .atmo-mist,
     #bscene #dynastorm::before,
     #bscene #dynastorm::after,
     #bscene .teraring,
@@ -1471,6 +1473,9 @@
     #bscene.wx-primordial .atmo-heat,
     #bscene.tr-electric .atmo-electric,
     #bscene.tr-psychic .atmo-deltamote,
+    #bscene.wx-hail .atmo-snow,
+    #bscene.tr-grassy .atmo-snow,
+    #bscene.tr-misty .atmo-mist,
     #bscene.dyna #dynastorm::before,
     #bscene.dyna #dynastorm::after,
     #bscene .plat.teraOn .teraring,
@@ -9455,7 +9460,7 @@
       <div class="flyPoke" style="top:60px"></div>
       <div class="grass"></div>
       <div id="titleInner">
-        <div class="logo">宝可梦<em>·</em>无限工厂</div>
+        <div class="logo">宝可梦<em>·</em>无限♾️</div>
         <div class="logoSub">POKÉMON INFINITE FACTORY · TURN-BASED BATTLE</div>
         <div id="menuList">
           <button class="menuItem" id="mStory"><span class="ball"></span>剧情模式<small>关都之旅</small></button>
@@ -10933,7 +10938,8 @@ const MUSIC = {
       /* 敌方群体 */
       swift: 'enemy-all', hypervoice: 'enemy-all', heatwave: 'enemy-all', blizzard: 'enemy-all',
       dazzlinggleam: 'enemy-all', rockslide: 'enemy-all', eruption: 'enemy-all', waterspout: 'enemy-all', originpulse: 'enemy-all',
-      precipiceblades: 'enemy-all', landswrath: 'enemy-all', breakingwipe: 'enemy-all', expandingforce: 'enemy-all',
+      precipiceblades: 'enemy-all', landswrath: 'enemy-all', breakingwipe: 'enemy-all',
+      /* 广域战力：默认单体，精神场地上由 targetsFor 特判变为敌方全体 */
       springtidestorm: 'enemy-all', bleakwindstorm: 'enemy-all', wildboltstorm: 'enemy-all', sandsearstorm: 'enemy-all',
       snarl: 'enemy-all', strugglebug: 'enemy-all', electroweb: 'enemy-all', overdrive: 'enemy-all', icywind: 'enemy-all',
       glaciate: 'enemy-all', diamondstorm: 'enemy-all', terastarstorm: 'enemy-all', makeitrain: 'enemy-all',
@@ -15034,7 +15040,8 @@ return ev;
       /* ---- 特性 ---- */
       {
         const abSec = sec('特性');
-        const cand = (m.sp.ab || []).map(k => AB[k]).filter(a => a);
+        /* ★ Mega进化/原始回归时显示Mega形态特性（m.mega.a） */
+        const cand = (m.mega ? [m.mega.a] : m.sp.ab || []).map(k => AB[k]).filter(a => a);
         const curAb = AB[m.ability];
         const abRow = el('div', ''); abRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;align-items:center;cursor:pointer';
         abRow.title = '点击展开' + (side === 'e' ? '查看所有可能特性的描述' : '查看特性描述');
@@ -18914,6 +18921,15 @@ return ev;
           totalDmg += r.dmg;
           if (r.connected) connected = true;
           if (r.ko) { koed = true; await this.handleKO(side, mon, r.foe); if (this.over) return; }
+          /* ★ 搏命：成功命中后使用者消耗全部HP陷入昏厥（气势披带/气势头带/结实均无法阻止）；未命中/被守住/属性无效时使用失败，使用者不受影响 */
+          if (useMv.finalgambit && connected && mon.alive()) {
+            await say(`${mon.vol.illusionName || mon.name} 耗尽了所有HP倒下了！`);
+            mon.hp = 0; mon.fainted = true;
+            BUI.refresh(this);
+            const wSide = this.sideOf(mon) === 'p' ? 'e' : 'p';
+            await this.handleKO(wSide, this.foeOf(mon), mon);
+            if (this.over) return;
+          }
         }
         this._helpingHand = false;
         /* ★ 电光双击：攻击后失去电属性 */
@@ -19880,6 +19896,8 @@ return ev;
         }
         /* ★ 固定伤害类 */
         if (mv.nightshade) { return { dmg: Math.max(1, mon.lvl), eff: effMult(mv.t, foe.types), crit: false }; }
+        /* ★ 搏命：造成等于自身当前HP的固定伤害（无视属性克制与STAB；属性无效时不造成伤害） */
+        if (mv.finalgambit) { return { dmg: mon.hp, eff: effMult(mv.t, foe.types), crit: false }; }
         if (mv.sonicboom) { return { dmg: 20, eff: effMult(mv.t, foe.types), crit: false }; }
         if (mv.dragonrage) { return { dmg: 40, eff: effMult(mv.t, foe.types), crit: false }; }
         if (mv.psywave) { return { dmg: Math.max(1, Math.floor(mon.lvl * (0.5 + Math.random()))), eff: effMult(mv.t, foe.types), crit: false }; }
@@ -20415,11 +20433,6 @@ return ev;
           mon.hp = 0; mon.fainted = true; await say(`${mon.name} 使用了${mv.lunardance ? '新月舞' : '治愈之愿'}！`);
           if (mv.healingwish) { mon.vol.healingWish = true; } else { mon.vol.lunarDance = true; }
           await this.handleKO(this.sideOf(foe) === 'p' ? 'e' : 'p', foe, mon);
-          BUI.refresh(this); return;
-        }
-        if (mv.finalgambit) {
-          const dmg = mon.hp; mon.hp = 0; mon.fainted = true;
-          await this.directDmg(foe, dmg, this.sideOf(foe), `${mon.name} 使用了搏命！`);
           BUI.refresh(this); return;
         }
         if (mv.bestow) {
