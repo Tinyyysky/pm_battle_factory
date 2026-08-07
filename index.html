@@ -9455,7 +9455,7 @@
       <div class="flyPoke" style="top:60px"></div>
       <div class="grass"></div>
       <div id="titleInner">
-        <div class="logo">宝可梦<em>·</em>无限</div>
+        <div class="logo">宝可梦<em>·</em>无限工厂</div>
         <div class="logoSub">POKÉMON INFINITE FACTORY · TURN-BASED BATTLE</div>
         <div id="menuList">
           <button class="menuItem" id="mStory"><span class="ball"></span>剧情模式<small>关都之旅</small></button>
@@ -10939,6 +10939,8 @@ const MUSIC = {
       glaciate: 'enemy-all', diamondstorm: 'enemy-all', terastarstorm: 'enemy-all', makeitrain: 'enemy-all',
       coreenforcer: 'enemy-all', astralbarrage: 'enemy-all', glaciallance: 'enemy-all', dragonenergy: 'enemy-all',
       clangoroussoulblaze: 'enemy-all', maxmv: 'any', matchagotcha: 'enemy-all',
+      /* ★ 千箭齐发：攻击敌方全体（可命中飞行/浮游） */
+      thousandarrows: 'enemy-all',
       /* 场地陷阱/场地状态：作用于对方场地 */
       stealthrock: 'enemy-all', spikes: 'enemy-all', toxicspikes: 'enemy-all', stickyweb: 'enemy-all', defog: 'enemy-all',
       /* 除自己外的全场 */
@@ -19625,8 +19627,8 @@ return ev;
           this.abBanner(foe);
           await this.changeStat(foe, 'def', 1, foe);
         }
-        // ★ 魔术师：攻击命中时偷走对手道具（石板无法被偷走）
-        if (dmg > 0 && mon.has('magician') && !mon.item && foe.item && foe.hp > 0 && !(foe.id === 493 && PLATES[foe.item])) {
+        // ★ 魔术师：攻击命中时偷走对手道具（石板/面具无法被偷走）
+        if (dmg > 0 && mon.has('magician') && !mon.item && foe.item && foe.hp > 0 && !(foe.id === 493 && PLATES[foe.item]) && foe.item !== 'wellspringmask' && foe.item !== 'hearthflamemask' && foe.item !== 'cornerstonemask') {
           const stolen = foe.item; foe.item = null; mon.item = stolen;
           this.abBanner(mon);
           await say(`${mon.vol.illusionName || mon.name} 的魔术师发动了！偷走了${foe.name}的${IT[stolen].n}！`);
@@ -19691,6 +19693,10 @@ return ev;
             await say(`${foe.name} 的黏着发动了！道具无法被拍落！`);
           }
           else if (foe.item === 'rustedsword' || foe.item === 'rustedshield') {
+            await say(`${foe.name} 的${IT[foe.item].n}无法被拍落！`);
+          }
+          /* ★ 厄诡椪的面具：无法被拍落 */
+          else if (foe.item === 'wellspringmask' || foe.item === 'hearthflamemask' || foe.item === 'cornerstonemask') {
             await say(`${foe.name} 的${IT[foe.item].n}无法被拍落！`);
           }
           /* ★ 阿尔宙斯携带石板：石板无法被拍落 */
@@ -20294,6 +20300,10 @@ return ev;
         if (mv.trick) {
           if (mon.item === 'rustedsword' || mon.item === 'rustedshield' || foe.item === 'rustedsword' || foe.item === 'rustedshield') {
             await say('专属道具无法被交换！戏法失败了！'); return;
+          }
+          /* ★ 厄诡椪的面具：无法被交换/替换 */
+          if (mon.item === 'wellspringmask' || mon.item === 'hearthflamemask' || mon.item === 'cornerstonemask' || foe.item === 'wellspringmask' || foe.item === 'hearthflamemask' || foe.item === 'cornerstonemask') {
+            await say('面具道具无法被交换！戏法失败了！'); return;
           }
           /* ★ 阿尔宙斯携带石板：石板无法被交换/移除 */
           if ((mon.id === 493 && PLATES[mon.item]) || (foe.id === 493 && PLATES[foe.item])) {
