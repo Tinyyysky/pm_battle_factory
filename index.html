@@ -10068,7 +10068,7 @@
     };
     const N = { C2: 65, D2: 73, E2: 82, F2: 87, G2: 98, A2: 110, B2: 123, C3: 131, D3: 147, E3: 165, F3: 175, G3: 196, A3: 220, B3: 247, C4: 262, D4: 294, E4: 330, F4: 349, G4: 392, A4: 440, B4: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988, C6: 1046 };
 
-    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, showTypeP: true, showTypeE: true, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false, dlgStyle: 'classic', buiBg: 'dark', battleBg: 'depth', spriteMode: 'dyn', wxchipShow: false }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
+    const CFG = Object.assign({ muted: false, music: false, weatherFx: true, fxShake: true, entryAnim: true, fancyFx: true, fancyAudio: true, sfxVol: 1, musVol: 1, myItem: true, myAbility: true, enemySpeedLine: false, mySpeedShow: false, showTypeP: true, showTypeE: true, aiReal: false, aiProvider: 'deepseek', aiApiKey: '', aiBaseUrl: '', aiModel: 'deepseek-v4-flash', aiDeepSeekThink: false, dlgStyle: 'classic', buiBg: 'dark', battleBg: 'depth', spriteMode: 'stat', wxchipShow: false }, JSON.parse(localStorage.getItem('pif_cfg') || '{}'));
     function saveCfg() { localStorage.setItem('pif_cfg', JSON.stringify(CFG)); }
 
 const _ST = (f, s) => f * Math.pow(2, s / 12);
@@ -15918,6 +15918,8 @@ return ev;
     }
     const FX = {
       on() { return CFG.fancyFx !== false; },
+      /* ★ 精简特效档：仅降低批量散布的微小粒子，结构表现（光束/环/柱/棱镜/闪光）全部保留 */
+      lite() { return CFG.fancyFx === 'lite'; },
       _layerEl: null,
       layer() { return this._layerEl || (this._layerEl = $('#fxlayer')); },
       /* ★ 布局缓存：精灵/图层矩形只在出场/换人/尺寸变化/动画开始时改变，
@@ -15976,6 +15978,8 @@ return ev;
         setTimeout(() => d.remove(), (dur || 450) + 80);
       },
       p(opts) {
+        /* ★ 精简档：批量散布的小粒子按约55%概率跳过（fxp无类微粒/太晶碎屑/碎块/极巨雷击/星光），不影响核心表现 */
+        if (this.lite() && ['fxp', '', 'fxTeraChip', 'fxShard', 'fxDynaBolt', 'fxStar'].includes(opts.cls || 'fxp') && Math.random() < .55) return null;
         const d = el('div', 'fxp ' + (opts.cls || ''));
         if (opts.char) d.textContent = opts.char;
         if (opts.c) d.style.color = opts.c;
@@ -25569,8 +25573,10 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
       ]));
       /* ---- ✨ 画面与演出 ---- */
       box.appendChild(settingsGroup('✨ 画面与演出', [
-        settingsRow('华丽特效', '每个技能专属多阶段演出（投射/光束/冲击/残余），以及异常状态、Mega、极巨、太晶的丰富特效。关闭后回到朴素通用特效',
-          () => CFG.fancyFx, v => { CFG.fancyFx = v; }),
+        settingsSelect('战斗特效', '华丽：完整粒子演出；精简：表现全部保留、粒子数量约减半（适合低端设备/竖屏）；关闭：朴素通用特效',
+          [{ n: '华丽', v: 'full' }, { n: '精简', v: 'lite' }, { n: '关闭', v: 'off' }],
+          () => CFG.fancyFx === 'lite' ? 'lite' : CFG.fancyFx === false ? 'off' : 'full',
+          v => { CFG.fancyFx = v === 'lite' ? 'lite' : v === 'full'; }),
         settingsRow('天气/场地特效', '场景中的雨幕、飞雪、沙暴、光轮、场地光晕与电火花等氛围层',
           () => CFG.weatherFx, v => {
             CFG.weatherFx = v;
@@ -25583,8 +25589,8 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           () => CFG.fxShake, v => { CFG.fxShake = v; }),
         settingsRow('出场动画', '投球→弹跳→爆开→实体化的出场演出',
           () => CFG.entryAnim, v => { CFG.entryAnim = v; }),
-        settingsSelect('精灵图片', '宝可梦图片显示方式：动态GIF动画（默认，多源加载优先动画）/ 静态PNG（更省流量、加载更快），切换后立即生效',
-          [{ n: '动态（GIF动画）', v: 'dyn' }, { n: '静态（PNG）', v: 'stat' }],
+        settingsSelect('精灵图片', '宝可梦图片显示方式：静态PNG（默认，更省流量、加载更快）/ 动态GIF动画（多源加载优先动画），切换后立即生效',
+          [{ n: '静态（PNG）', v: 'stat' }, { n: '动态（GIF动画）', v: 'dyn' }],
           () => CFG.spriteMode, v => { CFG.spriteMode = v; applySpriteMode(); }),
         settingsRow('顶部状态栏', '战斗中顶部显示天气/四大场地/戏法空间指示条（默认关闭；单方状态请点击宝可梦信息卡查看）',
           () => CFG.wxchipShow, v => { CFG.wxchipShow = v; }),
