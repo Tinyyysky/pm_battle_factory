@@ -710,7 +710,10 @@
 
     #dexDetail {
       position: sticky;
-      top: 0
+      top: 0;
+      max-height: calc(100vh - 150px);
+      overflow-y: auto;
+      overscroll-behavior: contain
     }
 
     .statRow {
@@ -9587,6 +9590,10 @@
           <select id="dexType">
             <option value="">全部属性</option>
           </select>
+          <select id="dexSort">
+            <option value="asc">编号正序</option>
+            <option value="desc">编号倒序</option>
+          </select>
         </div>
         <div style="display:grid;grid-template-columns:1fr 320px;gap:16px">
           <div id="dexGrid"></div>
@@ -9622,6 +9629,10 @@
               </select>
               <select id="freeType" style="border:2px solid var(--ink);border-radius:8px;padding:6px">
                 <option value="">全部属性</option>
+              </select>
+              <select id="freeSort" style="border:2px solid var(--ink);border-radius:8px;padding:6px">
+                <option value="asc">编号正序</option>
+                <option value="desc">编号倒序</option>
               </select>
             </div>
             <div id="freeGrid"
@@ -12899,50 +12910,86 @@ A('arenatrap', '沙穴', '对手无法逃走或交换');
 */
 
 const W = {
+  1: 6.9,
+  2: 13,
+  3: 100,
+  4: 8.5,
+  5: 19,
+  6: 90.5,
+  7: 9,
+  8: 22.5,
+  9: 85.5,
+  10: 2.9,
   11: 9.9,
+  12: 32,
   13: 3.2,
   14: 10,
+  15: 29.5,
+  16: 1.8,
   17: 30,
+  18: 39.5,
+  19: 3.5,
   20: 18.5,
   21: 2,
   22: 38,
   23: 6.9,
+  24: 65,
+  25: 6,
+  26: 30,
   27: 12,
+  28: 29.5,
   29: 7,
   30: 20,
+  31: 60,
   32: 9,
   33: 19.5,
+  34: 62,
   35: 7.5,
+  36: 40,
   37: 9.9,
+  38: 19.9,
   39: 5.5,
   40: 12,
   41: 7.5,
   42: 55,
   43: 5.4,
   44: 8.6,
+  45: 18.6,
   46: 5.4,
   47: 29.5,
   48: 30,
+  49: 12.5,
   50: 0.8,
+  51: 33.3,
   52: 4.2,
   53: 32,
   54: 19.6,
+  55: 76.6,
   56: 28,
   57: 32,
   58: 19,
+  59: 155,
   60: 12.4,
   61: 20,
+  62: 54,
   63: 19.5,
+  64: 56.5,
+  65: 48,
   66: 19.5,
   67: 70.5,
+  68: 130,
   69: 4,
   70: 6.4,
   71: 15.5,
   72: 45.5,
+  73: 55,
+  74: 20,
   75: 105,
   76: 300,
   77: 30,
+  78: 95,
   79: 36,
+  80: 78.5,
   81: 6,
   82: 60,
   83: 15,
@@ -12953,8 +13000,11 @@ const W = {
   88: 30,
   89: 30,
   90: 4,
+  91: 132.5,
   92: 0.1,
   93: 0.1,
+  94: 40.5,
+  95: 210,
   96: 32.4,
   97: 75.6,
   98: 6.5,
@@ -12969,34 +13019,57 @@ const W = {
   107: 50.2,
   108: 65.5,
   109: 1,
+  110: 9.5,
   111: 115,
+  112: 120,
   113: 34.6,
   114: 35,
+  115: 80,
   116: 8,
   117: 25,
   118: 15,
   119: 39,
+  120: 34.5,
+  121: 80,
   122: 54.5,
+  123: 56,
   124: 40.6,
   125: 30,
   126: 44.5,
+  127: 55,
   128: 88.4,
+  129: 10,
+  130: 235,
+  131: 220,
   132: 4,
+  133: 6.5,
+  134: 29,
+  135: 24.5,
+  136: 25,
   137: 36.5,
   138: 7.5,
   139: 35,
   140: 11.5,
   141: 40.5,
+  142: 59,
+  143: 460,
   144: 55.4,
+  145: 52.6,
   146: 60,
   147: 3.3,
   148: 16.5,
+  149: 210,
+  150: 122,
+  151: 4,
   152: 6.4,
   153: 15.8,
+  154: 100.5,
   155: 7.9,
   156: 19,
+  157: 79.5,
   158: 9.5,
   159: 25,
+  160: 88.8,
   161: 6,
   162: 32.5,
   163: 21.2,
@@ -13005,18 +13078,24 @@ const W = {
   166: 35.6,
   167: 8.5,
   168: 33.5,
+  169: 75,
   170: 12,
+  171: 22.5,
   172: 2,
   173: 3,
   174: 1,
   175: 1.5,
   176: 3.2,
   177: 2,
+  178: 15,
   179: 7.8,
   180: 13.3,
+  181: 61.5,
   182: 5.8,
   183: 8.5,
+  184: 28.5,
   185: 38,
+  186: 33.9,
   187: 0.5,
   188: 1,
   189: 3,
@@ -13025,6 +13104,9 @@ const W = {
   192: 8.5,
   193: 38,
   194: 8.5,
+  195: 75,
+  196: 26.5,
+  197: 27,
   198: 2.1,
   199: 79.5,
   200: 1,
@@ -13032,12 +13114,16 @@ const W = {
   202: 28.5,
   203: 41.5,
   204: 7.2,
+  205: 125.8,
   206: 14,
   207: 64.8,
+  208: 400,
   209: 7.8,
   210: 48.7,
   211: 3.9,
+  212: 118,
   213: 20.5,
+  214: 54,
   215: 28,
   216: 8.8,
   217: 125.8,
@@ -13052,6 +13138,8 @@ const W = {
   226: 220,
   227: 50.5,
   228: 10.8,
+  229: 35,
+  230: 152,
   231: 33.5,
   232: 120,
   233: 32.5,
@@ -13063,19 +13151,27 @@ const W = {
   239: 23.5,
   240: 21.4,
   241: 75.5,
+  242: 46.8,
   243: 178,
   244: 198,
+  245: 187,
   246: 72,
   247: 152,
+  248: 202,
+  249: 216,
   250: 199,
   251: 5,
   252: 5,
   253: 21.6,
+  254: 52.2,
   255: 2.5,
   256: 19.5,
+  257: 52,
   258: 7.6,
   259: 28,
+  260: 81.9,
   261: 13.6,
+  262: 37,
   263: 17.5,
   264: 32.5,
   265: 3.6,
@@ -13085,30 +13181,45 @@ const W = {
   269: 31.6,
   270: 2.6,
   271: 32.5,
+  272: 55,
   273: 4,
   274: 28,
+  275: 59.6,
   276: 2.3,
+  277: 19.8,
   278: 9.5,
+  279: 28,
   280: 6.6,
   281: 20.2,
+  282: 48.4,
   283: 1.7,
   284: 3.6,
   285: 4.5,
+  286: 39.2,
   287: 24,
   288: 46.5,
+  289: 130.5,
   290: 5.5,
+  291: 12,
+  292: 1.2,
   293: 16.3,
   294: 40.5,
   295: 84,
   296: 86.4,
+  297: 253.8,
   298: 2,
   299: 97,
   300: 11,
   301: 32.6,
+  302: 11,
+  303: 11.5,
   304: 60,
   305: 120,
+  306: 360,
   307: 11.2,
+  308: 31.5,
   309: 15.2,
+  310: 40.2,
   311: 4.2,
   312: 4.2,
   313: 17.7,
@@ -13117,16 +13228,22 @@ const W = {
   316: 10.3,
   317: 80,
   318: 20.8,
+  319: 88.8,
   320: 130,
   321: 398,
   322: 24,
+  323: 220,
+  324: 80.4,
   325: 30.6,
   326: 71.5,
   327: 5,
   328: 15,
   329: 15.3,
+  330: 82,
   331: 51.3,
+  332: 77.4,
   333: 1.2,
+  334: 20.6,
   335: 40.3,
   336: 52.5,
   337: 168,
@@ -13134,18 +13251,24 @@ const W = {
   339: 1.9,
   340: 23.6,
   341: 11.5,
+  342: 32.8,
   343: 21.5,
+  344: 108,
   345: 23.8,
   346: 60.4,
   347: 12.5,
   348: 68.2,
   349: 7.4,
+  350: 162,
   351: 0.8,
   352: 22,
   353: 2.3,
+  354: 12.5,
   355: 15,
+  356: 30.6,
   357: 100,
   358: 1,
+  359: 47,
   360: 14,
   361: 16.8,
   362: 256.5,
@@ -13159,30 +13282,45 @@ const W = {
   370: 8.7,
   371: 42.1,
   372: 110.5,
+  373: 102.6,
   374: 95.2,
   375: 202.5,
+  376: 550,
   377: 230,
   378: 175,
   379: 205,
   380: 40,
+  381: 60,
+  382: 352,
+  383: 950,
+  384: 206.5,
   385: 1.1,
   386: 60.8,
   387: 10.2,
   388: 97,
+  389: 310,
   390: 6.2,
   391: 22,
+  392: 55,
   393: 5.2,
   394: 23,
+  395: 84.5,
   396: 2,
   397: 15.5,
+  398: 24.9,
   399: 20,
+  400: 31.5,
   401: 2.2,
   402: 25.5,
   403: 9.5,
   404: 30.5,
+  405: 42,
   406: 1.2,
+  407: 14.5,
   408: 31.5,
+  409: 102.5,
   410: 57,
+  411: 149.5,
   412: 3.4,
   413: 6.5,
   414: 23.3,
@@ -13194,23 +13332,34 @@ const W = {
   420: 3.3,
   421: 9.3,
   422: 6.3,
+  423: 29.9,
+  424: 20.3,
   425: 1.2,
   426: 15,
   427: 5.5,
+  428: 33.3,
+  429: 4.4,
+  430: 27.3,
   431: 3.9,
   432: 43.8,
   433: 0.6,
   434: 19.2,
   435: 38,
   436: 60.5,
+  437: 187,
   438: 15,
   439: 13,
   440: 24.4,
   441: 1.9,
+  442: 108,
   443: 20.5,
+  444: 56,
+  445: 95,
   446: 105,
   447: 20.2,
+  448: 54,
   449: 49.5,
+  450: 300,
   451: 12,
   452: 61.5,
   453: 23,
@@ -13220,18 +13369,30 @@ const W = {
   457: 24,
   458: 65,
   459: 50.5,
+  460: 135.5,
+  461: 34,
+  462: 180,
   463: 140,
   464: 282.8,
   465: 128.6,
+  466: 138.6,
   467: 68,
+  468: 38,
+  469: 51.5,
   470: 25.5,
   471: 25.9,
+  472: 42.5,
+  473: 291,
+  474: 34,
+  475: 52,
   476: 340,
   477: 106.6,
   478: 26.6,
+  479: 0.3,
   480: 0.3,
   481: 0.3,
   482: 0.3,
+  483: 683,
   484: 336,
   485: 430,
   486: 420,
@@ -13239,18 +13400,26 @@ const W = {
   488: 85.6,
   489: 3.1,
   490: 1.4,
+  491: 50.5,
   492: 2.1,
+  493: 320,
+  494: 4,
   495: 8.1,
   496: 16,
+  497: 63,
   498: 9.9,
   499: 55.5,
+  500: 150,
   501: 5.9,
   502: 24.5,
+  503: 94.6,
   504: 11.6,
   505: 27,
   506: 4.1,
   507: 14.7,
+  508: 61,
   509: 10.1,
+  510: 37.5,
   511: 10.5,
   512: 30.5,
   513: 11,
@@ -13270,28 +13439,37 @@ const W = {
   527: 2.1,
   528: 10.5,
   529: 8.5,
+  530: 40.4,
   531: 31,
   532: 12.5,
   533: 40,
+  534: 87,
   535: 4.5,
   536: 17,
+  537: 62,
   538: 55.5,
+  539: 51,
   540: 2.5,
   541: 7.3,
   542: 20.5,
   543: 5.3,
   544: 58.5,
+  545: 200.5,
   546: 0.6,
+  547: 6.6,
   548: 6.6,
   549: 16.3,
   550: 18,
   551: 15.2,
   552: 33.4,
+  553: 96.3,
   554: 37.5,
+  555: 92.9,
   556: 28,
   557: 14.5,
   558: 200,
   559: 11.8,
+  560: 30,
   561: 14,
   562: 1.5,
   563: 76.5,
@@ -13302,7 +13480,9 @@ const W = {
   568: 31,
   569: 107.3,
   570: 12.5,
+  571: 81.1,
   572: 5.8,
+  573: 7.5,
   574: 5.8,
   575: 18,
   576: 44,
@@ -13320,22 +13500,28 @@ const W = {
   588: 5.9,
   589: 33,
   590: 1,
+  591: 10.5,
   592: 33,
   593: 135,
   594: 31.6,
   595: 0.6,
+  596: 14.3,
   597: 18.8,
+  598: 110,
   599: 21,
   600: 51,
   601: 81,
   602: 0.3,
   603: 22,
+  604: 80.5,
   605: 9,
   606: 34.5,
   607: 3.1,
   608: 13,
+  609: 34.3,
   610: 18,
   611: 36,
+  612: 105.5,
   613: 8.5,
   614: 260,
   615: 148,
@@ -13343,10 +13529,12 @@ const W = {
   617: 25.3,
   618: 11,
   619: 20,
+  620: 35.5,
   621: 139,
   622: 92,
   623: 330,
   624: 10.2,
+  625: 70,
   626: 94.6,
   627: 10.5,
   628: 41,
@@ -13356,7 +13544,9 @@ const W = {
   632: 33,
   633: 17.3,
   634: 50,
+  635: 160,
   636: 28.8,
+  637: 46,
   638: 250,
   639: 260,
   640: 200,
@@ -13371,48 +13561,62 @@ const W = {
   649: 82.5,
   650: 9,
   651: 29,
+  652: 90,
   653: 9.4,
   654: 14.5,
+  655: 39,
   656: 7,
   657: 10.9,
+  658: 40,
   659: 5,
   660: 42.4,
   661: 1.7,
   662: 16,
+  663: 24.5,
   664: 2.5,
   665: 8.4,
   666: 17,
   667: 13.5,
+  668: 81.5,
   669: 0.1,
   670: 0.9,
   671: 10,
   672: 31,
   673: 91,
   674: 8,
+  675: 136,
   676: 28,
   677: 3.5,
   678: 8.5,
   679: 2,
   680: 4.5,
+  681: 53,
   682: 0.5,
   683: 15.5,
   684: 3.5,
   685: 5,
   686: 3.5,
+  687: 47,
   688: 31,
   689: 96,
   690: 7.3,
   691: 81.5,
   692: 8.3,
+  693: 35.3,
   694: 6,
   695: 21,
   696: 26,
+  697: 270,
   698: 25.2,
   699: 225,
+  700: 23.5,
+  701: 21.5,
   702: 2.2,
   703: 5.7,
   704: 2.8,
   705: 17.5,
+  706: 150.5,
+  707: 3,
   708: 7,
   709: 71,
   710: 5,
@@ -13420,29 +13624,42 @@ const W = {
   712: 99.5,
   713: 505,
   714: 8,
+  715: 85,
+  716: 215,
+  717: 203,
   718: 305,
   719: 8.8,
   720: 9,
   721: 195,
   722: 1.5,
   723: 16,
+  724: 36.6,
   725: 4.3,
   726: 25,
+  727: 83,
   728: 7.5,
   729: 17.5,
+  730: 44,
   731: 1.2,
   732: 14.8,
+  733: 26,
   734: 6,
   735: 14.2,
   736: 4.4,
   737: 10.5,
+  738: 45,
   739: 7,
+  740: 180,
   741: 3.4,
   742: 0.2,
+  743: 0.5,
   744: 9.2,
+  745: 25,
   746: 0.3,
   747: 8,
+  748: 14.5,
   749: 110,
+  750: 920,
   751: 4,
   752: 82,
   753: 1.5,
@@ -13450,10 +13667,12 @@ const W = {
   755: 1.5,
   756: 11.5,
   757: 4.8,
+  758: 22.2,
   759: 6.8,
   760: 135,
   761: 3.2,
   762: 8.2,
+  763: 21.4,
   764: 0.3,
   765: 76,
   766: 82.8,
@@ -13467,40 +13686,55 @@ const W = {
   774: 40,
   775: 19.9,
   776: 212,
+  777: 3.3,
+  778: 0.7,
   779: 19,
   780: 185,
   781: 210,
   782: 29.7,
   783: 47,
+  784: 78.2,
+  785: 20.5,
   786: 18.6,
   787: 45.5,
   788: 21.2,
   789: 0.1,
   790: 999.9,
+  791: 230,
+  792: 120,
   793: 55.5,
   794: 333.6,
   795: 25,
   796: 100,
   797: 999.9,
+  798: 0.1,
   799: 888,
   800: 230,
   801: 80.5,
+  802: 22.2,
   803: 1.8,
   804: 150,
   805: 820,
   806: 13,
+  807: 44.5,
+  809: 800,
   810: 5,
   811: 14,
+  812: 90,
   813: 4.5,
   814: 9,
+  815: 33,
   816: 4,
   817: 11.5,
+  818: 45.2,
   819: 2.5,
   820: 6,
   821: 1.8,
   822: 16,
+  823: 75,
   824: 8,
   825: 19.5,
+  826: 40.8,
   827: 8.9,
   828: 19.9,
   829: 2.2,
@@ -13508,27 +13742,35 @@ const W = {
   831: 6,
   832: 43,
   833: 8.5,
+  834: 115.5,
   835: 13.5,
   836: 34,
   837: 12,
   838: 78,
+  839: 310.5,
   840: 0.5,
   841: 1,
+  842: 13,
   843: 7.6,
   844: 65.5,
   845: 18,
   846: 1,
   847: 30,
   848: 11,
+  849: 40,
   850: 1,
+  851: 120,
   852: 4,
   853: 39,
   854: 0.2,
   855: 0.4,
   856: 3.4,
   857: 4.8,
+  858: 5.1,
   859: 5.5,
   860: 12.5,
+  861: 61,
+  862: 46,
   863: 28,
   864: 0.4,
   865: 117,
@@ -13550,10 +13792,15 @@ const W = {
   881: 150,
   882: 215,
   883: 175,
+  884: 40,
   885: 2,
   886: 11,
+  887: 50,
+  888: 110,
+  889: 210,
   890: 950,
   891: 12,
+  892: 105,
   893: 70,
   894: 145,
   895: 200,
@@ -13568,17 +13815,22 @@ const W = {
   905: 48,
   906: 4.1,
   907: 12.2,
+  908: 31.2,
   909: 9.8,
   910: 30.7,
+  911: 326.5,
   912: 6.1,
   913: 21.5,
+  914: 61.9,
   915: 10.2,
   916: 120,
   917: 4,
   918: 16.5,
   919: 1,
+  920: 17.5,
   921: 2.5,
   922: 6.5,
+  923: 41,
   924: 1.8,
   925: 2.8,
   926: 10.9,
@@ -13589,7 +13841,10 @@ const W = {
   931: 2.4,
   932: 16,
   933: 105,
+  934: 240,
   935: 10.5,
+  936: 85,
+  937: 62,
   938: 0.4,
   939: 113,
   940: 3.6,
@@ -13606,12 +13861,15 @@ const W = {
   951: 3,
   952: 15,
   953: 1,
+  954: 3.5,
   955: 1.5,
   956: 90,
   957: 8.9,
   958: 59.1,
+  959: 112.8,
   960: 1.8,
   961: 5.4,
+  962: 42.9,
   963: 60.2,
   964: 60.2,
   965: 35,
@@ -13619,30 +13877,45 @@ const W = {
   967: 63,
   968: 310,
   969: 8,
+  970: 45,
   971: 35,
   972: 15,
+  973: 37,
   974: 45,
   975: 700,
   976: 90,
+  977: 220,
   978: 8,
+  979: 56,
+  980: 223,
   981: 160,
   982: 39.2,
+  983: 120,
+  984: 320,
   985: 8,
   986: 21,
+  987: 4,
   988: 92,
   989: 60,
   990: 240,
+  991: 11,
   992: 380.7,
   993: 111,
+  994: 36,
   995: 303,
   996: 17,
   997: 30,
   998: 210,
   999: 5,
+  1000: 30,
   1001: 74.2,
+  1002: 152.2,
   1003: 699.7,
   1004: 4.9,
   1005: 380,
+  1006: 35,
+  1007: 303,
+  1008: 240,
   1009: 280,
   1010: 125,
   1011: 9.7,
@@ -13701,7 +13974,9 @@ const W = {
   10225: 3.4,
   10226: 3.4,
   10227: 3.4,
+  10228: 1000,
   10268: 6.5,
+  10311: 570,
   10314: 460,
   10315: 350,
   10340: 33.5,
@@ -13711,6 +13986,8 @@ const W = {
   10363: 53.6,
   10417: 110,
   10418: 48,
+  10427: 0.8,
+  10428: 0.8,
   10441: 290,
   20052: 7.5,
   20077: 24,
@@ -15093,7 +15370,7 @@ return ev;
       offEsc = onEsc(() => { AU.no(); close(); });
       /* ---- 头部横幅：头像 + 名字 + 阵营 + HP（浅色渐变底，深色文字） ---- */
       const banner = el('div', ''); banner.style.cssText = 'display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,#fdf6e3,#f2e8d0);border:2px solid rgba(120,100,60,.35)';
-      const img = miniSprite(m.id); img.style.width = '58px'; img.style.height = '58px'; img.style.imageRendering = 'pixelated';
+      const img = miniSprite(m.vol.illusion || m.id); img.style.width = '58px'; img.style.height = '58px'; img.style.imageRendering = 'pixelated';
       banner.appendChild(img);
       const info = el('div', ''); info.style.flex = '1';
       const nmRow = el('div', ''); nmRow.style.cssText = 'display:flex;align-items:center;gap:8px';
@@ -15142,9 +15419,12 @@ return ev;
       /* ---- 特性 ---- */
       {
         const abSec = sec('特性');
-        /* ★ Mega进化/原始回归时显示Mega形态特性（m.mega.a） */
-        const cand = (m.mega ? [m.mega.a] : m.sp.ab || []).map(k => AB[k]).filter(a => a);
-        const curAb = AB[m.ability];
+        /* ★ 幻觉适配：特性列表显示伪装宝可梦的候选特性；Mega进化/原始回归时显示Mega形态特性（m.mega.a） */
+        const illus = m.vol.illusion;
+        const illusSp = illus ? SPDB[illus] : null;
+        const cand = (illusSp ? illusSp.ab : (m.mega ? [m.mega.a] : m.sp.ab || [])).map(k => AB[k]).filter(a => a);
+        const curAbK2 = illusSp ? (illusSp.ab[0] || m.ability) : m.ability;
+        const curAb = AB[curAbK2];
         const abRow = el('div', ''); abRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;align-items:center;cursor:pointer';
         abRow.title = '点击展开' + (side === 'e' ? '查看所有可能特性的描述' : '查看特性描述');
         const mkChip = (a, cur) => {
@@ -15153,7 +15433,7 @@ return ev;
           return c;
         };
         /* ★ 仅当"敌方特性显示"开关打开时，才高亮标出敌方当前真实特性；否则所有候选颜色一致 */
-        const isCur = a => side === 'e' ? (CFG.enemyAbility && a.k === m.ability) : a.k === m.ability;
+        const isCur = a => side === 'e' ? (CFG.enemyAbility && a.k === curAbK2) : a.k === curAbK2;
         if (side === 'e') {
           (cand.length ? cand : (curAb ? [curAb] : [])).forEach(a => abRow.appendChild(mkChip(a, isCur(a))));
         } else if (curAb) {
@@ -15210,8 +15490,8 @@ return ev;
         psn: ['中毒', '#a33ea1', '每回合损失最大HP的1/8'],
         tox: ['剧毒', '#8a2fa3', '每回合损失最大HP的1/16，伤害随回合递增'],
         par: ['麻痹', '#e0912b', '速度×0.5，行动时有12.5%几率无法出手'],
-        sleep: ['睡眠', '#5f6b7a', '无法行动，持续1~3回合后自然醒来'],
-        frz: ['冰冻', '#63c5c2', '无法行动，每回合20%解冻，第三回合必定解冻，受到火属性攻击或使用火焰招式可解冻']
+        sleep: ['睡眠', '#5f6b7a', '无法行动，最多2回合后自然醒来（早起特性更快醒来）'],
+        frz: ['冰冻', '#63c5c2', '无法行动，每回合20%解冻，第3回合必定解冻，受到火属性攻击可解冻']
       };
       let hasSt = false;
       if (m.status && ST[m.status]) { const s = ST[m.status]; pushSt(s[0], s[1], s[2]); hasSt = true; }
@@ -18966,6 +19246,11 @@ return ev;
         if (useMv.destiny) { mon.vol.destiny = true; await say(`${mon.logName} 正在瞄准同命！`); return; }
         /* ★ 双打目标解析（含看我嘛/愤怒粉/避雷针/引水/食草重定向） */
         const targets = this.targetsFor(mon, useMv, act);
+        /* ★ 逆鳞：虽为单体任选，但选定敌方后实际命中的位置随机（双打中在敌方中随机选一个，只打敌方不误伤队友）；选择己方目标时保持所选 */
+        if (useMv.k === 'outrage' && targets.length && this.sideOf(targets[0]) !== side) {
+          const foes = this.foesOf(mon).filter(f => f && f.alive());
+          if (foes.length > 1) targets[0] = pick(foes);
+        }
         if (!targets.length) { const fmsg = '目标已经倒下，使用失败了！'; await say(`${displayName} 的 ${useMv.n}${fmsg}`); this.addLog(`${displayName} 的 ${useMv.n}${fmsg}`); return; }
         // 变化招式执行
         if (useMv.c === 'X') {
@@ -19162,7 +19447,17 @@ return ev;
         if (!this.over && mon.hp <= 0 && !mon.fainted) { await this.handleKO(this.foeSide(side), targets[0], mon); return; }
         // 逆鳞锁定
         if (useMv.rampage && !mon.vol.lock) { const t = rnd(2, 3); mon.vol.lock = { k: mvk, t }; }
-        if (mon.vol.lock) { mon.vol.lock.t--; if (mon.vol.lock.t <= 0) { mon.vol.lock = null; if (!mon.vol.confuse) { mon.vol.confuse = rnd(2, 4); await say(`${mon.logName} 因狂暴而混乱了！`); } } }
+        if (mon.vol.lock) {
+          /* ★ 狂暴招式打空（未命中/免疫/被守住/无效等，connected=false）：锁招立即结束，并陷入混乱（逆鳞/花瓣舞/大愤慨等同步生效） */
+          if (useMv.rampage && !connected) {
+            mon.vol.lock = null;
+            if (!mon.vol.confuse) { mon.vol.confuse = rnd(2, 4); await say(`${mon.logName} 因狂暴而混乱了！`); }
+          }
+          else {
+            mon.vol.lock.t--;
+            if (mon.vol.lock.t <= 0) { mon.vol.lock = null; if (!mon.vol.confuse) { mon.vol.confuse = rnd(2, 4); await say(`${mon.logName} 因狂暴而混乱了！`); } }
+          }
+        }
         if (useMv.recharge) mon.vol.recharge = true;
         /* ★ 巨剑突击：使用后下一回合被对手必定击中且伤害翻倍 */
         if (useMv.glaiverush && !mon.fainted) { mon.vol.glaiveRush = true; await say(`${mon.logName} 露出了破绽！下回合受到攻击会加倍！`); }
@@ -19786,6 +20081,11 @@ return ev;
         // 气球破裂
         if (foe.item === 'airballoon') { foe.item = null; await say(`${foe.logName} 的气球破裂了！`); }
         // 追加效果（替身未破时被替身抵挡，不作用于本体；穿透/音波或替身被击破时正常触发）
+        /* ★ 刷刷茶炮：热茶命中解除目标冰冻（替身未破时被替身抵挡，不解除） */
+        if (useMv.k === 'matchagotcha' && foe.status === 'frz' && (!subBlocked || foe.vol.substitute <= 0)) {
+          foe.status = null;
+          await say(`${foe.logName} 被热茶解冻了！`);
+        }
         if (mv.sec && !mon.has('sheerforce') && !foe.has('shielddust') && foe.hp > 0 && (!subBlocked || foe.vol.substitute <= 0)) {
           let ch = mv.sec.ch * (mon.has('serenegrace') ? 2 : 1);
           if (Math.random() * 100 < ch) {
@@ -19934,6 +20234,8 @@ return ev;
         // 解冻（火属性伤害）
         /* ★ 水蒸气：自身冰冻时解冻 */
         if (mv.hydrosteam && mon.status === 'frz') { mon.status = null; await say(`${mon.logName} 被蒸汽解冻了！`); }
+        /* ★ 刷刷茶炮：热茶，自身冰冻时使用也能解冻 */
+        if (useMv.k === 'matchagotcha' && mon.status === 'frz') { mon.status = null; await say(`${mon.logName} 被热茶解冻了！`); }
         if (mv.t === 'fire' && foe.status === 'frz' && (!subBlocked || foe.vol.substitute <= 0)) { foe.status = null; await say(`${foe.logName} 解冻了！`); }
         BUI.refresh(this);
         return { dmg: subDmg || dmg, ko: foe.hp <= 0, eff: r.eff, crit: r.crit };
@@ -24167,7 +24469,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
         for (const k in MULTI_FORMS) hideIds.push(...MULTI_FORMS[k]);
         for (const k in REGIONAL_FORMS) hideIds.push(...REGIONAL_FORMS[k]);
         SP.filter(sp => hideIds.indexOf(sp.id) === -1 && (!g || genOf(sp.id) === g) && (!ty || sp.t.includes(ty)) && (!q || sp.n.includes(q) || String(sp.id) === q))
-          .sort((a, b) => a.id - b.id)
+          .sort((a, b) => $('#dexSort').value === 'desc' ? b.id - a.id : a.id - b.id)
           .forEach(sp => {
             const c = el('div', 'dexCell');
             const img = new Image(); setSprite(img, sp.id); c.appendChild(img);
@@ -24251,6 +24553,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
           });
       };
       ['input', 'change'].forEach(ev => { $('#dexSearch').addEventListener(ev, render); genSel.addEventListener(ev, render); tySel.addEventListener(ev, render); });
+      $('#dexSort').addEventListener('change', render);
       render(); dexDetail(SPDB[6]);
     }
     /* ============ 自由对战·宝可梦配置面板 ============ */
@@ -24453,7 +24756,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
         for (const k in MULTI_FORMS) hideIds2.push(...MULTI_FORMS[k]);
         for (const k in REGIONAL_FORMS) hideIds2.push(...REGIONAL_FORMS[k]);
         SP.filter(sp => hideIds2.indexOf(sp.id) === -1 && (!g || genOf(sp.id) === g) && (!ty || sp.t.includes(ty)) && (!q || sp.n.includes(q) || String(sp.id) === q))
-          .sort((a, b) => a.id - b.id)
+          .sort((a, b) => $('#freeSort').value === 'desc' ? b.id - a.id : a.id - b.id)
           .forEach(sp => {
             const renderPick = (fsp, fid) => {
               const c = el('div', 'pickCell'); const img = new Image(); setSprite(img, fid); c.appendChild(img);
@@ -24496,6 +24799,7 @@ ${cfg.s.map((v, i) => `<div class="statRow"><span style="width:30px;font-weight:
           });
       };
       ['input', 'change'].forEach(ev => { $('#freeSearch').addEventListener(ev, render); genSel.addEventListener(ev, render); tySel.addEventListener(ev, render); });
+      $('#freeSort').addEventListener('change', render);
       $('#freeLvl').oninput = e => { lvl = +e.target.value; $('#freeLvlV').textContent = lvl; playerTeam.forEach(t => t.lvl = lvl); enemyTeam.forEach(t => t.lvl = lvl); renderTeam(); };
       // 编辑目标切换
       const editToggle = $('#freeEditToggle');
@@ -25359,27 +25663,35 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
     function showDetail(m, battle) {
       const ov = $('#detailOv'); ov.innerHTML = ''; ov.classList.remove('hidden');
       const sp = m.sp;
+      /* ★ 幻觉适配：显示伪装宝可梦的外观（图片/名字/属性/特性）；种族值、等级等保持真实 */
+      const illus = m.vol.illusion;
+      const illusSp = illus ? SPDB[illus] : null;
+      const dName = m.vol.illusionName || m.name;
+      const dId = illus || (m.mega ? m.mega.f : null);
       /* ★ 形态识别：Mega > 道具形态（苍响/藏玛然特携带专属道具）> 基础形态 */
       const formCfg = (FORMS[m.id] && m.item === FORMS[m.id].item) ? FORMS[m.id] : null;
       /* ★ Mega形态：种族值/属性/特性均使用Mega数据 */
       const raceStats = m.mega ? m.mega.s : (formCfg ? formCfg.s : sp.s);
-      const raceTypes = m.mega ? m.mega.t.split('/') : (formCfg ? formCfg.t.split('/') : m.types);
+      const raceTypes = illusSp ? illusSp.t.split('/') : (m.mega ? m.mega.t.split('/') : (formCfg ? formCfg.t.split('/') : m.types));
       const raceAbility = m.ability;
+      /* ★ 幻觉时特性列表显示伪装宝可梦的候选特性 */
+      const abSrc = illusSp ? illusSp.ab : m.sp.ab;
+      const curAbK = illusSp ? (illusSp.ab[0] || m.ability) : m.ability;
       const card = el('div', ''); card.id = 'detailCard';
       const close = el('button', 'btn small', '✕ 关闭 (ESC)'); close.id = 'detailClose'; close.onclick = shut;
       ov.appendChild(close);
       const left = el('div', 'dLeft');
-      const img = new Image(); img.id = 'dSprite'; setSprite(img, m.mega ? m.mega.f : (formCfg ? formCfg.f : m.id), false, !!m.mega);
+      const img = new Image(); img.id = 'dSprite'; setSprite(img, dId || m.id, false, !!(m.mega && !illus));
       if (m.fainted) img.classList.add('faint');
       if (m.shiny) img.style.filter = 'hue-rotate(130deg) saturate(1.5)';
       left.appendChild(img);
       left.insertAdjacentHTML('beforeend', `
-    <div id="dName">${m.vol.illusionName || m.name}${m.shiny ? ' <span style="color:#e0a400">✦</span>' : ''}</div>
-    <div id="dLv">Lv.${m.lvl} · ${sp.leg ? '传说宝可梦' : '普通宝可梦'} · 种族值和 ${raceStats.reduce((a, b) => a + b, 0)}${(m.mega && m.mega.stone) ? (m.mega.formTag ? ` <span style="color:#c07a2a;font-weight:900">★${m.mega.formTag}</span>` : ' <span style="color:#b3188d;font-weight:900">◆Mega</span>') : (formCfg ? ` <span style="color:#c07a2a;font-weight:900">★${formCfg.formTag}</span>` : '')}</div>
+    <div id="dName">${dName}${m.shiny ? ' <span style="color:#e0a400">✦</span>' : ''}</div>
+    <div id="dLv">Lv.${m.lvl} · ${sp.leg ? '传说宝可梦' : '普通宝可梦'} · 种族值和 ${raceStats.reduce((a, b) => a + b, 0)} · 体重 ${W[m.id] != null ? W[m.id] + 'kg' : '—'}${(m.mega && m.mega.stone) ? (m.mega.formTag ? ` <span style="color:#c07a2a;font-weight:900">★${m.mega.formTag}</span>` : ' <span style="color:#b3188d;font-weight:900">◆Mega</span>') : (formCfg ? ` <span style="color:#c07a2a;font-weight:900">★${formCfg.formTag}</span>` : '')}</div>
     <div class="dMetaRow">${raceTypes.map(tyBadge).join('')}</div>
     <div class="dMetaRow">
-<span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span>
-      ${m.sp.ab.filter(k => k !== m.ability && AB[k]).map(k => `<span class="abchip" style="opacity:.55;border-style:dashed" title="${AB[k]?.d || ''}">${AB[k]?.n || k}</span>`).join('')}
+<span class="abchip" title="${AB[curAbK]?.d || ''}">${AB[curAbK]?.n || '—'}</span>
+      ${abSrc.filter(k => k !== curAbK && AB[k]).map(k => `<span class="abchip" style="opacity:.55;border-style:dashed" title="${AB[k]?.d || ''}">${AB[k]?.n || k}</span>`).join('')}
       <span class="abchip" style="color:#c07a2a;border-color:#e0b080;background:linear-gradient(180deg,#fff2e0,#ffe0b8)" title="${natureDesc(m.nature)}">性格·${m.nature?.n || '—'}${m.nature?.up ? ` ${natureDesc(m.nature)}` : ''}</span>
       ${m.item ? `<span class="abchip" style="color:#a06a00;border-color:#e0c060;background:linear-gradient(180deg,#fff8e0,#ffe9a8)" title="${IT[m.item]?.d || ''}">🎒 ${IT[m.item].n}</span>` : ''}
       <span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;background:linear-gradient(180deg,#e0fbff,#b8f0f8)">✦ 太晶·${TNAME[m.teraType]}</span>
@@ -25468,9 +25780,9 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
         }
       }
       renderMoves();
-      const allAb = m.sp.ab.map(k => AB[k]).filter(a => a);
+      const allAb = abSrc.map(k => AB[k]).filter(a => a);
       const abList = allAb.map((a, i) => {
-        const isCurrent = a.k === m.ability;
+        const isCurrent = a.k === curAbK;
         const style = isCurrent
           ? 'font-weight:900;color:#e0a400;border:2px solid #e0a400;border-radius:6px;padding:4px 8px;margin:2px 0;background:linear-gradient(180deg,#fff8e0,#ffe9a8)'
           : 'border:1px solid #ccc;border-radius:6px;padding:4px 8px;margin:2px 0;background:#f8f8f8;opacity:.7';
