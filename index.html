@@ -14676,6 +14676,7 @@ return ev;
     class P {
       constructor(id, lvl, o = {}) {
         const sp = SPDB[id]; this.sp = sp; this.id = id; this.name = sp.n; this.lvl = lvl;
+        this._side = o.side || null;   // ★ 阵营标记：'p' 我方 / 'e' 敌方（供战斗记录敌我标记）
         this.shiny = o.shiny ?? (Math.random() < 1 / 128);
         this.types = sp.t.split('/'); this.baseTypes = this.types.slice();
         this.ability = o.ability || pick(sp.ab); this.baseAbility = this.ability; this.item = o.item || null;
@@ -14756,6 +14757,11 @@ return ev;
         if (this.id === 484) { this.name = this.item === 'lustrousorb' ? '帕路奇亚(起源形态)' : '帕路奇亚'; }
       }
       hpPct() { return this.hp / this.maxhp; }
+      /* ★ 战斗记录敌我标记：敌方名字带「敌方的」前缀（含幻觉伪装名），我方保持原名 */
+      get logName() {
+        const nm = this.vol && this.vol.illusionName ? this.vol.illusionName : this.name;
+        return this._side === 'e' ? '敌方的' + nm : nm;
+      }
       /* ★ 古代活性/夸克充能：返回最高能力键（HP除外） */
       bestStat() { let best = 'atk'; for (const k of ['atk', 'def', 'spa', 'spd', 'spe']) if (this.st[k] > this.st[best]) best = k; return best; }
       alive() { return !this.fainted && this.hp > 0; }
@@ -17127,6 +17133,9 @@ return ev;
     class Battle {
       constructor(o) {
         this.pp = o.player; this.ep = o.enemy; this.wild = o.wild || false;
+        /* ★ 阵营标记：供战斗记录显示敌我（"敌方的XXX"） */
+        (this.pp || []).forEach(m => m._side = 'p');
+        (this.ep || []).forEach(m => m._side = 'e');
         this.doubles = o.doubles || false;   // ★ 双打模式
         this.pt = null; this.et = null;      // ★ 双打场上槽位（队伍索引）
         this.wideGuard = { p: false, e: false };
@@ -17286,7 +17295,7 @@ return ev;
               const berries = ['sitrus'];
               const got = pick(berries);
               GM.bag[got] = (GM.bag[got] || 0) + 1;
-              await say(`${m.name} 的采蜜特性发动了！获得了${IT[got].n}！`);
+              await say(`${m.logName} 的采蜜特性发动了！获得了${IT[got].n}！`);
             }
             // ★ 捡拾：胜利后概率获得道具
             for (const m of [...this.pp, ...this.ep]) {
@@ -17294,7 +17303,7 @@ return ev;
                 const items = ['potion', 'sitrus', 'quickclaw'];
                 const got = pick(items);
                 GM.bag[got] = (GM.bag[got] || 0) + 1;
-                await say(`${m.name} 的捡拾特性发动了！获得了${IT[got].n}！`);
+                await say(`${m.logName} 的捡拾特性发动了！获得了${IT[got].n}！`);
               }
             }
           }
@@ -17332,7 +17341,7 @@ return ev;
           m._slot = this.doubles && slot != null ? slot : 0;
           this._prepSendOut(m, 'p');
           await BUI.entryAnim('p', m, false, slot);
-          await say(first ? `去吧！${m.vol.illusionName || m.name}！` : `${m.vol.illusionName || m.name}，就决定是你了！`);
+          await say(first ? `去吧！${m.logName}！` : `${m.logName}，就决定是你了！`);
           this.participants.add(m);
           if (!skipEffects) await this.entryEffects(m, 'p');
         } else {
@@ -17341,7 +17350,7 @@ return ev;
           m._slot = this.doubles && slot != null ? slot : 0;
           this._prepSendOut(m, 'e');
           await BUI.entryAnim('e', m, this.wild, slot);
-          await say(this.wild ? `野生的 ${m.vol.illusionName || m.name} 出现了！` : `${this.trainerName || '对手'} 派出了 ${m.vol.illusionName || m.name}！`);
+          await say(this.wild ? `野生的 ${m.vol.illusionName || m.name} 出现了！` : `${this.trainerName || '对手'} 派出了 ${this.doubles ? m.logName : (m.vol.illusionName || m.name)}！`);
           if (!skipEffects) await this.entryEffects(m, 'e');
         }
         BUI.refresh(this);
@@ -17387,20 +17396,20 @@ return ev;
         await this.hazardHit(m, side);
         await this.switchInAbility(m);
         // if(m.has('quarkdrive')&&!m.vol.qd){ const best=STATKEYS.reduce((a,b)=>m.st[a]>=m.st[b]?a:b); m.vol.qd=best;
-        //   await say(`${m.name} 的夸克充能发动了！${STN[best]}提升了！`); AU.statUp(); }
+        //   await say(`${m.logName} 的夸克充能发动了！${STN[best]}提升了！`); AU.statUp(); }
       }
       async hazardHit(m, side) {
         const h = this.haz[side];
-        if (h.sr) { const e = effMult('rock', m.types); if (e > 0) { const d = Math.max(1, Math.floor(m.maxhp / 8 * e)); await this.directDmg(m, d, side, `隐形岩扎伤了${m.vol.illusionName || m.name}！`); } }
+        if (h.sr) { const e = effMult('rock', m.types); if (e > 0) { const d = Math.max(1, Math.floor(m.maxhp / 8 * e)); await this.directDmg(m, d, side, `隐形岩扎伤了${m.logName}！`); } }
         if (h.spikes) {
           const immune = m.types.includes('flying') || m.has('levitate') || m.has('eelevate');
-          if (!immune) { const d = Math.max(1, Math.floor(m.maxhp / [8, 6, 4][Math.min(h.spikes, 3) - 1])); await this.directDmg(m, d, side, `撒菱扎伤了${m.vol.illusionName || m.name}！`); }
+          if (!immune) { const d = Math.max(1, Math.floor(m.maxhp / [8, 6, 4][Math.min(h.spikes, 3) - 1])); await this.directDmg(m, d, side, `撒菱扎伤了${m.logName}！`); }
         }
         /* ★ 毒满地：地面上的宝可梦中毒/剧毒（毒/钢属性免疫，毒属性会吸收毒菱） */
         if (h.tspikes) {
           if (m.types.includes('poison')) {
             h.tspikes = 0;
-            await say(`${m.vol.illusionName || m.name} 吸收了毒满地！`);
+            await say(`${m.logName} 吸收了毒满地！`);
           } else {
             const immune = m.types.includes('flying') || m.has('levitate') || m.has('eelevate') || m.types.includes('steel');
             if (!immune && !m.status) {
@@ -17411,16 +17420,48 @@ return ev;
           /* ★ 黏黏网：降低速度（飞行/浮游/除雾免疫） */
           if (h.stickyweb && !m.types.includes('flying') && !m.has('levitate') && !m.has('eelevate') && !m.vol.rapidSpinUsed) {
             await this.changeStat(m, 'spe', -1, m);
-            await say(`${m.vol.illusionName || m.name} 被黏黏网缠住了，速度降低了！`);
+            await say(`${m.logName} 被黏黏网缠住了，速度降低了！`);
           }
         }
+      }
+      /* ★ 获得特性的主动类效果立即发动（复制/化学之力/接球手/描绘等共用；触发时不再递归进入 switchInAbility，避免无限循环） */
+      async triggerGainedAbility(m, newAb) {
+        if (newAb === 'drought') await this.setWeather('sun', m);
+        else if (newAb === 'drizzle') await this.setWeather('rain', m);
+        else if (newAb === 'sandstream') await this.setWeather('sand', m);
+        else if (newAb === 'snowwarning') await this.setWeather('hail', m);
+        else if (newAb === 'deltastream') await this.setWeather('delta', m);
+        else if (newAb === 'desolateland') await this.setWeather('desolate', m);
+        else if (newAb === 'primordialsea') await this.setWeather('primordial', m);
+        else if (newAb === 'grassysurge') await this.setTerrain('grassy', m);
+        else if (newAb === 'electricsurge') await this.setTerrain('electric', m);
+        else if (newAb === 'psychicsurge') await this.setTerrain('psychic', m);
+        else if (newAb === 'mistysurge') await this.setTerrain('misty', m);
+        else if (newAb === 'hadronengine') { await this.setTerrain('electric', m); await say(`${m.logName} 的强子引擎发动了，特攻提升了！`); }
+        else if (newAb === 'orichalcumpulse') { await this.setWeather('sun', m); await say(`${m.logName} 的绯红脉动发动了，物攻提升了！`); }
+        else if (newAb === 'intimidate') { for (const f of this.foesOf(m)) { if (f.vol.substitute > 0) continue; await this.changeStat(f, 'atk', -1, m); } }
+        else if (newAb === 'intrepidsword') await this.changeStat(m, 'atk', 1, m);
+        else if (newAb === 'dauntlessshield') await this.changeStat(m, 'def', 1, m);
+        else if (newAb === 'download') { const foes2 = this.foesOf(m); const boost = foes2.reduce((a, f) => a + f.st.def, 0) >= foes2.reduce((a, f) => a + f.st.spd, 0) ? 'spa' : 'atk'; await this.changeStat(m, boost, 1, m); }
+        else if (newAb === 'swordofruin') { await say(`${m.logName} 的灾祸之剑发动了！对手的防御下降了！`); AU.statDn(); }
+        else if (newAb === 'tabletsofruin') { await say(`${m.logName} 的灾祸之简发动了！对手的攻击下降了！`); AU.statDn(); }
+        else if (newAb === 'vesselofruin') { await say(`${m.logName} 的灾祸之壶发动了！对手的特攻下降了！`); AU.statDn(); }
+        else if (newAb === 'beadsofruin') { await say(`${m.logName} 的灾祸之珠发动了！对手的特防下降了！`); AU.statDn(); }
+        else if (newAb === 'fairyaura') await say('妖精气场笼罩了全场！');
+        else if (newAb === 'darkaura') await say('暗黑气场笼罩了全场！');
+        else if (newAb === 'frisk' && this.foesOf(m).length) { const items = this.foesOf(m).map(f => `${f.logName}持有「${f.item ? IT[f.item]?.n || '未知道具' : '无道具'}」`).join('，'); await say(`${m.logName} 的察觉发动了！${items}！`); }
+        else if (newAb === 'supersweetsyrup' && this.foesOf(m).length) { this.abBanner(m); for (const f of this.foesOf(m)) f.stages.eve = clamp((f.stages.eve || 0) - 1, -6, 6); await say(`${m.logName} 的甘露之蜜发动了！散发甜香，对手的闪避率下降了！`); }
+        else if (newAb === 'forewarn' && this.foesOf(m).length) { let best = null, bp = 0; for (const f of this.foesOf(m)) f.moves.forEach(mv => { const d = MV[mv.k]; if (d && d.p > bp) { bp = d.p; best = d; } }); if (best) { this.abBanner(m); await say(`${m.logName} 的预知梦发动了！对手最强的招式是「${best.n}」！`); } }
+        else if (newAb === 'anticipation' && this.foesOf(m).length) { const danger = this.foesOf(m).some(f => f.moves.some(x => { const d = MV[x.k]; return d && d.c !== 'X' && effMult(d.t, m.types) > 1; })); if (danger) { this.abBanner(m); await say(`${m.logName} 的危险预知发动了！预感到了危险！`); } }
+        else if (newAb === 'quarkdrive' && this.terrain === 'electric') await say(`${m.logName} 的夸克充能发动了！${STN[m.bestStat()]}提升了！`);
+        else if (newAb === 'protosynthesis' && this.wx === 'sun') await say(`${m.logName} 的古代活性发动了！${STN[m.bestStat()]}提升了！`);
       }
       async switchInAbility(m) {
         if (!m.alive()) return;   // ★ 已被入场伤害击倒则不发动特性
         const foe = this.foeOf(m); const ab = m.ability; const side = this.sideOf(m);
         /* ★ 气球：出场时漂浮在空中（免疫地面系招式，被攻击时破裂） */
         if (!m.has('klutz') && m.item === 'airballoon') {
-          await say(`${m.vol.illusionName || m.name} 浮在了空中！`);
+          await say(`${m.logName} 浮在了空中！`);
         }
         /* ★ 发号施令：米立龙出场时若同伴为吃吼霸则被吞入其口中；
            吃吼霸出场时若场上已有未被吞入的指挥官米立龙同样触发（本场已吞入过且吞入者阵亡则不再触发） */
@@ -17438,7 +17479,7 @@ return ev;
               dondo.vol.commanderLock = true;
               for (const k of ['atk', 'def', 'spa', 'spd', 'spe']) dondo.stages[k] = clamp((dondo.stages[k] || 0) + 2, -6, 6);
               this.abBanner(tatsu);
-              await say(`${tatsu.vol.illusionName || tatsu.name}作为发号施令的要员而被${dondo.vol.illusionName || dondo.name}吞下去了！`);
+              await say(`${tatsu.logName}作为发号施令的要员而被${dondo.logName}吞下去了！`);
               /* ★ 简单动画：绿色粒子 + 米立龙缩小消失 */
               const tSlot = this.fieldSlotOf(tatsu);
               FX.dotFx(side, 'grass', tSlot);
@@ -17455,7 +17496,7 @@ return ev;
           m.item = null;
           m.vol.booster = true;
           this.abBanner(m);
-          await say(`${m.name} 的驱劲能量发动了！${AB[m.ability].n}启动了！`);
+          await say(`${m.logName} 的驱劲能量发动了！${AB[m.ability].n}启动了！`);
         }
         /* ★ 天气/场地特性：场上已有同种天气/场地时不重复触发、不提示
            （绯红脉动/强子引擎除外：还有物攻/特攻强化效果；终结之地/始源之海除外：与常规天气不同） */
@@ -17479,9 +17520,9 @@ return ev;
         if (ab === 'supersweetsyrup' && this.foesOf(m).length) {
           this.abBanner(m);
           for (const f of this.foesOf(m)) f.stages.eve = clamp((f.stages.eve || 0) - 1, -6, 6);
-          await say(`${m.name} 的甘露之蜜发动了！散发甜香，对手的闪避率下降了！`);
+          await say(`${m.logName} 的甘露之蜜发动了！散发甜香，对手的闪避率下降了！`);
         }
-        const msg = async t => { await say(`${m.name} 的特性发动了！${t}`); };
+        const msg = async t => { await say(`${m.logName} 的特性发动了！${t}`); };
         /* ★ 原始回归：固拉多/盖欧卡携带专属宝珠时出场触发 */
         if (m.id === 383 && m.item === 'redorb' && !m.vol.primal) {
           m.vol.primal = true;
@@ -17491,7 +17532,7 @@ return ev;
           m.recalc(); m.hp = Math.round(m.maxhp * hpPct);
           m.ability = 'desolateland';
           AU.mega(); BUI.burst(side, m._slot || 0);
-          await say(`原始回归！${m.name} 回归了原始形态！`);
+          await say(`原始回归！${m.logName} 回归了原始形态！`);
           await this.setWeather('desolate', m);
           BUI.refresh(this);
           return;
@@ -17504,7 +17545,7 @@ return ev;
           m.recalc(); m.hp = Math.round(m.maxhp * hpPct);
           m.ability = 'primordialsea';
           AU.mega(); BUI.burst(side, m._slot || 0);
-          await say(`原始回归！${m.name} 回归了原始形态！`);
+          await say(`原始回归！${m.logName} 回归了原始形态！`);
           await this.setWeather('primordial', m);
           BUI.refresh(this);
           return;
@@ -17522,19 +17563,19 @@ return ev;
         if (ab === 'sandstream' && !wxAlready) { await this.setWeather('sand', m); }
         if (ab === 'snowwarning' && !wxAlready) { await this.setWeather('hail', m); }
         if (ab === 'deltastream' && !wxAlready) { await this.setWeather('delta', m); }
-        if (ab === 'orichalcumpulse') { await this.setWeather('sun', m); await say(`${m.name} 的绯红脉动发动了，物攻提升了！`); }
-        if (ab === 'hadronengine') { await this.setTerrain('electric', m); await say(`${m.name} 的强子引擎发动了，特攻提升了！`); }
+        if (ab === 'orichalcumpulse') { await this.setWeather('sun', m); await say(`${m.logName} 的绯红脉动发动了，物攻提升了！`); }
+        if (ab === 'hadronengine') { await this.setTerrain('electric', m); await say(`${m.logName} 的强子引擎发动了，特攻提升了！`); }
         if (ab === 'grassysurge' && !trAlready) { await this.setTerrain('grassy', m); }
         if (ab === 'electricsurge' && !trAlready) { await this.setTerrain('electric', m); }
         if (ab === 'psychicsurge' && !trAlready) { await this.setTerrain('psychic', m); }
         if (ab === 'mistysurge' && !trAlready) { await this.setTerrain('misty', m); }
         /* ★ 气闸/无天气：出场时提示天气被无效化（含终结之地/始源之海/德尔塔气流） */
-        if ((ab === 'airlock' || ab === 'cloudnine') && this.wx) { this.abBanner(m); await say(`${m.name} 的气闸发动了！天气的影响被无效化了！`); }
+        if ((ab === 'airlock' || ab === 'cloudnine') && this.wx) { this.abBanner(m); await say(`${m.logName} 的气闸发动了！天气的影响被无效化了！`); }
         /* ★ 预知梦：出场时预读对手最强招式 */
         if (ab === 'forewarn' && this.foesOf(m).length) {
           let best = null, bp = 0;
           for (const f of this.foesOf(m)) f.moves.forEach(mv => { const d = MV[mv.k]; if (d && d.p > bp) { bp = d.p; best = d; } });
-          if (best) { this.abBanner(m); await say(`${m.name} 的预知梦发动了！对手最强的招式是「${best.n}」！`); }
+          if (best) { this.abBanner(m); await say(`${m.logName} 的预知梦发动了！对手最强的招式是「${best.n}」！`); }
         }
         /* ★ 全能变身（正作）：交换下场后再次出场时变为英雄形态，攻击+2 */
         if (ab === 'zerotohero') {
@@ -17544,12 +17585,12 @@ return ev;
             m.recalc(); m.hp = Math.round(m.maxhp * hpPct);
             m.vol.heroForm = true;
             this.abBanner(m);
-            await say(`${m.name} 的${AB[ab].n}发动了！变成了全能形态！`);
+            await say(`${m.logName} 的${AB[ab].n}发动了！变成了全能形态！`);
           }
         }
         if (ab === 'frisk' && this.foesOf(m).length) {
-          const items = this.foesOf(m).map(f => `${f.name}持有「${f.item ? IT[f.item]?.n || '未知道具' : '无道具'}」`).join('，');
-          await say(`${m.name} 的察觉发动了！${items}！`);
+          const items = this.foesOf(m).map(f => `${f.logName}持有「${f.item ? IT[f.item]?.n || '未知道具' : '无道具'}」`).join('，');
+          await say(`${m.logName} 的察觉发动了！${items}！`);
         }
         /* ★ 危险预知：出场时预读对手是否有效果绝佳招式 */
         if (ab === 'anticipation' && this.foesOf(m).length) {
@@ -17559,7 +17600,7 @@ return ev;
           }));
           if (danger) {
             showAbilityBanner(m, side);
-            await say(`${m.name} 的危险预知发动了！预感到了危险！`);
+            await say(`${m.logName} 的危险预知发动了！预感到了危险！`);
           }
         }
         if (ab === 'illusion') {
@@ -17601,7 +17642,7 @@ return ev;
           m.maxhp = _saveMaxhp;
           m.baseMax = _saveBaseMax;
           if (m.hp > m.maxhp) m.hp = m.maxhp;
-          await say(`${_saveName} 的${AB[ab].n}发动了！变身成了${foe.name}！`);
+          await say(`${_saveName} 的${AB[ab].n}发动了！变身成了${foe.logName}！`);
           BUI.refresh(this);
         }
         if (ab === 'intrepidsword' && !m._intrepidUsed) { m._intrepidUsed = true; await this.changeStat(m, 'atk', 1, m); }
@@ -17615,37 +17656,23 @@ return ev;
           const foe = this.foesOf(m)[0];
           const newAb = foe.ability;
           m.ability = newAb;
-          await say(`${m.name} 复制了 ${foe.name} 的${AB[newAb]?.n || '特性'}！`);
+          await say(`${m.logName} 复制了 ${foe.logName} 的${AB[newAb]?.n || '特性'}！`);
           /* ★ 复制的主动特性立即触发（不再递归调用 switchInAbility，避免无限循环） */
-          if (newAb === 'drought') await this.setWeather('sun', m);
-          else if (newAb === 'drizzle') await this.setWeather('rain', m);
-          else if (newAb === 'sandstream') await this.setWeather('sand', m);
-          else if (newAb === 'snowwarning') await this.setWeather('hail', m);
-          else if (newAb === 'grassysurge') await this.setTerrain('grassy', m);
-          else if (newAb === 'psychicsurge') await this.setTerrain('psychic', m);
-          else if (newAb === 'hadronengine') { await this.setTerrain('electric', m); await say(`${m.name} 的强子引擎发动了，特攻提升了！`); }
-          else if (newAb === 'orichalcumpulse') { await this.setWeather('sun', m); await say(`${m.name} 的绯红脉动发动了，物攻提升了！`); }
-          else if (newAb === 'intimidate') { for (const f of this.foesOf(m)) await this.changeStat(f, 'atk', -1, m); }
-          else if (newAb === 'intrepidsword') await this.changeStat(m, 'atk', 1, m);
-          else if (newAb === 'dauntlessshield') await this.changeStat(m, 'def', 1, m);
-          else if (newAb === 'download') { const foes2 = this.foesOf(m); const boost = foes2.reduce((a, f) => a + f.st.def, 0) >= foes2.reduce((a, f) => a + f.st.spd, 0) ? 'spa' : 'atk'; await this.changeStat(m, boost, 1, m); }
-          else if (newAb === 'swordofruin') { await say(`${m.name} 的灾祸之剑发动了！对手的防御下降了！`); AU.statDn(); }
-          else if (newAb === 'fairyaura') await say('妖精气场笼罩了全场！');
-          else if (newAb === 'darkaura') await say('暗黑气场笼罩了全场！');
+          await this.triggerGainedAbility(m, newAb);
         }
         /* ★ 注意：复制/Mega改变的特性在战斗结束时由 baseAbility 统一还原 */
-        if (ab === 'swordofruin') { await say(`${m.name} 的灾祸之剑发动了！对手的防御下降了！`); AU.statDn(); }
+        if (ab === 'swordofruin') { await say(`${m.logName} 的灾祸之剑发动了！对手的防御下降了！`); AU.statDn(); }
         if (ab === 'fairyaura') { await say('妖精气场笼罩了全场！'); } if (ab === 'darkaura') { await say('暗黑气场笼罩了全场！'); }
-        if (ab === 'quarkdrive' && this.terrain === 'electric') { await say(`${m.name} 的夸克充能发动了！${STN[m.bestStat()]}提升了！`); }
-        if (ab === 'protosynthesis' && this.wx === 'sun') { await say(`${m.name} 的古代活性发动了！${STN[m.bestStat()]}提升了！`); }
+        if (ab === 'quarkdrive' && this.terrain === 'electric') { await say(`${m.logName} 的夸克充能发动了！${STN[m.bestStat()]}提升了！`); }
+        if (ab === 'protosynthesis' && this.wx === 'sun') { await say(`${m.logName} 的古代活性发动了！${STN[m.bestStat()]}提升了！`); }
         /* ---- 第六批入场特性 ---- */
         if (ab === 'mistysurge') { await this.setTerrain('misty', m); }
         if (ab === 'desolateland') { await this.setWeather('desolate', m); }
         if (ab === 'primordialsea') { await this.setWeather('primordial', m); }
         if (ab === 'hospitality') {
           const ally = side === 'p' ? this.pp.find(x => x !== m && x.alive()) : this.ep.find(x => x !== m && x.alive());
-          if (ally) { ally.hp = Math.min(ally.maxhp, ally.hp + Math.floor(ally.maxhp / 4)); await say(`${m.name} 的款待发动了！${ally.name}回复了HP！`); }
-          else { m.hp = Math.min(m.maxhp, m.hp + Math.floor(m.maxhp / 4)); await say(`${m.name} 的款待发动了！回复了HP！`); }
+          if (ally) { ally.hp = Math.min(ally.maxhp, ally.hp + Math.floor(ally.maxhp / 4)); await say(`${m.logName} 的款待发动了！${ally.logName}回复了HP！`); }
+          else { m.hp = Math.min(m.maxhp, m.hp + Math.floor(m.maxhp / 4)); await say(`${m.logName} 的款待发动了！回复了HP！`); }
         }
         if (ab === 'terashift') {
           if (m.id === 1024) {
@@ -17653,18 +17680,18 @@ return ev;
             m.mega = { f: 1024, t: 'normal', s: [95, 65, 110, 110, 130, 90], a: 'terashell' };
             m.recalc(); m.ability = 'terashell';
             m.hp = Math.round(m.maxhp * hpPct);
-            await say(`${m.name} 的太晶变形发动了！变成了太晶形态，特性变为太晶甲壳！`);
+            await say(`${m.logName} 的太晶变形发动了！变成了太晶形态，特性变为太晶甲壳！`);
           } else {
             m.tera = true;
-            await say(`${m.name} 的太晶变形发动了！`);
+            await say(`${m.logName} 的太晶变形发动了！`);
           }
         }
-        if (ab === 'tabletsofruin') { await say(`${m.name} 的灾祸之简发动了！全场攻击被削弱了！`); }
-        if (ab === 'vesselofruin') { await say(`${m.name} 的灾祸之鼎发动了！全场特攻被削弱了！`); }
-        if (ab === 'beadsofruin') { await say(`${m.name} 的灾祸之玉发动了！全场特防被削弱了！`); }
+        if (ab === 'tabletsofruin') { await say(`${m.logName} 的灾祸之简发动了！全场攻击被削弱了！`); }
+        if (ab === 'vesselofruin') { await say(`${m.logName} 的灾祸之鼎发动了！全场特攻被削弱了！`); }
+        if (ab === 'beadsofruin') { await say(`${m.logName} 的灾祸之玉发动了！全场特防被削弱了！`); }
         if (ab === 'curiousmedicine') {
           const ally = side === 'p' ? this.pp.find(x => x !== m && x.alive()) : this.ep.find(x => x !== m && x.alive());
-          if (ally) { Object.keys(ally.stages).forEach(k => ally.stages[k] = 0); await say(`${m.name} 的怪药发动了！重置了同伴的能力变化！`); }
+          if (ally) { Object.keys(ally.stages).forEach(k => ally.stages[k] = 0); await say(`${m.logName} 的怪药发动了！重置了同伴的能力变化！`); }
         }
         /* ★ 同台共演：出场时复制同伴的能力变化（双打） */
         if ((ab === 'costar' || ab === 'costar3') && this.doubles) {
@@ -17672,7 +17699,7 @@ return ev;
           if (ally) {
             for (const k of STATKEYS) m.stages[k] = ally.stages[k] || 0;
             this.abBanner(m);
-            await say(`${m.name} 的同台共演发动了！复制了${ally.name}的能力变化！`);
+            await say(`${m.logName} 的同台共演发动了！复制了${ally.logName}的能力变化！`);
             BUI.refresh(this);
           }
         }
@@ -17687,7 +17714,7 @@ return ev;
             m.ability = maskAb[mask];
             m.baseAbility = maskAb[mask];
             m.formSprite = FORMSPRITE[mask];
-            await say(`${m.name} 的${IT[mask].n}生效了！属性变为${m.types.map(t => TNAME[t]).join('/')}，特性变为${AB[m.ability].n}！`);
+            await say(`${m.logName} 的${IT[mask].n}生效了！属性变为${m.types.map(t => TNAME[t]).join('/')}，特性变为${AB[m.ability].n}！`);
           } else {
             /* 无面具/其他道具时为碧草形态 */
             m.types = ['grass'];
@@ -17698,9 +17725,9 @@ return ev;
           }
         }
         if (ab === 'embodyaspect') {
-          await say(`${m.name} 的特性是面影辉映，太晶化时将根据面具获得额外增益！`);
+          await say(`${m.logName} 的特性是面影辉映，太晶化时将根据面具获得额外增益！`);
         }
-        if (ab === 'neutralizinggas') { await say(`${m.name} 的化学变化气体发动了！全场特性被暂时无效化了！`); }
+        if (ab === 'neutralizinggas') { await say(`${m.logName} 的化学变化气体发动了！全场特性被暂时无效化了！`); }
         if (ab === 'powerconstruct' && m.hpPct() <= 0.5) {
           m.vol.completeForm = true;
           const baseHp = m.id === 10340 ? 54 : 108;
@@ -17709,7 +17736,7 @@ return ev;
           m.recalc(); m.hp = Math.min(m.maxhp, m.hp + healAmt);
           this.abBanner(m);
           if (!CFG.fancyAudio) AU.mega(); BUI.burst(side, m._slot || 0); FX.transform(side, 'power', m._slot || 0);
-          await say(`${m.name} 的群聚变形发动了！变成了完全体形态！`);
+          await say(`${m.logName} 的群聚变形发动了！变成了完全体形态！`);
           BUI.refresh(this);
         }
       }
@@ -17726,8 +17753,8 @@ return ev;
         this.wx = w; this.wxT = isPrimal || w === 'delta' ? 99 : 5;
         const actNm = { sun: '大晴天', rain: '下雨了', sand: '刮起了沙暴', hail: '下起了冰雹', delta: '德尔塔气流笼罩了全场', desolate: '终结之地笼罩了全场！火属性招式的威力提升了！水属性招式已经无效了！', primordial: '始源之海笼罩了全场！水属性招式的威力提升了！火属性招式已经无效了！' }[w];
         await say(`${actNm}！`);
-        if (w === 'sun' || w === 'desolate') { for (const mon of [this.P(), this.E()]) { if (mon && mon.alive() && mon.has('protosynthesis') && mon !== m) await say(`${mon.vol.illusionName || mon.name} 的古代活性发动了！${STN[mon.bestStat()]}提升了！`); } }
-        if (w === 'rain' || w === 'primordial') { for (const mon of [this.P(), this.E()]) { if (mon && mon.alive() && mon.has('raindish') && mon !== m) await say(`${mon.vol.illusionName || mon.name} 的雨盘回复了HP！`); } }
+        if (w === 'sun' || w === 'desolate') { for (const mon of [this.P(), this.E()]) { if (mon && mon.alive() && mon.has('protosynthesis') && mon !== m) await say(`${mon.logName} 的古代活性发动了！${STN[mon.bestStat()]}提升了！`); } }
+        if (w === 'rain' || w === 'primordial') { for (const mon of [this.P(), this.E()]) { if (mon && mon.alive() && mon.has('raindish') && mon !== m) await say(`${mon.logName} 的雨盘回复了HP！`); } }
         BUI.refresh(this);   // ★ 天气变化立即刷新背景特效
       }
       async setTerrain(t, m) {
@@ -17737,7 +17764,7 @@ return ev;
         /* ★ 大地薄膜：场地持续8回合 */
         this.terrainT = (m && !m.has('klutz') && m.item === 'terrainextender') ? 8 : 5;
         await say(`场地变成了${TERRNAME[t]}！`);
-        if (t === 'electric') { for (const mon of [this.P(), this.E()]) { if (mon && mon.alive() && mon.has('quarkdrive') && mon !== m) await say(`${mon.vol.illusionName || mon.name} 的夸克充能发动了！${STN[mon.bestStat()]}提升了！`); } }
+        if (t === 'electric') { for (const mon of [this.P(), this.E()]) { if (mon && mon.alive() && mon.has('quarkdrive') && mon !== m) await say(`${mon.logName} 的夸克充能发动了！${STN[mon.bestStat()]}提升了！`); } }
         /* ★ 场地种子：场上的宝可梦若持有对应种子则立即触发 */
         for (const mon of [this.P(), this.E()]) { if (mon && mon.alive() && mon !== m) await this.maybeSeed(mon); }
         BUI.refresh(this);   // ★ 场地变化立即刷新背景特效
@@ -17752,7 +17779,7 @@ return ev;
         this.abBanner(m);
         const up = (key === 'grassseed' || key === 'electricseed') ? 'def' : 'spd';
         await this.changeStat(m, up, 1, m);
-        await say(`${m.name} 的${IT[key].n}发动了！${STN[up]}提升了！`);
+        await say(`${m.logName} 的${IT[key].n}发动了！${STN[up]}提升了！`);
       }
       /* ★ 共生：同伴消耗道具后把自己的道具交给同伴（双打） */
       async maybeSymbiosis(m) {
@@ -17761,7 +17788,7 @@ return ev;
         if (!ally) return;
         m.item = ally.item; ally.item = null;
         this.abBanner(ally);
-        await say(`${ally.name} 的共生发动了！把${IT[m.item].n}交给了${m.name}！`);
+        await say(`${ally.logName} 的共生发动了！把${IT[m.item].n}交给了${m.logName}！`);
         BUI.refresh(this);
       }
       grounded(m) { return !m.types.includes('flying') && !m.has('levitate') && !m.has('eelevate'); }
@@ -17898,7 +17925,7 @@ return ev;
           const ov = $('#targetOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
           const box = el('div', 'ovBox panel'); ov.appendChild(box);
           box.appendChild(el('h3', 'disp', `逃跑？`));
-          box.appendChild(el('div', '', `<div style="font-size:13px;color:#777;margin-bottom:10px">正在操作：<b>${m.name}</b> · 逃跑将结束整场双打对战</div>`));
+          box.appendChild(el('div', '', `<div style="font-size:13px;color:#777;margin-bottom:10px">正在操作：<b>${m.logName}</b> · 逃跑将结束整场双打对战</div>`));
           const row = el('div', ''); row.style.cssText = 'display:flex;gap:10px;justify-content:center';
           let done = false;
           const close = v => { if (done) return; done = true; window.removeEventListener('keydown', esc); ov.classList.add('hidden'); res(v); };
@@ -18206,7 +18233,7 @@ return ev;
           const multiRng = ['enemy-all', 'all-except-self', 'self', 'all', 'ally-all'].includes(rng);
           const nm = displayName || mv.n;
           box.appendChild(el('h3', 'disp', '选择目标'));
-          box.appendChild(el('div', 'rangeNote', `「${nm}」 · 正在操作：${mon.vol.illusionName || mon.name}`));
+          box.appendChild(el('div', 'rangeNote', `「${nm}」 · 正在操作：${mon.logName}`));
           const pickable = (m, isEnemy) => {
             if (!m || !m.alive()) return false;   // ★ 发号施令：口中的米立龙仍可选为目标（但无法命中）
             if (rng === 'enemy-any') return isEnemy;
@@ -18279,7 +18306,7 @@ return ev;
                 : eff > 1 ? `<div class="effTag effSup">效果绝佳 ${eff}×</div>`
                 : eff < 1 ? '<div class="effTag effWeak">效果不好</div>'
                 : '<div class="effTag effNorm">有效果</div>';
-              c.insertAdjacentHTML('beforeend', `<div><div class="tn">${m.vol.illusionName || m.name}</div><div class="thp">${hpTxt}</div>${effHtml}</div>`);
+              c.insertAdjacentHTML('beforeend', `<div><div class="tn">${m.logName}</div><div class="thp">${hpTxt}</div>${effHtml}</div>`);
               const ok = pickable(m, isEnemy);
               if (!ok) { c.classList.add('disabled'); c.onclick = e => { e.stopPropagation(); AU.no(); }; }
               else {
@@ -18317,7 +18344,7 @@ return ev;
         return new Promise(res => {
           const ov = $('#partyOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
           const box = el('div', 'ovBox panel' + (escOk ? '' : ' forced')); ov.appendChild(box);
-          const who = (this.doubles && curMon) ? ` · 正在操作：${curMon.vol.illusionName || curMon.name}` : '';
+          const who = (this.doubles && curMon) ? ` · 正在操作：${curMon.logName}` : '';
           box.appendChild(el('h3', 'disp', (escOk ? '选择宝可梦' : '⚠ 必须选择一只宝可梦出战！') + who));
           const foe = this.E();
           let offEsc = null;
@@ -18328,7 +18355,7 @@ return ev;
             const isField = onField.includes(i);
             const s = el('div', 'slot' + (isField ? ' active' : '') + (m.alive() ? '' : ' fainted'));
             s.appendChild(miniSprite(m.id));
-            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.name} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${m.status ? ' [' + m.status + ']' : ''}</div>
+            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.logName} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${m.status ? ' [' + m.status + ']' : ''}</div>
           <div class="hpbar" style="max-width:200px"><div class="hpfill ${m.hpPct() > .5 ? '' : m.hpPct() > .2 ? 'mid' : 'low'}" style="width:${Math.round(m.hpPct() * 100)}%"></div></div>
           <div style="font-size:11px;color:#666;font-weight:700">${m.hp}/${m.maxhp} <span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div></div>`);
             const det = el('button', 'btn tiny', '详情');
@@ -18403,7 +18430,7 @@ return ev;
             const canUse = m.alive() && m.hp < m.maxhp;
             const s = el('div', 'slot' + (i === this.pi ? ' active' : '') + (canUse ? '' : ' fainted'));
             s.appendChild(miniSprite(m.id));
-            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.name} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${i === this.pi ? ' <span style="font-size:10px;color:#2a6dd4;font-weight:900">战斗中</span>' : ''}</div>
+            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.logName} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${i === this.pi ? ' <span style="font-size:10px;color:#2a6dd4;font-weight:900">战斗中</span>' : ''}</div>
 <div class="hpbar" style="max-width:200px"><div class="hpfill ${m.hpPct() > .5 ? '' : m.hpPct() > .2 ? 'mid' : 'low'}" style="width:${Math.round(m.hpPct() * 100)}%"></div></div>
 <div style="font-size:11px;color:#666;font-weight:700">${m.hp}/${m.maxhp}</div></div>`);
             if (canUse) { s.onclick = () => { AU.ok(); close(i); }; }
@@ -18427,7 +18454,7 @@ return ev;
           arr.filter(m => m.fainted).forEach(m => {
             const s = el('div', 'slot fainted');
             s.appendChild(miniSprite(m.id));
-            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.name} <span class="px" style="font-size:8px">Lv${m.lvl}</span></div>
+            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.logName} <span class="px" style="font-size:8px">Lv${m.lvl}</span></div>
       <div style="font-size:11px;color:#999;font-weight:700">HP 0/${m.maxhp} · 濒死</div></div>`);
             s.onclick = () => { AU.ok(); close(m); };
             box.appendChild(s);
@@ -18443,9 +18470,9 @@ return ev;
         const m = this.pp[idx]; const heals = { potion: 20, superpotion: 60, hyperpotion: 120, maxpotion: 9999, fullrestore: 9999 };
         if (heals[k]) {
           m.hp = Math.min(m.maxhp, m.hp + heals[k]); if (k === 'fullrestore') { m.status = null; m.sleepT = 0; m.toxicN = 0; }
-          AU.heal(); await say(`给 ${m.name} 使用了${IT[k].n}，回复了HP！`);
+          AU.heal(); await say(`给 ${m.logName} 使用了${IT[k].n}，回复了HP！`);
         }
-        if (k === 'revive') { m.fainted = false; m.hp = Math.floor(m.maxhp / 2); AU.heal(); await say(`${m.name} 恢复了活力！`); }
+        if (k === 'revive') { m.fainted = false; m.hp = Math.floor(m.maxhp / 2); AU.heal(); await say(`${m.logName} 恢复了活力！`); }
         BUI.refresh(this);
       }
       /* ---------- 捕捉 ---------- */
@@ -18467,7 +18494,7 @@ return ev;
         }
         b.remove();
         if (caught) {
-          AU.catch(); await say(`Gotcha！${m.name} 被收服了！`);
+          AU.catch(); await say(`Gotcha！${m.logName} 被收服了！`);
           m.fainted = true; this.caught = m; this.result = 'capture'; this.over = true;
           await this.gainXP(true);
         } else { await say(`啊——！宝可梦从球里挣脱出来了！`); }
@@ -18544,7 +18571,7 @@ return ev;
             if (foe && foe.alive() && foe.has('dancer') && !foe.vol.dancerUsed && !this.over && foe !== a.mon) {
               foe.vol.dancerUsed = true;
               this.abBanner(foe);
-              await say(`${foe.vol.illusionName || foe.name} 的舞者发动了！`);
+              await say(`${foe.logName} 的舞者发动了！`);
               await this.doMove(this.sideOf(foe), foe, { k: _danceMvKey }, { side: this.sideOf(foe), mon: foe, move: { k: _danceMvKey } });
             }
           }
@@ -18590,12 +18617,12 @@ return ev;
       async doMove(side, mon, moveSel, act) {
         const foe = this.foeOf(mon);
         // 懒惰
-        if (mon.has('truant')) { if (mon.vol.loaf) { mon.vol.loaf = false; await say(`${mon.vol.illusionName || mon.name} 正在偷懒！`); return; } mon.vol.loaf = true; }
+        if (mon.has('truant')) { if (mon.vol.loaf) { mon.vol.loaf = false; await say(`${mon.logName} 正在偷懒！`); return; } mon.vol.loaf = true; }
         // 蓄力招式
-        if (mon.vol.charge) { const ck = mon.vol.charge; mon.vol.charge = null; mon.vol.justCharged = true; moveSel = { k: ck }; await say(`${mon.vol.illusionName || mon.name} 释放了积蓄的能量！`); }
+        if (mon.vol.charge) { const ck = mon.vol.charge; mon.vol.charge = null; mon.vol.justCharged = true; moveSel = { k: ck }; await say(`${mon.logName} 释放了积蓄的能量！`); }
         /* ★ 暗影潜袭：第二回合从暗影中现身并发动攻击 */
-        else if (mon.vol.shadowCharge) { const sk = mon.vol.shadowCharge; mon.vol.shadowCharge = null; mon.vol.justCharged = true; moveSel = { k: sk }; await say(`${mon.vol.illusionName || mon.name} 从暗影中现身，发动了攻击！`); }
-        else if (mon.vol.recharge) { mon.vol.recharge = false; await say(`${mon.vol.illusionName || mon.name} 必须休息一回合！`); return; }
+        else if (mon.vol.shadowCharge) { const sk = mon.vol.shadowCharge; mon.vol.shadowCharge = null; mon.vol.justCharged = true; moveSel = { k: sk }; await say(`${mon.logName} 从暗影中现身，发动了攻击！`); }
+        else if (mon.vol.recharge) { mon.vol.recharge = false; await say(`${mon.logName} 必须休息一回合！`); return; }
         // 锁定（逆鳞）★ 极巨化期间免疫锁招
         if (mon.vol.lock && !mon.dyn) moveSel = { k: mon.vol.lock.k };
         let mvk = moveSel.k || moveSel;
@@ -18606,7 +18633,7 @@ return ev;
         let mv = MV[mvk];
         // ★ 巨力锤：不能连续使用（上一回合使用了同一招式则失败，不消耗PP）
         if (mv.noRepeat && mon.vol.lastMove === mvk) {
-          await say(`${mon.vol.illusionName || mon.name} 无法连续使用${mv.n}！`);
+          await say(`${mon.logName} 无法连续使用${mv.n}！`);
           return;
         }
         // 状态检查
@@ -18617,20 +18644,20 @@ return ev;
           if (mon.sleepT >= 2) {
             /* 第一回合：必定无法行动 */
             mon.sleepT -= mon.has('earlybird') ? 2 : 1;
-            await say(`${mon.vol.illusionName || mon.name} 正在呼呼大睡…`); return;
+            await say(`${mon.logName} 正在呼呼大睡…`); return;
           } else if (mon.sleepT === 1) {
             /* 第二回合：1/3概率提前醒来 */
             if (Math.random() < 1 / 3) {
               mon.status = null; mon.sleepT = 0;
-              await say(`${mon.vol.illusionName || mon.name} 醒来了！`);
+              await say(`${mon.logName} 醒来了！`);
             } else {
               mon.sleepT -= mon.has('earlybird') ? 2 : 1;
-              await say(`${mon.vol.illusionName || mon.name} 正在呼呼大睡…`); return;
+              await say(`${mon.logName} 正在呼呼大睡…`); return;
             }
           } else {
             /* 第三回合及以后：必定醒来 */
             mon.status = null; mon.sleepT = 0;
-            await say(`${mon.vol.illusionName || mon.name} 醒来了！`);
+            await say(`${mon.logName} 醒来了！`);
           }
         }
         /* ★ 冰冻：每回合20%解冻，第三回合必定解冻 */
@@ -18638,25 +18665,25 @@ return ev;
           mon.vol.frzT = (mon.vol.frzT || 0) + 1;
           if (mon.vol.frzT >= 3 || Math.random() < .2) {
             mon.status = null; mon.vol.frzT = 0;
-            await say(`${mon.vol.illusionName || mon.name} 解冻了！`);
+            await say(`${mon.logName} 解冻了！`);
           } else {
-            await say(`${mon.vol.illusionName || mon.name} 被冻住无法行动！`); return;
+            await say(`${mon.logName} 被冻住无法行动！`); return;
           }
         }
-        if (mon.status === 'par' && Math.random() < 1 / 8) { await say(`${mon.vol.illusionName || mon.name} 全身麻痹无法行动！`); AU.status(); return; }
+        if (mon.status === 'par' && Math.random() < 1 / 8) { await say(`${mon.logName} 全身麻痹无法行动！`); AU.status(); return; }
         /* ★ 着迷：迷人之躯的简化状态，50%无法行动 */
         if (mon.vol.attract) {
           const src = mon.vol.attract;
           if (!src || src.fainted || this.foeOf(mon) !== src) {
             mon.vol.attract = null;
           } else if (Math.random() < .5) {
-            await say(`${mon.vol.illusionName || mon.name} 着迷了，无法行动！`);
+            await say(`${mon.logName} 着迷了，无法行动！`);
             return;
           }
         }
         if (mon.vol.confuse && mon.vol.confuse > 0) {
           if (Math.random() < 1 / 3) {
-            await say(`${mon.vol.illusionName || mon.name} 在混乱中攻击了自己！`); AU.hit();
+            await say(`${mon.logName} 在混乱中攻击了自己！`); AU.hit();
             /* ★ 混乱自伤：无属性40威力，魔法防守免疫；自杀式倒下走正常濒死流程 */
             if (!mon.has('magicguard')) {
               const d = Math.max(1, Math.floor((2 * mon.lvl / 5 + 2) * 40 * mon.effStat('atk', this) / mon.effStat('def', this) / 50) + 2);
@@ -18667,13 +18694,13 @@ return ev;
             }
             return;
           }
-          await say(`${mon.vol.illusionName || mon.name} 陷入了混乱！`);
+          await say(`${mon.logName} 陷入了混乱！`);
         }
         /* ★ 畏缩：极巨化期间免疫畏缩 */
-        if (mon.vol.flinch && !mon.dyn) { mon.vol.flinch = false; if (mon.has('steadfastx')) { this.abBanner(mon); await this.changeStat(mon, 'spe', 1, mon); await say(`${mon.vol.illusionName || mon.name} 的不屈之心发动了！`); } await say(`${mon.vol.illusionName || mon.name} 畏缩了，无法行动！`); return; }
+        if (mon.vol.flinch && !mon.dyn) { mon.vol.flinch = false; if (mon.has('steadfastx')) { this.abBanner(mon); await this.changeStat(mon, 'spe', 1, mon); await say(`${mon.logName} 的不屈之心发动了！`); } await say(`${mon.logName} 畏缩了，无法行动！`); return; }
         // ★ 诅咒之躯封印：被封印的招式无法使用
         if (mon.vol.disabled && mon.vol.disabled.k === mvk) {
-          await say(`${mon.vol.illusionName || mon.name} 的${mv.n}被封印了，无法使用！`); return;
+          await say(`${mon.logName} 的${mv.n}被封印了，无法使用！`); return;
         }
         /* ★ 蓄力招式（日光束等）：晴天秒发，否则第一回合蓄力、第二回合释放；极巨化时直接变为极巨草原，无需蓄力 */
         /* ★ 电光束：雨天下不蓄力，攻击前提升特攻1级 */
@@ -18682,7 +18709,7 @@ return ev;
           const herb = mon.item === 'powerherb';
           const skipCharge = herb || (this.wxActive() === 'sun') || (mon.has('megasol')) || (mv.k === 'electroshot' && this.wxActive() === 'rain');
           if (skipCharge) {
-            if (herb) { mon.item = null; mon.vol.powerherb = true; await say(`${mon.vol.illusionName || mon.name} 的强力香草发动了，立刻完成了蓄力！`); }
+            if (herb) { mon.item = null; mon.vol.powerherb = true; await say(`${mon.logName} 的强力香草发动了，立刻完成了蓄力！`); }
             if (mv.k === 'electroshot' && this.wxActive() === 'rain') { await this.changeStat(mon, 'spa', 1, mon); }
             if (mv.meteorbeam) { await this.changeStat(mon, 'spa', 1, mon); }
           } else {
@@ -18690,7 +18717,7 @@ return ev;
             FX.chargeFx(side, mv.t, mon._slot || 0);
             /* ★ 蓄力提示按招式区分（日光束/日光刃吸收光能、大地掌控积蓄大地之力、流星光束吸收星光、电光束充电） */
             const chargeMsg = { geomancy: '开始积蓄大地之力！', solarbeam: '吸收了光能！', solarblade: '吸收了光能！', meteorbeam: '吸收星光能量！', electroshot: '开始充电！' }[mvk] || '开始蓄力！';
-            await say(`${mon.vol.illusionName || mon.name} ${chargeMsg}`);
+            await say(`${mon.logName} ${chargeMsg}`);
             if (mv.meteorbeam) { await this.changeStat(mon, 'spa', 1, mon); }
             if (mvObj && mvk !== 'struggle') { let cost = foe.has('pressure') ? 2 : 1; mvObj.pp = Math.max(0, mvObj.pp - cost); }
             return;
@@ -18699,7 +18726,7 @@ return ev;
         /* ★ 暗影潜袭：第一回合从场上消失（期间不会被任何招式命中），第二回合发动攻击（可贯穿保护） */
         if (mv.shadowforce && !mon.vol.justCharged && !mon.dyn) {
           mon.vol.shadowCharge = mvk;
-          await say(`${mon.vol.illusionName || mon.name} 的暗影潜袭发动了！身影消失在场上！`);
+          await say(`${mon.logName} 的暗影潜袭发动了！身影消失在场上！`);
           if (mvObj && mvk !== 'struggle') { let cost = foe.has('pressure') ? 2 : 1; mvObj.pp = Math.max(0, mvObj.pp - cost); }
           return;
         }
@@ -18742,7 +18769,7 @@ return ev;
             const lt = legendType(foe.types);
             mon.types = [lt];
             useMv = { ...useMv, t: lt };
-            await say(`传说石板发动！${mon.vol.illusionName || mon.name} 变成了${TNAME[lt]}属性！`);
+            await say(`传说石板发动！${mon.logName} 变成了${TNAME[lt]}属性！`);
           }
         }
         /* ★ 棘藤棒：随面具改变属性 */
@@ -18783,11 +18810,11 @@ return ev;
         const displayName = mon.vol.illusionName || mon.name;
         /* ★ 击掌奇袭/迎头一击：仅限出场首回合使用（失败判定在PP扣除之前，不消耗PP） */
         if (useMv.fakeout && mon.vol.turnsActive > 0) {
-          await say(`${mon.vol.illusionName || mon.name} 的击掌奇袭只能在出场时使用！`);
+          await say(`${mon.logName} 的击掌奇袭只能在出场时使用！`);
           return;
         }
         if (useMv.firstimpression && mon.vol.turnsActive > 0) {
-          await say(`${mon.vol.illusionName || mon.name} 的迎头一击只能在出场时使用！`);
+          await say(`${mon.logName} 的迎头一击只能在出场时使用！`);
           return;
         }
         // ★ 播报使用的招式（对话框 + 对战记录同步显示）
@@ -18796,25 +18823,25 @@ return ev;
         if (mvObj && mvk !== 'struggle') { let cost = foe.has('pressure') ? 2 : 1; mvObj.pp = Math.max(0, mvObj.pp - cost); }
         mon.vol.lastMove = mvk;   // ★ 记录本回合招式（供巨力锤等noRepeat招式判定）
         // 挑衅
-        if (mon.vol.taunt && mon.vol.taunt > 0 && useMv.c === 'X') { await say(`${mon.vol.illusionName || mon.name} 受到挑衅，无法使用变化招式！`); return; }
+        if (mon.vol.taunt && mon.vol.taunt > 0 && useMv.c === 'X') { await say(`${mon.logName} 受到挑衅，无法使用变化招式！`); return; }
         /* ★ 超极巨液金熔击（Torment）：不能连续使用相同招式 */
         if (mon.vol.gmaxTorment && mon.vol.lastMove === mvk && mvk !== 'struggle') {
-          await say(`${mon.vol.illusionName || mon.name} 受到液金熔击的影响，无法连续使用相同的招式！`);
+          await say(`${mon.logName} 受到液金熔击的影响，无法连续使用相同的招式！`);
           return;
         }
         /* ★ 电光双击：已经失去电属性时使用失败 */
         if (useMv.doubleshock && !mon.types.includes('electric')) {
-          await say(`${mon.vol.illusionName || mon.name} 已经没有电属性了，电光双击失败了！`);
+          await say(`${mon.logName} 已经没有电属性了，电光双击失败了！`);
           return;
         }
         /* ★ 双倍奉还/镜面反射/金属爆炸：替身存在时使用失败 */
         if ((useMv.counter || useMv.mirrorcoat || useMv.metalburst) && mon.vol.substitute > 0) {
-          await say(`${mon.vol.illusionName || mon.name} 处于替身状态，无法使用${useMv.n}！`);
+          await say(`${mon.logName} 处于替身状态，无法使用${useMv.n}！`);
           return;
         }
         /* ★ 燃尽：已经失去火属性时使用失败 */
         if (useMv.burnup && !mon.types.includes('fire')) {
-          await say(`${mon.vol.illusionName || mon.name} 已经没有火属性了，燃尽失败了！`);
+          await say(`${mon.logName} 已经没有火属性了，燃尽失败了！`);
           return;
         }
         /* ★ 突击背心 */
@@ -18825,7 +18852,7 @@ return ev;
         }
         // 变换自如/自由者：太晶化后属性锁定不触发；单属性使用本系招式（属性本就不变）也不触发
         if ((mon.has('protean') || mon.has('libero')) && !mon.vol.proteanUsed && !mon.tera && useMv.c !== 'X' && useMv.t !== 'normal' && !(mon.types.length === 1 && mon.types[0] === useMv.t)) {
-          mon.vol.proteanUsed = true; mon.types = [useMv.t]; showAbilityBanner(mon, side); await say(`${mon.vol.illusionName || mon.name} 的${AB[mon.ability].n}发动了！变成了${TNAME[useMv.t]}属性！`);
+          mon.vol.proteanUsed = true; mon.types = [useMv.t]; showAbilityBanner(mon, side); await say(`${mon.logName} 的${AB[mon.ability].n}发动了！变成了${TNAME[useMv.t]}属性！`);
         }
         // 坚盾剑怪形态
         if (mon.has('stancechange')) {
@@ -18843,14 +18870,14 @@ return ev;
           const chain = (mon.vol.pchain || 0) + 1; mon.vol.pchain = chain;
           /* ★ 连续使用保护：第1次100%，第2次1/3，第3次1/9…即 (1/3)^(n-1) */
           const prob = Math.pow(1 / 3, chain - 1);
-          if (Math.random() > prob) { mon.vol.protect = false; await say(`${mon.vol.illusionName || mon.name} 的保护失败了！`); }
-          else { mon.vol.protect = true; mon.vol.ks = useMv.ks; mon.vol.bb = useMv.bb; mon.vol.burnprot = useMv.burning; mon.vol.maxguard = !!useMv.maxguard; if (!CFG.fancyAudio) AU.protect(); FX.protect(side, useMv, mon._slot || 0); await say(`${mon.vol.illusionName || mon.name} ${useMv.maxguard ? '用极巨防壁' : '保护'}了自己！`); }
+          if (Math.random() > prob) { mon.vol.protect = false; await say(`${mon.logName} 的保护失败了！`); }
+          else { mon.vol.protect = true; mon.vol.ks = useMv.ks; mon.vol.bb = useMv.bb; mon.vol.burnprot = useMv.burning; mon.vol.maxguard = !!useMv.maxguard; if (!CFG.fancyAudio) AU.protect(); FX.protect(side, useMv, mon._slot || 0); await say(`${mon.logName} ${useMv.maxguard ? '用极巨防壁' : '保护'}了自己！`); }
           if (useMv.ks && mon.has('stancechange')) mon.vol.shield = true;
           return;
         }
         mon.vol.protect = false; mon.vol.pchain = 0; mon.vol.maxguard = false;
         // 同命
-        if (useMv.destiny) { mon.vol.destiny = true; await say(`${mon.vol.illusionName || mon.name} 正在瞄准同命！`); return; }
+        if (useMv.destiny) { mon.vol.destiny = true; await say(`${mon.logName} 正在瞄准同命！`); return; }
         /* ★ 双打目标解析（含看我嘛/愤怒粉/避雷针/引水/食草重定向） */
         const targets = this.targetsFor(mon, useMv, act);
         if (!targets.length) { const fmsg = '目标已经倒下，使用失败了！'; await say(`${displayName} 的 ${useMv.n}${fmsg}`); this.addLog(`${displayName} 的 ${useMv.n}${fmsg}`); return; }
@@ -18859,7 +18886,7 @@ return ev;
           /* ★ 变化招式在暗影潜袭目标上落空 */
           const t0 = targets[0];
           if (t0 && t0.vol.shadowCharge && rngOf(mvk) !== 'ally-any' && rngOf(mvk) !== 'self' && rngOf(mvk) !== 'ally-all' && !useMv.protect && !useMv.weather && !useMv.trickroom && !useMv.screen && !useMv.hazard) {
-            await say(`${t0.vol.illusionName || t0.name} 的身影消失了，招式落空了！`);
+            await say(`${t0.logName} 的身影消失了，招式落空了！`);
             return;
           }
           await this.statusMove(side, mon, t0, useMv, act);
@@ -18867,7 +18894,7 @@ return ev;
           if (useMv.sound && !mon.has('klutz') && mon.item === 'throatspray' && mon.alive()) {
             mon.item = null;
             await this.changeStat(mon, 'spa', 1, mon);
-            await say(`${mon.name} 的爽喉喷雾发动了！`);
+            await say(`${mon.logName} 的爽喉喷雾发动了！`);
           }
           return;
         }
@@ -18882,7 +18909,7 @@ return ev;
           const t0 = targets[0];
           const abName = t0.has('queenmajesty') ? '女王的威严' : t0.has('dazzling') ? '耀眼' : '尾甲';
           this.abBanner(t0);
-          await say(`${t0.name} 的${abName}发动了！先制招式无效！`);
+          await say(`${t0.logName} 的${abName}发动了！先制招式无效！`);
           return;
         }
         let totalDmg = 0, koed = false, connected = false;
@@ -18937,7 +18964,7 @@ return ev;
           if (r.ko) { koed = true; await this.handleKO(side, mon, r.foe); if (this.over) return; }
           /* ★ 搏命：成功命中后使用者消耗全部HP陷入昏厥（气势披带/气势头带/结实均无法阻止）；未命中/被守住/属性无效时使用失败，使用者不受影响 */
           if (useMv.finalgambit && connected && mon.alive()) {
-            await say(`${mon.vol.illusionName || mon.name} 耗尽了所有HP倒下了！`);
+            await say(`${mon.logName} 耗尽了所有HP倒下了！`);
             mon.hp = 0; mon.fainted = true;
             BUI.refresh(this);
             const wSide = this.sideOf(mon) === 'p' ? 'e' : 'p';
@@ -18949,13 +18976,13 @@ return ev;
         /* ★ 电光双击：攻击后失去电属性 */
         if (useMv.doubleshock && connected && mon.alive() && mon.types.includes('electric')) {
           mon.types = mon.types.filter(t => t !== 'electric');
-          await say(`${mon.vol.illusionName || mon.name} 的电光双击耗尽了电属性，失去了电属性！`);
+          await say(`${mon.logName} 的电光双击耗尽了电属性，失去了电属性！`);
           BUI.refresh(this);
         }
         /* ★ 燃尽：攻击后失去火属性 */
         if (useMv.burnup && connected && mon.alive() && mon.types.includes('fire')) {
           mon.types = mon.types.filter(t => t !== 'fire');
-          await say(`${mon.vol.illusionName || mon.name} 的燃尽消耗了火属性，失去了火属性！`);
+          await say(`${mon.logName} 的燃尽消耗了火属性，失去了火属性！`);
           BUI.refresh(this);
         }
         /* ★ 诡异咒语：降低对手最后使用招式的PP */
@@ -18990,14 +19017,14 @@ return ev;
               stole = true;
             }
           }
-          await say(stole ? `${mon.vol.illusionName || mon.name} 偷走了对手的能力提升！` : '对手没有能力提升…');
+          await say(stole ? `${mon.logName} 偷走了对手的能力提升！` : '对手没有能力提升…');
           BUI.refresh(this);
         }
         /* ★ 爽喉喷雾：使用声音招式后特攻+1（消耗）——攻击类声音招式在结算后触发 */
         if (useMv.sound && !mon.has('klutz') && mon.item === 'throatspray' && mon.alive()) {
           mon.item = null;
           await this.changeStat(mon, 'spa', 1, mon);
-          await say(`${mon.name} 的爽喉喷雾发动了！`);
+          await say(`${mon.logName} 的爽喉喷雾发动了！`);
         }
         /* ★ 上菜（吃吼霸）：只有发号施令被吞入的米立龙在场时才有效果（按形态决定提升项：上弓=攻击/下垂=防御/平挺=速度）；否则没有效果也不提示 */
         if (useMv.orderup && connected && totalDmg > 0 && mon.alive()) {
@@ -19005,7 +19032,7 @@ return ev;
           if (tatsu && tatsu.alive()) {
             const up = tatsu.id === 10427 ? 'def' : tatsu.id === 10428 ? 'spe' : 'atk';
             await this.changeStat(mon, up, 1, mon);
-            await say(`${mon.name} 吃到了上菜，${STN[up]}提升了！`);
+            await say(`${mon.logName} 吃到了上菜，${STN[up]}提升了！`);
           }
         }
         // ★ 吸取/反伤/命玉：只要造成伤害就结算（击倒对手也要付反伤）
@@ -19017,23 +19044,23 @@ return ev;
           if (ooze) {
             mon.hp = Math.max(0, mon.hp - h);
             this.abBanner(ooze);
-            await say(`${ooze.name} 的污泥浆发动了！${mon.vol.illusionName || mon.name} 反而受到了伤害！`);
+            await say(`${ooze.logName} 的污泥浆发动了！${mon.logName} 反而受到了伤害！`);
             BUI.dmgPop(side, `-${h}`, '#ff9d8a');
           } else {
-            mon.hp = Math.min(mon.maxhp, mon.hp + h); AU.heal(); await say(`${mon.vol.illusionName || mon.name} 吸取了对手的HP！`);
+            mon.hp = Math.min(mon.maxhp, mon.hp + h); AU.heal(); await say(`${mon.logName} 吸取了对手的HP！`);
           }
         }
       if (useMv.recoil && totalDmg > 0 && !mon.has('rockhead') && !mon.has('magicguard') && !mon.fainted) {
         const rec = Math.max(1, Math.floor(totalDmg / useMv.recoil));
         mon.hp = Math.max(0, mon.hp - rec);
-        await say(`${mon.vol.illusionName || mon.name} 受到了反作用力伤害！`);
+        await say(`${mon.logName} 受到了反作用力伤害！`);
         BUI.dmgPop(side, `-${rec}`, '#ff9d8a');
       }
       /* ★ 挣扎反伤：1/4最大HP，坚硬脑袋/魔法防守无法减免，造成伤害时才结算 */
       if (useMv.struggle && totalDmg > 0 && !mon.fainted) {
         const rec = Math.max(1, Math.floor(mon.maxhp / 4));
         mon.hp = Math.max(0, mon.hp - rec);
-        await say(`${mon.vol.illusionName || mon.name} 受到了反作用力伤害！`);
+        await say(`${mon.logName} 受到了反作用力伤害！`);
         BUI.dmgPop(side, `-${rec}`, '#ff9d8a');
       }
         /* ★ 强行特性携带生命宝珠不掉血 */
@@ -19041,7 +19068,7 @@ return ev;
           const lo = Math.max(1, Math.floor(mon.baseMax / 10));   // ★ 按未翻倍HP计算
           mon.hp = Math.max(0, mon.hp - lo);
           await say('生命宝珠消耗了HP…');
-          this.addLog(`↳ ${mon.vol.illusionName || mon.name} 生命宝珠反伤 -${lo} HP（剩余 ${Math.round(mon.hp / mon.maxhp * 100)}%）`);
+          this.addLog(`↳ ${mon.logName} 生命宝珠反伤 -${lo} HP（剩余 ${Math.round(mon.hp / mon.maxhp * 100)}%）`);
           BUI.dmgPop(side, `-${lo}`, '#ff9d8a');
         }
         BUI.refresh(this);
@@ -19049,18 +19076,18 @@ return ev;
         if (!this.over && mon.hp <= 0 && !mon.fainted) { await this.handleKO(this.foeSide(side), targets[0], mon); return; }
         // 逆鳞锁定
         if (useMv.rampage && !mon.vol.lock) { const t = rnd(2, 3); mon.vol.lock = { k: mvk, t }; }
-        if (mon.vol.lock) { mon.vol.lock.t--; if (mon.vol.lock.t <= 0) { mon.vol.lock = null; if (!mon.vol.confuse) { mon.vol.confuse = rnd(2, 4); await say(`${mon.vol.illusionName || mon.name} 因狂暴而混乱了！`); } } }
+        if (mon.vol.lock) { mon.vol.lock.t--; if (mon.vol.lock.t <= 0) { mon.vol.lock = null; if (!mon.vol.confuse) { mon.vol.confuse = rnd(2, 4); await say(`${mon.logName} 因狂暴而混乱了！`); } } }
         if (useMv.recharge) mon.vol.recharge = true;
         /* ★ 巨剑突击：使用后下一回合被对手必定击中且伤害翻倍 */
-        if (useMv.glaiverush && !mon.fainted) { mon.vol.glaiveRush = true; await say(`${mon.name} 露出了破绽！下回合受到攻击会加倍！`); }
+        if (useMv.glaiverush && !mon.fainted) { mon.vol.glaiveRush = true; await say(`${mon.logName} 露出了破绽！下回合受到攻击会加倍！`); }
         /* ★ 克命爪：命中目标后概率附加异常 */
         if (mv.direclaw) { for (const t of targets) { if (t.alive() && Math.random() < 0.3) { await this.inflictStatus(t, pick(['psn','par','sleep']), mon, 'poison'); } } }
         if (useMv.selfko && mon.alive()) {
           mon.hp = 0; mon.fainted = true;
-          await say(`${mon.vol.illusionName || mon.name} 的${useMv.n}炸开了！`);
+          await say(`${mon.logName} 的${useMv.n}炸开了！`);
           BUI.koFx(side, BUI.sprEl(side, act && act.slot != null ? act.slot : this.fieldSlotOf(mon)));
           await sleep(760);
-          await say(`${mon.vol.illusionName || mon.name} 倒下了！`);
+          await say(`${mon.logName} 倒下了！`);
           if (this.ep.every(m2 => !m2.alive())) { this.result = 'win'; this.over = true; return; }
           if (this.pp.every(m2 => !m2.alive())) { this.result = 'lose'; this.over = true; return; }
           this.pendingSwitches.push({ side, slot: this.fieldSlotOf(mon) });
@@ -19075,12 +19102,12 @@ return ev;
       async hitTarget(side, mon, foe, useMv, act, animFn) {
         if (this.over || !foe || foe.fainted) return { foe, dmg: 0, ko: false, connected: false, failed: false };
         if (this.wideGuard[this.sideOf(foe)] && !mv.dragondarts) {
-          await say(`${foe.vol.illusionName || foe.name} 被广域防守挡住了！`);
+          await say(`${foe.logName} 被广域防守挡住了！`);
           return { foe, dmg: 0, ko: false, connected: false, failed: false };
         }
         /* ★ 暗影潜袭消失中：目标不在场上，攻击招式全部落空 */
         if (foe.vol.shadowCharge) {
-          await say(`${foe.vol.illusionName || foe.name} 的身影消失了，招式落空了！`);
+          await say(`${foe.logName} 的身影消失了，招式落空了！`);
           return { foe, dmg: 0, ko: false, connected: false, failed: false };
         }
         // ★ 突袭判定：目标必须正在使用攻击招式、且本回合尚未出手，否则失败
@@ -19088,30 +19115,30 @@ return ev;
           const foePlan = foe.vol.plannedMove;
           const foeUsingAttack = foePlan && MV[foePlan] && MV[foePlan].c !== 'X';
           if (!foeUsingAttack || foe.vol.actedThisTurn) {
-            await say(`${mon.vol.illusionName || mon.name} 的突袭失败了！`);
+            await say(`${mon.logName} 的突袭失败了！`);
             return { foe, dmg: 0, ko: false, connected: false, failed: true };
           }
         }
         // ★ 灵骚判定：目标未持有道具时使用失败；成功使用时探知对手的道具
         if (useMv.poltergeist) {
           if (!foe.item) {
-            await say(`${mon.vol.illusionName || mon.name} 的灵骚失败了！对手没有持有道具！`);
+            await say(`${mon.logName} 的灵骚失败了！对手没有持有道具！`);
             return { foe, dmg: 0, ko: false, connected: false, failed: false };
           }
-          await say(`${mon.vol.illusionName || mon.name} 的灵骚发动了！${foe.name} 被自己持有的「${IT[foe.item]?.n || '未知道具'}」攻击了！`);
+          await say(`${mon.logName} 的灵骚发动了！${foe.logName} 被自己持有的「${IT[foe.item]?.n || '未知道具'}」攻击了！`);
         }
         // 命中判定
         let acc = this.hitAccuracy(mon, foe, useMv);
         if (acc != null && !mon.has('noguard') && !foe.has('noguard') && Math.random() * 100 > acc) {
-          await say(`${mon.vol.illusionName || mon.name} 的 ${useMv.n} 没有命中 ${foe.vol.illusionName || foe.name}！`);
-          this.addLog(`${mon.vol.illusionName || mon.name} 的 ${useMv.n} 没有命中 ${foe.vol.illusionName || foe.name}`);
+          await say(`${mon.logName} 的 ${useMv.n} 没有命中 ${foe.logName}！`);
+          this.addLog(`${mon.logName} 的 ${useMv.n} 没有命中 ${foe.logName}`);
           /* ★ 打空保险：miss后速度+2并消耗 */
           if (!mon.has('klutz') && mon.item === 'blunderpolicy') {
             mon.item = null;
             await this.changeStat(mon, 'spe', 2, mon);
-            await say(`${mon.name} 的打空保险发动了！速度大幅提升！`);
+            await say(`${mon.logName} 的打空保险发动了！速度大幅提升！`);
           }
-          if (useMv.crash) { const d = Math.floor(mon.maxhp / 2); await this.directDmg(mon, d, side, `${mon.vol.illusionName || mon.name} 摔倒受到了伤害！`); }
+          if (useMv.crash) { const d = Math.floor(mon.maxhp / 2); await this.directDmg(mon, d, side, `${mon.logName} 摔倒受到了伤害！`); }
           return { foe, dmg: 0, ko: false, connected: false, failed: false };
         }
         // 极巨/太晶/Mega 前置动画在 action 里已处理
@@ -19133,8 +19160,8 @@ return ev;
           if ((useMv.multiPow || useMv.k === 'populationbomb') && h > 0) {
             const ha = this.hitAccuracy(mon, foe, useMv);
             if (ha != null && !mon.has('noguard') && !foe.has('noguard') && Math.random() * 100 > ha) {
-              await say(`第 ${h + 1} 击没有命中 ${foe.vol.illusionName || foe.name}！`);
-              this.addLog(`第 ${h + 1} 击没有命中 ${foe.vol.illusionName || foe.name}`);
+              await say(`第 ${h + 1} 击没有命中 ${foe.logName}！`);
+              this.addLog(`第 ${h + 1} 击没有命中 ${foe.logName}`);
               break;
             }
           }
@@ -19279,7 +19306,7 @@ return ev;
         if (AU.cur !== target && MUSIC[target]) AU.playMusic(target);
       }
       async uturnSwitch(side, mon) {
-        await say(`${mon.vol.illusionName || mon.name} 要回到队伍里了！`);
+        await say(`${mon.logName} 要回到队伍里了！`);
         const slot = this.fieldSlotOf(mon);
         /* ★ 折返类招式离场必须选择替换宝可梦，不允许返回/取消 */
         if (side === 'p') { const idx = await this.chooseParty(false, false, slot, mon); if (idx != null && (!this.pt || !this.pt.includes(idx))) await this.doSwitch('p', idx, slot); }
@@ -19320,16 +19347,16 @@ return ev;
         const tgtSide = this.sideOf(foe);   // 受击方实际侧（攻击队友时特效/动画朝队友）
         /* ★ 发号施令：吃吼霸口中的米立龙无法被命中（即使无防守特性） */
         if (foe.vol.commanderIn) {
-          await say(`在${foe.vol.commanderInDondo || '吃吼霸'}的口中，招式无法命中${foe.vol.illusionName || foe.name}！`);
-          this.addLog(`对 ${foe.vol.illusionName || foe.name} 没有效果（在吃吼霸口中）`);
+          await say(`在${foe.vol.commanderInDondo || '吃吼霸'}的口中，招式无法命中${foe.logName}！`);
+          this.addLog(`对 ${foe.logName} 没有效果（在吃吼霸口中）`);
           return { dmg: 0, immune: true };
         }
         /* ★ 花粉团：对队友回复最大HP的1/4（回复效果不受替身/属性影响） */
         if (mv.pollen && this.sideOf(mon) === this.sideOf(foe)) {
           const h = Math.max(1, Math.floor(foe.maxhp / 4));
           foe.hp = Math.min(foe.maxhp, foe.hp + h);
-          await say(`${foe.vol.illusionName || foe.name} 被花粉团包裹，回复了HP！`);
-          this.addLog(`↳ ${foe.vol.illusionName || foe.name} 花粉团回复 +${h} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
+          await say(`${foe.logName} 被花粉团包裹，回复了HP！`);
+          this.addLog(`↳ ${foe.logName} 花粉团回复 +${h} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
           BUI.dmgPop(this.sideOf(foe), `+${h}`, '#3ecf6c', foe._slot || 0);
           return { dmg: 0, connected: true };
         }
@@ -19340,36 +19367,36 @@ return ev;
         /* ★ 心灵感应：双打中免疫同伴招式的伤害 */
         if (this.sideOf(mon) === this.sideOf(foe) && foe.has('telepathy')) {
           this.abBanner(foe);
-          await say(`${foe.name} 的心灵感应发动了！同伴的招式没有效果！`);
+          await say(`${foe.logName} 的心灵感应发动了！同伴的招式没有效果！`);
           return { dmg: 0, immune: true };
         }
         /* ★ AI学习：本招对当前对手完全无效，记入AI记忆（下次换招） */
         if (side === 'e' && (imm === 'immune' || imm === 'absorb')) this._aiImmune(foe, mv.t);
-        if (imm === 'immune') { await say(`对 ${foe.name} 没有效果…`); return { dmg: 0, immune: true }; }
+        if (imm === 'immune') { await say(`对 ${foe.logName} 没有效果…`); return { dmg: 0, immune: true }; }
         if (imm === 'absorb') { return { dmg: 0, immune: true }; }
         // 神奇守护
         const e0 = mv.struggle ? 1 : effMult(mv.t, foe.types);
-        if (foe.has('wonderguard') && e0 <= 1 && !mv.ignAb) { this.abBanner(foe); await say(`${foe.name} 的神奇守护发动了！只有效果绝佳的招式才能击中！`); return { dmg: 0, immune: true }; }
+        if (foe.has('wonderguard') && e0 <= 1 && !mv.ignAb) { this.abBanner(foe); await say(`${foe.logName} 的神奇守护发动了！只有效果绝佳的招式才能击中！`); return { dmg: 0, immune: true }; }
         // ★ 防弹：免疫弹类/球类招式
-        if (foe.has('bulletproof') && mv.bullet) { this.abBanner(foe); await say(`${foe.name} 的防弹特性发动了！${mv.n}无效！`); return { dmg: 0, immune: true }; }
+        if (foe.has('bulletproof') && mv.bullet) { this.abBanner(foe); await say(`${foe.logName} 的防弹特性发动了！${mv.n}无效！`); return { dmg: 0, immune: true }; }
         // 保护
         let protectPierce = false, fullPierce = false;
         if (foe.vol.protect) {
           /* ★ 强力钻/暗影潜袭：可穿透保护造成全额伤害（无法穿透极巨防壁） */
           if ((mv.hyperdrill || mv.shadowforce || mv.mightycleave) && !foe.vol.maxguard) {
             fullPierce = true;
-            await say(`${foe.name} 的保护被${mv.n}贯穿了！`);
+            await say(`${foe.logName} 的保护被${mv.n}贯穿了！`);
           }
           /* ★ 无形拳/贯穿钻：接触招式可穿透保护（无法穿透极巨防壁），造成1/4伤害 */
           else if ((mon.has('unseenfist') || mon.has('piercingdrill')) && mv.ct && !foe.vol.maxguard) {
             protectPierce = true;
-            await say(`${foe.name} 的保护被贯穿了！`);
+            await say(`${foe.logName} 的保护被贯穿了！`);
           } else if (mv.k === 'maxmv' && !foe.vol.maxguard) {
             // ★ 极巨招式穿透普通保护，造成1/4伤害
             protectPierce = true;
-            await say(`${foe.name} 的保护被极巨招式穿透了！`);
+            await say(`${foe.logName} 的保护被极巨招式穿透了！`);
           } else {
-            await say(`${foe.name} ${foe.vol.maxguard ? '用极巨防壁' : '保护'}挡住了攻击！`);
+            await say(`${foe.logName} ${foe.vol.maxguard ? '用极巨防壁' : '保护'}挡住了攻击！`);
             if (foe.vol.ks && mv.ct) { await this.changeStat(mon, 'atk', -2, foe); }
             if (foe.vol.bb && mv.ct) { await this.inflictStatus(mon, 'psn', foe, 'poison'); }
             if (foe.vol.burnprot && mv.ct && !mon.status) { this.abBanner(foe); await this.inflictStatus(mon, 'burn', foe, 'fire'); }
@@ -19379,30 +19406,30 @@ return ev;
         // 伤害计算
         const r = this.calcDmg(mon, foe, mv);
         /* ★ 投掷：无道具时失败 */
-        if (r.flingFail) { await say(`${mon.vol.illusionName || mon.name} 的投掷失败了！因为没有任何道具可以投掷！`); this.addLog(`${mon.vol.illusionName || mon.name} 的投掷失败了（无道具）`); return { dmg: 0, immune: true }; }
+        if (r.flingFail) { await say(`${mon.logName} 的投掷失败了！因为没有任何道具可以投掷！`); this.addLog(`${mon.logName} 的投掷失败了（无道具）`); return { dmg: 0, immune: true }; }
         /* ★ 礼物：回复目标HP */
         if (r.presentHeal) {
           foe.hp = Math.min(foe.maxhp, foe.hp + r.presentHeal);
-          await say(`${mon.vol.illusionName || mon.name} 的礼物让 ${foe.vol.illusionName || foe.name} 恢复了HP！`);
-          this.addLog(`↳ ${foe.vol.illusionName || foe.name} 收到礼物 +${r.presentHeal} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
+          await say(`${mon.logName} 的礼物让 ${foe.logName} 恢复了HP！`);
+          this.addLog(`↳ ${foe.logName} 收到礼物 +${r.presentHeal} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
           BUI.dmgPop(this.sideOf(foe), `+${r.presentHeal}`, '#3ecf6c', foe._slot || 0);
           return { dmg: 0 };
         }
         let dmg = r.dmg;
         /* ★ 随机光拿出全力：播报提示 */
-        if (r.fickle) await say(`${mon.vol.illusionName || mon.name} 拿出了全力！`);
+        if (r.fickle) await say(`${mon.logName} 拿出了全力！`);
         /* ★ 秘剑·千重涛：命中后撒菱 */
         if (mv.ceaselessedge && dmg > 0 && foe.hp > 0) {
           const ts = this.foeSide(side);
-          if (this.haz[ts].spikes < 3) { this.haz[ts].spikes++; await say(`${mon.name} 的秘剑·千重涛撒下了撒菱！`); }
+          if (this.haz[ts].spikes < 3) { this.haz[ts].spikes++; await say(`${mon.logName} 的秘剑·千重涛撒下了撒菱！`); }
         }
         /* ★ 千波激荡：命中后困住对手，无法替换宝可梦 */
         if (mv.trap && dmg > 0 && foe.hp > 0 && !foe.vol.gmaxTrap) {
           foe.vol.gmaxTrap = true;
-          await say(`${foe.name} 被千波激荡困住了，无法替换宝可梦！`);
+          await say(`${foe.logName} 被千波激荡困住了，无法替换宝可梦！`);
         }
         /* ★ 太晶甲壳/归零化境：弹特性横幅 */
-        if (foe.vol.showTerashell) { foe.vol.showTerashell = false; this.abBanner(foe); await say(`${foe.name} 的${AB[foe.ability]?.n || foe.ability}发动了！伤害减半！`); }
+        if (foe.vol.showTerashell) { foe.vol.showTerashell = false; this.abBanner(foe); await say(`${foe.logName} 的${AB[foe.ability]?.n || foe.ability}发动了！伤害减半！`); }
         if (protectPierce && !fullPierce) dmg = Math.max(1, Math.floor(dmg / 4));
         /* ★ 伤害封顶：实际结算不超过受击者当前HP（50%HP打到0只记50%） */
         dmg = Math.min(dmg, foe.hp);
@@ -19412,24 +19439,24 @@ return ev;
           if (dmg >= foe.vol.substitute) {
             subDmg = foe.vol.substitute;
             foe.vol.substitute = 0;
-            await say(`${foe.vol.illusionName || foe.name} 的替身抵挡了攻击后消失了！`);
+            await say(`${foe.logName} 的替身抵挡了攻击后消失了！`);
           } else {
             subDmg = dmg;
             foe.vol.substitute -= dmg;
-            await say(`${foe.vol.illusionName || foe.name} 的替身抵挡了攻击！`);
+            await say(`${foe.logName} 的替身抵挡了攻击！`);
           }
           dmg = 0;
           subBlocked = true;
           BUI.refresh(this);
         }
         // ★ 属性免疫：不造成伤害，也不破坏画皮
-        if (r.eff === 0) { if (side === 'e') this._aiImmune(foe, mv.t); await say(`对 ${foe.name} 没有效果…`); return { dmg: 0, immune: true }; }
+        if (r.eff === 0) { if (side === 'e') this._aiImmune(foe, mv.t); await say(`对 ${foe.logName} 没有效果…`); return { dmg: 0, immune: true }; }
         /* ★ 幻觉解除：受到攻击伤害时伪装解除 */
         if (foe.vol.illusion && dmg > 0) {
           foe.vol.illusion = null;
           foe.vol.illusionName = null;
           this.abBanner(foe);
-          await say(`${foe.name} 的幻觉被识破了！变回了原来的样子！`);
+          await say(`${foe.logName} 的幻觉被识破了！变回了原来的样子！`);
           BUI.refresh(this);
         }
         /* ★ 结冻头：抵挡一次物理攻击（替身抵挡后不触发） */
@@ -19438,7 +19465,7 @@ return ev;
           foe.iceHeadUsed = true;
           foe.formSprite = FORMSPRITE.noice;
           this.abBanner(foe);
-          await say(`${foe.name} 的结冻头抵挡了攻击！结冻头碎裂了！`);
+          await say(`${foe.logName} 的结冻头抵挡了攻击！结冻头碎裂了！`);
           BUI.dmgPop(tgtSide, '抵挡', '#9fe8f5', foe._slot || 0);
           if (mv.maxfx) {
             const f = mv.maxfx;
@@ -19459,12 +19486,12 @@ return ev;
           foe.disguiseUsed = true;   // ★ 本场已触发，换人后不再恢复
           foe.formSprite = FORMSPRITE.busted;
           FX.transform(tgtSide, 'disguise', foe._slot || 0);
-          await say(`${foe.name} 的画皮抵挡了攻击！`);
+          await say(`${foe.logName} 的画皮抵挡了攻击！`);
           BUI.dmgPop(tgtSide, '抵挡', '#ffd93b', foe._slot || 0);
           if (!foe.has('magicguard')) {
             const rec = Math.max(1, Math.floor(foe.baseMax / 8));   // ★ 按未翻倍HP计算
             foe.hp = Math.max(0, foe.hp - rec);
-            await say(`${foe.name} 因画皮破损受到了伤害！`);
+            await say(`${foe.logName} 因画皮破损受到了伤害！`);
             BUI.dmgPop(tgtSide, `-${rec}`, '#ff9d8a');
           }
           if (mv.maxfx) {
@@ -19481,8 +19508,8 @@ return ev;
           return { dmg: 0 };
         }
         if (dmg >= foe.hp) {
-          if (foe.item === 'focussash' && foe.hp === foe.maxhp) { dmg = foe.hp - 1; await say(`${foe.name} 靠气势腰带撑住了！`); }
-          else if (foe.has('sturdy') && foe.hp === foe.maxhp && !mv.ignAb) { dmg = foe.hp - 1; this.abBanner(foe); await say(`${foe.name} 靠结实撑住了！`); }
+          if (foe.item === 'focussash' && foe.hp === foe.maxhp) { dmg = foe.hp - 1; await say(`${foe.logName} 靠气势腰带撑住了！`); }
+          else if (foe.has('sturdy') && foe.hp === foe.maxhp && !mv.ignAb) { dmg = foe.hp - 1; this.abBanner(foe); await say(`${foe.logName} 靠结实撑住了！`); }
         }
         // 动画 + ★属性攻击特效（与受击动画同步）
         const tgtSpr = BUI.sprEl(tgtSide, foe._slot || 0);
@@ -19495,7 +19522,7 @@ return ev;
         /* ★ 碎裂铠甲：受到物理攻击时防御-1、速度+2 */
         if (dmg > 0 && mv.c === 'P' && foe.has('weakarmor')  && !mon.has('moldbreaker') && !mv.ignAb) {
           this.abBanner(foe);
-          await say(`${foe.name} 的碎裂铠甲发动了！`);
+          await say(`${foe.logName} 的碎裂铠甲发动了！`);
           await this.changeStat(foe, 'def', -1, mon);
           await this.changeStat(foe, 'spe', 2, mon);
         }
@@ -19503,15 +19530,15 @@ return ev;
         if (dmg > 0) {
           const pct = Math.max(1, Math.round(dmg / foe.maxhp * 100));
           const leftPct = Math.round(foe.hp / foe.maxhp * 100);
-          this.addLog(`↳ ${foe.vol.illusionName || foe.name} 受到 ${dmg} 点伤害（${pct}% HP）· 对手剩余 ${leftPct}%${r.crit ? ' · 击中要害' : ''}${r.eff > 1 ? ' · 效果绝佳' : (r.eff > 0 && r.eff < 1) ? ' · 收效甚微' : ''}`);
+          this.addLog(`↳ ${foe.logName} 受到 ${dmg} 点伤害（${pct}% HP）· 对手剩余 ${leftPct}%${r.crit ? ' · 击中要害' : ''}${r.eff > 1 ? ' · 效果绝佳' : (r.eff > 0 && r.eff < 1) ? ' · 收效甚微' : ''}`);
           const popSide = tgtSide;
           BUI.dmgPop(popSide, `-${dmg} (${pct}%)`, r.crit ? '#ffd93b' : r.eff > 1 ? '#ff9d6b' : (r.eff > 0 && r.eff < 1) ? '#8fb6e8' : '#ffffff', foe._slot || 0);
           if (r.crit) setTimeout(() => BUI.dmgPop(popSide, '击中要害!', '#ffd93b', foe._slot || 0), 170);
         }
         // 接触副作用
         if (mv.ct && !mon.has('magicguard') && !mon.has('longreach')) {
-          if (foe.has('ironbarbs') || foe.has('roughskin')) { this.abBanner(foe); await this.directDmg(mon, Math.max(1, Math.floor(mon.baseMax / 8)), side, `${foe.name} 的${AB[foe.ability].n}伤害了 ${mon.vol.illusionName || mon.name}！`); }
-          if (!mon.has('klutz') && foe.item === 'rockyhelmet') { await this.directDmg(mon, Math.max(1, Math.floor(mon.baseMax / 6)), side, `${foe.vol.illusionName || foe.name} 的凹凸头盔反弹了伤害！`); }
+          if (foe.has('ironbarbs') || foe.has('roughskin')) { this.abBanner(foe); await this.directDmg(mon, Math.max(1, Math.floor(mon.baseMax / 8)), side, `${foe.logName} 的${AB[foe.ability].n}伤害了 ${mon.logName}！`); }
+          if (!mon.has('klutz') && foe.item === 'rockyhelmet') { await this.directDmg(mon, Math.max(1, Math.floor(mon.baseMax / 6)), side, `${foe.logName} 的凹凸头盔反弹了伤害！`); }
           if (foe.has('effectspore') && Math.random() < .3 && !mon.status) { this.abBanner(foe); await this.inflictStatus(mon, pick(['psn', 'par', 'sleep']), foe); }
         }
         /* ★ 新增接触类特性 */
@@ -19519,7 +19546,7 @@ return ev;
           /* 黏滑：被接触攻击时降低攻击者速度 */
           if (foe.has('gooey')  && !mon.has('moldbreaker') && !mv.ignAb) {
             this.abBanner(foe);
-            await say(`${foe.name} 的黏滑发动了！`);
+            await say(`${foe.logName} 的黏滑发动了！`);
             await this.changeStat(mon, 'spe', -1, foe);
           }
 
@@ -19527,7 +19554,7 @@ return ev;
           if (foe.has('cutecharm')  && !mon.vol.attract && !mon.has('obliviousx') && Math.random() < .3) {
             this.abBanner(foe);
             mon.vol.attract = foe;
-            await say(`${mon.vol.illusionName || mon.name} 被${foe.name}的迷人之躯迷住了！`);
+            await say(`${mon.logName} 被${foe.logName}的迷人之躯迷住了！`);
           }
 
           /* 毒手：接触攻击可能使对手中毒 */
@@ -19538,7 +19565,7 @@ return ev;
           /* ★ 棉絮：受攻击时降对手速度 */
           if (foe.has('cottondown')  && !mon.has('moldbreaker') && !mv.ignAb) {
             this.abBanner(foe);
-            await say(`${foe.name} 的棉絮发动了！`);
+            await say(`${foe.logName} 的棉絮发动了！`);
             await this.changeStat(mon, 'spe', -1, foe);
           }
           /* ★ 一口导弹：受攻击时吐出猎物反击并降防 */
@@ -19547,7 +19574,7 @@ return ev;
             const gd = Math.max(1, Math.floor(mon.maxhp / 4));
             mon.hp = Math.max(0, mon.hp - gd);
             foe.vol.gulpPrey = false;
-            await say(`${foe.name} 吐出了嘴里的猎物！${mon.name} 受到了伤害！`);
+            await say(`${foe.logName} 吐出了嘴里的猎物！${mon.logName} 受到了伤害！`);
             await this.changeStat(mon, 'def', -1, foe);
             BUI.dmgPop(this.sideOf(mon), `-${gd}`, '#ff9d8a', mon._slot || 0);
           }
@@ -19555,11 +19582,11 @@ return ev;
         // ★ 顺手牵羊：被接触招式击中时偷走对手道具（自身无道具时；石板无法被偷走）
         if (mv.ct && foe.has('pickpocket') && !foe.item && mon.item  && !mon.has('stickyhold') && !(mon.id === 493 && PLATES[mon.item])) {
           const stolen = mon.item; mon.item = null; foe.item = stolen; this.abBanner(foe);
-          await say(`${foe.name} 的顺手牵羊发动了！偷走了${mon.vol.illusionName || mon.name}的${IT[stolen].n}！`);
+          await say(`${foe.logName} 的顺手牵羊发动了！偷走了${mon.logName}的${IT[stolen].n}！`);
         }
         /* ★ 恶臭：攻击时10%使对手畏缩（畏缩不立刻提示，行动时再显示） */
         if (dmg > 0 && mon.has('stench') && !foe.has('innerfocus') && foe.hp > 0 && Math.random() < 0.1) {
-          foe.vol.flinch = true; this.abBanner(mon); await say(`${mon.name} 的恶臭发动了！`);
+          foe.vol.flinch = true; this.abBanner(mon); await say(`${mon.logName} 的恶臭发动了！`);
         }
         /* ★ 掉出种子：受攻击时撒草场 */
         if (dmg > 0 && foe.has('seedsower')  && this.terrain !== 'grassy') {
@@ -19576,16 +19603,16 @@ return ev;
         /* ---- 第六批接触特性 ---- */
         /* ★ 卷发：被接触攻击时降低攻击者速度 */
         if (mv.ct && foe.has('tanglinghair')  && !mon.has('moldbreaker') && !mv.ignAb) {
-          this.abBanner(foe); await say(`${foe.name} 的卷发发动了！`); await this.changeStat(mon, 'spe', -1, foe);
+          this.abBanner(foe); await say(`${foe.logName} 的卷发发动了！`); await this.changeStat(mon, 'spe', -1, foe);
         }
         /* ★ 甩不掉的香气/游魂：被接触攻击时交换特性 */
         if (mv.ct && foe.has('wanderingspirit')  && !mon.has('moldbreaker') && !mv.ignAb) {
           this.abBanner(foe); const tmp = mon.ability; mon.ability = foe.ability; foe.ability = tmp;
-          await say(`${foe.name} 的游魂发动了！与${mon.name}交换了特性！`);
+          await say(`${foe.logName} 的游魂发动了！与${mon.logName}交换了特性！`);
         }
         if (mv.ct && foe.has('lingeringaroma')  && !mon.has('moldbreaker') && !mv.ignAb) {
           this.abBanner(foe); mon.ability = 'lingeringaroma';
-          await say(`${foe.name} 的甩不掉的香气发动了！${mon.name}的特性变成了甩不掉的香气！`);
+          await say(`${foe.logName} 的甩不掉的香气发动了！${mon.logName}的特性变成了甩不掉的香气！`);
         }
         /* ★ 毒锁链：攻击使对手剧毒 */
         if (mv.ct && mon.has('toxicchain') && foe.hp > 0 && !foe.status && Math.random() < 0.3) {
@@ -19594,7 +19621,7 @@ return ev;
         /* ★ 热交换：火属性招式击中时攻击+1 */
         if (dmg > 0 && mv.t === 'fire' && foe.has('thermalexchange') ) {
           this.abBanner(foe); await this.changeStat(foe, 'atk', 1, mon);
-          await say(`${foe.name} 的热交换发动了！`);
+          await say(`${foe.logName} 的热交换发动了！`);
         }
         /* ★ 毒满地：受物理攻击时在对手场地撒下毒菱 */
         if (dmg > 0 && foe.has('toxicdebris') && mv.c === 'P' ) {
@@ -19602,30 +19629,30 @@ return ev;
           if (this.haz[atkSide].tspikes < 2) {
             this.abBanner(foe);
             this.haz[atkSide].tspikes++;
-            await say(`${foe.name} 的毒满地发动了！在${mon.vol.illusionName || mon.name}脚下撒下了毒菱！`);
+            await say(`${foe.logName} 的毒满地发动了！在${mon.logName}脚下撒下了毒菱！`);
             BUI.refresh(this);
           }
         }
         /* ★ 电力转换：受攻击时标记 */
         if (dmg > 0 && foe.has('electromorphosis') ) {
-          foe.vol.emBoost = true; this.abBanner(foe); await say(`${foe.name} 的电力转换发动了！`);
+          foe.vol.emBoost = true; this.abBanner(foe); await say(`${foe.logName} 的电力转换发动了！`);
         }
         /* ★ 胆怯：受到恶/幽灵/虫属性攻击时速度+1 */
         if (dmg > 0 && foe.has('rattled')  && ['dark', 'ghost', 'bug'].includes(mv.t)) {
           this.abBanner(foe);
-          await say(`${foe.name} 的胆怯发动了！`);
+          await say(`${foe.logName} 的胆怯发动了！`);
           await this.changeStat(foe, 'spe', 1, foe);
         }
         /* ★ 木乃伊：被接触攻击时对手特性变为木乃伊 */
         if (mv.ct && foe.has('mummy')  && !mon.has('mummy') && !mv.ignAb) {
           this.abBanner(foe);
           mon.ability = 'mummy';
-          await say(`${mon.vol.illusionName || mon.name} 的特性变成了木乃伊！`);
+          await say(`${mon.logName} 的特性变成了木乃伊！`);
         }
         // ★ 诅咒之躯：被击中时30%几率封印对手招式4回合
         if (foe.has('cursedbodyx') && mv.k !== 'struggle' && !mon.vol.disabled  && Math.random() < 0.3) {
           mon.vol.disabled = { k: mv.k, turns: 4 }; this.abBanner(foe);
-          await say(`${mon.vol.illusionName || mon.name} 的${mv.n}被${foe.name}的诅咒之躯封印了！`);
+          await say(`${mon.logName} 的${mv.n}被${foe.logName}的诅咒之躯封印了！`);
         }
         // ★ 接触类特性触发（静电/火焰之躯/毒刺）：仅接触招式(ct)触发
         if (mv.ct && !mon.has('longreach') && foe.has('static') && Math.random() < .3 && !mon.status) { this.abBanner(foe); await this.inflictStatus(mon, 'par', foe, 'electric'); }
@@ -19634,13 +19661,13 @@ return ev;
         // ★ 正义之心：受恶属性招式攻击时攻击提升
         if (mv.t === 'dark' && foe.has('justified')  && !mv.ignAb) {
           this.abBanner(foe);
-          await say(`${foe.name} 的正义之心发动了！`);
+          await say(`${foe.logName} 的正义之心发动了！`);
           await this.changeStat(foe, 'atk', 1, foe);
         }
         /* ★ 热交换：受到火系招式时攻击+1且不会灼伤 */
         if (dmg > 0 && mv.t === 'fire' && foe.has('thermalexchange')  && !mv.ignAb) {
           this.abBanner(foe); await this.changeStat(foe, 'atk', 1, foe);
-          await say(`${foe.name} 的热交换发动了！攻击提升了！`);
+          await say(`${foe.logName} 的热交换发动了！攻击提升了！`);
         }
         // ★ 电气引擎：受电属性招式时速度提升（免疫伤害）
         // 注意：此逻辑在 checkImmunity 中处理
@@ -19649,7 +19676,7 @@ return ev;
         // ★ 愤怒穴位：受到会心一击时攻击+6（打替身不触发）
         if (r.crit && foe.has('angerpoint') && (!subBlocked || foe.vol.substitute <= 0)) {
           this.abBanner(foe);
-          await say(`${foe.name} 的愤怒穴位发动了！`);
+          await say(`${foe.logName} 的愤怒穴位发动了！`);
           await this.changeStat(foe, 'atk', 6, foe);
         }
         // ★ 持久力：受到攻击时防御+1
@@ -19661,26 +19688,26 @@ return ev;
         if (dmg > 0 && mon.has('magician') && !mon.item && foe.item && foe.hp > 0 && !(foe.id === 493 && PLATES[foe.item]) && foe.item !== 'wellspringmask' && foe.item !== 'hearthflamemask' && foe.item !== 'cornerstonemask') {
           const stolen = foe.item; foe.item = null; mon.item = stolen;
           this.abBanner(mon);
-          await say(`${mon.vol.illusionName || mon.name} 的魔术师发动了！偷走了${foe.name}的${IT[stolen].n}！`);
+          await say(`${mon.logName} 的魔术师发动了！偷走了${foe.logName}的${IT[stolen].n}！`);
         }
         // 弱点保险
         if (r.eff > 1 && foe.item === 'weaknesspolicy' && !foe.fainted && !foe.has('klutz')) {
           foe.item = null;
           await this.changeStat(foe, 'atk', 2, foe);
           await this.changeStat(foe, 'spa', 2, foe, true);
-          await say(`${foe.name} 的弱点保险发动了！`);
+          await say(`${foe.logName} 的弱点保险发动了！`);
         }
         // 气球破裂
-        if (foe.item === 'airballoon') { foe.item = null; await say(`${foe.name} 的气球破裂了！`); }
+        if (foe.item === 'airballoon') { foe.item = null; await say(`${foe.logName} 的气球破裂了！`); }
         // 追加效果（替身未破时被替身抵挡，不作用于本体；穿透/音波或替身被击破时正常触发）
         if (mv.sec && !mon.has('sheerforce') && !foe.has('shielddust') && foe.hp > 0 && (!subBlocked || foe.vol.substitute <= 0)) {
           let ch = mv.sec.ch * (mon.has('serenegrace') ? 2 : 1);
           if (Math.random() * 100 < ch) {
             if (mv.sec.st) {
-              if (mv.sec.st === 'confuse') { if (!foe.vol.confuse) { foe.vol.confuse = rnd(2, 4); await say(`${foe.name} 混乱了！`); } }
+              if (mv.sec.st === 'confuse') { if (!foe.vol.confuse) { foe.vol.confuse = rnd(2, 4); await say(`${foe.logName} 混乱了！`); } }
               else if (mv.sec.st === 'tri') { await this.inflictStatus(foe, pick(['burn', 'par', 'frz']), mon, mv.t); }
               else await this.inflictStatus(foe, mv.sec.st, mon, mv.t);
-              if (mv.sec.st === 'burn' && foe.status === 'frz') { foe.status = 'burn'; await say(`${foe.name} 解冻了！`); }
+              if (mv.sec.st === 'burn' && foe.status === 'frz') { foe.status = 'burn'; await say(`${foe.logName} 解冻了！`); }
             }
             if (mv.sec.flinch) { if (!foe.has('innerfocus')) { foe.vol.flinch = true; /* ★ 畏缩不立刻提示，行动时再显示 */ } }
             if (mv.sec.drop) { await this.changeStat(foe, mv.sec.drop, mv.sec.n, mon); }
@@ -19693,7 +19720,7 @@ return ev;
         /* ★ 束缚类招式（替身未破时不生效） */
         if (mv.partialTrap && foe.hp > 0 && !foe.vol.binding && (!subBlocked || foe.vol.substitute <= 0)) {
           foe.vol.binding = 4 + Math.floor(Math.random() * 2);
-          await say(`${foe.name} 被束缚住了！`);
+          await say(`${foe.logName} 被束缚住了！`);
         }
         /* ★ 自身/目标降能力（selfDropT 作用于目标，替身未破时不生效） */
         if (mv.selfDropT && foe.hp > 0 && (!subBlocked || foe.vol.substitute <= 0)) { await this.changeStat(foe, mv.selfDropT.drop, mv.selfDropT.n, mon); }
@@ -19701,7 +19728,7 @@ return ev;
         if (mv.syrupbomb && foe.hp > 0 && (!subBlocked || foe.vol.substitute <= 0)) {
           await this.changeStat(foe, 'spe', -1, mon);
           foe.vol.syrupBomb = 3;
-          await say(`${foe.name} 被糖浆包裹住了，速度不断下降！`);
+          await say(`${foe.logName} 被糖浆包裹住了，速度不断下降！`);
         }
         /* ★ 妒火：对本回合提升过能力的对手必定灼伤 */
         if (mv.burningjeal && foe.hp > 0 && foe.vol.buffedThisTurn && (!subBlocked || foe.vol.substitute <= 0) && !foe.status) {
@@ -19720,31 +19747,31 @@ return ev;
           /* ★ 黏着：道具无法被拍落 */
           if (foe.has('stickyhold')) {
             this.abBanner(foe);
-            await say(`${foe.name} 的黏着发动了！道具无法被拍落！`);
+            await say(`${foe.logName} 的黏着发动了！道具无法被拍落！`);
           }
           else if (foe.item === 'rustedsword' || foe.item === 'rustedshield') {
-            await say(`${foe.name} 的${IT[foe.item].n}无法被拍落！`);
+            await say(`${foe.logName} 的${IT[foe.item].n}无法被拍落！`);
           }
           /* ★ 厄诡椪的面具：无法被拍落 */
           else if (foe.item === 'wellspringmask' || foe.item === 'hearthflamemask' || foe.item === 'cornerstonemask') {
-            await say(`${foe.name} 的${IT[foe.item].n}无法被拍落！`);
+            await say(`${foe.logName} 的${IT[foe.item].n}无法被拍落！`);
           }
           /* ★ 阿尔宙斯携带石板：石板无法被拍落 */
           else if (foe.id === 493 && PLATES[foe.item]) {
-            await say(`${foe.name} 的${IT[foe.item].n}无法被拍落！`);
+            await say(`${foe.logName} 的${IT[foe.item].n}无法被拍落！`);
           } else {
-            await say(`${foe.name} 的${IT[foe.item].n}被拍落了！`); foe.item = null; foe.vol.choiceLock = null;
+            await say(`${foe.logName} 的${IT[foe.item].n}被拍落了！`); foe.item = null; foe.vol.choiceLock = null;
           }
           // ★ 轻装触发（黏着导致拍落失败时不触发）
           if (!foe.has('stickyhold') && foe.has('unburden') && !foe.vol.unburdenActive) {
             foe.vol.unburdenActive = true;
             this.abBanner(foe);
-            await say(`${foe.name} 的轻装发动了！速度大幅提升！`);
+            await say(`${foe.logName} 的轻装发动了！速度大幅提升！`);
             await this.changeStat(foe, 'spe', 2, foe);
           }
         }
         // 盐腌（替身未破时不生效）
-        if (mv.salt && foe.hp > 0 && (!subBlocked || foe.vol.substitute <= 0)) { foe.vol.salt = true; await say(`${foe.name} 被盐腌住了！`); }
+        if (mv.salt && foe.hp > 0 && (!subBlocked || foe.vol.substitute <= 0)) { foe.vol.salt = true; await say(`${foe.logName} 被盐腌住了！`); }
         // 愤怒之拳计数已在 vol.rage
         // 文柚果
         /* ★ 贪吃鬼：文柚果触发阈值提高到75%；笨拙：道具效果无效 */
@@ -19755,8 +19782,8 @@ return ev;
           const h = Math.floor(foe.maxhp / 4);
           foe.hp = Math.min(foe.maxhp, foe.hp + h);
           AU.heal();
-          await say(`${foe.name} 吃了文柚果，回复了HP！`);
-          this.addLog(`↳ ${foe.name} 文柚果回复 +${h} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
+          await say(`${foe.logName} 吃了文柚果，回复了HP！`);
+          this.addLog(`↳ ${foe.logName} 文柚果回复 +${h} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
           /* ★ 反刍：食用树果后标记，下回合结束再吃一次 */
           if (foe.has('cudchew') && !foe.vol.cudChewPending) { foe.vol.cudChewPending = true; foe.vol.cudChewItem = eatenBerry || 'sitrus'; }
           /* ★ 共生：同伴把道具交给吃下树果的宝可梦 */
@@ -19791,37 +19818,37 @@ return ev;
             for (const f2 of this.foesOf(mon)) {
               if (!f2.alive()) continue;
               if (f.sec === 'par') await this.inflictStatus(f2, 'par', mon, 'electric');
-              else if (f.sec === 'attract') { if (!f2.vol.attract) { f2.vol.attract = mon; await say(`${f2.name} 着迷了！`); } }
+              else if (f.sec === 'attract') { if (!f2.vol.attract) { f2.vol.attract = mon; await say(`${f2.logName} 着迷了！`); } }
               else if (f.sec === 'psn') await this.inflictStatus(f2, 'psn', mon, 'poison');
               else if (f.sec === 'psn_par') await this.inflictStatus(f2, pick(['psn', 'par']), mon, 'poison');
               else if (f.sec === 'psn_par_sleep') await this.inflictStatus(f2, pick(['psn', 'par', 'sleep']), mon, 'poison');
               else if (f.sec === 'tri') await this.inflictStatus(f2, pick(['burn', 'par', 'psn']), mon, 'poison');
-              else if (f.sec === 'confuse') { if (!f2.vol.confuse) { f2.vol.confuse = rnd(2, 4); await say(`${f2.name} 混乱了！`); } }
-              else if (f.sec === 'drowsy') { if (!f2.has('insomnia') && !f2.has('vitalspirit') && !f2.status) { f2.vol.drowsy = 2; await say(`${f2.name} 变得昏昏欲睡了！`); } }
+              else if (f.sec === 'confuse') { if (!f2.vol.confuse) { f2.vol.confuse = rnd(2, 4); await say(`${f2.logName} 混乱了！`); } }
+              else if (f.sec === 'drowsy') { if (!f2.has('insomnia') && !f2.has('vitalspirit') && !f2.status) { f2.vol.drowsy = 2; await say(`${f2.logName} 变得昏昏欲睡了！`); } }
             }
           }
           /* ★ 超极巨幻影幽魂：踩影（禁止替换） */
-          if (f.trap && foe.hp > 0 && !foe.has('shadowtagx')) { foe.vol.gmaxTrap = true; await say(`${foe.name} 被超极巨幻影幽魂困住了！`); }
+          if (f.trap && foe.hp > 0 && !foe.has('shadowtagx')) { foe.vol.gmaxTrap = true; await say(`${foe.logName} 被超极巨幻影幽魂困住了！`); }
           /* ★ 超极巨会心一击：会心率提升 */
-          if (f.critUp) { mon.vol.gmaxCrit = true; await say(`${mon.name} 的会心率大幅提升了！`); }
+          if (f.critUp) { mon.vol.gmaxCrit = true; await say(`${mon.logName} 的会心率大幅提升了！`); }
           /* ★ 超极巨资源再生：恢复树果 */
-          if (f.berry) { for (const ally of this.fieldMons(allySide).filter(x => x.alive() && !x.item)) { ally.item = 'sitrus'; } await say(`${mon.name} 的资源再生发动了！文柚果恢复了！`); }
+          if (f.berry) { for (const ally of this.fieldMons(allySide).filter(x => x.alive() && !x.item)) { ally.item = 'sitrus'; } await say(`${mon.logName} 的资源再生发动了！文柚果恢复了！`); }
           /* ★ 超极巨劣化衰变：减少对手最后使用招式的PP */
-          if (f.ppDrain && foe.moves.length) { const lm = foe.moves.find(x => x.k === foe.vol.lastMove); if (lm) { lm.pp = Math.max(0, lm.pp - f.ppDrain); await say(`${foe.name} 的PP被削减了！`); } }
+          if (f.ppDrain && foe.moves.length) { const lm = foe.moves.find(x => x.k === foe.vol.lastMove); if (lm) { lm.pp = Math.max(0, lm.pp - f.ppDrain); await say(`${foe.logName} 的PP被削减了！`); } }
           /* ★ 超极巨液金熔击：禁止对手连续使用相同招式 */
-          if (f.torment) { foe.vol.gmaxTorment = true; await say(`${foe.name} 被液金困住了，无法连续使用相同招式！`); }
+          if (f.torment) { foe.vol.gmaxTorment = true; await say(`${foe.logName} 被液金困住了，无法连续使用相同招式！`); }
           /* ★ 超极巨夺命一击：无视保护 */
           if (f.bypassProtect) await say('超极巨夺命一击无视一切保护！');
           /* ★ 超极巨幸福圆满/琼浆玉液：回复己方HP或治愈异常 */
           if (f.healTeam) { const h = Math.floor(mon.baseMax / 6); for (const ally of this.fieldMons(allySide).filter(x => x.alive())) { ally.hp = Math.min(ally.maxhp, ally.hp + h); } await say(`己方宝可梦回复了HP！`); }
-          if (f.healStatus) { for (const ally of this.fieldMons(allySide).filter(x => x.alive())) { ally.status = null; ally.sleepT = 0; ally.toxicN = 0; } await say(`${mon.name} 的异常状态被治愈了！`); }
+          if (f.healStatus) { for (const ally of this.fieldMons(allySide).filter(x => x.alive())) { ally.status = null; ally.sleepT = 0; ally.toxicN = 0; } await say(`${mon.logName} 的异常状态被治愈了！`); }
           /* ★ 超极巨百火焚野/沙尘漫天：部分束缚 */
-          if (f.partialTrap && foe.hp > 0) { foe.vol.binding = 4 + Math.floor(Math.random() * 2); await say(`${foe.name} 被束缚住了！`); }
+          if (f.partialTrap && foe.hp > 0) { foe.vol.binding = 4 + Math.floor(Math.random() * 2); await say(`${foe.logName} 被束缚住了！`); }
         }
         // 解冻（火属性伤害）
         /* ★ 水蒸气：自身冰冻时解冻 */
-        if (mv.hydrosteam && mon.status === 'frz') { mon.status = null; await say(`${mon.name} 被蒸汽解冻了！`); }
-        if (mv.t === 'fire' && foe.status === 'frz' && (!subBlocked || foe.vol.substitute <= 0)) { foe.status = null; await say(`${foe.name} 解冻了！`); }
+        if (mv.hydrosteam && mon.status === 'frz') { mon.status = null; await say(`${mon.logName} 被蒸汽解冻了！`); }
+        if (mv.t === 'fire' && foe.status === 'frz' && (!subBlocked || foe.vol.substitute <= 0)) { foe.status = null; await say(`${foe.logName} 解冻了！`); }
         BUI.refresh(this);
         return { dmg: subDmg || dmg, ko: foe.hp <= 0, eff: r.eff, crit: r.crit };
       }
@@ -19834,57 +19861,57 @@ return ev;
         /* ★ 始源之海：火属性招式无效 */
         if (wx === 'primordial' && t === 'fire') { await say('始源之海的效果使火属性招式无效了！'); return 'immune'; }
         if (t === 'ground' && !mv.thousandarrows) {
-          if (foe.has('levitate') || foe.has('eelevate')) { this.abBanner(foe); await say(`${foe.name} 漂浮在空中！`); return 'immune'; }
-          if (foe.item === 'airballoon') { await say(`${foe.name} 靠气球浮在空中！`); return 'immune'; }
+          if (foe.has('levitate') || foe.has('eelevate')) { this.abBanner(foe); await say(`${foe.logName} 漂浮在空中！`); return 'immune'; }
+          if (foe.item === 'airballoon') { await say(`${foe.logName} 靠气球浮在空中！`); return 'immune'; }
         }
-        if (t === 'electric' && foe.has('voltabsorb')) { this.abBanner(foe); foe.hp = Math.min(foe.maxhp, foe.hp + Math.floor(foe.maxhp / 4)); await say(`${foe.name} 的蓄电发动了，回复了HP！`); AU.heal(); return 'absorb'; }
-        if (t === 'water' && foe.has('waterabsorb')) { this.abBanner(foe); foe.hp = Math.min(foe.maxhp, foe.hp + Math.floor(foe.maxhp / 4)); await say(`${foe.name} 的储水发动了，回复了HP！`); AU.heal(); return 'absorb'; }
+        if (t === 'electric' && foe.has('voltabsorb')) { this.abBanner(foe); foe.hp = Math.min(foe.maxhp, foe.hp + Math.floor(foe.maxhp / 4)); await say(`${foe.logName} 的蓄电发动了，回复了HP！`); AU.heal(); return 'absorb'; }
+        if (t === 'water' && foe.has('waterabsorb')) { this.abBanner(foe); foe.hp = Math.min(foe.maxhp, foe.hp + Math.floor(foe.maxhp / 4)); await say(`${foe.logName} 的储水发动了，回复了HP！`); AU.heal(); return 'absorb'; }
         /* ★ 遇水凝固：受水属性招式时防御+2（免疫伤害） */
         if (t === 'water' && foe.has('watercompaction')) {
           this.abBanner(foe);
           await this.changeStat(foe, 'def', 2, foe);
-          await say(`${foe.name} 的遇水凝固发动了！防御大幅提升！`);
+          await say(`${foe.logName} 的遇水凝固发动了！防御大幅提升！`);
           return 'absorb';
         }
-        if (t === 'water' && foe.has('stormdrain')) { this.abBanner(foe); await this.changeStat(foe, 'spa', 1, foe); await say(`${foe.name} 的引水发动了！`); return 'absorb'; }
-        if (t === 'electric' && foe.has('lightningrod')) { this.abBanner(foe); await this.changeStat(foe, 'spa', 1, foe); await say(`${foe.name} 的避雷针发动了！`); return 'absorb'; }
-        if (t === 'fire' && foe.has('flashfire')) { this.abBanner(foe); foe.vol.ff = true; await say(`${foe.name} 的引火发动了！火属性招式威力提升了！`); return 'absorb'; }
-        if (t === 'grass' && foe.has('sapsipper')) { this.abBanner(foe); await this.changeStat(foe, 'atk', 1, foe); await say(`${foe.name} 的食草发动了！`); return 'absorb'; }
+        if (t === 'water' && foe.has('stormdrain')) { this.abBanner(foe); await this.changeStat(foe, 'spa', 1, foe); await say(`${foe.logName} 的引水发动了！`); return 'absorb'; }
+        if (t === 'electric' && foe.has('lightningrod')) { this.abBanner(foe); await this.changeStat(foe, 'spa', 1, foe); await say(`${foe.logName} 的避雷针发动了！`); return 'absorb'; }
+        if (t === 'fire' && foe.has('flashfire')) { this.abBanner(foe); foe.vol.ff = true; await say(`${foe.logName} 的引火发动了！火属性招式威力提升了！`); return 'absorb'; }
+        if (t === 'grass' && foe.has('sapsipper')) { this.abBanner(foe); await this.changeStat(foe, 'atk', 1, foe); await say(`${foe.logName} 的食草发动了！`); return 'absorb'; }
         if (t === 'electric' && foe.has('motordrive')) {
           this.abBanner(foe);
           await this.changeStat(foe, 'spe', 1, foe);
-          await say(`${foe.name} 的电气引擎发动了！速度提升了！`);
+          await say(`${foe.logName} 的电气引擎发动了！速度提升了！`);
           return 'absorb';
         }
         if ((t === 'flying' || mv.wind) && foe.has('windrider')) {
           this.abBanner(foe);
           await this.changeStat(foe, 'atk', 1, foe);
-          await say(`${foe.name} 的乘风发动了！攻击提升了！`);
+          await say(`${foe.logName} 的乘风发动了！攻击提升了！`);
           return 'absorb';
         }
         /* ★ 干燥皮肤：水回复1/4HP */
-        if (t === 'water' && foe.has('dryskin')) { this.abBanner(foe); foe.hp = Math.min(foe.maxhp, foe.hp + Math.floor(foe.maxhp / 4)); await say(`${foe.name} 的干燥皮肤发动了，回复了HP！`); AU.heal(); return 'absorb'; }
+        if (t === 'water' && foe.has('dryskin')) { this.abBanner(foe); foe.hp = Math.min(foe.maxhp, foe.hp + Math.floor(foe.maxhp / 4)); await say(`${foe.logName} 的干燥皮肤发动了，回复了HP！`); AU.heal(); return 'absorb'; }
         /* ★ 食土：地面回复1/4HP */
-        if (t === 'ground' && foe.has('eartheater')) { this.abBanner(foe); foe.hp = Math.min(foe.maxhp, foe.hp + Math.floor(foe.maxhp / 4)); await say(`${foe.name} 的食土发动了，回复了HP！`); AU.heal(); return 'absorb'; }
+        if (t === 'ground' && foe.has('eartheater')) { this.abBanner(foe); foe.hp = Math.min(foe.maxhp, foe.hp + Math.floor(foe.maxhp / 4)); await say(`${foe.logName} 的食土发动了，回复了HP！`); AU.heal(); return 'absorb'; }
         /* ★ 焦香之躯：火免疫+防御+2 */
-        if (t === 'fire' && foe.has('wellbakedbody')) { this.abBanner(foe); await this.changeStat(foe, 'def', 2, foe); await say(`${foe.name} 的焦香之躯发动了！`); return 'absorb'; }
+        if (t === 'fire' && foe.has('wellbakedbody')) { this.abBanner(foe); await this.changeStat(foe, 'def', 2, foe); await say(`${foe.logName} 的焦香之躯发动了！`); return 'absorb'; }
         /* ★ 风力发电：受飞行招式时标记 */
-        if (t === 'flying' && foe.has('windpower')) { this.abBanner(foe); foe.vol.wpBoost = true; await say(`${foe.name} 的风力发电发动了！`); return 'absorb'; }
+        if (t === 'flying' && foe.has('windpower')) { this.abBanner(foe); foe.vol.wpBoost = true; await say(`${foe.logName} 的风力发电发动了！`); return 'absorb'; }
         // ★ 隔音：免疫声音类招式
         if (foe.has('soundproof') && mv.sound) {
-          this.abBanner(foe); await say(`${foe.name} 的隔音发动了！声音招式无效！`); return 'immune';
+          this.abBanner(foe); await say(`${foe.logName} 的隔音发动了！声音招式无效！`); return 'immune';
         }
         // ★ 蒸汽机：受到火/水属性招式时速度+6（不免疫伤害，只提升速度）
         if ((t === 'fire' || t === 'water') && foe.has('steamengine')) {
           this.abBanner(foe);
           await this.changeStat(foe, 'spe', 6, foe);
-          await say(`${foe.name} 的蒸汽机发动了！速度大幅提升！`);
+          await say(`${foe.logName} 的蒸汽机发动了！速度大幅提升！`);
         }
         /* ★ 风力发电：受飞行招式时标记 */
-        if (t === 'flying' && foe.has('windpower')) { this.abBanner(foe); foe.vol.wpBoost = true; await say(`${foe.name} 的风力发电发动了！`); return 'absorb'; }
+        if (t === 'flying' && foe.has('windpower')) { this.abBanner(foe); foe.vol.wpBoost = true; await say(`${foe.logName} 的风力发电发动了！`); return 'absorb'; }
         /* ---- 第六批免疫特性 ---- */
         /* ★ 热交换：免疫灼伤，受火属性攻击时攻击+1 */
-        if (t === 'fire' && foe.has('thermalexchange')) { this.abBanner(foe); await this.changeStat(foe, 'atk', 1, foe); await say(`${foe.name} 的热交换发动了！`); return 'absorb'; }
+        if (t === 'fire' && foe.has('thermalexchange')) { this.abBanner(foe); await this.changeStat(foe, 'atk', 1, foe); await say(`${foe.logName} 的热交换发动了！`); return 'absorb'; }
         return null;
       }
       calcDmg(mon, foe, mv) {
@@ -20217,7 +20244,7 @@ return ev;
         if (m.has('magicguard')) return;
         m.hp = Math.max(0, m.hp - d); if (msg) await say(msg);
         if (d > 0) m.lastDmgTaken = d;
-        this.addLog(`↳ ${m.name} 损失 ${d} HP（${Math.max(1, Math.round(d / m.maxhp * 100))}%）· 剩余 ${Math.round(m.hp / m.maxhp * 100)}%`);
+        this.addLog(`↳ ${m.logName} 损失 ${d} HP（${Math.max(1, Math.round(d / m.maxhp * 100))}%）· 剩余 ${Math.round(m.hp / m.maxhp * 100)}%`);
         BUI.refresh(this);
         if (m.hp <= 0) { const foe = this.foeOf(m); await this.handleKO(this.sideOf(m) === 'p' ? 'e' : 'p', foe, m); }
       }
@@ -20230,23 +20257,23 @@ return ev;
         if (!isSelf && !isAllyTarget && foe && foe !== mon) {
           /* ★ 替身：抵挡指向目标的变化招式（音波/穿透无视；挑衅/无理取闹/互换类/天气/场地/空间/群体/自身不受影响） */
           if (foe.vol.substitute > 0 && !mon.has('infiltrator') && !mv.sound && mv.k !== 'taunt' && mv.k !== 'encore' && mv.k !== 'powerswap' && mv.k !== 'guardswap' && mv.k !== 'heartswap' && !['all', 'all-except-self', 'enemy-all', 'ally-all'].includes(mvRng)) {
-            await say(`${foe.vol.illusionName || foe.name} 的替身抵挡了${mv.n}！`);
+            await say(`${foe.logName} 的替身抵挡了${mv.n}！`);
             return;
           }
           // 黄金之躯（场地技/天气/戏法空间除外）
-          if (foe.has('goodasgold') && !mv.hazard && mv.k !== 'trickroom' && !mv.weather) { this.abBanner(foe); await say(`${foe.name} 的黄金之躯发动了！变化招式无效！`); return; }
+          if (foe.has('goodasgold') && !mv.hazard && mv.k !== 'trickroom' && !mv.weather) { this.abBanner(foe); await say(`${foe.logName} 的黄金之躯发动了！变化招式无效！`); return; }
           // 魔法镜（场地技/天气/戏法空间除外）
           if (foe.has('magicbounce') && !mv.hazard && mv.k !== 'trickroom' && !mv.weather && !mon.has('moldbreaker')) {
-            this.abBanner(foe); await say(`${foe.name} 的魔法镜反弹了招式！`);[mon, foe] = [foe, mon];
+            this.abBanner(foe); await say(`${foe.logName} 的魔法镜反弹了招式！`);[mon, foe] = [foe, mon];
           }
           // ★ 恶作剧之心：变化招式对恶系宝可梦无效（场地技/天气/戏法空间除外）
-          if (mon.has('prankster') && foe.types.includes('dark') && !mv.hazard && !mv.weather && mv.k !== 'trickroom') { await say(`${foe.name} 无视了恶作剧！变化招式失败了！`); return; }
+          if (mon.has('prankster') && foe.types.includes('dark') && !mv.hazard && !mv.weather && mv.k !== 'trickroom') { await say(`${foe.logName} 无视了恶作剧！变化招式失败了！`); return; }
           // ★ 变化招式不参与属性克制（电磁波除外：电属性变化招式对地面系无效）
           // 状态免疫（钢免疫中毒、火免疫灼伤等）由 inflictStatus 处理，不在此判定
-          if (mv.t === 'electric' && foe.types.includes('ground')) { await say(`对 ${foe.name} 没有效果…`); return; }
+          if (mv.t === 'electric' && foe.types.includes('ground')) { await say(`对 ${foe.logName} 没有效果…`); return; }
         }
         // 命中
-        if (mv.a != null && Math.random() * 100 > mv.a * (mon.has('compoundeyes') ? 1.3 : 1)) { await say(`${mv.n} 没有命中 ${foe.vol.illusionName || foe.name}！`); return; }
+        if (mv.a != null && Math.random() * 100 > mv.a * (mon.has('compoundeyes') ? 1.3 : 1)) { await say(`${mv.n} 没有命中 ${foe.logName}！`); return; }
         /* ★ 变化招式共用特效：作用于招式目标（减益/异常/场地技→对手，强化/回复→自身） */
         const mySide = this.sideOf(mon);
         const onFoe = !!(mv.setSt || mv.setDrop || mv.taunt || mv.leechseed || mv.trick || mv.parting || mv.clearsmog || mv.hazard);
@@ -20259,7 +20286,7 @@ return ev;
           if (mon.alive() && this.sideAliveCount(side) > 1) { await this.uturnSwitch(side, mon); }
           return;
         }
-        if (mv.trickroom) { this.trickT = this.trickT > 0 ? 0 : 5; await say(this.trickT ? `${mon.vol.illusionName || mon.name} 扭转了时空！` : '戏法空间解除了！'); return; }
+        if (mv.trickroom) { this.trickT = this.trickT > 0 ? 0 : 5; await say(this.trickT ? `${mon.logName} 扭转了时空！` : '戏法空间解除了！'); return; }
         /* ★ 反射壁/光墙/极光幕：光之黏土延长至8回合 */
         if (mv.screen) {
           const turns = (!mon.has('klutz') && mon.item === 'lightclay') ? 8 : 5;
@@ -20268,43 +20295,43 @@ return ev;
           /* ★ 屏障已存在：不叠加、不刷新、不提示 */
           if (allies.some(a => (a.vol[key] || 0) > 0)) return;
           for (const ally of allies) ally.vol[key] = turns;
-          if (mv.screen === 'reflect') await say(`${mon.vol.illusionName || mon.name} 升起了反射壁！物理伤害减半！`);
-          else if (mv.screen === 'light') await say(`${mon.vol.illusionName || mon.name} 升起了光墙！特殊伤害减半！`);
-          else if (mv.screen === 'aurora') await say(`${mon.vol.illusionName || mon.name} 升起了极光幕！伤害减半！`);
+          if (mv.screen === 'reflect') await say(`${mon.logName} 升起了反射壁！物理伤害减半！`);
+          else if (mv.screen === 'light') await say(`${mon.logName} 升起了光墙！特殊伤害减半！`);
+          else if (mv.screen === 'aurora') await say(`${mon.logName} 升起了极光幕！伤害减半！`);
           BUI.refresh(this);
           return;
         }
         if (mv.hazard) {
           const ts = this.foeSide(side);
-          if (mv.hazard === 'sr') { if (this.haz[ts].sr) { await say('场上已经撒过隐形岩了！'); return; } this.haz[ts].sr = 1; await say(`${mon.vol.illusionName || mon.name} 撒下了隐形岩！`); }
-          if (mv.hazard === 'spikes') { if (this.haz[ts].spikes >= 3) { await say('场上已经布满撒菱了！'); return; } this.haz[ts].spikes++; await say(`${mon.vol.illusionName || mon.name} 撒下了撒菱！`); }
+          if (mv.hazard === 'sr') { if (this.haz[ts].sr) { await say('场上已经撒过隐形岩了！'); return; } this.haz[ts].sr = 1; await say(`${mon.logName} 撒下了隐形岩！`); }
+          if (mv.hazard === 'spikes') { if (this.haz[ts].spikes >= 3) { await say('场上已经布满撒菱了！'); return; } this.haz[ts].spikes++; await say(`${mon.logName} 撒下了撒菱！`); }
           if (mv.hazard === 'tspikes') {
             if (this.haz[ts].tspikes >= 2) { await say('场上已经布满毒菱了！'); return; }
             this.haz[ts].tspikes++;
-            await say(`${mon.vol.illusionName || mon.name} 撒下了毒菱！${this.haz[ts].tspikes === 1 ? '触碰后中毒' : '触碰后进入剧毒状态'}！`);
+            await say(`${mon.logName} 撒下了毒菱！${this.haz[ts].tspikes === 1 ? '触碰后中毒' : '触碰后进入剧毒状态'}！`);
           }
           if (mv.hazard === 'stickyweb') {
             if (this.haz[ts].stickyweb) { await say('场上已经布满黏黏网了！'); return; }
             this.haz[ts].stickyweb = 1;
-            await say(`${mon.vol.illusionName || mon.name} 撒下了黏黏网！`);
+            await say(`${mon.logName} 撒下了黏黏网！`);
           }
           return;
         }
         // ★ 防尘：免疫粉末招式（自身使用的粉末招式不受影响）
         if (mv.powder && foe !== mon) {
-          if (foe.types.includes('grass')) { await say(`对 ${foe.name} 没有效果…`); return; }
-          if (foe.has('overcoatx')) { this.abBanner(foe); await say(`${foe.name} 的防尘发动了！粉末招式无效！`); return; }
+          if (foe.types.includes('grass')) { await say(`对 ${foe.logName} 没有效果…`); return; }
+          if (foe.has('overcoatx')) { this.abBanner(foe); await say(`${foe.logName} 的防尘发动了！粉末招式无效！`); return; }
         }
         if (mv.setSt) { await this.tryInflict(foe, mv.setSt, mon, mv.t); return; }
         if (mv.setDrop) { await this.changeStat(foe, mv.setDrop.drop, mv.setDrop.n, mon); return; }
-        if (mv.heal) { const h = Math.floor(mon.maxhp / 2); mon.hp = Math.min(mon.maxhp, mon.hp + h); AU.heal(); await say(`${mon.vol.illusionName || mon.name} 回复了HP！`); BUI.refresh(this); return; }
+        if (mv.heal) { const h = Math.floor(mon.maxhp / 2); mon.hp = Math.min(mon.maxhp, mon.hp + h); AU.heal(); await say(`${mon.logName} 回复了HP！`); BUI.refresh(this); return; }
         /* ★ 丛林治疗：全队回复1/4HP并治愈异常状态 */
         if (mv.jungleheal) {
           const arr = side === 'p' ? this.pp : this.ep;
           let healed = false;
           arr.forEach(x => { if (x.alive()) { const h = Math.floor(x.maxhp / 4); x.hp = Math.min(x.maxhp, x.hp + h); x.status = null; x.sleepT = 0; x.toxicN = 0; healed = true; } });
           AU.heal();
-          await say(`${mon.name} 使用丛林治疗，全队回复了HP并治愈了异常状态！`);
+          await say(`${mon.logName} 使用丛林治疗，全队回复了HP并治愈了异常状态！`);
           BUI.refresh(this);
           return;
         }
@@ -20314,20 +20341,20 @@ return ev;
           mon.hp = Math.min(mon.maxhp, mon.hp + h);
           mon.status = null; mon.sleepT = 0; mon.toxicN = 0;
           AU.heal();
-          await say(`${mon.name} 的新月祈祷发动了！回复了HP并治愈了异常状态！`);
+          await say(`${mon.logName} 的新月祈祷发动了！回复了HP并治愈了异常状态！`);
           BUI.refresh(this);
           return;
         }
-        if (mv.rest) { mon.hp = mon.maxhp; mon.status = 'sleep'; mon.sleepT = 3; AU.heal(); await say(`${mon.vol.illusionName || mon.name} 睡着了，HP完全回复了！`); BUI.refresh(this); return; }
+        if (mv.rest) { mon.hp = mon.maxhp; mon.status = 'sleep'; mon.sleepT = 3; AU.heal(); await say(`${mon.logName} 睡着了，HP完全回复了！`); BUI.refresh(this); return; }
         if (mv.leechseed) {
-          if (foe.types.includes('grass')) { await say(`对 ${foe.name} 没有效果…`); return; }
-          if (foe.vol.seed) { await say(`${foe.name} 已经被种下了种子！`); return; }
-          foe.vol.seed = mon; await say(`${mon.vol.illusionName || mon.name} 种下了寄生种子！`); return;
+          if (foe.types.includes('grass')) { await say(`对 ${foe.logName} 没有效果…`); return; }
+          if (foe.vol.seed) { await say(`${foe.logName} 已经被种下了种子！`); return; }
+          foe.vol.seed = mon; await say(`${mon.logName} 种下了寄生种子！`); return;
         }
         if (mv.taunt) {
           const veil = foe.has('obliviousx') || foe.has('aromaveil') || this.alliesOf(foe).some(a => a.has('aromaveil'));
-          if (veil) { this.abBanner(foe); await say(`${foe.name} 的${foe.has('aromaveil') || this.alliesOf(foe).some(a => a.has('aromaveil')) ? '芳香幕' : '迟钝'}发动了！挑衅无效！`); return; }
-          foe.vol.taunt = 3; await say(`${foe.name} 被挑衅了！`); return;
+          if (veil) { this.abBanner(foe); await say(`${foe.logName} 的${foe.has('aromaveil') || this.alliesOf(foe).some(a => a.has('aromaveil')) ? '芳香幕' : '迟钝'}发动了！挑衅无效！`); return; }
+          foe.vol.taunt = 3; await say(`${foe.logName} 被挑衅了！`); return;
         }
         if (mv.trick) {
           if (mon.item === 'rustedsword' || mon.item === 'rustedshield' || foe.item === 'rustedsword' || foe.item === 'rustedshield') {
@@ -20348,12 +20375,12 @@ return ev;
             return;
           }
           const a = mon.item, b = foe.item; mon.item = b; foe.item = a; mon.vol.choiceLock = null; foe.vol.choiceLock = null;
-          await say(`${mon.vol.illusionName || mon.name} 用戏法交换了双方的道具！`);
+          await say(`${mon.logName} 用戏法交换了双方的道具！`);
           // ★ 轻装触发
           if (foe.has('unburden') && !foe.vol.unburdenActive) {
             foe.vol.unburdenActive = true;
             this.abBanner(foe);
-            await say(`${foe.name} 的轻装发动了！速度大幅提升！`);
+            await say(`${foe.logName} 的轻装发动了！速度大幅提升！`);
             await this.changeStat(foe, 'spe', 2, foe);
           }
           return;
@@ -20362,7 +20389,7 @@ return ev;
           const avg = Math.floor((mon.hp + foe.hp) / 2); mon.hp = Math.min(mon.maxhp, avg); foe.hp = Math.min(foe.maxhp, avg);
           await say('双方分担了痛楚！'); BUI.refresh(this); return;
         }
-        if (mv.clearsmog) { foe.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; await say(`${foe.name} 的能力变化消失了！`); return; }
+        if (mv.clearsmog) { foe.stages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; await say(`${foe.logName} 的能力变化消失了！`); return; }
         if (mv.parting) {
           await this.changeStat(foe, 'atk', -1, mon); await this.changeStat(foe, 'spa', -1, mon, true);
           if (this.sideAliveCount(side) > 1) await this.uturnSwitch(side, mon); return;
@@ -20371,22 +20398,22 @@ return ev;
         if (mv.healbell) {
           const arr = side === 'p' ? this.pp : this.ep;
           arr.forEach(m => { if (m.alive()) { m.status = null; m.sleepT = 0; m.toxicN = 0; } });
-          await say(`${mon.name} 的治愈铃声响起，全队的异常状态被治愈了！`); return;
+          await say(`${mon.logName} 的治愈铃声响起，全队的异常状态被治愈了！`); return;
         }
         if (mv.substitute) {
           if (mon.vol.substitute > 0) { await say('已经处于替身状态，无法再使用替身！'); return; }
           const cost = Math.floor(mon.maxhp / 4);
           if (mon.hp <= cost || mon.hp <= 0) { await say('HP不足，无法使用替身！'); return; }
           mon.hp -= cost; mon.vol.substitute = Math.floor(mon.maxhp / 4);
-          await say(`${mon.name} 制造了一个替身！`); BUI.refresh(this); return;
+          await say(`${mon.logName} 制造了一个替身！`); BUI.refresh(this); return;
         }
         if (mv.wish) {
           mon.vol.wish = Math.floor(mon.maxhp / 2);
-          await say(`${mon.name} 许下了心愿！`); return;
+          await say(`${mon.logName} 许下了心愿！`); return;
         }
         if (mv.yawn) {
           if (foe.status) { await say('对手已有异常状态…'); return; }
-          foe.vol.drowsy = 2; await say(`${foe.name} 变得昏昏欲睡！`); return;
+          foe.vol.drowsy = 2; await say(`${foe.logName} 变得昏昏欲睡！`); return;
         }
         if (mv.stockpile) {
           if ((mon.vol.stockpile || 0) >= 3) { await say('已经蓄力到最大了！'); return; }
@@ -20394,7 +20421,7 @@ return ev;
           mon.vol.stockDef = (mon.vol.stockDef || 0) + 1;
           mon.vol.stockSpd = (mon.vol.stockSpd || 0) + 1;
           await this.changeStat(mon, 'def', 1, mon); await this.changeStat(mon, 'spd', 1, mon, true);
-          await say(`${mon.name} 积蓄了力量！(${mon.vol.stockpile}/3)`); return;
+          await say(`${mon.logName} 积蓄了力量！(${mon.vol.stockpile}/3)`); return;
         }
         if (mv.swallow) {
           const n = mon.vol.stockpile || 0;
@@ -20402,28 +20429,28 @@ return ev;
           const healPct = [0, .25, .5, 1][n];
           mon.hp = Math.min(mon.maxhp, mon.hp + Math.floor(mon.maxhp * healPct));
           mon.vol.stockpile = 0; mon.vol.stockDef = 0; mon.vol.stockSpd = 0;
-          await say(`${mon.name} 吞下了积蓄的力量，回复了HP！`); AU.heal(); BUI.refresh(this); return;
+          await say(`${mon.logName} 吞下了积蓄的力量，回复了HP！`); AU.heal(); BUI.refresh(this); return;
         }
         if (mv.spitup) {
           const n = mon.vol.stockpile || 0;
           if (!n) { await say('没有积蓄力量…'); return; }
           const dmg = 100 * n;
-          await this.directDmg(foe, dmg, this.sideOf(foe), `${mon.name} 喷出了积蓄的力量！`);
+          await this.directDmg(foe, dmg, this.sideOf(foe), `${mon.logName} 喷出了积蓄的力量！`);
           mon.vol.stockpile = 0; mon.vol.stockDef = 0; mon.vol.stockSpd = 0;
           BUI.refresh(this); return;
         }
         if (mv.ingrain) {
           if (mon.vol.ingrain) { await say('已经扎根了！'); return; }
-          mon.vol.ingrain = true; await say(`${mon.name} 将根扎入了地面！`); return;
+          mon.vol.ingrain = true; await say(`${mon.logName} 将根扎入了地面！`); return;
         }
         if (mv.recycle) {
           if (!mon.vol.usedBerry || mon.item) { await say('没有可以回收的道具…'); return; }
           mon.item = mon.vol.usedBerryItem || 'sitrus'; mon.vol.usedBerry = false;
-          await say(`${mon.name} 的回收利用发动了！找回了道具！`); return;
+          await say(`${mon.logName} 的回收利用发动了！找回了道具！`); return;
         }
         if (mv.refresh) {
           mon.status = null; mon.sleepT = 0; mon.toxicN = 0;
-          await say(`${mon.name} 焕然一新，状态恢复了！`); return;
+          await say(`${mon.logName} 焕然一新，状态恢复了！`); return;
         }
         if (mv.perish) {
           for (const x of [...this.fieldMons('p'), ...this.fieldMons('e')]) if (x && x.alive()) x.vol.perishT = 3;
@@ -20435,16 +20462,16 @@ return ev;
           if (!alive.length) { await say('对手没有可以替换的宝可梦！'); return; }
           const idx = Math.floor(Math.random() * alive.length);
           await this.doSwitch(this.sideOf(foe), arr.indexOf(alive[idx]), this.fieldSlotOf(foe));
-          await say(`${foe.name} 被吼走了！`); return;
+          await say(`${foe.logName} 被吼走了！`); return;
         }
         if (mv.memento) {
           await this.changeStat(foe, 'atk', -2, mon); await this.changeStat(foe, 'spa', -2, mon, true);
-          mon.hp = 0; mon.fainted = true; await say(`${mon.name} 使用了临别礼物！`);
+          mon.hp = 0; mon.fainted = true; await say(`${mon.logName} 使用了临别礼物！`);
           await this.handleKO(this.sideOf(foe) === 'p' ? 'e' : 'p', foe, mon);
           BUI.refresh(this); return;
         }
         if (mv.healingwish || mv.lunardance) {
-          mon.hp = 0; mon.fainted = true; await say(`${mon.name} 使用了${mv.lunardance ? '新月舞' : '治愈之愿'}！`);
+          mon.hp = 0; mon.fainted = true; await say(`${mon.logName} 使用了${mv.lunardance ? '新月舞' : '治愈之愿'}！`);
           if (mv.healingwish) { mon.vol.healingWish = true; } else { mon.vol.lunarDance = true; }
           await this.handleKO(this.sideOf(foe) === 'p' ? 'e' : 'p', foe, mon);
           BUI.refresh(this); return;
@@ -20452,10 +20479,10 @@ return ev;
         if (mv.bestow) {
           if (!mon.item || foe.item) { await say('无法传递礼物…'); return; }
           foe.item = mon.item; mon.item = null;
-          await say(`${mon.name} 把${IT[foe.item]?.n || '道具'}传递给了${foe.name}！`); return;
+          await say(`${mon.logName} 把${IT[foe.item]?.n || '道具'}传递给了${foe.logName}！`); return;
         }
         if (mv.quash) {
-          foe.vol.quash = true; await say(`${foe.name} 被延后了！`); return;
+          foe.vol.quash = true; await say(`${foe.logName} 被延后了！`); return;
         }
         if (mv.allyswitch) {
           const arr = side === 'p' ? this.pp : this.ep;
@@ -20464,22 +20491,22 @@ return ev;
           const allyIdx = arr.findIndex((m, i) => i !== idx && m.alive() && m !== mon);
           if (allyIdx === -1) { await say('没有可以交换的对象…'); return; }
           arr[idx] = arr[allyIdx]; arr[allyIdx] = mon;
-          await say(`${mon.name} 交换了位置！`); BUI.refresh(this); return;
+          await say(`${mon.logName} 交换了位置！`); BUI.refresh(this); return;
         }
         if (mv.telekinesis) {
           if (foe.vol.telekinesis) { await say('已经被意念移物了…'); return; }
-          foe.vol.telekinesis = 3; await say(`${foe.name} 被意念移物了！`); return;
+          foe.vol.telekinesis = 3; await say(`${foe.logName} 被意念移物了！`); return;
         }
         if (mv.magiccoat) {
-          mon.vol.magicCoat = true; await say(`${mon.name} 披上了魔法反射的外衣！`); return;
+          mon.vol.magicCoat = true; await say(`${mon.logName} 披上了魔法反射的外衣！`); return;
         }
         if (mv.snatch) {
-          mon.vol.snatch = true; await say(`${mon.name} 准备抢夺对手的招式效果！`); return;
+          mon.vol.snatch = true; await say(`${mon.logName} 准备抢夺对手的招式效果！`); return;
         }
         if (mv.feint) {
           if (foe.vol.protect || foe.vol.banefulBunker || foe.vol.obstruct || foe.vol.silkTrap) {
             foe.vol.protect = false; foe.vol.banefulBunker = false; foe.vol.obstruct = false; foe.vol.silkTrap = false;
-            await say(`${mon.name} 的佯攻打破了保护！`);
+            await say(`${mon.logName} 的佯攻打破了保护！`);
             const d = Math.max(1, Math.floor(Math.random() * 30 + 15));
             await this.directDmg(foe, d, this.sideOf(foe));
           } else { await say('没有保护可以打破…'); }
@@ -20492,23 +20519,23 @@ return ev;
           if (foe.vol.lightscreen) foe.vol.lightscreen = false;
           if (foe.vol.reflect) foe.vol.reflect = false;
           if (foe.vol.mist) foe.vol.mist = false;
-          await say(`${mon.name} 清除了对手场上的陷阱和屏障！`); return;
+          await say(`${mon.logName} 清除了对手场上的陷阱和屏障！`); return;
         }
         if (mv.tailwind) {
           /* ★ 顺风已存在：不叠加、不刷新、不提示 */
           if (this.tailwind[side] > 0) return;
-          this.tailwind[side] = 4; await say(`${mon.name} 召唤了顺风！己方速度翻倍！`); return;
+          this.tailwind[side] = 4; await say(`${mon.logName} 召唤了顺风！己方速度翻倍！`); return;
         }
         /* ★ 双打辅助招式 */
         if (mv.helpinghand) {
           if (!foe || foe.fainted || foe === mon) { await say('没有可以帮助的对象！'); return; }
           foe.vol.helpingHand = true;
-          await say(`${mon.name} 帮助了 ${foe.name}！${foe.name} 本回合招式的威力提升了！`);
+          await say(`${mon.logName} 帮助了 ${foe.logName}！${foe.logName} 本回合招式的威力提升了！`);
           return;
         }
-        if (mv.followme) { mon.vol.followme = true; mon.vol.followmePowder = false; await say(`${mon.name} 使出了看我嘛！成为了攻击目标！`); return; }
-        if (mv.ragepowder) { mon.vol.followme = true; mon.vol.followmePowder = true; await say(`${mon.name} 撒出了愤怒粉！成为了攻击目标！`); return; }
-        if (mv.wideguard) { this.wideGuard[side] = true; await say(`${mon.name} 展开了广域防守！多目标招式无效！`); return; }
+        if (mv.followme) { mon.vol.followme = true; mon.vol.followmePowder = false; await say(`${mon.logName} 使出了看我嘛！成为了攻击目标！`); return; }
+        if (mv.ragepowder) { mon.vol.followme = true; mon.vol.followmePowder = true; await say(`${mon.logName} 撒出了愤怒粉！成为了攻击目标！`); return; }
+        if (mv.wideguard) { this.wideGuard[side] = true; await say(`${mon.logName} 展开了广域防守！多目标招式无效！`); return; }
         if (mv.coaching) {
           if (!foe || foe.fainted || foe === mon) { await say('没有可以指导的对象！'); return; }
           await this.changeStat(foe, 'atk', 1, mon);
@@ -20522,7 +20549,7 @@ return ev;
         }
         if (mv.mist) {
           for (const ally of this.fieldMons(side).filter(x => x.alive())) ally.vol.mist = 5;
-          await say(`${mon.name} 升起了白雾！能力不会被降低了！`); return;
+          await say(`${mon.logName} 升起了白雾！能力不会被降低了！`); return;
         }
         if (mv.gearup) {
           for (const ally of this.fieldMons(side).filter(x => x.alive())) { await this.changeStat(ally, 'atk', 1, mon); await this.changeStat(ally, 'spa', 1, mon, true); }
@@ -20536,59 +20563,59 @@ return ev;
         }
         if (mv.purify) {
           if (!foe || foe.fainted || foe === mon) { await say('没有可以净化的对象！'); return; }
-          if (!foe.status) { await say(`${foe.name} 没有异常状态！`); return; }
+          if (!foe.status) { await say(`${foe.logName} 没有异常状态！`); return; }
           foe.status = null; foe.sleepT = 0; foe.toxicN = 0;
-          await say(`${mon.name} 净化了${foe.name}的异常状态！`); return;
+          await say(`${mon.logName} 净化了${foe.logName}的异常状态！`); return;
         }
         if (mv.floralheal) {
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
           const h = Math.floor(foe.maxhp * (this.terrain === 'grassy' ? 2 / 3 : 0.5));
           foe.hp = Math.min(foe.maxhp, foe.hp + h);
           AU.heal();
-          await say(`${foe.name} 回复了HP！`); BUI.refresh(this); return;
+          await say(`${foe.logName} 回复了HP！`); BUI.refresh(this); return;
         }
         if (mv.dragoncheer) {
           if (!foe || foe.fainted || foe === mon) { await say('没有可以鼓舞的对象！'); return; }
           foe.vol.cheerCrit = true;
-          await say(`${mon.name} 鼓舞了${foe.name}，会心率提升了！`); return;
+          await say(`${mon.logName} 鼓舞了${foe.logName}，会心率提升了！`); return;
         }
         if (mv.tidyup) {
           this.haz = { p: { sr: 0, spikes: 0, tspikes: 0, stickyweb: 0 }, e: { sr: 0, spikes: 0, tspikes: 0, stickyweb: 0 } };
           await this.changeStat(mon, 'atk', 1, mon);
           await this.changeStat(mon, 'spe', 1, mon, true);
-          await say(`${mon.name} 整理了场地，清除了所有场地陷阱！`); return;
+          await say(`${mon.logName} 整理了场地，清除了所有场地陷阱！`); return;
         }
         if (mv.courtchange) {
           const hp = this.haz.p, he = this.haz.e;
           this.haz.p = he; this.haz.e = hp;
           const ap = this.auroraveil.p, ae = this.auroraveil.e;
           this.auroraveil.p = ae; this.auroraveil.e = ap;
-          await say(`${mon.name} 使用换场交换了双方的场地状态！`); BUI.refresh(this); return;
+          await say(`${mon.logName} 使用换场交换了双方的场地状态！`); BUI.refresh(this); return;
         }
         if (mv.speedswap) {
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
           const tmp = mon.st.spe; mon.st.spe = foe.st.spe; foe.st.spe = tmp;
-          await say(`${mon.name} 与${foe.name}交换了速度！`); BUI.refresh(this); return;
+          await say(`${mon.logName} 与${foe.logName}交换了速度！`); BUI.refresh(this); return;
         }
         if (mv.guardswap) {
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
           for (const k of ['def', 'spd']) { const tmp = mon.st[k]; mon.st[k] = foe.st[k]; foe.st[k] = tmp; }
-          await say(`${mon.name} 与${foe.name}交换了防御能力！`); BUI.refresh(this); return;
+          await say(`${mon.logName} 与${foe.logName}交换了防御能力！`); BUI.refresh(this); return;
         }
         if (mv.powerswap2) {
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
           for (const k of ['atk', 'spa']) { const tmp = mon.st[k]; mon.st[k] = foe.st[k]; foe.st[k] = tmp; }
-          await say(`${mon.name} 与${foe.name}交换了攻击能力！`); BUI.refresh(this); return;
+          await say(`${mon.logName} 与${foe.logName}交换了攻击能力！`); BUI.refresh(this); return;
         }
         if (mv.heartswap) {
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
           const tmp = mon.stages; mon.stages = foe.stages; foe.stages = tmp;
-          await say(`${mon.name} 与${foe.name}交换了能力变化！`); BUI.refresh(this); return;
+          await say(`${mon.logName} 与${foe.logName}交换了能力变化！`); BUI.refresh(this); return;
         }
         if (mv.spotlight) {
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
           foe.vol.followme = true; foe.vol.followmePowder = false;
-          await say(`${foe.name} 成为了聚光灯的焦点！`); return;
+          await say(`${foe.logName} 成为了聚光灯的焦点！`); return;
         }
         if (mv.stuffcheeks) {
           if (!mon.item) { await say('没有持有树果！'); return; }
@@ -20596,7 +20623,7 @@ return ev;
           if (berry === 'sitrus' || !IT[berry]?.t) {
             const h = Math.floor(mon.maxhp / (berry === 'sitrus' ? 4 : 3));
             mon.hp = Math.min(mon.maxhp, mon.hp + h);
-            await say(`${mon.name} 吃掉了${IT[berry]?.n || '树果'}，回复了HP！`);
+            await say(`${mon.logName} 吃掉了${IT[berry]?.n || '树果'}，回复了HP！`);
           }
           await this.changeStat(mon, 'def', 2, mon);
           BUI.refresh(this); return;
@@ -20610,7 +20637,7 @@ return ev;
           await this.changeStat(mon, 'atk', 2, mon);
           await this.changeStat(mon, 'spa', 2, mon, true);
           await this.changeStat(mon, 'spe', 2, mon, true);
-          await say(`${mon.name} 甩掉了赘肉，攻击、特攻和速度大幅提升了！`);
+          await say(`${mon.logName} 甩掉了赘肉，攻击、特攻和速度大幅提升了！`);
           BUI.refresh(this); return;
         }
         if (mv.shedtail) {
@@ -20621,27 +20648,27 @@ return ev;
           const slot = this.fieldSlotOf(mon);
           const subHp = Math.floor(mon.maxhp / 4);
           mon.hp -= cost; mon.vol.substitute = subHp;
-          await say(`${mon.name} 制造了一个替身！`);
+          await say(`${mon.logName} 制造了一个替身！`);
           await this.uturnSwitch(side, mon);
           /* ★ 断尾：替身传递给换上场的宝可梦 */
           const incoming = this.slotMon(side, slot >= 0 ? slot : 0);
           if (incoming && incoming !== mon) {
             incoming.vol.substitute = subHp;
-            await say(`${incoming.name} 继承了替身！`);
+            await say(`${incoming.logName} 继承了替身！`);
           }
           BUI.refresh(this); return;
         }
         if (mv.powershift) {
           const atk = mon.st.atk, spa = mon.st.spa;
           mon.st.atk = Math.max(1, Math.floor(spa)); mon.st.spa = Math.max(1, Math.floor(atk));
-          await say(`${mon.name} 的力量转换发动了！攻击与特攻互换！`); BUI.refresh(this); return;
+          await say(`${mon.logName} 的力量转换发动了！攻击与特攻互换！`); BUI.refresh(this); return;
         }
         /* ★ 沥青射击：降低对手速度1级，并使对手受到火属性伤害提升 */
         if (mv.tarshot) {
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
           await this.changeStat(foe, 'spe', -1, mon);
           foe.vol.tarshot = true;
-          await say(`${foe.name} 被沥青覆盖了！速度降低，火属性招式伤害提升！`);
+          await say(`${foe.logName} 被沥青覆盖了！速度降低，火属性招式伤害提升！`);
           return;
         }
         /* ★ 魔法粉：使目标变成超能力属性 */
@@ -20649,15 +20676,15 @@ return ev;
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
           foe.vol.mpTypes = foe.types.slice();
           foe.types = ['psychic'];
-          await say(`${foe.name} 被撒上了魔法粉，变成了超能力属性！`); BUI.refresh(this); return;
+          await say(`${foe.logName} 被撒上了魔法粉，变成了超能力属性！`); BUI.refresh(this); return;
         }
         /* ★ 茶会：场上所有宝可梦吃下携带的树果 */
         if (mv.teatime) {
           for (const m of [...this.fieldMons('p'), ...this.fieldMons('e')]) {
             if (m && m.alive() && m.item) {
               const berry = m.item; m.item = null;
-              if (berry === 'sitrus') { const h = Math.floor(m.maxhp / 4); m.hp = Math.min(m.maxhp, m.hp + h); AU.heal(); await say(`${m.name} 吃掉了文柚果，回复了HP！`); }
-              else await say(`${m.name} 吃掉了${IT[berry]?.n || '树果'}！`);
+              if (berry === 'sitrus') { const h = Math.floor(m.maxhp / 4); m.hp = Math.min(m.maxhp, m.hp + h); AU.heal(); await say(`${m.logName} 吃掉了文柚果，回复了HP！`); }
+              else await say(`${m.logName} 吃掉了${IT[berry]?.n || '树果'}！`);
             }
           }
           BUI.refresh(this); return;
@@ -20667,7 +20694,7 @@ return ev;
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
           foe.vol.binding = 4 + Math.floor(Math.random() * 2);
           foe.vol.octolock = true;
-          await say(`${foe.name} 被蛸固困住了！每回合防御和特防都会降低！`);
+          await say(`${foe.logName} 被蛸固困住了！每回合防御和特防都会降低！`);
           return;
         }
         /* ★ 写生：复制对手最后使用的招式 */
@@ -20679,7 +20706,7 @@ return ev;
           const newMv = { k: last, pp: MV[last].pp, maxpp: MV[last].pp };
           if (idx >= 0) mon.moves[idx] = newMv;
           else mon.moves.push(newMv);
-          await say(`${mon.name} 写生复制了${foe.name}的${MV[last].n}！`); return;
+          await say(`${mon.logName} 写生复制了${foe.logName}的${MV[last].n}！`); return;
         }
         /* ★ 腐蚀气体：溶解场上所有宝可梦的道具（黏着除外） */
         if (mv.corrosivegas) {
@@ -20695,7 +20722,7 @@ return ev;
           const h = Math.max(1, foe.effStat('atk', this));
           mon.hp = Math.min(mon.maxhp, mon.hp + h);
           AU.heal();
-          await say(`${mon.name} 吸收了${foe.name}的力量，回复了HP！`);
+          await say(`${mon.logName} 吸收了${foe.logName}的力量，回复了HP！`);
           BUI.refresh(this); return;
         }
         /* ★ 毒丝：使对手中毒并降低速度1级 */
@@ -20708,7 +20735,7 @@ return ev;
         /* ★ 磨砺：下回合必定会心一击 */
         if (mv.laserfocus) {
           mon.vol.laserFocus = true;
-          await say(`${mon.name} 集中精神，下回合必定会心一击！`); return;
+          await say(`${mon.logName} 集中精神，下回合必定会心一击！`); return;
         }
         /* ★ 号令：让队友立即再次使用上回合的招式 */
         if (mv.instruct) {
@@ -20716,7 +20743,7 @@ return ev;
           if (!ally || ally.fainted) { await say('没有目标！'); return; }
           const last = ally.vol.lastMove;
           if (!last || !ally.moves.some(x => x.k === last)) { await say('对方没有可以再次使用的招式…'); return; }
-          await say(`${mon.name} 号令${ally.name}再次使用${MV[last]?.n || last}！`);
+          await say(`${mon.logName} 号令${ally.logName}再次使用${MV[last]?.n || last}！`);
           await this.doMove(side, ally, { k: last }, { side, mon: ally, move: { k: last } });
           return;
         }
@@ -20730,21 +20757,24 @@ return ev;
         /* ★ 电磁飘浮：5回合内免疫地面系招式 */
         if (mv.magnetrise) {
           mon.vol.magnetRise = 5;
-          await say(`${mon.name} 借助磁力漂浮了起来！`); return;
+          await say(`${mon.logName} 借助磁力漂浮了起来！`); return;
         }
         /* ★ 水流环：每回合回复1/16最大HP */
         if (mv.aquaring) {
           mon.vol.aquaRing = true;
-          await say(`${mon.name} 被水流环包裹住了！`); return;
+          await say(`${mon.logName} 被水流环包裹住了！`); return;
         }
         /* ★ 玩泥巴/玩水：5回合内全场电/火属性伤害减半 */
-        if (mv.mudsport) { this.mudSport = 5; await say(`${mon.name} 玩起了泥巴！5回合内电属性招式伤害减半！`); return; }
-        if (mv.watersport) { this.waterSport = 5; await say(`${mon.name} 玩起了水！5回合内火属性招式伤害减半！`); return; }
+        if (mv.mudsport) { this.mudSport = 5; await say(`${mon.logName} 玩起了泥巴！5回合内电属性招式伤害减半！`); return; }
+        if (mv.watersport) { this.waterSport = 5; await say(`${mon.logName} 玩起了水！5回合内火属性招式伤害减半！`); return; }
         if (mv.doodle) {
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
           const ab = foe.ability;
           for (const ally of this.fieldMons(side).filter(x => x.alive())) ally.ability = ab;
-          await say(`${mon.name} 描绘了${foe.name}的特性，全队特性变成了${AB[ab]?.n || ab}！`); return;
+          await say(`${mon.logName} 描绘了${foe.logName}的特性，全队特性变成了${AB[ab]?.n || ab}！`);
+          /* ★ 获得的主动类特性立即发动 */
+          for (const ally of this.fieldMons(side).filter(x => x.alive())) await this.triggerGainedAbility(ally, ab);
+          return;
         }
         if (mv.spicyextract) {
           if (!foe || foe.fainted) { await say('没有目标！'); return; }
@@ -20754,26 +20784,26 @@ return ev;
         }
         if (mv.encore) {
           /* ★ 极巨化的宝可梦不会被再来一次 */
-          if (foe.dyn) { await say(`${foe.name} 正在极巨化，无法被再来一次！`); return; }
+          if (foe.dyn) { await say(`${foe.logName} 正在极巨化，无法被再来一次！`); return; }
           /* ★ 已经处于再来一次状态的宝可梦，无法再被再来一次 */
-          if (foe.vol.encore) { await say(`${foe.name} 已经被再来一次困住了！`); return; }
+          if (foe.vol.encore) { await say(`${foe.logName} 已经被再来一次困住了！`); return; }
           const lastK = foe.vol.lastMove;
           if (!lastK || !foe.moves.some(m => m.k === lastK)) { await say('没有可以再来一次的招式…'); return; }
           /* ★ 再来一次不能让「再来一次」再来一次 */
-          if (lastK === 'encore') { await say(`${foe.name} 的再来一次无法被再来一次！`); return; }
-          foe.vol.encore = { k: lastK, t: 3 }; await say(`${foe.name} 被再来一次困住了！`); return;
+          if (lastK === 'encore') { await say(`${foe.logName} 的再来一次无法被再来一次！`); return; }
+          foe.vol.encore = { k: lastK, t: 3 }; await say(`${foe.logName} 被再来一次困住了！`); return;
         }
         if (mv.craftyshield) {
-          mon.vol.craftyShield = true; await say(`${mon.name} 使用了戏法防守！`); return;
+          mon.vol.craftyShield = true; await say(`${mon.logName} 使用了戏法防守！`); return;
         }
         if (mv.flatter) {
           await this.changeStat(foe, 'spa', 1, mon);
-          if (!foe.vol.confuse) { foe.vol.confuse = rnd(2, 4); await say(`${foe.name} 混乱了！`); }
+          if (!foe.vol.confuse) { foe.vol.confuse = rnd(2, 4); await say(`${foe.logName} 混乱了！`); }
           return;
         }
         if (mv.swagger) {
           await this.changeStat(foe, 'atk', 2, mon);
-          if (!foe.vol.confuse) { foe.vol.confuse = rnd(2, 4); await say(`${foe.name} 混乱了！`); }
+          if (!foe.vol.confuse) { foe.vol.confuse = rnd(2, 4); await say(`${foe.logName} 混乱了！`); }
           return;
         }
         if (mv.captivate) {
@@ -20797,7 +20827,7 @@ return ev;
           target.fainted = false;
           target.hp = Math.floor(target.maxhp / 2);
           AU.heal();
-          await say(`${mon.vol.illusionName || mon.name} 的复生祈祷发动了！${target.name} 恢复了活力，回复了50%的HP！`);
+          await say(`${mon.logName} 的复生祈祷发动了！${target.logName} 恢复了活力，回复了50%的HP！`);
           BUI.refresh(this);
           return;
         }
@@ -20830,7 +20860,7 @@ return ev;
           mon.maxhp = _saveMaxhp;
           mon.baseMax = _saveBaseMax;
           if (mon.hp > mon.maxhp) mon.hp = mon.maxhp;
-          await say(`${mon.vol.illusionName || _saveName} 变身成了${foe.name}！`);
+          await say(`${mon.vol.illusionName || _saveName} 变身成了${foe.logName}！`);
           BUI.refresh(this);
           return;
         }
@@ -20850,21 +20880,21 @@ return ev;
         if (mv.takeheart) {
           await this.changeStat(mon, 'spa', 1, mon);
           await this.changeStat(mon, 'spd', 1, mon, true);
-          if (mon.status) { mon.status = null; mon.sleepT = 0; mon.toxicN = 0; await say(`${mon.name} 的异常状态被治愈了！`); }
+          if (mon.status) { mon.status = null; mon.sleepT = 0; mon.toxicN = 0; await say(`${mon.logName} 的异常状态被治愈了！`); }
         }
         /* ★ 魂舞烈音爆：消耗1/3最大HP，全能力+1 */
         if (mv.clangorous) {
           const cost = Math.floor(mon.maxhp / 3);
           mon.hp = Math.max(1, mon.hp - cost);
           BUI.dmgPop(side, `-${cost}`, '#ff9d8a');
-          await say(`${mon.name} 消耗了体力！`);
+          await say(`${mon.logName} 消耗了体力！`);
           await this.changeStatBatch(mon, [['atk', 1], ['def', 1], ['spa', 1], ['spd', 1], ['spe', 1]], mon);
         }
         BUI.refresh(this);
       }
       async tryInflict(foe, st, src, mvType) {
         /* ★ 场地防护：薄雾场地免疫异常状态，电气场地免疫睡眠 */
-        if (st !== 'confuse' && foe.status) { await say(`${foe.name} 已经有异常状态了！`); return; }
+        if (st !== 'confuse' && foe.status) { await say(`${foe.logName} 已经有异常状态了！`); return; }
         await this.inflictStatus(foe, st, src, mvType);
       }
       async inflictStatus(m, st, src, mvType, noSync) {
@@ -20872,7 +20902,7 @@ return ev;
         // ★ 叶子防守：晴天时免疫异常状态（混乱除外）
         if (st !== 'confuse' && m.has('leafguard') && this.wxActive() === 'sun') {
           this.abBanner(m);
-          await say(`${m.name} 的叶子防守发动了！晴天不会陷入异常状态！`);
+          await say(`${m.logName} 的叶子防守发动了！晴天不会陷入异常状态！`);
           return false;
         }
         /* ★ 薄雾场地：地面上的宝可梦免疫异常状态（混乱除外） */
@@ -20885,61 +20915,61 @@ return ev;
         }
         if (st === 'confuse' && m.has('owntempo')) {
           this.abBanner(m);
-          await say(`${m.name} 的我行我素发动了！不会陷入混乱！`);
+          await say(`${m.logName} 的我行我素发动了！不会陷入混乱！`);
           return false;
         }
-        if (st === 'confuse') { if (m.vol.confuse > 0) return false; m.vol.confuse = rnd(2, 4); await say(`${m.name} 混乱了！`); if (!CFG.fancyAudio) AU.status(); FX.inflict(this.sideOf(m), 'confuse'); return true; }
+        if (st === 'confuse') { if (m.vol.confuse > 0) return false; m.vol.confuse = rnd(2, 4); await say(`${m.logName} 混乱了！`); if (!CFG.fancyAudio) AU.status(); FX.inflict(this.sideOf(m), 'confuse'); return true; }
         /* ★ 属性免疫（绝对，与来源招式属性无关） */
-        if (st === 'burn' && m.types.includes('fire')) { await say(`${m.name} 是火属性，不会灼伤！`); return false; }
+        if (st === 'burn' && m.types.includes('fire')) { await say(`${m.logName} 是火属性，不会灼伤！`); return false; }
         /* ★ 水泡：不会灼伤 */
-        if (st === 'burn' && m.has('waterbubble')) { this.abBanner(m); await say(`${m.name} 的水泡特性发动了！不会灼伤！`); return false; }
-        if (st === 'burn' && m.has('thermalexchange')) { this.abBanner(m); await say(`${m.name} 的热交换特性发动了！不会灼伤！`); return false; }
-        if (st === 'frz' && m.types.includes('ice')) { await say(`${m.name} 是冰属性，不会冰冻！`); return false; }
+        if (st === 'burn' && m.has('waterbubble')) { this.abBanner(m); await say(`${m.logName} 的水泡特性发动了！不会灼伤！`); return false; }
+        if (st === 'burn' && m.has('thermalexchange')) { this.abBanner(m); await say(`${m.logName} 的热交换特性发动了！不会灼伤！`); return false; }
+        if (st === 'frz' && m.types.includes('ice')) { await say(`${m.logName} 是冰属性，不会冰冻！`); return false; }
         if ((st === 'psn' || st === 'tox') && (m.types.includes('poison') || m.types.includes('steel')) && !(src && src.has('corrosion'))) {
-          await say(`${m.name} 不会中毒！`); return false;
+          await say(`${m.logName} 不会中毒！`); return false;
         }
         /* ★ 电属性仅免疫电属性招式的麻痹（电磁波/打雷），大蛇瞪眼等一般属性仍可麻痹 */
-        if (st === 'par' && m.types.includes('electric') && mvType === 'electric') { await say(`${m.name} 是电属性，不会被电属性招式麻痹！`); return false; }
+        if (st === 'par' && m.types.includes('electric') && mvType === 'electric') { await say(`${m.logName} 是电属性，不会被电属性招式麻痹！`); return false; }
         /* ★ 甜幕：不会睡着 */
         if (st === 'sleep' && m.has('sweetveil')) {
           this.abBanner(m);
-          await say(`${m.name} 的甜幕发动了！不会睡着！`);
+          await say(`${m.logName} 的甜幕发动了！不会睡着！`);
           return false;
         }
         /* ★ 双打同伴守护：甜幕/粉彩护幕/花幕 */
         if (st === 'sleep' && this.alliesOf(m).some(a => a.has('sweetveil'))) {
           const ally = this.alliesOf(m).find(a => a.has('sweetveil'));
           this.abBanner(ally);
-          await say(`${ally.name} 的甜幕发动了！${m.name} 不会睡着！`);
+          await say(`${ally.logName} 的甜幕发动了！${m.logName} 不会睡着！`);
           return false;
         }
         if ((st === 'psn' || st === 'tox') && this.alliesOf(m).some(a => a.has('pastelveil'))) {
           const ally = this.alliesOf(m).find(a => a.has('pastelveil'));
           this.abBanner(ally);
-          await say(`${ally.name} 的粉彩护幕发动了！${m.name} 不会中毒！`);
+          await say(`${ally.logName} 的粉彩护幕发动了！${m.logName} 不会中毒！`);
           return false;
         }
         if (st !== 'confuse' && m.types.includes('grass') && this.alliesOf(m).some(a => a.has('flowerveil'))) {
           const ally = this.alliesOf(m).find(a => a.has('flowerveil'));
           this.abBanner(ally);
-          await say(`${ally.name} 的花幕发动了！${m.name} 不会陷入异常状态！`);
+          await say(`${ally.logName} 的花幕发动了！${m.logName} 不会陷入异常状态！`);
           return false;
         }
         /* ★ 特性免疫 */
-        if (st === 'burn' && m.has('waterveil')) { await say(`${m.name} 的水幕特性发动了！`); return false; }
-        if (st === 'par' && m.has('limber')) { await say(`${m.name} 的柔软特性发动了！`); return false; }
-        if ((st === 'psn' || st === 'tox') && (m.has('immunity') || m.has('purifyingsalt'))) { await say(`${m.name} 的特性让它无法中毒！`); return false; }
-        if (st === 'sleep' && (m.has('insomnia') || m.has('vitalspirit'))) { await say(`${m.name} 的特性让它无法入睡！`); return false; }
+        if (st === 'burn' && m.has('waterveil')) { await say(`${m.logName} 的水幕特性发动了！`); return false; }
+        if (st === 'par' && m.has('limber')) { await say(`${m.logName} 的柔软特性发动了！`); return false; }
+        if ((st === 'psn' || st === 'tox') && (m.has('immunity') || m.has('purifyingsalt'))) { await say(`${m.logName} 的特性让它无法中毒！`); return false; }
+        if (st === 'sleep' && (m.has('insomnia') || m.has('vitalspirit'))) { await say(`${m.logName} 的特性让它无法入睡！`); return false; }
         m.status = st;
         if (!CFG.fancyAudio) AU.status();
         FX.inflict(this.sideOf(m), st, m._slot || 0);
         const nm = { burn: '被灼伤了', par: '麻痹了', psn: '中毒了', tox: '中了剧毒', sleep: '睡着了', frz: '被冻住了' }[st];
-        await say(`${m.name} ${nm}！`);
+        await say(`${m.logName} ${nm}！`);
         /* ★ 毒傀儡：使对手中毒/剧毒时，对手陷入混乱 */
         if ((st === 'psn' || st === 'tox') && src && src.has('poisonpuppeteer') && !m.vol.confuse) {
           this.abBanner(src);
           m.vol.confuse = rnd(2, 4);
-          await say(`${m.name} 被毒傀儡操控，混乱了！`);
+          await say(`${m.logName} 被毒傀儡操控，混乱了！`);
         }
         /* ★ 睡眠：固定2回合计数（第一回合必睡，第二回合1/3醒，第三回合必醒） */
         if (st === 'sleep') m.sleepT = m.has('earlybird') ? 1 : 2;
@@ -20947,7 +20977,7 @@ return ev;
         if (st === 'frz') m.vol.frzT = 0;   // ★ 冰冻回合计数器
         /* 同步：反射同样经过免疫判定，noSync 防止连锁 */
         if (!noSync && m.has('synchronize') && src && src !== m && !src.status && src.hp > 0) {
-          await say(`${m.name} 的同步特性发动了！`);
+          await say(`${m.logName} 的同步特性发动了！`);
           await this.inflictStatus(src, st, m, mvType, true);
         }
         BUI.refresh(this);
@@ -20960,7 +20990,7 @@ return ev;
         if (m.vol) { if (n > 0) m.vol.buffedThisTurn = true; if (n < 0) m.vol.loweredThisTurn = true; }
         /* ★ 白雾：能力不会被同伴/对手降低 */
         if (n < 0 && src && src !== m && m.vol.mist > 0) {
-          await say(`${m.name} 的白雾挡住了能力下降！`);
+          await say(`${m.logName} 的白雾挡住了能力下降！`);
           return;
         }
         let orig = n;
@@ -20972,33 +21002,33 @@ return ev;
           if (m.types.includes('grass') && this.alliesOf(m).some(a => a.has('flowerveil'))) {
             const ally = this.alliesOf(m).find(a => a.has('flowerveil'));
             this.abBanner(ally);
-            await say(`${ally.name} 的花幕发动了！${m.name} 的能力不会下降！`);
+            await say(`${ally.logName} 的花幕发动了！${m.logName} 的能力不会下降！`);
             return;
           }
           if (m.has('clearbody') || m.has('fullmetalbody') || m.has('whitesmoke')) {
             this.abBanner(m);
-            await say(`${m.name} 的${AB[m.ability].n}发动了！能力不会下降！`);
+            await say(`${m.logName} 的${AB[m.ability].n}发动了！能力不会下降！`);
             return;
           }
-          if (n < 0 && k === 'atk' && m.has('hyperCutterx')) { this.abBanner(m); await say(`${m.name} 的怪力钳发动了！攻击不会下降！`); return; }
+          if (n < 0 && k === 'atk' && m.has('hyperCutterx')) { this.abBanner(m); await say(`${m.logName} 的怪力钳发动了！攻击不会下降！`); return; }
           /* ★ 健壮胸肌：防御不会被对手降低 */
           if (n < 0 && k === 'def' && m.has('bigpecks')) {
             this.abBanner(m);
-            await say(`${m.name} 的健壮胸肌发动了！防御不会下降！`);
+            await say(`${m.logName} 的健壮胸肌发动了！防御不会下降！`);
             return;
           }
-          if (m.has('mirrorarmor') && src.hp > 0) { this.abBanner(m); await say(`${m.name} 的镜甲反弹了能力下降！`); await this.changeStat(src, k, orig < 0 ? orig : -orig, m); return; }
+          if (m.has('mirrorarmor') && src.hp > 0) { this.abBanner(m); await say(`${m.logName} 的镜甲反弹了能力下降！`); await this.changeStat(src, k, orig < 0 ? orig : -orig, m); return; }
         }
         const before = m.stages[k];
         m.stages[k] = clamp(before + n, -6, 6);
         const real = m.stages[k] - before;
-        if (real === 0) { await say(`${m.name} 的${STN[k]}不会再${n > 0 ? '提高' : '降低'}了！`); return; }
+        if (real === 0) { await say(`${m.logName} 的${STN[k]}不会再${n > 0 ? '提高' : '降低'}了！`); return; }
         if (n < 0 && src && src !== m && !m.has('contrary')) {
-          if (m.has('defiant')) { this.abBanner(m); await say(`${m.name} 的不服输发动了！`); m.stages.atk = clamp(m.stages.atk + 2, -6, 6); }
-          if (m.has('competitive')) { this.abBanner(m); await say(`${m.name} 的好胜发动了！`); m.stages.spa = clamp(m.stages.spa + 2, -6, 6); }
+          if (m.has('defiant')) { this.abBanner(m); await say(`${m.logName} 的不服输发动了！`); m.stages.atk = clamp(m.stages.atk + 2, -6, 6); }
+          if (m.has('competitive')) { this.abBanner(m); await say(`${m.logName} 的好胜发动了！`); m.stages.spa = clamp(m.stages.spa + 2, -6, 6); }
         }
         const word = Math.abs(n) >= 2 ? (n > 0 ? '大幅提升' : '大幅下降') : (n > 0 ? '提升了' : '下降了');
-        await say(`${m.name} 的${STN[k]}${word}！`);
+        await say(`${m.logName} 的${STN[k]}${word}！`);
         /* ★ silent：多项能力同时变化时只在第一项播放音效，避免重复 */
         if (!silent) { if (n > 0) { AU.statUp(); } else { AU.statDn(); } }
         /* ★ 跟风：对手能力提升时自己也提升（无论来源） */
@@ -21007,7 +21037,7 @@ return ev;
           if (foe && foe.alive() && foe.has('opportunist') && real > 0) {
             this.abBanner(foe);
             foe.stages[k] = clamp(foe.stages[k] + real, -6, 6);
-            await say(`${foe.name} 的跟风发动了！${STN[k]}也提升了！`);
+            await say(`${foe.logName} 的跟风发动了！${STN[k]}也提升了！`);
           }
         }
         BUI.dmgPop(this.sideOf(m), `${STN[k]}${n > 0 ? '▲' : '▼'}${Math.abs(n)}`, n > 0 ? '#ff6b57' : '#5aa0ff', m._slot || 0);
@@ -21035,7 +21065,7 @@ return ev;
         const announce = async (list) => {
           if (!list.length) return;
           const names = list.map(c => `${STN[c.k]}${Math.abs(c.n) >= 2 ? (c.n > 0 ? '大幅提升' : '大幅下降') : (c.n > 0 ? '提升' : '下降')}`).join('、');
-          await say(`${m.name} 的${names}！`);
+          await say(`${m.logName} 的${names}！`);
           list.forEach(c => BUI.dmgPop(this.sideOf(m), `${STN[c.k]}${c.n > 0 ? '▲' : '▼'}${Math.abs(c.n)}`, c.n > 0 ? '#ff6b57' : '#5aa0ff', m._slot || 0));
         };
         if (ups.length) { AU.statUp(); await announce(ups); }
@@ -21046,7 +21076,7 @@ return ev;
           if (foe && foe.alive() && foe.has('opportunist')) {
             this.abBanner(foe);
             for (const c of ups) foe.stages[c.k] = clamp(foe.stages[c.k] + c.n, -6, 6);
-            await say(`${foe.name} 的跟风发动了！也提升了！`);
+            await say(`${foe.logName} 的跟风发动了！也提升了！`);
           }
         }
         BUI.refresh(this);
@@ -21067,7 +21097,7 @@ return ev;
         // 同命（双倒各自播放演出）
         if (loser.vol.destiny && winner && winner.hp > 0) {
           winner.vol.destiny = false; winner.hp = 0; winner.fainted = true;
-          await say(`${loser.name} 的同命发动了！${winner.name} 也跟着倒下了！`);
+          await say(`${loser.logName} 的同命发动了！${winner.logName} 也跟着倒下了！`);
           const wSide = this.sideOf(winner);
           BUI.koFx(wSide, BUI.sprEl(wSide, this.fieldSlotOf(winner)));
         }
@@ -21075,7 +21105,7 @@ return ev;
         if (loser.has('aftermath') && winner && winner.alive() && !winner.has('magicguard')) {
           const ad = Math.max(1, Math.floor(winner.maxhp / 4));
           winner.hp = Math.max(0, winner.hp - ad);
-          await say(`${loser.name} 的引爆发动了！${winner.name} 受到了伤害！`);
+          await say(`${loser.logName} 的引爆发动了！${winner.logName} 受到了伤害！`);
           BUI.dmgPop(this.sideOf(winner), `-${ad}`, '#ff9d8a', winner._slot || 0);
         }
         /* ★ 飞出的内在物：被击倒时对手受到等同于最后受到伤害量的伤害 */
@@ -21083,13 +21113,13 @@ return ev;
           this.abBanner(loser);
           const id = Math.min(loser.lastDmgTaken, winner.hp);
           winner.hp = Math.max(0, winner.hp - id);
-          await say(`${loser.name} 的飞出的内在物发动了！${winner.name} 受到了 ${id} 点伤害！`);
+          await say(`${loser.logName} 的飞出的内在物发动了！${winner.logName} 受到了 ${id} 点伤害！`);
           BUI.dmgPop(this.sideOf(winner), `-${id}`, '#ff9d8a', winner._slot || 0);
         }
         /* ★ 濒死演出：闪屏+震动+旋转坠落+金星 */
         BUI.koFx(lSide, BUI.sprEl(lSide, this.fieldSlotOf(loser)));
         await sleep(760);
-        await say(`${loser.name} 倒下了！`);
+        await say(`${loser.logName} 倒下了！`);
         /* ★ 德尔塔气流/终结之地/始源之海：持有者在场才存在（双打全槽位检查，防止误消散） */
         if (this.wx === 'delta' || this.wx === 'desolate' || this.wx === 'primordial') {
           const still = (m) => m && m.alive() && ((this.wx === 'delta' && m.has('deltastream')) || (this.wx === 'desolate' && m.has('desolateland')) || (this.wx === 'primordial' && m.has('primordialsea')));
@@ -21105,23 +21135,23 @@ return ev;
         if (winner && winner.alive()) {
           if (winner.has('moxie')) { this.abBanner(winner); await this.changeStat(winner, 'atk', 1, winner); }
           if (winner.has('beastboost')) { this.abBanner(winner); const best = STATKEYS.reduce((a, b) => winner.st[a] >= winner.st[b] ? a : b); await this.changeStat(winner, best, 1, winner); }
-          if (winner.has('eelevate')) { this.abBanner(winner); const best = STATKEYS.reduce((a, b) => winner.st[a] >= winner.st[b] ? a : b); await this.changeStat(winner, best, 1, winner); await say(`${winner.name} 的鰻鰻高升发动了！`); }
+          if (winner.has('eelevate')) { this.abBanner(winner); const best = STATKEYS.reduce((a, b) => winner.st[a] >= winner.st[b] ? a : b); await this.changeStat(winner, best, 1, winner); await say(`${winner.logName} 的鰻鰻高升发动了！`); }
           /* ---- 第六批KO特性 ---- */
-          if (winner.has('soulheart')) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.name} 的魂之心发动了！`); }
-          if (winner.has('chillingneigh')) { this.abBanner(winner); await this.changeStat(winner, 'atk', 1, winner); await say(`${winner.name} 的苍白嘶鸣发动了！`); }
-          if (winner.has('grimneigh')) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.name} 的漆黑嘶鸣发动了！`); }
+          if (winner.has('soulheart')) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.logName} 的魂之心发动了！`); }
+          if (winner.has('chillingneigh')) { this.abBanner(winner); await this.changeStat(winner, 'atk', 1, winner); await say(`${winner.logName} 的苍白嘶鸣发动了！`); }
+          if (winner.has('grimneigh')) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.logName} 的漆黑嘶鸣发动了！`); }
           /* ★ 牵绊变身：击败对手后物攻/特攻/速度各提升1级 */
           if (winner.has('battlebond')) {
             this.abBanner(winner);
             await this.changeStat(winner, 'atk', 1, winner);
             await this.changeStat(winner, 'spa', 1, winner, true);
             await this.changeStat(winner, 'spe', 1, winner, true);
-            await say(`${winner.name} 的牵绊变身发动了！攻击、特攻和速度提升了！`);
+            await say(`${winner.logName} 的牵绊变身发动了！攻击、特攻和速度提升了！`);
           }
           /* ★ 人马一体（蕾冠王骑乘形态）：兼具紧张感+苍白嘶鸣/漆黑嘶鸣 */
           if (winner.has('asone')) {
-            if (winner.id === 10362) { this.abBanner(winner); await this.changeStat(winner, 'atk', 1, winner); await say(`${winner.name} 的人马一体（苍白嘶鸣）发动了！`); }
-            else if (winner.id === 10363) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.name} 的人马一体（漆黑嘶鸣）发动了！`); }
+            if (winner.id === 10362) { this.abBanner(winner); await this.changeStat(winner, 'atk', 1, winner); await say(`${winner.logName} 的人马一体（苍白嘶鸣）发动了！`); }
+            else if (winner.id === 10363) { this.abBanner(winner); await this.changeStat(winner, 'spa', 1, winner); await say(`${winner.logName} 的人马一体（漆黑嘶鸣）发动了！`); }
           }
         }
         const loserSide = this.sideOf(loser);
@@ -21130,7 +21160,9 @@ return ev;
         const receiver = allyTeam.find(m => m.alive() && m !== loser && this.fieldMons(loserSide).includes(m) && (m.has('powerofalchemy') || m.has('receiver')));
         if (receiver) {
           this.abBanner(receiver); const oldAb = receiver.ability; receiver.ability = loser.ability;
-          await say(`${receiver.name} 的${AB[oldAb]?.n || '特性'}发动了！获得了${loser.name}的${AB[loser.ability]?.n || '特性'}！`);
+          await say(`${receiver.logName} 的${AB[oldAb]?.n || '特性'}发动了！获得了${loser.logName}的${AB[loser.ability]?.n || '特性'}！`);
+          /* ★ 获得的主动类特性立即发动（如威吓立即降攻、日照/降雨立即变更天气、下载立即判定强化） */
+          await this.triggerGainedAbility(receiver, receiver.ability);
         }
         // 经验
         if (loserSide === 'e' && winner && this.sideOf(winner) === 'p' && !this.wild) { this.participants.add(winner); await this.gainXP(); }
@@ -21212,20 +21244,20 @@ return ev;
           const base = Math.round(bst(foe.sp) * 0.5) + 20;
           let gain = Math.floor(base * foe.lvl / 5 * (this.wild ? 1 : 1.5));
           m.xpGot = true;
-          if (!silent) await say(`${m.name} 获得了 ${gain} 经验值！`);
+          if (!silent) await say(`${m.logName} 获得了 ${gain} 经验值！`);
           m.xp += gain;
           while (m.xp >= Math.pow(m.lvl + 1, 3) && m.lvl < 100) {
             m.lvl++; AU.level();
             const oldMax = m.maxhp;
             m.recalc();
             m.hp += m.maxhp - oldMax;
-            await say(`🎉 ${m.name} 升到了 Lv.${m.lvl}！`);
+            await say(`🎉 ${m.logName} 升到了 Lv.${m.lvl}！`);
             // 学新招式
             const known = m.moves.map(x => x.k);
             for (const nk of m.sp.mv) {
               if (!known.includes(nk)) {
-                if (m.moves.length < 4) { m.moves.push({ k: nk, pp: MV[nk].pp, maxpp: MV[nk].pp }); await say(`${m.name} 学会了 ${MV[nk].n}！`); }
-                else { const rep = await this.askForget(m, nk); if (rep != null) { m.moves[rep] = { k: nk, pp: MV[nk].pp, maxpp: MV[nk].pp }; await say(`${m.name} 忘记了 ${MV[known[rep]].n}，学会了 ${MV[nk].n}！`); } }
+                if (m.moves.length < 4) { m.moves.push({ k: nk, pp: MV[nk].pp, maxpp: MV[nk].pp }); await say(`${m.logName} 学会了 ${MV[nk].n}！`); }
+                else { const rep = await this.askForget(m, nk); if (rep != null) { m.moves[rep] = { k: nk, pp: MV[nk].pp, maxpp: MV[nk].pp }; await say(`${m.logName} 忘记了 ${MV[known[rep]].n}，学会了 ${MV[nk].n}！`); } }
                 break;
               }
             }
@@ -21237,7 +21269,7 @@ return ev;
         return new Promise(res => {
           const ov = $('#partyOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
           const box = el('div', 'ovBox panel'); ov.appendChild(box);
-          box.appendChild(el('h3', 'disp', `${m.name} 想学习 ${MV[nk].n}，要忘记哪个招式？`));
+          box.appendChild(el('h3', 'disp', `${m.logName} 想学习 ${MV[nk].n}，要忘记哪个招式？`));
           let offEsc = null;
           const close = val => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); res(val); };
           m.moves.forEach((mv, i) => {
@@ -21269,7 +21301,7 @@ return ev;
             const pct = old.hp / old.maxhp;
             old.dyn = false; old.dynT = 0; old.recalc();
             old.hp = Math.max(1, Math.round(old.maxhp * pct));
-            await say(`${old.name} 的极巨化在交换中解除了！`);
+            await say(`${old.logName} 的极巨化在交换中解除了！`);
             BUI.refresh(this);
           }
         }
@@ -21305,26 +21337,26 @@ return ev;
           // 天气伤害
           const wx = this.wxActive();
           if (wx === 'sand' && !m.has('overcoatx') && !['rock', 'ground', 'steel'].includes(m.types[0]) && !['rock', 'ground', 'steel'].includes(m.types[1] || '')) {
-            if (!m.has('sandveil') && !m.has('magicguard')) { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); await say(`沙暴袭击了 ${m.name}！`); this.addLog(`↳ ${m.name} 受沙暴伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+            if (!m.has('sandveil') && !m.has('magicguard')) { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); await say(`沙暴袭击了 ${m.logName}！`); this.addLog(`↳ ${m.logName} 受沙暴伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           }
           if (wx === 'hail' && !m.has('overcoatx') && !m.types.includes('ice')) {
-            if (!m.has('snowcloak') && !m.has('magicguard')) { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); await say(`冰雹袭击了 ${m.name}！`); this.addLog(`↳ ${m.name} 受冰雹伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+            if (!m.has('snowcloak') && !m.has('magicguard')) { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); await say(`冰雹袭击了 ${m.logName}！`); this.addLog(`↳ ${m.logName} 受冰雹伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           }
-          if (m.has('solarpower') && (wx === 'sun' || wx === 'desolate') && !m.has('magicguard')) { this.abBanner(m); const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); await say(`${m.name} 的太阳之力发动了！`); this.addLog(`↳ ${m.name} 太阳之力 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (m.has('raindish') && (wx === 'rain' || wx === 'primordial')) { this.abBanner(m); const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的雨盘回复了HP！`); this.addLog(`↳ ${m.name} 雨盘回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.has('solarpower') && (wx === 'sun' || wx === 'desolate') && !m.has('magicguard')) { this.abBanner(m); const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); await say(`${m.logName} 的太阳之力发动了！`); this.addLog(`↳ ${m.logName} 太阳之力 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.has('raindish') && (wx === 'rain' || wx === 'primordial')) { this.abBanner(m); const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.logName} 的雨盘回复了HP！`); this.addLog(`↳ ${m.logName} 雨盘回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           /* ★ 冰冻之躯：冰雹天气时每回合回复1/16HP */
-          if (m.has('icebody') && wx === 'hail') { this.abBanner(m); const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的冰冻之躯回复了HP！`); this.addLog(`↳ ${m.name} 冰冻之躯回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.has('icebody') && wx === 'hail') { this.abBanner(m); const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.logName} 的冰冻之躯回复了HP！`); this.addLog(`↳ ${m.logName} 冰冻之躯回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           /* ★ 干燥皮肤：晴天扣血，雨天回血 */
           if (m.has('dryskin') && !m.has('magicguard')) {
-            if (wx === 'sun') { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); await say(`${m.name} 的干燥皮肤在晴天受到了伤害！`); }
-            if (wx === 'rain') { const h = Math.floor(B / 8); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的干燥皮肤在雨天回复了HP！`); }
+            if (wx === 'sun') { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); await say(`${m.logName} 的干燥皮肤在晴天受到了伤害！`); }
+            if (wx === 'rain') { const h = Math.floor(B / 8); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.logName} 的干燥皮肤在雨天回复了HP！`); }
           }
           /* ★ 天气扣血致死：立即判死，不等回合末 */
           if (m.hp <= 0 && !m.fainted) { await this.handleKO(this.foeSide(side), this.foeOf(m), m); if (this.over) return; continue; }
           /* ★ 收获：晴天时文柚果可重复使用（简化） */
           if (m.has('harvest') && wx === 'sun' && !m.item && m.vol.usedBerry && m.hpPct() <= .5) {
             m.item = 'sitrus'; m.vol.usedBerry = false;
-            this.abBanner(m); await say(`${m.name} 的收获发动了！文柚果重新长出来了！`);
+            this.abBanner(m); await say(`${m.logName} 的收获发动了！文柚果重新长出来了！`);
             await this.maybeSymbiosis(m);
           }
           /* ★ 反刍：食用树果后，下回合结束再食用一次 */
@@ -21336,7 +21368,7 @@ return ev;
               const h = Math.floor(m.maxhp / 4);
               m.hp = Math.min(m.maxhp, m.hp + h);
               m.item = null;
-              await say(`${m.name} 的反刍发动了！再次食用了文柚果，回复了HP！`);
+              await say(`${m.logName} 的反刍发动了！再次食用了文柚果，回复了HP！`);
               await this.maybeSymbiosis(m);
             }
           }
@@ -21349,14 +21381,14 @@ return ev;
               const h = Math.floor(m.maxhp / 4);
               m.hp = Math.min(m.maxhp, m.hp + h);
               m.item = null;
-              await say(`${m.name} 的反刍发动了！再次食用了文柚果，回复了HP！`);
+              await say(`${m.logName} 的反刍发动了！再次食用了文柚果，回复了HP！`);
               await this.maybeSymbiosis(m);
             }
           }
           // 青草场地回复（★ HP已满时不回复）
-          if (this.terrain === 'grassy' && this.grounded(m) && m.hp > 0 && m.hp < m.maxhp) { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 在青草场地上回复了HP！`); this.addLog(`↳ ${m.name} 青草场地回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (this.terrain === 'grassy' && this.grounded(m) && m.hp > 0 && m.hp < m.maxhp) { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.logName} 在青草场地上回复了HP！`); this.addLog(`↳ ${m.logName} 青草场地回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           /* ★ 水流环：每回合回复1/16最大HP */
-          if (m.vol.aquaRing && m.hp > 0 && m.hp < m.maxhp) { const h = Math.max(1, Math.floor(B / 16)); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 被水流环治愈了HP！`); }
+          if (m.vol.aquaRing && m.hp > 0 && m.hp < m.maxhp) { const h = Math.max(1, Math.floor(B / 16)); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.logName} 被水流环治愈了HP！`); }
           /* ★ 蛸固：每回合降低防御和特防1级 */
           if (m.vol.octolock && m.alive()) { await this.changeStat(m, 'def', -1, null); await this.changeStat(m, 'spd', -1, null, true); }
           /* ★ 糖浆炸弹：每回合降低速度1级 */
@@ -21374,21 +21406,21 @@ return ev;
               /* ★ 污泥浆：被寄生种子吸取时，吸取方本应回复的HP改为受到同等伤害 */
               if (m.has('liquidooze')) {
                 this.abBanner(m);
-                await say(`${m.name} 被寄生种子吸取了HP！`);
+                await say(`${m.logName} 被寄生种子吸取了HP！`);
                 if (!src.has('magicguard')) {
                   src.hp = Math.max(0, src.hp - d);
-                  await say(`${m.name} 的污泥浆发动了！${src.name} 反而受到了伤害！`);
-                  this.addLog(`↳ ${m.name} 寄生种子 -${d} HP · ${src.name} 污泥浆反伤 -${d} HP（剩余 ${Math.round(src.hp / src.maxhp * 100)}%）`);
+                  await say(`${m.logName} 的污泥浆发动了！${src.logName} 反而受到了伤害！`);
+                  this.addLog(`↳ ${m.logName} 寄生种子 -${d} HP · ${src.logName} 污泥浆反伤 -${d} HP（剩余 ${Math.round(src.hp / src.maxhp * 100)}%）`);
                   BUI.dmgPop(this.sideOf(src), `-${d}`, '#ff9d8a', src._slot || 0);
                   if (src.hp <= 0 && !src.fainted) { await this.handleKO(side, m, src); if (this.over) return; }
                 } else {
-                  await say(`${src.name} 的魔法防守发动了！没有受到伤害！`);
-                  this.addLog(`↳ ${m.name} 寄生种子 -${d} HP · ${src.name} 魔法防守免疫反伤`);
+                  await say(`${src.logName} 的魔法防守发动了！没有受到伤害！`);
+                  this.addLog(`↳ ${m.logName} 寄生种子 -${d} HP · ${src.logName} 魔法防守免疫反伤`);
                 }
               } else {
                 src.hp = Math.min(src.maxhp, src.hp + d);
-                await say(`${m.name} 被寄生种子吸取了HP！`);
-                this.addLog(`↳ ${m.name} 寄生种子 -${d} HP → ${src.name} +${d} HP`);
+                await say(`${m.logName} 被寄生种子吸取了HP！`);
+                this.addLog(`↳ ${m.logName} 寄生种子 -${d} HP → ${src.logName} +${d} HP`);
               }
             }
           }
@@ -21397,22 +21429,22 @@ return ev;
           // 盐腌
           if (m.vol.salt && m.hp > 0) {
             const d = Math.max(1, Math.floor(B / (['water', 'steel'].includes(m.types[0]) ? 4 : 8)));
-            m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'salt', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#e8e8f0', m._slot || 0); await say(`盐腌正在侵蚀 ${m.name}！`); this.addLog(`↳ ${m.name} 盐腌伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`);
+            m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'salt', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#e8e8f0', m._slot || 0); await say(`盐腌正在侵蚀 ${m.logName}！`); this.addLog(`↳ ${m.logName} 盐腌伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`);
           }
           /* ★ 盐腌致死：立即判死 */
           if (m.hp <= 0 && !m.fainted) { await this.handleKO(this.foeSide(side), this.foeOf(m), m); if (this.over) return; continue; }
           // ★ 道具回复：先于扣血异常结算（回血在先，再承受灼伤/中毒等回合末伤害；发号施令口中的米立龙不吃道具回复）
           /* ★ 笨拙：道具回复效果无效 */
-          if (!m.vol.commanderIn && !m.has('klutz') && m.item === 'leftovers') { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.name} 吃剩的东西回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (!m.vol.commanderIn && !m.has('klutz') && m.item === 'leftovers') { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.logName} 吃剩的东西回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           if (!m.vol.commanderIn && !m.has('klutz') && m.item === 'blacksludge') {
-            if (m.types.includes('poison')) { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.name} 黑色污泥回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-            else if (!m.has('magicguard')) { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'sludge', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#b56fd8', m._slot || 0); this.addLog(`↳ ${m.name} 黑色污泥伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+            if (m.types.includes('poison')) { const h = Math.floor(B / 16); m.hp = Math.min(m.maxhp, m.hp + h); this.addLog(`↳ ${m.logName} 黑色污泥回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+            else if (!m.has('magicguard')) { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'sludge', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#b56fd8', m._slot || 0); this.addLog(`↳ ${m.logName} 黑色污泥伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           }
           // 异常状态
-          if (m.status === 'burn') { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'burn', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#ff7a2f', m._slot || 0); await say(`${m.name} 被灼伤伤害了！`); this.addLog(`↳ ${m.name} 灼伤伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (m.status === 'psn') { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'psn', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#b56fd8', m._slot || 0); await say(`${m.name} 受到了毒素伤害！`); this.addLog(`↳ ${m.name} 中毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (m.status === 'tox') { m.toxicN++; const d = Math.floor(B * m.toxicN / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'tox', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#8a2fa3', m._slot || 0); await say(`${m.name} 受到了剧毒伤害！`); this.addLog(`↳ ${m.name} 剧毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
-          if (m.has('poisonheal') && (m.status === 'psn' || m.status === 'tox')) { this.abBanner(m); const h = Math.floor(B / 8); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.name} 的毒疗发动了，回复了HP！`); this.addLog(`↳ ${m.name} 毒疗回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.status === 'burn') { const d = Math.floor(B / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'burn', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#ff7a2f', m._slot || 0); await say(`${m.logName} 被灼伤伤害了！`); this.addLog(`↳ ${m.logName} 灼伤伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.status === 'psn') { const d = Math.floor(B / 8); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'psn', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#b56fd8', m._slot || 0); await say(`${m.logName} 受到了毒素伤害！`); this.addLog(`↳ ${m.logName} 中毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.status === 'tox') { m.toxicN++; const d = Math.floor(B * m.toxicN / 16); m.hp = Math.max(0, m.hp - d); FX.dotFx(side, 'tox', m._slot || 0); BUI.dmgPop(side, `-${d}`, '#8a2fa3', m._slot || 0); await say(`${m.logName} 受到了剧毒伤害！`); this.addLog(`↳ ${m.logName} 剧毒伤害 -${d} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
+          if (m.has('poisonheal') && (m.status === 'psn' || m.status === 'tox')) { this.abBanner(m); const h = Math.floor(B / 8); m.hp = Math.min(m.maxhp, m.hp + h); await say(`${m.logName} 的毒疗发动了，回复了HP！`); this.addLog(`↳ ${m.logName} 毒疗回复 +${h} HP（剩余 ${Math.round(m.hp / m.maxhp * 100)}%）`); }
           /* ★ 异常状态致死：立即判死（灼伤/中毒/剧毒），不再等回合末统一结算 */
           if (m.hp <= 0 && !m.fainted) { await this.handleKO(this.foeSide(side), this.foeOf(m), m); if (this.over) return; continue; }
           /* ★ 火焰宝珠/剧毒宝珠：回合末附加异常状态 */
@@ -21422,34 +21454,34 @@ return ev;
           const foes = this.foesOf(m);
           for (const foe of foes) {
             if (m.has('baddreams') && foe && foe.alive() && foe.status === 'sleep' && !foe.has('magicguard')) {
-              this.abBanner(m); const d = Math.floor(foe.baseMax / 8); foe.hp = Math.max(0, foe.hp - d); await say(`${foe.name} 被梦魇折磨着！`); this.addLog(`↳ ${foe.name} 梦魇伤害 -${d} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
+              this.abBanner(m); const d = Math.floor(foe.baseMax / 8); foe.hp = Math.max(0, foe.hp - d); await say(`${foe.logName} 被梦魇折磨着！`); this.addLog(`↳ ${foe.logName} 梦魇伤害 -${d} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
             }
             if (m.has('betterbaddreams') && foe && foe.alive() && foe.status === 'sleep' && !foe.has('magicguard')) {
-              this.abBanner(m); const d = Math.floor(foe.baseMax / 4); foe.hp = Math.max(0, foe.hp - d); await say(`${foe.name} 被恶梦强化折磨着！`); this.addLog(`↳ ${foe.name} 恶梦强化伤害 -${d} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
+              this.abBanner(m); const d = Math.floor(foe.baseMax / 4); foe.hp = Math.max(0, foe.hp - d); await say(`${foe.logName} 被恶梦强化折磨着！`); this.addLog(`↳ ${foe.logName} 恶梦强化伤害 -${d} HP（剩余 ${Math.round(foe.hp / foe.maxhp * 100)}%）`);
             }
           }
           // 蜕皮
-          if (m.has('shedskin') && m.status && Math.random() < 1 / 3) { this.abBanner(m); m.status = null; m.sleepT = 0; m.toxicN = 0; await say(`${m.name} 的蜕皮发动了，状态恢复了！`); }
+          if (m.has('shedskin') && m.status && Math.random() < 1 / 3) { this.abBanner(m); m.status = null; m.sleepT = 0; m.toxicN = 0; await say(`${m.logName} 的蜕皮发动了，状态恢复了！`); }
 
           /* ★ 湿润之躯：下雨时异常状态治愈 */
           if (m.has('hydration') && m.status && this.wxActive() === 'rain') {
             this.abBanner(m);
             m.status = null; m.sleepT = 0; m.toxicN = 0;
-            await say(`${m.name} 的湿润之躯发动了，状态恢复了！`);
+            await say(`${m.logName} 的湿润之躯发动了，状态恢复了！`);
           }
 
           /* ★ 治愈之心：每回合30%治愈自身或同伴异常 */
           if (m.has('healer') && m.status && Math.random() < .3) {
             this.abBanner(m);
             m.status = null; m.sleepT = 0; m.toxicN = 0;
-            await say(`${m.name} 的治愈之心发动了，状态恢复了！`);
+            await say(`${m.logName} 的治愈之心发动了，状态恢复了！`);
           }
           if (m.has('healer') && !m.status) {
             const ally = this.alliesOf(m).find(a => a.status && a.alive());
             if (ally && Math.random() < .3) {
               this.abBanner(m);
               ally.status = null; ally.sleepT = 0; ally.toxicN = 0;
-              await say(`${m.name} 的治愈之心发动了！${ally.name} 的状态恢复了！`);
+              await say(`${m.logName} 的治愈之心发动了！${ally.logName} 的状态恢复了！`);
             }
           }
 
@@ -21459,7 +21491,7 @@ return ev;
             const up = pick(STATKEYS);
             const downPool = STATKEYS.filter(k => k !== up);
             const down = downPool.length ? pick(downPool) : up;
-            await say(`${m.name} 的心情不定发动了！`);
+            await say(`${m.logName} 的心情不定发动了！`);
             await this.changeStat(m, up, 2, m);
             await this.changeStat(m, down, -1, m);
           }
@@ -21467,7 +21499,7 @@ return ev;
           /* ★ 一口导弹：使用冲浪后标记嘴里有猎物 */
           if (m.has('gulpmissile') && m.vol.lastMove === 'surf' && !m.vol.gulpPrey) {
             m.vol.gulpPrey = true;
-            await say(`${m.name} 的嘴里叼住了猎物！`);
+            await say(`${m.logName} 的嘴里叼住了猎物！`);
           }
           // 加速（替换上场的当回合不触发）
           if (m.has('speedboost') && !m.vol.switchedInThisTurn) { this.abBanner(m); await this.changeStat(m, 'spe', 1, m); }
@@ -21477,7 +21509,7 @@ return ev;
               const pct = m.hp / m.maxhp;
               m.dyn = false; m.recalc();
               m.hp = Math.max(1, Math.round(m.maxhp * pct));
-              await say(`${m.name} 的极巨化解除了！HP按比例还原。`);
+              await say(`${m.logName} 的极巨化解除了！HP按比例还原。`);
               BUI.refresh(this);
               this.syncBattleMusic();
             }
@@ -21490,13 +21522,13 @@ return ev;
               m.recalc();
               this.abBanner(m);
               FX.transform(this.sideOf(m), 'school', m._slot || 0);
-              await say(`${m.name} 的鱼群特性发动了！变成了鱼群形态！`);
+              await say(`${m.logName} 的鱼群特性发动了！变成了鱼群形态！`);
             } else if (m.hpPct() <= 0.25 && m.vol.schoolForm) {
               m.vol.schoolForm = false;
               m.mega = null;
               m.recalc();
               FX.transform(this.sideOf(m), 'schoolOut', m._slot || 0);
-              await say(`${m.name} 的鱼群解散了，变回了单独形态！`);
+              await say(`${m.logName} 的鱼群解散了，变回了单独形态！`);
             }
           }
           /* ★ 界限盾壳（小陨星）：HP≤50%时核心形态，免疫异常 */
@@ -21507,31 +21539,31 @@ return ev;
               m.recalc();
               if (m.status) { m.status = null; m.sleepT = 0; m.toxicN = 0; }
               this.abBanner(m);
-              await say(`${m.name} 的外壳破碎了！变成了核心形态！`);
+              await say(`${m.logName} 的外壳破碎了！变成了核心形态！`);
             } else if (m.hpPct() > 0.5 && m.vol.coreForm) {
               m.vol.coreForm = false;
               m.mega = null;
               m.recalc();
-              await say(`${m.name} 重新形成了外壳！`);
+              await say(`${m.logName} 重新形成了外壳！`);
             }
           }
           /* ---- 第六批回合末特性 ---- */
           /* ★ 怒火冲天：HP降至一半以下时特攻提升（可反复触发：回血过半后再降血会再次发动） */
-          if (m.has('berserk') && m.hpPct() <= 0.5 && m.vol.berserkUp !== false) { m.vol.berserkUp = false; this.abBanner(m); await this.changeStat(m, 'spa', 1, m); await say(`${m.name} 的怒火冲天发动了！`); }
+          if (m.has('berserk') && m.hpPct() <= 0.5 && m.vol.berserkUp !== false) { m.vol.berserkUp = false; this.abBanner(m); await this.changeStat(m, 'spa', 1, m); await say(`${m.logName} 的怒火冲天发动了！`); }
           if (m.has('berserk') && m.hpPct() > 0.5) m.vol.berserkUp = true;
           /* ★ 愤怒甲壳：HP降至一半以下时攻/特攻/速度+1，防/特防-1 */
-          if (m.has('angershell') && m.hpPct() <= 0.5 && !m.vol.angerShellTriggered) { m.vol.angerShellTriggered = true; this.abBanner(m); await this.changeStat(m, 'atk', 1, m); await this.changeStat(m, 'spa', 1, m); await this.changeStat(m, 'spe', 1, m); await this.changeStat(m, 'def', -1, m); await this.changeStat(m, 'spd', -1, m); await say(`${m.name} 的愤怒甲壳发动了！`); }
+          if (m.has('angershell') && m.hpPct() <= 0.5 && !m.vol.angerShellTriggered) { m.vol.angerShellTriggered = true; this.abBanner(m); await this.changeStat(m, 'atk', 1, m); await this.changeStat(m, 'spa', 1, m); await this.changeStat(m, 'spe', 1, m); await this.changeStat(m, 'def', -1, m); await this.changeStat(m, 'spd', -1, m); await say(`${m.logName} 的愤怒甲壳发动了！`); }
           /* ★ 结冻头：冰雹时头部结冰 */
-          if (m.has('iceface') && wx === 'hail' && !m.vol.iceHead) { m.vol.iceHead = true; m.formSprite = null; BUI.refresh(this); await say(`${m.name} 的结冻头在冰雹中恢复了！`); }
+          if (m.has('iceface') && wx === 'hail' && !m.vol.iceHead) { m.vol.iceHead = true; m.formSprite = null; BUI.refresh(this); await say(`${m.logName} 的结冻头在冰雹中恢复了！`); }
           /* ★ 慢启动回合计数 */
-          if (m.has('slowstart')) { if (m.vol.slowStartTurns === undefined) m.vol.slowStartTurns = 0; m.vol.slowStartTurns++; if (m.vol.slowStartTurns >= 5) await say(`${m.name} 终于进入了状态，慢启动解除了！`); }
+          if (m.has('slowstart')) { if (m.vol.slowStartTurns === undefined) m.vol.slowStartTurns = 0; m.vol.slowStartTurns++; if (m.vol.slowStartTurns >= 5) await say(`${m.logName} 终于进入了状态，慢启动解除了！`); }
           /* ★ 跃跃欲逃 / 危险回避：HP≤50%时自动换下 */
           if ((m.has('wimpout') || m.has('emergencyexit')) && m.hpPct() <= 0.5 && !m.vol.fledThisBattle) {
             const arr = this.sideOf(m) === 'p' ? this.pp : this.ep;
             if (arr.filter(x => x.alive()).length > 1) {
               m.vol.fledThisBattle = true;
               this.abBanner(m);
-              await say(`${m.name} 的${AB[m.ability].n}发动了！`);
+              await say(`${m.logName} 的${AB[m.ability].n}发动了！`);
               const sd = this.sideOf(m);
               const slot = this.fieldSlotOf(m);
               if (sd === 'p') { const idx = await this.chooseParty(false, false, slot, m); if (idx != null && !this.pt.includes(idx)) await this.doSwitch('p', idx, slot); }
@@ -21554,14 +21586,14 @@ return ev;
                 }
                 m.recalc();
                 this.abBanner(m);
-                await say(`${m.name} 的达摩模式发动了！变成了达摩形态！`);
+                await say(`${m.logName} 的达摩模式发动了！变成了达摩形态！`);
                 AU.mega(); BUI.burst(this.sideOf(m), m._slot || 0);
               } else if (m.hpPct() > 0.5 && m.vol.zenMode) {
                 m.vol.zenMode = false;
                 m.types = m.id === 555 ? ['fire'] : ['ice'];
                 m.mega = null;
                 m.recalc();
-                await say(`${m.name} 的达摩模式解除了！`);
+                await say(`${m.logName} 的达摩模式解除了！`);
               }
             }
           }
@@ -21575,7 +21607,7 @@ return ev;
               m.recalc(); m.hp = Math.min(m.maxhp, m.hp + healAmt);
               this.abBanner(m);
               AU.mega(); BUI.burst(this.sideOf(m), m._slot || 0); FX.transform(this.sideOf(m), 'power', m._slot || 0);
-              await say(`${m.name} 的群聚变形发动了！变成了完全体形态！`);
+              await say(`${m.logName} 的群聚变形发动了！变成了完全体形态！`);
               BUI.refresh(this);
             }
           }
@@ -21592,7 +21624,7 @@ return ev;
             else if (wxNow === 'hail') newType = 'ice';
             if (m.types[0] !== newType) {
               m.types = [newType];
-              await say(`${m.name} 的阴晴不定发动了！变成了${TNAME[newType]}属性！`);
+              await say(`${m.logName} 的阴晴不定发动了！变成了${TNAME[newType]}属性！`);
               BUI.refresh(this);
             }
           }
@@ -21615,8 +21647,8 @@ return ev;
               const dd = Math.max(1, Math.floor(dotM.maxhp / 6));
               dotM.hp = Math.max(0, dotM.hp - dd);
               FX.gmaxDotFx(this.gmaxDot.name, this.gmaxDot.type, this.gmaxDot.side, dotM._slot || 0);
-              await say(`${dotM.name} 受到了${((this.gmaxDot.name || '') + '').replace(/^超极巨/, '') || '超极巨' + TNAME[this.gmaxDot.type]}的持续伤害！`);
-              this.addLog(`↳ ${dotM.name} 超极巨DOT -${dd} HP`);
+              await say(`${dotM.logName} 受到了${((this.gmaxDot.name || '') + '').replace(/^超极巨/, '') || '超极巨' + TNAME[this.gmaxDot.type]}的持续伤害！`);
+              this.addLog(`↳ ${dotM.logName} 超极巨DOT -${dd} HP`);
               BUI.dmgPop(this.gmaxDot.side, `-${dd}`, TCOL[this.gmaxDot.type]);
               /* ★ 被DOT击杀：正常触发濒死演出与换人（死亡动画/立绘消失） */
               if (dotM.hp <= 0 && !dotM.fainted) {
@@ -21639,23 +21671,23 @@ return ev;
           m.vol.flinch = false; m.vol.switchedInThisTurn = false;
           m.vol.followme = false; m.vol.helpingHand = false;
           if (m.vol.mist > 0) m.vol.mist--;
-          if (m.vol.confuse > 0) { m.vol.confuse--; if (m.vol.confuse === 0) await say(`${m.name} 的混乱解除了。`); }
+          if (m.vol.confuse > 0) { m.vol.confuse--; if (m.vol.confuse === 0) await say(`${m.logName} 的混乱解除了。`); }
           if (m.vol.taunt > 0) m.vol.taunt--;
           /* ★ 再来一次倒计时：结束或锁定招式PP耗尽时解除 */
           if (m.vol.encore) {
             m.vol.encore.t--;
             const em = m.moves.find(x => x.k === m.vol.encore.k);
-            if (m.vol.encore.t <= 0 || !em || em.pp <= 0) { await say(`${m.name} 的再来一次效果结束了！`); m.vol.encore = null; }
+            if (m.vol.encore.t <= 0 || !em || em.pp <= 0) { await say(`${m.logName} 的再来一次效果结束了！`); m.vol.encore = null; }
           }
           /* ★ 反射壁/光墙/极光幕倒计时 */
-          if (m.vol.reflect > 0) { m.vol.reflect--; if (m.vol.reflect === 0) await say(`${m.name} 的反射壁消失了！`); }
-          if (m.vol.lightscreen > 0) { m.vol.lightscreen--; if (m.vol.lightscreen === 0) await say(`${m.name} 的光墙消失了！`); }
-          if (m.vol.auroraveil > 0) { m.vol.auroraveil--; if (m.vol.auroraveil === 0) await say(`${m.name} 的极光幕消失了！`); }
-          if (m.vol.disabled) { m.vol.disabled.turns--; if (m.vol.disabled.turns <= 0) { await say(`${m.name} 的招式封印解除了！`); m.vol.disabled = null; } }
+          if (m.vol.reflect > 0) { m.vol.reflect--; if (m.vol.reflect === 0) await say(`${m.logName} 的反射壁消失了！`); }
+          if (m.vol.lightscreen > 0) { m.vol.lightscreen--; if (m.vol.lightscreen === 0) await say(`${m.logName} 的光墙消失了！`); }
+          if (m.vol.auroraveil > 0) { m.vol.auroraveil--; if (m.vol.auroraveil === 0) await say(`${m.logName} 的极光幕消失了！`); }
+          if (m.vol.disabled) { m.vol.disabled.turns--; if (m.vol.disabled.turns <= 0) { await say(`${m.logName} 的招式封印解除了！`); m.vol.disabled = null; } }
           /* ★ 昏睡（哈欠/超极巨睡魔降临）：获得瞌睡的下一回合末才睡着 */
           if (m.vol.drowsy > 0 && !m.status) {
             m.vol.drowsy--;
-            if (m.vol.drowsy <= 0) { m.status = 'sleep'; m.sleepT = 2; await say(`${m.name} 昏昏沉沉地睡着了！`); }
+            if (m.vol.drowsy <= 0) { m.status = 'sleep'; m.sleepT = 2; await say(`${m.logName} 昏昏沉沉地睡着了！`); }
           }
           /* ★ 束缚（捕兽夹/雷电囚笼/熔岩风暴等）：回合末扣血 */
           if (m.vol.binding && m.vol.binding > 0) {
@@ -21664,7 +21696,7 @@ return ev;
             m.hp = Math.max(0, m.hp - bd);
             FX.dotFx(this.sideOf(m), 'binding', m._slot || 0);
             BUI.dmgPop(this.sideOf(m), `-${bd}`, '#9fe8f5', m._slot || 0);
-            await say(`${m.name} 被束缚伤害了！`);
+            await say(`${m.logName} 被束缚伤害了！`);
           }
           /* ★ 超极巨幻影幽魂的封锁在换下时解除（不做回合衰减） */
         }
@@ -21673,16 +21705,7 @@ return ev;
         if (this.fieldMons('p').some(m => m.alive() && m.hpPct() <= .2)) AU.lowhp();
       }
       addLog(text) {
-        /* ★ 敌方宝可梦名称前加「敌方的」，避免双方同种宝可梦分不清（已加过前缀的不重复） */
-        const seen = {};
-        for (const m of this.ep) {
-          if (!m) continue;
-          const nm = m.vol.illusionName || m.name;
-          if (!nm || seen[nm]) continue;
-          seen[nm] = true;
-          const pfx = '敌方的' + nm;
-          if (text.indexOf(pfx) === -1) text = text.split(nm).join(pfx);
-        }
+        /* ★ 敌我标记由消息生成处直接使用 logName（敌方自动带「敌方的」前缀），此处不再文本替换 */
         this.log.push({ t: this.turn, text });
         renderBattleLog(this);
       }
@@ -21862,7 +21885,7 @@ return ev;
               const spMax = Math.floor((c + 32) * 1.1);
               return '速度线:' + spMin + '~' + spMax + '(该宝可梦当前等级可达速度范围) 太晶属性:' + TNAME[m.teraType];
             })();
-        return `${m.name} Lv.${m.lvl} ${m.types.join('/')} HP${pct}% 状态:${status} 能力:${stg} ${statInfo} ${abInfo} ${itemInfo} 晶${TNAME[m.teraType]}${m.alive() ? '' : '[已濒死]'}\n  招式: ${moves}`;
+        return `${m.logName} Lv.${m.lvl} ${m.types.join('/')} HP${pct}% 状态:${status} 能力:${stg} ${statInfo} ${abInfo} ${itemInfo} 晶${TNAME[m.teraType]}${m.alive() ? '' : '[已濒死]'}\n  招式: ${moves}`;
       }
       /* ★ 构建本回合完整战况提示词（单打/双打通用，双打一次请求两个槽位） */
       buildAIPrompt() {
@@ -22048,7 +22071,7 @@ return ev;
         m.recalc();
         m.ability = cfg.a;
         if (!CFG.fancyAudio) AU.mega(); BUI.burst(side, this.fieldSlotOf(m)); FX.mega(side, this.fieldSlotOf(m));
-        await say(`超级进化！${m.name} 进化成了 Mega${m.name.replace(/\(.+\)/, '')}！`);
+        await say(`超级进化！${m.logName} 进化成了 Mega${m.name.replace(/\(.+\)/, '')}！`);
         await this.switchInAbility(m);  // ★ 变更后的特性立即发动（雷电兽→威吓立刻降攻、喷火龙Y→日照立刻开晴天、胡地→复制等）
         BUI.refresh(this);
       }
@@ -23278,7 +23301,7 @@ return ev;
         if (GM.fac.party) {
           GM.fac.party.forEach((m, idx) => {
             const c = el('div', 'slot'); c.appendChild(miniSprite(m.id));
-            c.insertAdjacentHTML('beforeend', `<div class="facSlotInfo"><b>${m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x => MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : '无道具'} · 晶${TNAME[m.teraType]}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span></div></div>`);
+            c.insertAdjacentHTML('beforeend', `<div class="facSlotInfo"><b>${m.logName}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x => MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : '无道具'} · 晶${TNAME[m.teraType]}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span></div></div>`);
             const btnCol = el('div', ''); btnCol.style.cssText = 'display:flex;flex-direction:column;gap:4px;margin-left:auto;flex:none';
             const det = el('button', 'btn tiny', '详情'); det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(m, null); }; btnCol.appendChild(det);
             const itemBtn = el('button', 'btn tiny', '道具'); itemBtn.onclick = e => { e.stopPropagation(); AU.cursor(); this.equipItem(idx); }; btnCol.appendChild(itemBtn);
@@ -23297,7 +23320,7 @@ return ev;
         const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); this.ui(); };
         offEsc = onEsc(() => { AU.no(); close(); });
         const equipHead = el('div', ''); equipHead.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:4px';
-        equipHead.appendChild(el('h3', 'disp', `携带道具 · ${m.name}`));
+        equipHead.appendChild(el('h3', 'disp', `携带道具 · ${m.logName}`));
         const equipClose = el('button', 'btn small', '✕'); equipClose.style.cssText = 'width:36px;height:36px;padding:0;font-size:16px;line-height:1;border-radius:9px';
         equipClose.onclick = () => { AU.no(); close(); };
         equipHead.appendChild(equipClose);
@@ -23528,7 +23551,7 @@ return ev;
               sets[si].forEach(m => {
                 const c = el('div', 'rentCard');
                 c.appendChild(miniSprite(m.id)); c.children[0].style.width = '84px'; c.children[0].style.height = '84px';
-                c.insertAdjacentHTML('beforeend', `<div class="rn">${m.name}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
+                c.insertAdjacentHTML('beforeend', `<div class="rn">${m.logName}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
 <div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${Math.max(m.st.atk, m.st.spa)}</span></div><div class="statMini"><span>防 ${Math.max(m.st.def, m.st.spd)}</span><span>速 ${m.st.spe}</span></div>
 <div style="font-size:10px;color:#555;font-weight:700;margin-top:3px">${m.moves.map(x => MV[x.k].n).join('·')}</div>
 <div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span></div>`);
@@ -23552,7 +23575,7 @@ return ev;
               const c = el('div', 'rentCard');
               c.style.cssText = 'flex:1 1 160px;max-width:190px;width:auto';
               c.appendChild(miniSprite(m.id)); c.children[0].style.width = '84px'; c.children[0].style.height = '84px';
-              c.insertAdjacentHTML('beforeend', `<div class="rn">${m.name}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
+              c.insertAdjacentHTML('beforeend', `<div class="rn">${m.logName}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
 <div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${Math.max(m.st.atk, m.st.spa)}</span></div><div class="statMini"><span>防 ${Math.max(m.st.def, m.st.spd)}</span><span>速 ${m.st.spe}</span></div>
 <div style="font-size:10px;color:#555;font-weight:700;margin-top:3px">${m.moves.map(x => MV[x.k].n).join('·')}</div>
 <div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span></div>`);
@@ -23577,7 +23600,7 @@ return ev;
                 const m = pool[pi];
                 const c = el('div', 'rentCard'); c.style.cssText = 'width:140px;position:relative';
                 c.appendChild(miniSprite(m.id)); c.children[0].style.width = '56px'; c.children[0].style.height = '56px';
-                c.insertAdjacentHTML('beforeend', `<div class="rn" style="font-size:13px">${m.name}</div>`);
+                c.insertAdjacentHTML('beforeend', `<div class="rn" style="font-size:13px">${m.logName}</div>`);
                 c.insertAdjacentHTML('beforeend', `<span style="position:absolute;top:4px;right:6px;font-family:'Press Start 2P';font-size:10px;color:#fff;background:#e3350d;border:2px solid var(--ink);border-radius:6px;padding:1px 5px;line-height:1.4">${order + 1}</span>`);
                 c.onclick = () => {
                   if (order < picked.length - 1) { [picked[order], picked[order + 1]] = [picked[order + 1], picked[order]]; AU.cursor(); renderPicked(); }
@@ -23747,7 +23770,7 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
           const eg = el('div', ''); eg.style.display = 'flex'; eg.style.gap = '10px'; eg.style.flexWrap = 'wrap';
           enemyTeam.forEach((m, i) => {
             const c = el('div', 'rentCard'); c.appendChild(miniSprite(m.id)); c.children[0].style.width = '48px'; c.children[0].style.height = '48px';
-            c.insertAdjacentHTML('beforeend', `<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x => MV[x.k].n).join('·')}</div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div>`);
+            c.insertAdjacentHTML('beforeend', `<div class="rn">${m.logName}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x => MV[x.k].n).join('·')}</div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div>`);
             const det = el('button', 'btn tiny', '详情'); det.style.marginTop = '4px'; det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(m, null); }; c.appendChild(det);
             c.onclick = () => { AU.cursor(); eg.querySelectorAll('.rentCard').forEach(x => x.classList.remove('swapPick')); c.classList.add('swapPick'); pickE = i; };
             eg.appendChild(c);
@@ -23757,7 +23780,7 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
           const pg = el('div', ''); pg.style.display = 'flex'; pg.style.gap = '10px'; pg.style.flexWrap = 'wrap';
           GM.fac.party.forEach((m, i) => {
             const c = el('div', 'rentCard'); c.appendChild(miniSprite(m.id)); c.children[0].style.width = '70px'; c.children[0].style.height = '70px';
-            c.insertAdjacentHTML('beforeend', `<div class="rn">${m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x => MV[x.k].n).join('·')}</div></div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div>`);
+            c.insertAdjacentHTML('beforeend', `<div class="rn">${m.logName}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x => MV[x.k].n).join('·')}</div></div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div>`);
             const det = el('button', 'btn tiny', '详情'); det.style.marginTop = '4px'; det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(m, null); }; c.appendChild(det);
             c.onclick = () => { AU.cursor(); pg.querySelectorAll('.rentCard').forEach(x => x.classList.remove('swapPick')); c.classList.add('swapPick'); pickP = i; };
             pg.appendChild(c);
@@ -24841,7 +24864,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       box.appendChild(el('h3', 'disp', '队伍 (' + GM.story.party.length + '/6)'));
       GM.story.party.forEach(m => {
         const s = el('div', 'slot'); s.appendChild(miniSprite(m.id));
-        s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.name}</b> Lv${m.lvl} ${m.item ? '[' + IT[m.item].n + ']' : ''}<div class="hpbar" style="max-width:220px"><div class="hpfill" style="width:${Math.round(m.hpPct() * 100)}%"></div></div><div style="font-size:11px;color:#666">${m.hp}/${m.maxhp} · ${m.moves.map(x => MV[x.k].n).join('/')} · <span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div></div>`);
+        s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.logName}</b> Lv${m.lvl} ${m.item ? '[' + IT[m.item].n + ']' : ''}<div class="hpbar" style="max-width:220px"><div class="hpfill" style="width:${Math.round(m.hpPct() * 100)}%"></div></div><div style="font-size:11px;color:#666">${m.hp}/${m.maxhp} · ${m.moves.map(x => MV[x.k].n).join('/')} · <span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div></div>`);
         const det = el('button', 'btn tiny', '详情'); det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(m, null); }; s.appendChild(det);
         box.appendChild(s);
       });
@@ -24849,7 +24872,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
         box.appendChild(el('h3', 'disp', '电脑盒子'));
         GM.story.box.forEach((m, i) => {
           const s = el('div', 'slot'); s.appendChild(miniSprite(m.id));
-          s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.name}</b> Lv${m.lvl}</div>`);
+          s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.logName}</b> Lv${m.lvl}</div>`);
           const b = el('button', 'btn tiny', '取出'); b.onclick = () => { if (GM.story.party.length < 6) { GM.story.party.push(GM.story.box.splice(i, 1)[0]); $('#storyPartyBtn').click(); } else toast('队伍已满'); };
           s.appendChild(b); box.appendChild(s);
         });
@@ -24896,7 +24919,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
           /* ★ 极巨化解除一切锁招/再来一次/蓄力/暗影潜袭 */
           Pm.vol.lock = null; Pm.vol.encore = null; Pm.vol.charge = null; Pm.vol.shadowCharge = null; Pm.vol.choiceLock = null;
           if (Pm._userGmax !== undefined ? Pm._userGmax : (Pm.vol.canGmax !== undefined ? Pm.vol.canGmax : (side === 'e' ? GMAXLIST.has(Pm.id) && Math.random() < 0.7 : GMAXLIST.has(Pm.id)))) Pm.vol.gmax = true;
-          if (!CFG.fancyAudio) AU.dyna(); FX.dyna(side, slot); await say(`极巨化！${Pm.name} 的体型变得巨大了！HP翻倍！${Pm.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
+          if (!CFG.fancyAudio) AU.dyna(); FX.dyna(side, slot); await say(`极巨化！${Pm.logName} 的体型变得巨大了！HP翻倍！${Pm.vol.gmax ? '（超极巨化）' : ''}`); BUI.refresh(this);
         } else if (a.tera && this.rules.tera && !this.usedForm[side] && !Pm.tera) {
           this.usedForm[side] = true; Pm.tera = true;
           if (Pm.teraType === 'stellar') {
@@ -24912,7 +24935,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
             Pm.vol.terashellUsed = true; Pm.vol.showTerashell = false;   // ★ 确保太晶甲壳不再生效
             Pm.hp = Math.round(Pm.maxhp * hpPct);
             this.wx = null; this.wxT = 0; this.terrain = null; this.terrainT = 0;
-            this.abBanner(Pm); await say(`${Pm.name} 的归零化境发动了！天气和场地被消除了！`);
+            this.abBanner(Pm); await say(`${Pm.logName} 的归零化境发动了！天气和场地被消除了！`);
           }
           /* ★ 厄诡椪太晶化：特性变为面影辉映并触发增益 */
           if (Pm.id === 1017) {
@@ -24923,9 +24946,9 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
             else if (mask === 'hearthflamemask') { await this.changeStat(Pm, 'atk', 1, Pm); }
             else if (mask === 'cornerstonemask') { await this.changeStat(Pm, 'def', 1, Pm); }
             else { await this.changeStat(Pm, 'spe', 1, Pm); }
-            await say(`${Pm.name} 的面影辉映发动了！`);
+            await say(`${Pm.logName} 的面影辉映发动了！`);
           }
-          if (!CFG.fancyAudio) AU.tera(); BUI.sparkle(side, slot); FX.tera(side, Pm.teraType, slot); await say(`太晶化！${Pm.name} 变成了${TNAME[Pm.teraType]}属性！`); BUI.refresh(this);
+          if (!CFG.fancyAudio) AU.tera(); BUI.sparkle(side, slot); FX.tera(side, Pm.teraType, slot); await say(`太晶化！${Pm.logName} 变成了${TNAME[Pm.teraType]}属性！`); BUI.refresh(this);
         }
       };
       for (let s = 0; s < (this.doubles ? 2 : 1); s++) {
@@ -25265,7 +25288,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (m.shiny) img.style.filter = 'hue-rotate(130deg) saturate(1.5)';
       left.appendChild(img);
       left.insertAdjacentHTML('beforeend', `
-    <div id="dName">${m.name}${m.shiny ? ' <span style="color:#e0a400">✦</span>' : ''}</div>
+    <div id="dName">${m.logName}${m.shiny ? ' <span style="color:#e0a400">✦</span>' : ''}</div>
     <div id="dLv">Lv.${m.lvl} · ${sp.leg ? '传说宝可梦' : '普通宝可梦'} · 种族值和 ${raceStats.reduce((a, b) => a + b, 0)}${(m.mega && m.mega.stone) ? (m.mega.formTag ? ` <span style="color:#c07a2a;font-weight:900">★${m.mega.formTag}</span>` : ' <span style="color:#b3188d;font-weight:900">◆Mega</span>') : (formCfg ? ` <span style="color:#c07a2a;font-weight:900">★${formCfg.formTag}</span>` : '')}</div>
     <div class="dMetaRow">${raceTypes.map(tyBadge).join('')}</div>
     <div class="dMetaRow">
@@ -25489,7 +25512,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           team.forEach(m => {
             const cap = evCap(m), used = evTotal(m), avail = Math.max(0, cap - used);
             const s = el('div', 'slot'); s.appendChild(miniSprite(m.id));
-            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span>
+            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.logName}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span>
           <div style="font-size:11px;color:#666">出场 ${m.battles || 0} 场 · 已分配 ${used}/66 · <b style="color:${avail > 0 ? '#3ecf6c' : '#999'}">可再分配 +${avail}</b></div></div>`);
             if (avail > 0) s.onclick = () => { AU.ok(); panel(m); }; else s.style.opacity = '.5';
             box.appendChild(s);
@@ -25504,7 +25527,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           const cap = evCap(m);
           const draft = { hp: m.ev.hp, atk: m.ev.atk, def: m.ev.def, spa: m.ev.spa, spd: m.ev.spd, spe: m.ev.spe };
           let natIdx = NATURES.indexOf(m.nature); if (natIdx < 0) natIdx = 0;
-          box.appendChild(el('h3', 'disp', `分配对战点数 · ${m.name}`));
+          box.appendChild(el('h3', 'disp', `分配对战点数 · ${m.logName}`));
           const info = el('div', ''); info.style.cssText = 'font-size:12px;color:#888;margin:6px 0'; box.appendChild(info);
           /* ★ 性格选择（与点数同时更改） */
           const natRow = el('div', ''); natRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin:6px 0';
