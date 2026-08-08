@@ -9453,10 +9453,96 @@
         grid-template-columns: 1fr 1fr !important
       }
     }
+    /* ============ 启动加载遮罩 ============ */
+    #bootload {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 26px;
+      background: radial-gradient(ellipse at 50% 28%, #372e5c 0%, #161226 72%);
+      transition: opacity .7s ease;
+      pointer-events: auto
+    }
+
+    #bootload.done {
+      opacity: 0;
+      pointer-events: none
+    }
+
+    /* 精灵球：上下浮动 */
+    #bootload .blBall {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 50%, #f7f7f7 0 13px, #3a3a3a 14px 17px, transparent 18px),
+        linear-gradient(180deg, #e3350d 0%, #c22e0d 48%, #2b2b2b 50%, #2b2b2b 52%, #fff 53%, #fff 100%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .5), inset 0 -5px 10px rgba(0, 0, 0, .22), inset 0 4px 8px rgba(255, 255, 255, .28);
+      animation: blBob 1.5s ease-in-out infinite
+    }
+
+    /* 旋转光环 */
+    #bootload .blBall::after {
+      content: "";
+      position: absolute;
+      inset: -18px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, transparent 0 66%, rgba(255, 219, 92, .95) 86%, transparent 100%);
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      animation: blSpin 1.05s linear infinite
+    }
+
+    @keyframes blBob {
+      0%,
+      100% {
+        transform: translateY(0) scale(1)
+      }
+
+      50% {
+        transform: translateY(-11px) scale(1.04)
+      }
+    }
+
+    @keyframes blSpin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    #bootload .blTxt {
+      color: rgba(255, 255, 255, .72);
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 6px;
+      text-indent: 6px;
+      animation: blPulse 1.8s ease-in-out infinite
+    }
+
+    @keyframes blPulse {
+      0%,
+      100% {
+        opacity: .4
+      }
+
+      50% {
+        opacity: 1
+      }
+    }
   </style>
 </head>
 
 <body>
+  <!-- ★ 启动加载遮罩：HTML体积较大，解析期间先展示丝滑加载动画，游戏初始化完成后淡出 -->
+  <div id="bootload">
+    <div class="blBall"></div>
+    <div class="blTxt">加载中…</div>
+  </div>
   <div id="stage">
 
     <!-- ======= TITLE ======= -->
@@ -25822,6 +25908,12 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
     AU.muted = CFG.muted; AU.musOn = CFG.music;
     loadFac();
     show('#title');
+    /* ★ 加载完成判定：同步初始化全部执行完毕，等待两帧确保首帧已绘制、事件已可交互（此时首页按钮均可点击），再丝滑淡出遮罩 */
+    const bootDone = () => {
+      const bl = $('#bootload');
+      if (bl) { bl.classList.add('done'); setTimeout(() => bl.remove(), 800); }
+    };
+    requestAnimationFrame(() => requestAnimationFrame(bootDone));
     setTimeout(() => { try { AU.init(); AU.playMusic('title'); } catch (e) { } }, 800);
   </script>
 </body>
