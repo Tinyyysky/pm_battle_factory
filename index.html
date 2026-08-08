@@ -17925,7 +17925,7 @@ return ev;
           const ov = $('#targetOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
           const box = el('div', 'ovBox panel'); ov.appendChild(box);
           box.appendChild(el('h3', 'disp', `逃跑？`));
-          box.appendChild(el('div', '', `<div style="font-size:13px;color:#777;margin-bottom:10px">正在操作：<b>${m.logName}</b> · 逃跑将结束整场双打对战</div>`));
+          box.appendChild(el('div', '', `<div style="font-size:13px;color:#777;margin-bottom:10px">正在操作：<b>${m.vol.illusionName || m.name}</b> · 逃跑将结束整场双打对战</div>`));
           const row = el('div', ''); row.style.cssText = 'display:flex;gap:10px;justify-content:center';
           let done = false;
           const close = v => { if (done) return; done = true; window.removeEventListener('keydown', esc); ov.classList.add('hidden'); res(v); };
@@ -18233,7 +18233,7 @@ return ev;
           const multiRng = ['enemy-all', 'all-except-self', 'self', 'all', 'ally-all'].includes(rng);
           const nm = displayName || mv.n;
           box.appendChild(el('h3', 'disp', '选择目标'));
-          box.appendChild(el('div', 'rangeNote', `「${nm}」 · 正在操作：${mon.logName}`));
+          box.appendChild(el('div', 'rangeNote', `「${nm}」 · 正在操作：${mon.vol.illusionName || mon.name}`));
           const pickable = (m, isEnemy) => {
             if (!m || !m.alive()) return false;   // ★ 发号施令：口中的米立龙仍可选为目标（但无法命中）
             if (rng === 'enemy-any') return isEnemy;
@@ -18306,7 +18306,7 @@ return ev;
                 : eff > 1 ? `<div class="effTag effSup">效果绝佳 ${eff}×</div>`
                 : eff < 1 ? '<div class="effTag effWeak">效果不好</div>'
                 : '<div class="effTag effNorm">有效果</div>';
-              c.insertAdjacentHTML('beforeend', `<div><div class="tn">${m.logName}</div><div class="thp">${hpTxt}</div>${effHtml}</div>`);
+              c.insertAdjacentHTML('beforeend', `<div><div class="tn">${m.vol.illusionName || m.name}</div><div class="thp">${hpTxt}</div>${effHtml}</div>`);
               const ok = pickable(m, isEnemy);
               if (!ok) { c.classList.add('disabled'); c.onclick = e => { e.stopPropagation(); AU.no(); }; }
               else {
@@ -18344,7 +18344,7 @@ return ev;
         return new Promise(res => {
           const ov = $('#partyOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
           const box = el('div', 'ovBox panel' + (escOk ? '' : ' forced')); ov.appendChild(box);
-          const who = (this.doubles && curMon) ? ` · 正在操作：${curMon.logName}` : '';
+          const who = (this.doubles && curMon) ? ` · 正在操作：${curMon.vol.illusionName || curMon.name}` : '';
           box.appendChild(el('h3', 'disp', (escOk ? '选择宝可梦' : '⚠ 必须选择一只宝可梦出战！') + who));
           const foe = this.E();
           let offEsc = null;
@@ -18355,7 +18355,7 @@ return ev;
             const isField = onField.includes(i);
             const s = el('div', 'slot' + (isField ? ' active' : '') + (m.alive() ? '' : ' fainted'));
             s.appendChild(miniSprite(m.id));
-            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.logName} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${m.status ? ' [' + m.status + ']' : ''}</div>
+            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.vol.illusionName || m.name} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${m.status ? ' [' + m.status + ']' : ''}</div>
           <div class="hpbar" style="max-width:200px"><div class="hpfill ${m.hpPct() > .5 ? '' : m.hpPct() > .2 ? 'mid' : 'low'}" style="width:${Math.round(m.hpPct() * 100)}%"></div></div>
           <div style="font-size:11px;color:#666;font-weight:700">${m.hp}/${m.maxhp} <span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div></div>`);
             const det = el('button', 'btn tiny', '详情');
@@ -18430,7 +18430,7 @@ return ev;
             const canUse = m.alive() && m.hp < m.maxhp;
             const s = el('div', 'slot' + (i === this.pi ? ' active' : '') + (canUse ? '' : ' fainted'));
             s.appendChild(miniSprite(m.id));
-            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.logName} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${i === this.pi ? ' <span style="font-size:10px;color:#2a6dd4;font-weight:900">战斗中</span>' : ''}</div>
+            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.vol.illusionName || m.name} <span class="px" style="font-size:8px">Lv${m.lvl}</span>${i === this.pi ? ' <span style="font-size:10px;color:#2a6dd4;font-weight:900">战斗中</span>' : ''}</div>
 <div class="hpbar" style="max-width:200px"><div class="hpfill ${m.hpPct() > .5 ? '' : m.hpPct() > .2 ? 'mid' : 'low'}" style="width:${Math.round(m.hpPct() * 100)}%"></div></div>
 <div style="font-size:11px;color:#666;font-weight:700">${m.hp}/${m.maxhp}</div></div>`);
             if (canUse) { s.onclick = () => { AU.ok(); close(i); }; }
@@ -18454,7 +18454,7 @@ return ev;
           arr.filter(m => m.fainted).forEach(m => {
             const s = el('div', 'slot fainted');
             s.appendChild(miniSprite(m.id));
-            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.logName} <span class="px" style="font-size:8px">Lv${m.lvl}</span></div>
+            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><div class="sname">${m.vol.illusionName || m.name} <span class="px" style="font-size:8px">Lv${m.lvl}</span></div>
       <div style="font-size:11px;color:#999;font-weight:700">HP 0/${m.maxhp} · 濒死</div></div>`);
             s.onclick = () => { AU.ok(); close(m); };
             box.appendChild(s);
@@ -18494,7 +18494,7 @@ return ev;
         }
         b.remove();
         if (caught) {
-          AU.catch(); await say(`Gotcha！${m.logName} 被收服了！`);
+          AU.catch(); await say(`Gotcha！${m.vol.illusionName || m.name} 被收服了！`);
           m.fainted = true; this.caught = m; this.result = 'capture'; this.over = true;
           await this.gainXP(true);
         } else { await say(`啊——！宝可梦从球里挣脱出来了！`); }
@@ -21269,7 +21269,7 @@ return ev;
         return new Promise(res => {
           const ov = $('#partyOv'); ov.classList.remove('hidden'); ov.innerHTML = '';
           const box = el('div', 'ovBox panel'); ov.appendChild(box);
-          box.appendChild(el('h3', 'disp', `${m.logName} 想学习 ${MV[nk].n}，要忘记哪个招式？`));
+          box.appendChild(el('h3', 'disp', `${m.vol.illusionName || m.name} 想学习 ${MV[nk].n}，要忘记哪个招式？`));
           let offEsc = null;
           const close = val => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); res(val); };
           m.moves.forEach((mv, i) => {
@@ -23301,7 +23301,7 @@ return ev;
         if (GM.fac.party) {
           GM.fac.party.forEach((m, idx) => {
             const c = el('div', 'slot'); c.appendChild(miniSprite(m.id));
-            c.insertAdjacentHTML('beforeend', `<div class="facSlotInfo"><b>${m.logName}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x => MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : '无道具'} · 晶${TNAME[m.teraType]}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span></div></div>`);
+            c.insertAdjacentHTML('beforeend', `<div class="facSlotInfo"><b>${m.vol.illusionName || m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span><div style="font-size:11px;color:#666;font-weight:700">${m.moves.map(x => MV[x.k].n).join(' / ')}</div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : '无道具'} · 晶${TNAME[m.teraType]}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span></div></div>`);
             const btnCol = el('div', ''); btnCol.style.cssText = 'display:flex;flex-direction:column;gap:4px;margin-left:auto;flex:none';
             const det = el('button', 'btn tiny', '详情'); det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(m, null); }; btnCol.appendChild(det);
             const itemBtn = el('button', 'btn tiny', '道具'); itemBtn.onclick = e => { e.stopPropagation(); AU.cursor(); this.equipItem(idx); }; btnCol.appendChild(itemBtn);
@@ -23320,7 +23320,7 @@ return ev;
         const close = () => { if (offEsc) { offEsc(); offEsc = null; } ov.classList.add('hidden'); this.ui(); };
         offEsc = onEsc(() => { AU.no(); close(); });
         const equipHead = el('div', ''); equipHead.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:4px';
-        equipHead.appendChild(el('h3', 'disp', `携带道具 · ${m.logName}`));
+        equipHead.appendChild(el('h3', 'disp', `携带道具 · ${m.vol.illusionName || m.name}`));
         const equipClose = el('button', 'btn small', '✕'); equipClose.style.cssText = 'width:36px;height:36px;padding:0;font-size:16px;line-height:1;border-radius:9px';
         equipClose.onclick = () => { AU.no(); close(); };
         equipHead.appendChild(equipClose);
@@ -23551,7 +23551,7 @@ return ev;
               sets[si].forEach(m => {
                 const c = el('div', 'rentCard');
                 c.appendChild(miniSprite(m.id)); c.children[0].style.width = '84px'; c.children[0].style.height = '84px';
-                c.insertAdjacentHTML('beforeend', `<div class="rn">${m.logName}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
+                c.insertAdjacentHTML('beforeend', `<div class="rn">${m.vol.illusionName || m.name}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
 <div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${Math.max(m.st.atk, m.st.spa)}</span></div><div class="statMini"><span>防 ${Math.max(m.st.def, m.st.spd)}</span><span>速 ${m.st.spe}</span></div>
 <div style="font-size:10px;color:#555;font-weight:700;margin-top:3px">${m.moves.map(x => MV[x.k].n).join('·')}</div>
 <div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span></div>`);
@@ -23575,7 +23575,7 @@ return ev;
               const c = el('div', 'rentCard');
               c.style.cssText = 'flex:1 1 160px;max-width:190px;width:auto';
               c.appendChild(miniSprite(m.id)); c.children[0].style.width = '84px'; c.children[0].style.height = '84px';
-              c.insertAdjacentHTML('beforeend', `<div class="rn">${m.logName}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
+              c.insertAdjacentHTML('beforeend', `<div class="rn">${m.vol.illusionName || m.name}</div><div style="text-align:center;margin:3px 0">${m.types.map(tyBadge).join(' ')}</div>
 <div class="statMini"><span>HP ${m.maxhp}</span><span>攻 ${Math.max(m.st.atk, m.st.spa)}</span></div><div class="statMini"><span>防 ${Math.max(m.st.def, m.st.spd)}</span><span>速 ${m.st.spe}</span></div>
 <div style="font-size:10px;color:#555;font-weight:700;margin-top:3px">${m.moves.map(x => MV[x.k].n).join('·')}</div>
 <div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || '—'}</span></div>`);
@@ -23600,7 +23600,7 @@ return ev;
                 const m = pool[pi];
                 const c = el('div', 'rentCard'); c.style.cssText = 'width:140px;position:relative';
                 c.appendChild(miniSprite(m.id)); c.children[0].style.width = '56px'; c.children[0].style.height = '56px';
-                c.insertAdjacentHTML('beforeend', `<div class="rn" style="font-size:13px">${m.logName}</div>`);
+                c.insertAdjacentHTML('beforeend', `<div class="rn" style="font-size:13px">${m.vol.illusionName || m.name}</div>`);
                 c.insertAdjacentHTML('beforeend', `<span style="position:absolute;top:4px;right:6px;font-family:'Press Start 2P';font-size:10px;color:#fff;background:#e3350d;border:2px solid var(--ink);border-radius:6px;padding:1px 5px;line-height:1.4">${order + 1}</span>`);
                 c.onclick = () => {
                   if (order < picked.length - 1) { [picked[order], picked[order + 1]] = [picked[order + 1], picked[order]]; AU.cursor(); renderPicked(); }
@@ -23770,7 +23770,7 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
           const eg = el('div', ''); eg.style.display = 'flex'; eg.style.gap = '10px'; eg.style.flexWrap = 'wrap';
           enemyTeam.forEach((m, i) => {
             const c = el('div', 'rentCard'); c.appendChild(miniSprite(m.id)); c.children[0].style.width = '48px'; c.children[0].style.height = '48px';
-            c.insertAdjacentHTML('beforeend', `<div class="rn">${m.logName}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x => MV[x.k].n).join('·')}</div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div>`);
+            c.insertAdjacentHTML('beforeend', `<div class="rn">${m.vol.illusionName || m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x => MV[x.k].n).join('·')}</div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div>`);
             const det = el('button', 'btn tiny', '详情'); det.style.marginTop = '4px'; det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(m, null); }; c.appendChild(det);
             c.onclick = () => { AU.cursor(); eg.querySelectorAll('.rentCard').forEach(x => x.classList.remove('swapPick')); c.classList.add('swapPick'); pickE = i; };
             eg.appendChild(c);
@@ -23780,7 +23780,7 @@ ${nextExpert.type ? `<br><span style="color:${TCOL[nextExpert.type]};font-size:1
           const pg = el('div', ''); pg.style.display = 'flex'; pg.style.gap = '10px'; pg.style.flexWrap = 'wrap';
           GM.fac.party.forEach((m, i) => {
             const c = el('div', 'rentCard'); c.appendChild(miniSprite(m.id)); c.children[0].style.width = '70px'; c.children[0].style.height = '70px';
-            c.insertAdjacentHTML('beforeend', `<div class="rn">${m.logName}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x => MV[x.k].n).join('·')}</div></div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div>`);
+            c.insertAdjacentHTML('beforeend', `<div class="rn">${m.vol.illusionName || m.name}</div><div style="font-size:10px;color:#555;font-weight:700">${m.moves.map(x => MV[x.k].n).join('·')}</div></div><div style="font-size:10px;color:#999">${m.item ? IT[m.item].n : ''}</div><div style="margin-top:2px"><span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div>`);
             const det = el('button', 'btn tiny', '详情'); det.style.marginTop = '4px'; det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(m, null); }; c.appendChild(det);
             c.onclick = () => { AU.cursor(); pg.querySelectorAll('.rentCard').forEach(x => x.classList.remove('swapPick')); c.classList.add('swapPick'); pickP = i; };
             pg.appendChild(c);
@@ -24864,7 +24864,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       box.appendChild(el('h3', 'disp', '队伍 (' + GM.story.party.length + '/6)'));
       GM.story.party.forEach(m => {
         const s = el('div', 'slot'); s.appendChild(miniSprite(m.id));
-        s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.logName}</b> Lv${m.lvl} ${m.item ? '[' + IT[m.item].n + ']' : ''}<div class="hpbar" style="max-width:220px"><div class="hpfill" style="width:${Math.round(m.hpPct() * 100)}%"></div></div><div style="font-size:11px;color:#666">${m.hp}/${m.maxhp} · ${m.moves.map(x => MV[x.k].n).join('/')} · <span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div></div>`);
+        s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.vol.illusionName || m.name}</b> Lv${m.lvl} ${m.item ? '[' + IT[m.item].n + ']' : ''}<div class="hpbar" style="max-width:220px"><div class="hpfill" style="width:${Math.round(m.hpPct() * 100)}%"></div></div><div style="font-size:11px;color:#666">${m.hp}/${m.maxhp} · ${m.moves.map(x => MV[x.k].n).join('/')} · <span class="abchip" title="${AB[m.ability]?.d || ''}">${AB[m.ability]?.n || ''}</span></div></div>`);
         const det = el('button', 'btn tiny', '详情'); det.onclick = e => { e.stopPropagation(); AU.cursor(); showDetail(m, null); }; s.appendChild(det);
         box.appendChild(s);
       });
@@ -24872,7 +24872,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
         box.appendChild(el('h3', 'disp', '电脑盒子'));
         GM.story.box.forEach((m, i) => {
           const s = el('div', 'slot'); s.appendChild(miniSprite(m.id));
-          s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.logName}</b> Lv${m.lvl}</div>`);
+          s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.vol.illusionName || m.name}</b> Lv${m.lvl}</div>`);
           const b = el('button', 'btn tiny', '取出'); b.onclick = () => { if (GM.story.party.length < 6) { GM.story.party.push(GM.story.box.splice(i, 1)[0]); $('#storyPartyBtn').click(); } else toast('队伍已满'); };
           s.appendChild(b); box.appendChild(s);
         });
@@ -25288,7 +25288,7 @@ ${mv.gmax || mv.maxmv ? '' : `<div style="font-weight:900;font-size:14px;margin-
       if (m.shiny) img.style.filter = 'hue-rotate(130deg) saturate(1.5)';
       left.appendChild(img);
       left.insertAdjacentHTML('beforeend', `
-    <div id="dName">${m.logName}${m.shiny ? ' <span style="color:#e0a400">✦</span>' : ''}</div>
+    <div id="dName">${m.vol.illusionName || m.name}${m.shiny ? ' <span style="color:#e0a400">✦</span>' : ''}</div>
     <div id="dLv">Lv.${m.lvl} · ${sp.leg ? '传说宝可梦' : '普通宝可梦'} · 种族值和 ${raceStats.reduce((a, b) => a + b, 0)}${(m.mega && m.mega.stone) ? (m.mega.formTag ? ` <span style="color:#c07a2a;font-weight:900">★${m.mega.formTag}</span>` : ' <span style="color:#b3188d;font-weight:900">◆Mega</span>') : (formCfg ? ` <span style="color:#c07a2a;font-weight:900">★${formCfg.formTag}</span>` : '')}</div>
     <div class="dMetaRow">${raceTypes.map(tyBadge).join('')}</div>
     <div class="dMetaRow">
@@ -25512,7 +25512,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           team.forEach(m => {
             const cap = evCap(m), used = evTotal(m), avail = Math.max(0, cap - used);
             const s = el('div', 'slot'); s.appendChild(miniSprite(m.id));
-            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.logName}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span>
+            s.insertAdjacentHTML('beforeend', `<div style="flex:1"><b>${m.vol.illusionName || m.name}</b> <span class="px" style="font-size:8px">Lv${m.lvl}</span>
           <div style="font-size:11px;color:#666">出场 ${m.battles || 0} 场 · 已分配 ${used}/66 · <b style="color:${avail > 0 ? '#3ecf6c' : '#999'}">可再分配 +${avail}</b></div></div>`);
             if (avail > 0) s.onclick = () => { AU.ok(); panel(m); }; else s.style.opacity = '.5';
             box.appendChild(s);
@@ -25527,7 +25527,7 @@ ${m.tera ? `<span class="abchip" style="color:#0a7f8f;border-color:#7fd8e0;backg
           const cap = evCap(m);
           const draft = { hp: m.ev.hp, atk: m.ev.atk, def: m.ev.def, spa: m.ev.spa, spd: m.ev.spd, spe: m.ev.spe };
           let natIdx = NATURES.indexOf(m.nature); if (natIdx < 0) natIdx = 0;
-          box.appendChild(el('h3', 'disp', `分配对战点数 · ${m.logName}`));
+          box.appendChild(el('h3', 'disp', `分配对战点数 · ${m.vol.illusionName || m.name}`));
           const info = el('div', ''); info.style.cssText = 'font-size:12px;color:#888;margin:6px 0'; box.appendChild(info);
           /* ★ 性格选择（与点数同时更改） */
           const natRow = el('div', ''); natRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin:6px 0';
