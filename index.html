@@ -1774,6 +1774,16 @@
       opacity: 1
     }
 
+    /* ★ 竖屏/窄屏：极巨能量风暴的全屏位移动画（条纹漂移/火星滚动）与3D场景叠加会持续重投影，导致爆炸/换人演出抽搐；
+       竖屏下仅保留静态红色能量幕（表现仍在，去掉逐帧重排源） */
+    @media screen and (max-width: 768px),
+    screen and (orientation: portrait) {
+      #bscene.dyna #dynastorm::before,
+      #bscene.dyna #dynastorm::after {
+        animation: none
+      }
+    }
+
     /* ============ 属性攻击特效 ============ */
     .tfx {
       position: absolute;
@@ -22951,10 +22961,14 @@ return ev;
         if (GMAXLIST.has(sp.id)) mon.vol.canGmax = Math.random() < 0.7;
         return mon;
       },
-      /* ★ 按档位抽取：先掷档位，再从该档位随机 */
-      drawOne(round) {
+      /* ★ 按档位抽取：先掷档位，再从该档位随机（used：已抽取ID集合，保证同批候选不重复；档位池抽尽时回退全池） */
+      drawOne(round, used = null) {
         const t = this.rollTier(round);
-        const pool = SP.filter(s => this.tier(s) === t);
+        let pool = SP.filter(s => this.tier(s) === t);
+        if (used && used.size) {
+          const fresh = pool.filter(s => !used.has(s.id));
+          if (fresh.length) pool = fresh;
+        }
         return pool.length ? pick(pool) : pick(SP);
       },
       /* ============ 属性专家 ============ */
@@ -22974,23 +22988,26 @@ return ev;
       /* ============ 队伍生成 ============ */
       rentalSets(round) {
         const sets = [];
+        const used = new Set();   // ★ 全部候选宝可梦互不重复（组内与组间）
         for (let s = 0; s < 3; s++) {
           const set = [];
-          for (let i = 0; i < 3; i++) { const sp = this.drawOne(round); set.push(this.build(sp, this.lvl(round, i), round)); }
+          for (let i = 0; i < 3; i++) { const sp = this.drawOne(round, used); set.push(this.build(sp, this.lvl(round, i), round)); used.add(sp.id); }
           sets.push(set);
         }
         return sets;
       },
-      /* ★ 六选三：生成6个候选宝可梦 */
+      /* ★ 六选三：生成6个候选宝可梦（互不重复） */
       pickPool(round) {
         const pool = [];
-        for (let i = 0; i < 6; i++) { const sp = this.drawOne(round); pool.push(this.build(sp, this.lvl(round, i), round)); }
+        const used = new Set();
+        for (let i = 0; i < 6; i++) { const sp = this.drawOne(round, used); pool.push(this.build(sp, this.lvl(round, i), round)); used.add(sp.id); }
         return pool;
       },
-      /* ★ 六选四双打：生成6个候选宝可梦（按双打配置） */
+      /* ★ 六选四双打：生成6个候选宝可梦（按双打配置，互不重复） */
       pickPoolDouble(round) {
         const pool = [];
-        for (let i = 0; i < 6; i++) { const sp = this.drawOne(round); pool.push(this.buildDouble(sp, this.lvl(round, i), round)); }
+        const used = new Set();
+        for (let i = 0; i < 6; i++) { const sp = this.drawOne(round, used); pool.push(this.buildDouble(sp, this.lvl(round, i), round)); used.add(sp.id); }
         return pool;
       },
       /* ★ 双打冠军级队伍：从冠军的双打配置中随机抽取（1%概率隐藏冠军·灭天，使用其专属双打阵容） */
