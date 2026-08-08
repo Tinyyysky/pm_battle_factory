@@ -20082,7 +20082,7 @@ return ev;
         if (foe.item === 'airballoon') { foe.item = null; await say(`${foe.logName} 的气球破裂了！`); }
         // 追加效果（替身未破时被替身抵挡，不作用于本体；穿透/音波或替身被击破时正常触发）
         /* ★ 刷刷茶炮：热茶命中解除目标冰冻（替身未破时被替身抵挡，不解除） */
-        if (useMv.k === 'matchagotcha' && foe.status === 'frz' && (!subBlocked || foe.vol.substitute <= 0)) {
+        if (mv.k === 'matchagotcha' && foe.status === 'frz' && (!subBlocked || foe.vol.substitute <= 0)) {
           foe.status = null;
           await say(`${foe.logName} 被热茶解冻了！`);
         }
@@ -20235,7 +20235,7 @@ return ev;
         /* ★ 水蒸气：自身冰冻时解冻 */
         if (mv.hydrosteam && mon.status === 'frz') { mon.status = null; await say(`${mon.logName} 被蒸汽解冻了！`); }
         /* ★ 刷刷茶炮：热茶，自身冰冻时使用也能解冻 */
-        if (useMv.k === 'matchagotcha' && mon.status === 'frz') { mon.status = null; await say(`${mon.logName} 被热茶解冻了！`); }
+        if (mv.k === 'matchagotcha' && mon.status === 'frz') { mon.status = null; await say(`${mon.logName} 被热茶解冻了！`); }
         if (mv.t === 'fire' && foe.status === 'frz' && (!subBlocked || foe.vol.substitute <= 0)) { foe.status = null; await say(`${foe.logName} 解冻了！`); }
         BUI.refresh(this);
         return { dmg: subDmg || dmg, ko: foe.hp <= 0, eff: r.eff, crit: r.crit };
